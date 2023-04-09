@@ -2,6 +2,7 @@
 name = "mtgo-collection-manager"
 version = "0.1.0"
 edition = "2021"
+readme = "README.md"
 license = "MIT OR Apache-2.0"
 keywords = ["mtgo"]
 description = "Some kind of app that helps you manage your mtgo collection."
