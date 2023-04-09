@@ -1,5 +1,4 @@
 /target
-/download_zip.py
 /chromedriver.exe
 /managed-files/*
 /.*
