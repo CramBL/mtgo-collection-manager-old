@@ -1,25 +1,47 @@
-pub fn run_download_script(script_name: &str) {
-    let mut path = std::env::current_dir().unwrap();
-    path.push(script_name);
-    let output = if cfg!(target_os = "windows") {
-        std::process::Command::new("cmd")
-            .arg("/C")
-            .arg("python3.10.exe ".to_string() + path.to_str().unwrap())
-            .output()
-            .expect("failed to execute process")
-    } else {
-        std::process::Command::new("sh")
-            .arg("-c")
-            .arg("python3.10 ".to_string() + path.to_str().unwrap())
-            .output()
-            .expect("failed to execute process")
-    };
+use std::io::Read;
 
-    let terminal_response = output.stdout;
-    log::info!(
-        "Response from command: {}",
-        String::from_utf8(terminal_response).unwrap()
+pub fn get_bytes_readable(url: &str) -> Result<impl std::io::Read + std::io::Seek, reqwest::Error> {
+    let resp_bytes = reqwest::blocking::get(url)?.bytes()?;
+    let readable_bytes = std::io::Cursor::new(resp_bytes);
+    Ok(readable_bytes)
+}
+
+pub fn unzip_bytes(readable_bytes: impl Read + std::io::Seek) -> zip::result::ZipResult<String> {
+    let mut archive = zip::ZipArchive::new(readable_bytes)?;
+    let mut file = archive.by_index(0).unwrap();
+    let mut contents = String::new();
+    std::io::Read::read_to_string(&mut file, &mut contents)?;
+    Ok(contents)
+}
+
+/// Store the contents of a file in a directory with a timestamped filename ending in .txt.
+pub fn store_contents(
+    contents: String,
+    f_name: &str,
+    pwd_dst_dir: &str,
+) -> Result<(), std::io::Error> {
+    let mut path = std::env::current_dir()?;
+    path.push(pwd_dst_dir);
+
+    let dt: chrono::DateTime<chrono::Local> = chrono::Local::now();
+    let time_str = dt.format("%Y-%m-%dT%H-%M").to_string();
+    path.push(f_name.to_string() + "-" + &time_str + ".txt");
+
+    let mut output_file = std::fs::OpenOptions::new()
+        .create(true)
+        .write(true)
+        .append(true)
+        .open(path)?;
+    log::debug!(
+        "First 100 characters of 'contents': {}",
+        contents[0..100].to_string()
     );
+    use std::io::prelude::*;
+
+    for line in contents.lines() {
+        writeln!(output_file, "{line}")?;
+    }
+    Ok(())
 }
 
 pub fn first_file_match_from_dir(
@@ -65,44 +87,53 @@ pub fn first_file_match_from_dir(
     }
 }
 
-// Opens a zip-file, extracts the first file in the archive, stores it in the specified directory with a timestamp as the suffix of the filename
-pub fn extract_and_store(path_to_zip: std::path::PathBuf, f_name: &str, pwd_dst_dir: &str) {
-    let file = std::fs::File::open(path_to_zip).unwrap();
-
-    let mut archive = zip::ZipArchive::new(file).unwrap();
-    let mut file = archive.by_index(0).unwrap();
-    assert!(file.name().contains(f_name));
-
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    let mut path = std::env::current_dir().unwrap();
-    path.push(pwd_dst_dir);
-
-    let dt: chrono::DateTime<chrono::Local> = chrono::Local::now();
-    let time_str = dt.format("%Y-%m-%dT%H-%M").to_string();
-    path.push(f_name.to_string() + "-" + &time_str + ".txt");
-
-    let mut output_file = std::fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .append(true)
-        .open(path)
-        .unwrap();
-    log::debug!("Contents: {}", contents[0..100].to_string());
-    use std::io::prelude::*;
-
-    for line in contents.lines() {
-        writeln!(output_file, "{}", line).unwrap();
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    #[test]
+    fn test_store_contents() {
+        let expect_contents = "contents of test_store_contents".to_string();
+        let expect_f_name = "test_store_contents";
+        let expect_pwd_dst_dir = "managed-files\\prices\\";
+        store_contents(expect_contents.clone(), expect_f_name, expect_pwd_dst_dir).unwrap();
+        // Assert a file with the prefix "test" exists in the folder
+        let mut path = std::env::current_dir().unwrap();
+        path.push(expect_pwd_dst_dir);
+        let mut found = false;
+
+        for entry in path.read_dir().unwrap() {
+            let entry = entry.unwrap();
+            let path = entry.path();
+            if path.is_file() {
+                if path
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .contains(expect_f_name)
+                {
+                    found = true;
+                    // Assert the file contains the contents
+                    {
+                        // Scoped borrow
+                        let mut file = std::fs::File::open(&path).unwrap();
+                        let mut file_contents = String::new();
+                        file.read_to_string(&mut file_contents).unwrap();
+                        assert!(file_contents.contains(&expect_contents));
+                    }
+                    // Delete the file
+                    std::fs::remove_file(path).unwrap();
+                }
+            }
+        }
+        assert!(found);
+    }
+
     // Doesn't contain any assertions, just prints the results
     // For experimenting and examining folders/files
     #[test]
+    #[ignore]
     fn test_first_file_match_from_dir() {
         let price_res = first_file_match_from_dir(
             crate::PRICE_LIST_FNAME,
@@ -112,7 +143,7 @@ mod tests {
         let card_res = first_file_match_from_dir(
             crate::CARD_DEFINITIONS_FNAME,
             &dirs::download_dir().unwrap(),
-            Some(1000),
+            None,
         );
         println!("Price list: {:?}", price_res);
         println!("Card defs list: {:?}", card_res);

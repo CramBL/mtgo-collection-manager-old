@@ -1,77 +1,76 @@
-use chrono;
 extern crate pretty_env_logger;
 #[macro_use]
 extern crate log;
-
 use mtgo_collection_manager::download;
+
+// TODO:
+// Only run download script if there's no price list from today
+// Better: Check goatbots.com if there's a newer price list
 
 fn main() -> std::io::Result<()> {
     pretty_env_logger::init();
     trace!("Starting price list manager!");
 
-    let managed_dir_path = std::env::current_dir()
-        .unwrap()
-        .join(mtgo_collection_manager::MANAGED_DIR);
-    let download_dir_path = dirs::download_dir().unwrap();
+    let managed_dir_path = std::env::current_dir()?.join(mtgo_collection_manager::MANAGED_DIR);
 
-    download::lib::run_download_script(mtgo_collection_manager::DOWNLOAD_SCRIPT);
+    let resp = download::lib::get_bytes_readable(mtgo_collection_manager::DOWNLOAD_PRICE_LIST_URL);
 
-    let download_zip_prices = download::lib::first_file_match_from_dir(
-        mtgo_collection_manager::PRICE_LIST_FNAME,
-        &download_dir_path,
-        Some(600),
-    );
-
-    if let Some(zip_prices) = download_zip_prices {
-        download::lib::extract_and_store(
-            zip_prices,
-            mtgo_collection_manager::PRICE_LIST_FNAME,
-            mtgo_collection_manager::MANAGED_PRICE_HISTORY,
-        );
-    }
-
-    if let None = download::lib::first_file_match_from_dir(
-        mtgo_collection_manager::CARD_DEFINITIONS_FNAME,
-        &managed_dir_path,
-        None,
-    ) {
-        let download_zip_card_definitions = download::lib::first_file_match_from_dir(
-            mtgo_collection_manager::CARD_DEFINITIONS_FNAME,
-            &download_dir_path,
-            None,
-        );
-        if let Some(zip_card_definitions) = download_zip_card_definitions {
-            download::lib::extract_and_store(
-                zip_card_definitions,
-                mtgo_collection_manager::CARD_DEFINITIONS_FNAME,
-                mtgo_collection_manager::MANAGED_DIR,
-            );
-        } else {
+    let bytes = match resp {
+        Ok(bytes) => bytes,
+        Err(e) => {
             return Err(std::io::Error::new(
                 std::io::ErrorKind::Other,
-                "No card definitions zip-file in Downloads directory, after attempting to download",
-            ));
+                format!("Failed to download price list: {e}"),
+            ))
         }
-    }
+    };
 
-    if let Some(card_defs) = download::lib::first_file_match_from_dir(
+    let contents = download::lib::unzip_bytes(bytes)?;
+
+    download::lib::store_contents(
+        contents,
+        mtgo_collection_manager::PRICE_LIST_FNAME,
+        mtgo_collection_manager::MANAGED_PRICE_HISTORY,
+    )?;
+
+    let card_definitions = match download::lib::first_file_match_from_dir(
         mtgo_collection_manager::CARD_DEFINITIONS_FNAME,
         &managed_dir_path,
         None,
     ) {
-        let card_definitions = std::fs::read_to_string(card_defs).unwrap();
-        let card_definitions: Vec<String> = card_definitions
-            .lines()
-            .map(|line| line.to_string())
-            .collect();
-        let first_10_lines = &card_definitions[0..10];
-        info!("Card definitions: {:?}", first_10_lines);
-    } else {
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "No card definitions file in managed-files directory",
-        ));
-    }
+        // Download and store card definitions if there's no file in the managed directory
+        None => {
+            let response = download::lib::get_bytes_readable(
+                mtgo_collection_manager::DOWNLOAD_CARD_DEFINITIONS_URL,
+            );
+
+            let bytes = match response {
+                Ok(bytes) => bytes,
+                Err(e) => {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::Other,
+                        format!("Failed to download card definitions: {e}"),
+                    ))
+                }
+            };
+
+            let contents = download::lib::unzip_bytes(bytes)?;
+            download::lib::store_contents(
+                contents.clone(),
+                mtgo_collection_manager::CARD_DEFINITIONS_FNAME,
+                mtgo_collection_manager::MANAGED_DIR,
+            )?;
+            contents
+        }
+        Some(card_defs) => std::fs::read_to_string(card_defs)?,
+    };
+
+    let card_defs_vec: Vec<String> = card_definitions
+        .lines()
+        .map(|line| line.to_string())
+        .collect();
+    let first_10_lines = &card_defs_vec[0..10];
+    info!("Card definitions: {:?}", first_10_lines);
 
     Ok(())
 }
@@ -81,6 +80,24 @@ mod tests {
 
     use super::*;
     use serde_json;
+
+    #[test]
+    #[ignore] // Ignore because this actually downloads the file from goatbots.com
+    fn test_get_zip_and_unzip() {
+        let price_url = "https://www.goatbots.com/download/price-history.zip";
+
+        let res_bytes = reqwest::blocking::get(price_url).unwrap().bytes().unwrap();
+
+        println!("Response bytes length: {:?}", res_bytes.len());
+
+        let mut archive = zip::ZipArchive::new(std::io::Cursor::new(res_bytes)).unwrap();
+        let mut file = archive.by_index(0).unwrap();
+        let mut contents = String::new();
+        std::io::Read::read_to_string(&mut file, &mut contents).unwrap();
+        // for line in contents.lines() {
+        //     println!("{}", line);
+        // }
+    }
 
     #[test]
     fn test_card_defs() {
