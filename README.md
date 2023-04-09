@@ -11,10 +11,10 @@ If you have a great idea, make a feature request via an issue, thanks!
 * **[A million data driven features]** like giving alerts when a card with a historically stable price suddenly spikes, and stuff like that.
 
 ## Currently running MTGO Collection Manager assumes
-* The directory it runs from contains a [chrome driver](https://chromedriver.chromium.org/downloads) called `chromedriver.exe`
-* `Python 3.10` is installed with [Selenium](https://pypi.org/project/selenium/)
+* Nothing!
+As of ~2 hours before this writing, Goatbots made changes to allow retrieving their prices via a simple GET. For now the Python script will stay, and the Rust code invoking the script is moved to a dedicated module. Might be useful in the future!
 
-These assumption will change over time, and some will become much less strict such as the Python requirement, but for now user friendliness is not a priority.
+These assumption might change over time, but for now user friendliness is not a priority.
 
 ## Thanks
 To [goatbots.com](https://www.goatbots.com/) for providing the data that makes this project possible. All price tracking is based on Goatbots' prices, and they offer by far the most competitive prices, and as such it is only a tiny tiny loss to not track prices from other vendors.
