@@ -3,24 +3,29 @@ extern crate pretty_env_logger;
 extern crate log;
 
 use mtgo_collection_manager::download;
+use serde::{Deserialize, Serialize};
 use std::{collections, env, fs, io};
 
 // TODO:
-// Only run download script if there's no price list from today
-// Better: Check goatbots.com if there's a newer price list
+// Make stats file for collection, update on every run
+
+#[derive(Debug, Serialize, Deserialize)]
+struct NamePriceQuantity(String, f32, u32);
 
 fn main() -> io::Result<()> {
     pretty_env_logger::init();
     info!("Starting price list manager!");
     // Create all directories if they don't exist
     let managed_dir_path = env::current_dir()?.join(mtgo_collection_manager::MANAGED_DIR);
+    let prices_dir = managed_dir_path.join("prices");
+    let collection_price_history_dir = managed_dir_path.join("collection-price-history");
     fs::create_dir_all(&managed_dir_path)?;
-    fs::create_dir_all(managed_dir_path.join("prices"))?;
-    fs::create_dir_all(managed_dir_path.join("collection-price-history"))?;
+    fs::create_dir_all(&prices_dir)?;
+    fs::create_dir_all(&collection_price_history_dir)?;
 
     let price_list = match download::lib::first_file_match_from_dir(
         mtgo_collection_manager::PRICE_LIST_FNAME,
-        &managed_dir_path,
+        &prices_dir,
         Some(86400), // 24 hours
     ) {
         // Download and store price list if there's no file in the managed directory
@@ -112,8 +117,68 @@ fn main() -> io::Result<()> {
 
     let prices_json: serde_json::Value =
         serde_json::from_str(&price_list).expect("JSON was not well-formatted");
-    let card_defs_json: serde_json::Value =
+
+    // No use for this yet
+    let _card_defs_json: serde_json::Value =
         serde_json::from_str(&card_definitions).expect("JSON was not well-formatted");
+
+    let collection_price_history_map: collections::HashMap<String, NamePriceQuantity> =
+        match download::lib::first_file_match_from_dir(
+            "collection-price-history-json",
+            &collection_price_history_dir,
+            Some(86400),
+        ) {
+            None => {
+                // Create new collection price history map from collection map and price list
+                let mut collection_price_history: collections::HashMap<String, NamePriceQuantity> =
+                    collections::HashMap::new();
+                for (id, (name, quantity)) in collection_map {
+                    if id == "1" {
+                        // This is an event ticket, insert with price 1.
+                        collection_price_history
+                            .insert(id, NamePriceQuantity(name.to_string(), 1.0, quantity));
+                        continue;
+                    }
+                    let price = prices_json[id.as_str()].as_f64().expect(&format!(
+                        "ID {id} did not yield a number, got: {:#?}",
+                        prices_json[id.as_str()]
+                    ));
+                    collection_price_history.insert(
+                        id,
+                        NamePriceQuantity(name.to_string(), price as f32, quantity),
+                    );
+                }
+                // Store it
+                let collection_price_history_json =
+                    serde_json::to_string(&collection_price_history)?;
+                download::lib::store_contents(
+                    collection_price_history_json,
+                    "collection-price-history-json",
+                    "managed-files\\collection-price-history\\",
+                )?;
+                collection_price_history
+            }
+            Some(collection_price_history) => {
+                let collection_price_history = fs::read_to_string(collection_price_history)?;
+                serde_json::from_str(&collection_price_history)?
+            }
+        };
+
+    let total_quantity: u32 = collection_price_history_map
+        .values()
+        .map(|NamePriceQuantity(_, _, quantity)| quantity)
+        .sum();
+    for (id, name_price_quantity) in &collection_price_history_map {
+        let NamePriceQuantity(name, price, quantity) = name_price_quantity;
+        if *quantity > 10 {
+            println!("{}: {} - {} - {}", id, name, price, quantity);
+        }
+    }
+    println!(
+        "{} unique cards in collection",
+        collection_price_history_map.len()
+    );
+    println!("{} total quantity", total_quantity);
 
     Ok(())
 }

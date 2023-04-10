@@ -24,7 +24,7 @@ pub fn store_contents(
     path.push(pwd_dst_dir);
 
     let dt: chrono::DateTime<chrono::Local> = chrono::Local::now();
-    let time_str = dt.format("%Y-%m-%d-T%H:%M").to_string();
+    let time_str = dt.format("%Y-%m-%d-H%HM%M").to_string();
     path.push(f_name.to_string() + "-" + &time_str + ".txt");
 
     let mut output_file = std::fs::OpenOptions::new()
@@ -49,7 +49,8 @@ pub fn first_file_match_from_dir(
     path: &std::path::PathBuf,
     max_file_age: Option<u64>,
 ) -> Option<std::path::PathBuf> {
-    let mut target_lists: Vec<std::path::PathBuf> = Vec::new();
+    log::info!("Searching for file matching: {}", f_name);
+    let mut matching_entries: Vec<std::path::PathBuf> = Vec::new();
 
     for entry in path.read_dir().unwrap() {
         let dir_entry = entry.unwrap();
@@ -75,14 +76,14 @@ pub fn first_file_match_from_dir(
                 .unwrap()
                 .contains(f_name)
             {
-                target_lists.push(dir_entry.path());
+                matching_entries.push(dir_entry.path());
             }
         }
     }
-    if target_lists.len() > 0 {
-        return Some(target_lists[0].clone());
+    if matching_entries.len() > 0 {
+        return Some(matching_entries[0].clone());
     } else {
-        log::warn!("No target list found");
+        log::warn!("No matching files found");
         return None;
     }
 }
