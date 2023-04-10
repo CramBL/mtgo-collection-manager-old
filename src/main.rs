@@ -171,14 +171,14 @@ fn main() -> io::Result<()> {
     for (id, name_price_quantity) in &collection_price_history_map {
         let NamePriceQuantity(name, price, quantity) = name_price_quantity;
         if *quantity > 10 {
-            println!("{}: {} - {} - {}", id, name, price, quantity);
+            println!("{id}: {name} - {price} - {quantity}");
         }
     }
     println!(
-        "{} unique cards in collection",
+        "{} unique items in collection",
         collection_price_history_map.len()
     );
-    println!("{} total quantity", total_quantity);
+    println!("{total_quantity} total quantity");
 
     Ok(())
 }
