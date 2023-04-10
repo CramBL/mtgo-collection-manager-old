@@ -168,17 +168,34 @@ fn main() -> io::Result<()> {
         .values()
         .map(|NamePriceQuantity(_, _, quantity)| quantity)
         .sum();
-    for (id, name_price_quantity) in &collection_price_history_map {
-        let NamePriceQuantity(name, price, quantity) = name_price_quantity;
-        if *quantity > 10 {
-            println!("{id}: {name} - {price} - {quantity}");
-        }
-    }
+
     println!(
         "{} unique items in collection",
         collection_price_history_map.len()
     );
     println!("{total_quantity} total quantity");
+
+    // top 10 most expensive cards
+    let mut top_10: Vec<NamePriceQuantity> = collection_price_history_map
+        .values()
+        .map(|NamePriceQuantity(name, price, quantity)| {
+            NamePriceQuantity(name.to_string(), *price, *quantity)
+        })
+        .collect();
+    top_10.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+    println!("Top 10 most expensive cards:");
+    top_10
+        .iter()
+        .take(10)
+        .for_each(|NamePriceQuantity(name, price, quantity)| {
+            println!("{name}: {price}$ - {quantity} pcs.")
+        });
+    // Total value
+    let total_value: f32 = collection_price_history_map
+        .values()
+        .map(|NamePriceQuantity(_, price, quantity)| price * (*quantity as f32))
+        .sum();
+    println!("Total value (with Goatbots sell price): {total_value} $");
 
     Ok(())
 }
