@@ -1,42 +1,57 @@
 extern crate pretty_env_logger;
 #[macro_use]
 extern crate log;
+
 use mtgo_collection_manager::download;
+use std::{collections, env, fs, io};
 
 // TODO:
 // Only run download script if there's no price list from today
 // Better: Check goatbots.com if there's a newer price list
 
-fn main() -> std::io::Result<()> {
+fn main() -> io::Result<()> {
     pretty_env_logger::init();
-    trace!("Starting price list manager!");
+    info!("Starting price list manager!");
+    // Create all directories if they don't exist
+    let managed_dir_path = env::current_dir()?.join(mtgo_collection_manager::MANAGED_DIR);
+    fs::create_dir_all(&managed_dir_path)?;
+    fs::create_dir_all(managed_dir_path.join("prices"))?;
+    fs::create_dir_all(managed_dir_path.join("collection-price-history"))?;
 
-    let managed_dir_path = std::env::current_dir()?.join(mtgo_collection_manager::MANAGED_DIR);
-
-    let resp = download::lib::get_bytes_readable(mtgo_collection_manager::DOWNLOAD_PRICE_LIST_URL);
-
-    let bytes = match resp {
-        Ok(bytes) => bytes,
-        Err(e) => {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("Failed to download price list: {e}"),
-            ))
-        }
-    };
-
-    let contents = download::lib::unzip_bytes(bytes)?;
-
-    download::lib::store_contents(
-        contents,
+    let price_list = match download::lib::first_file_match_from_dir(
         mtgo_collection_manager::PRICE_LIST_FNAME,
-        mtgo_collection_manager::MANAGED_PRICE_HISTORY,
-    )?;
+        &managed_dir_path,
+        Some(86400), // 24 hours
+    ) {
+        // Download and store price list if there's no file in the managed directory
+        None => {
+            let resp =
+                download::lib::get_bytes_readable(mtgo_collection_manager::DOWNLOAD_PRICE_LIST_URL);
+            let bytes = match resp {
+                Ok(bytes) => bytes,
+                Err(e) => {
+                    return Err(io::Error::new(
+                        io::ErrorKind::Other,
+                        format!("Failed to download price list: {e}"),
+                    ))
+                }
+            };
+
+            let contents = download::lib::unzip_bytes(bytes)?;
+            download::lib::store_contents(
+                contents.clone(),
+                mtgo_collection_manager::PRICE_LIST_FNAME,
+                mtgo_collection_manager::MANAGED_PRICE_HISTORY,
+            )?;
+            contents
+        }
+        Some(price_list) => fs::read_to_string(price_list)?,
+    };
 
     let card_definitions = match download::lib::first_file_match_from_dir(
         mtgo_collection_manager::CARD_DEFINITIONS_FNAME,
         &managed_dir_path,
-        None,
+        Some(86400), // 24 hours
     ) {
         // Download and store card definitions if there's no file in the managed directory
         None => {
@@ -47,8 +62,8 @@ fn main() -> std::io::Result<()> {
             let bytes = match response {
                 Ok(bytes) => bytes,
                 Err(e) => {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::Other,
+                    return Err(io::Error::new(
+                        io::ErrorKind::Other,
                         format!("Failed to download card definitions: {e}"),
                     ))
                 }
@@ -62,15 +77,43 @@ fn main() -> std::io::Result<()> {
             )?;
             contents
         }
-        Some(card_defs) => std::fs::read_to_string(card_defs)?,
+        Some(card_defs) => fs::read_to_string(card_defs)?,
     };
 
-    let card_defs_vec: Vec<String> = card_definitions
-        .lines()
-        .map(|line| line.to_string())
-        .collect();
-    let first_10_lines = &card_defs_vec[0..10];
-    info!("Card definitions: {:?}", first_10_lines);
+    let collection_map: collections::HashMap<String, (String, u32)> = if let Some(collection) =
+        download::lib::first_file_match_from_dir("collection.json", &managed_dir_path, None)
+    {
+        let collection = fs::read_to_string(collection)?;
+        serde_json::from_str(&collection)?
+    } else {
+        log::info!(
+            "No collection.json found in managed directory, looking for Full Trade List instead"
+        );
+        let collection_map = if let Some(full_trade_list) =
+            download::lib::first_file_match_from_dir("Full Trade List", &managed_dir_path, None)
+        {
+            let collection = fs::read_to_string(full_trade_list)?;
+            let collection_map = mtgo_collection_manager::collection_map_from_string(collection);
+            // Write to file
+            mtgo_collection_manager::map_to_json_file(
+                managed_dir_path,
+                "collection.json",
+                &collection_map,
+            )?;
+            collection_map
+        } else {
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                format!("Failed to find Full Trade List in managed directory"),
+            ));
+        };
+        collection_map
+    };
+
+    let prices_json: serde_json::Value =
+        serde_json::from_str(&price_list).expect("JSON was not well-formatted");
+    let card_defs_json: serde_json::Value =
+        serde_json::from_str(&card_definitions).expect("JSON was not well-formatted");
 
     Ok(())
 }

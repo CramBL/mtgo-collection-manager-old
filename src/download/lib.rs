@@ -24,7 +24,7 @@ pub fn store_contents(
     path.push(pwd_dst_dir);
 
     let dt: chrono::DateTime<chrono::Local> = chrono::Local::now();
-    let time_str = dt.format("%Y-%m-%dT%H-%M").to_string();
+    let time_str = dt.format("%Y-%m-%d-T%H:%M").to_string();
     path.push(f_name.to_string() + "-" + &time_str + ".txt");
 
     let mut output_file = std::fs::OpenOptions::new()
