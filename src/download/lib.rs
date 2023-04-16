@@ -54,7 +54,7 @@ pub fn store_contents(
 
 pub fn first_file_match_from_dir(
     f_name: &str,
-    path: &std::path::PathBuf,
+    path: &std::path::Path,
     max_file_age: Option<u64>,
 ) -> Option<std::path::PathBuf> {
     log::info!("Searching for file matching: {}", f_name);
@@ -88,11 +88,11 @@ pub fn first_file_match_from_dir(
             }
         }
     }
-    if matching_entries.len() > 0 {
-        return Some(matching_entries[0].clone());
+    if !matching_entries.is_empty() {
+        Some(matching_entries[0].clone())
     } else {
         log::warn!("No matching files found");
-        return None;
+        None
     }
 }
 

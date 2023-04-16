@@ -36,7 +36,7 @@ pub fn collection_map_from_string(
         r#"CatID="(?P<id>[0-9]*)".*Quantity="(?P<quantity>[0-9]*)".*Name="(?P<name>.*?)""#;
     let re: regex::Regex = regex::Regex::new(pattern).expect("Failed to compile regex");
     let collection_map: std::collections::HashMap<String, (String, u32)> = re
-        .captures_iter(&collection.as_str())
+        .captures_iter(collection.as_str())
         .map(|cap| {
             (
                 cap.name("id").unwrap().as_str().to_string(),
