@@ -6,6 +6,14 @@ pub fn get_bytes_readable(url: &str) -> Result<impl std::io::Read + std::io::See
     Ok(readable_bytes)
 }
 
+pub async fn async_get_bytes_readable(
+    url: &str,
+) -> Result<impl std::io::Read + std::io::Seek, reqwest::Error> {
+    let resp_bytes = reqwest::get(url).await?.bytes().await?;
+    let readable_bytes = std::io::Cursor::new(resp_bytes);
+    Ok(readable_bytes)
+}
+
 pub fn unzip_bytes(readable_bytes: impl Read + std::io::Seek) -> zip::result::ZipResult<String> {
     let mut archive = zip::ZipArchive::new(readable_bytes)?;
     let mut file = archive.by_index(0).unwrap();
@@ -137,7 +145,7 @@ mod tests {
     #[ignore]
     fn test_first_file_match_from_dir() {
         let price_res = first_file_match_from_dir(
-            crate::PRICE_LIST_FNAME,
+            crate::GOATBOTS_PRICE_LIST_FNAME,
             &dirs::download_dir().unwrap(),
             Some(1000),
         );
