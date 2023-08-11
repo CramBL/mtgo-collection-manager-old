@@ -7,7 +7,7 @@ import (
 )
 
 var version = "0.1.0"
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:     "mtgogetter",
 	Version: version,
 	Short:   "MTGO Getter - a simple utility to get/download MTGO card info",
@@ -18,7 +18,7 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		log.Fatalf("Init error: '%s'", err)
 	}
 }
