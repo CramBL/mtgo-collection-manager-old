@@ -2,3 +2,4 @@ rust-processing/target
 /chromedriver.exe
 /managed-files/*
 /.*
+go-backend/go-backend.exe
