@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import mtgogetter "github.com/CramBL/mtgo-collection-manager/go-backend/cmd"
 
 func main() {
-	fmt.Println("Hello, World!")
+	mtgogetter.Execute()
 }
