@@ -1,4 +1,4 @@
-/target
+rust-processing/target
 /chromedriver.exe
 /managed-files/*
 /.*
