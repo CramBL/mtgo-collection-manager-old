@@ -1,6 +1,7 @@
 package mtgogetter
 
 import (
+	"github.com/CramBL/mtgo-collection-manager/go-backend/cmd/mtgogetter/download"
 	"github.com/spf13/cobra"
 )
 
@@ -17,4 +18,6 @@ var BaseDownloadCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(BaseDownloadCmd)
+
+	BaseDownloadCmd.AddCommand(download.DownloadGoatbotsPriceHistoryCmd)
 }
