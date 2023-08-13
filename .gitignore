@@ -3,3 +3,4 @@ rust-processing/target
 /managed-files/*
 mtgogetter/mtgogetter.exe
 mtgoupdater/Cargo.lock
+mtgoupdater/target
