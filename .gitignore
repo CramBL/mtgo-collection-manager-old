@@ -2,3 +2,4 @@ rust-processing/target
 /chromedriver.exe
 /managed-files/*
 mtgogetter/mtgogetter.exe
+mtgoupdater/Cargo.lock

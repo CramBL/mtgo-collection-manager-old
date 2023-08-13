@@ -1,0 +1,19 @@
+[package]
+name = "mtgoupdater"
+version = "0.1.0"
+edition = "2021"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["mtgo"]
+description = "Library for interoperating with MTGO Collection manager's C++ and Go code"
+authors = ["Marc Beck König <mbkj@tutamail.com>"]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+libc = "0.2.147"
+
+[profile.release]
+lto = true
+codegen-units = 1
