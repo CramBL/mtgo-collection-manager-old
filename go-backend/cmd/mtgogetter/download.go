@@ -20,4 +20,5 @@ func init() {
 	RootCmd.AddCommand(BaseDownloadCmd)
 
 	BaseDownloadCmd.AddCommand(download.DownloadGoatbotsPriceHistoryCmd)
+	BaseDownloadCmd.AddCommand(download.DownloadGoatbotsCardDefinitionsCmd)
 }
