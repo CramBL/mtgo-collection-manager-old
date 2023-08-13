@@ -1,4 +1,4 @@
-module github.com/CramBL/mtgo-collection-manager/go-backend
+module github.com/CramBL/mtgo-collection-manager/mtgogetter
 
 go 1.21.0
 

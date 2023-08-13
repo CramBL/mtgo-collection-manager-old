@@ -1,7 +1,7 @@
 package mtgogetter
 
 import (
-	"github.com/CramBL/mtgo-collection-manager/go-backend/cmd/mtgogetter/download"
+	"github.com/CramBL/mtgo-collection-manager/mtgogetter/cmd/mtgogetter/download"
 	"github.com/spf13/cobra"
 )
 
