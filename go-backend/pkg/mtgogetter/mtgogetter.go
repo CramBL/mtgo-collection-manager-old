@@ -4,32 +4,32 @@ import (
 	"archive/zip"
 	"bytes"
 	"io"
+
 	"log"
 	"net/http"
 	"os"
 )
 
-func DownloadToBuf(url string) (buffer bytes.Buffer) {
+func DownloadBodyToBytes(url string) (respBody []byte) {
 	log.Println("Downloading from", url)
 
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Println("Error downloading file:", err)
+		log.Fatal(err)
 		return
 	}
 	defer resp.Body.Close()
-	// Read the file content into a buffer
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, resp.Body)
+
+	bodyAsBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("Error reading file content:", err)
-		return
+		log.Fatal(err)
 	}
-	return buf
+
+	return bodyAsBytes
 }
 
-func UnzipBufAndWriteToDisk(buf bytes.Buffer) {
-	reader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+func UnzipBufAndWriteToDisk(byteSlice []byte) {
+	reader, err := zip.NewReader(bytes.NewReader(byteSlice), int64(len(byteSlice)))
 	if err != nil {
 		log.Println("Error creating zip reader:", err)
 		return
@@ -62,8 +62,8 @@ func UnzipBufAndWriteToDisk(buf bytes.Buffer) {
 	}
 }
 
-func UnzipFromBuf(buf bytes.Buffer) *zip.Reader {
-	reader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+func UnzipFromBytes(byteSlice []byte) *zip.Reader {
+	reader, err := zip.NewReader(bytes.NewReader(byteSlice), int64(len(byteSlice)))
 	if err != nil {
 		log.Fatalln("Error creating zip reader:", err)
 	}
