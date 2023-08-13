@@ -11,7 +11,10 @@ var DownloadGoatbotsPriceHistoryCmd = &cobra.Command{
 	Use:     "goatbots-price-history",
 	Aliases: []string{"goat-price-hist", "goat-ph", "gph"},
 	Short:   "Download the price history for cards on Goatbots.com",
-	Args:    cobra.ExactArgs(0),
+	Long: `Download the price history for cards on Goatbots.com
+
+The price history appears as a JSON map of unique card IDs and associated tix price`,
+	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		dl_bytes := mtgogetter.DownloadBodyToBytes(GoatbotsPriceHistoryUrl)
 		reader := mtgogetter.UnzipFromBytes(dl_bytes)
