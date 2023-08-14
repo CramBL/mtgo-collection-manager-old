@@ -4,3 +4,4 @@ rust-processing/target
 mtgogetter/mtgogetter.exe
 mtgoupdater/Cargo.lock
 mtgoupdater/target
+mtgoparser/build
