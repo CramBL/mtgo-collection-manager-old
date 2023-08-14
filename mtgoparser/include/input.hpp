@@ -6,7 +6,9 @@
 
 namespace fs = std::filesystem;
 
-[[nodiscard]] std::string readFile(fs::path path)
+namespace io_util {
+
+[[nodiscard]] std::string ReadFile(fs::path path)
 {
     // Open the stream to 'lock' the file.
     std::ifstream f(path, std::ios::in | std::ios::binary);
@@ -21,4 +23,5 @@ namespace fs = std::filesystem;
     f.read(buffer.data(), sz);
 
     return buffer;
+}
 }
