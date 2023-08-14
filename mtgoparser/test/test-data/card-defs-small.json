@@ -1,0 +1,32 @@
+{
+    "47483": {
+        "name": "Gruul Charm",
+        "cardset": "GTC",
+        "rarity": "Uncommon",
+        "foil": 0
+    },
+    "40516": {
+        "name": "Windfall",
+        "cardset": "CMD",
+        "rarity": "Uncommon",
+        "foil": 0
+    },
+    "31745": {
+        "name": "Noble Hierarch",
+        "cardset": "CON",
+        "rarity": "Rare",
+        "foil": 0
+    },
+    "348": {
+        "name": "Black Lotus",
+        "cardset": "1E",
+        "rarity": "Rare",
+        "foil": 1
+    },
+    "347": {
+        "name": "Black Lotus",
+        "cardset": "1E",
+        "rarity": "Rare",
+        "foil": 0
+    }
+}
