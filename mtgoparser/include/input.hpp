@@ -1,11 +1,10 @@
+#pragma once
+
 #include <filesystem>
 #include <fstream>
 #include <string>
 
 namespace fs = std::filesystem;
-
-// Use version that checks for cached size?
-// https://en.cppreference.com/w/cpp/filesystem/directory_entry/file_size
 
 [[nodiscard]] std::string readFile(fs::path path)
 {
