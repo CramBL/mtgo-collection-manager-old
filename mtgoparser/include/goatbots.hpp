@@ -11,11 +11,6 @@ namespace goatbots
       std::string rarity{};
       uint8_t foil{}; // actually boolean but 0/1
    };
-
-   struct PriceHistory
-   {
-      double price{};
-   };
 }
 
 template <>
