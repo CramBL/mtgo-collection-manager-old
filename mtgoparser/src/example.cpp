@@ -9,10 +9,13 @@ void example() {
     using goatbots::price_hist_map_t;
     using goatbots::CardDefinition;
 
-    card_defs_map_t cards = goatbots::ReadJsonMap<card_defs_map_t>("./test/test-data/card-defs-small.json").value();
+    std::optional<card_defs_map_t> cards = goatbots::ReadJsonMap<card_defs_map_t>("./test/test-data/card-defs-small.json");
+    if (!cards.has_value()) {
+        // Error: ReadJsonMap() failed
+    }
     price_hist_map_t prices = goatbots::ReadJsonMap<price_hist_map_t>("./test/test-data/price-hist-small.json").value();
 
-    for (auto &&e : cards)
+    for (auto &&e : cards.value())
     {
         if (e.second.name == "Black Lotus") {
 
@@ -26,7 +29,6 @@ void example() {
 int main()
 {
     example();
-
 
     return 0;
 }
