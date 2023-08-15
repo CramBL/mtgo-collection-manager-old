@@ -24,13 +24,14 @@ namespace goatbots
    concept goatbots_json = std::disjunction<std::is_same<T, price_hist_map_t>, std::is_same<T, card_defs_map_t>>::value;
 
    template<goatbots_json T>
-   auto ReadJsonMap(std::filesystem::path path_json) -> std::optional<T> {
+   [[nodiscard]] auto ReadJsonMap(std::filesystem::path path_json) -> std::optional<T> {
+      // Instantiate and pre-allocate map
       T json_map = {};
       json_map.reserve(80000);
 
-      auto err_code = glz::read_json(json_map, io_util::ReadFile(path_json));
-
-      if (err_code) {
+      // Read file into buffer and decode to populate map
+      if (auto err_code = glz::read_json(json_map, io_util::ReadFile(path_json))) {
+         // Handle error
          std::string descriptive_error = glz::format_error(err_code, std::string{});
          std::cout << "ERR=" << err_code << " parsing json: " << descriptive_error << '\n';
          return std::nullopt;
