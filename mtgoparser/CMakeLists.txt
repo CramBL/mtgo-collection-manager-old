@@ -26,9 +26,24 @@ target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_link_libraries(${PROJECT_NAME} PRIVATE glaze::glaze)
 
 if (MSVC)
-    # warning level 4
-    add_compile_options(/W4)
+    add_compile_options(
+      /Wall
+      /WX
+      )
 else()
-    # additional warnings
-    add_compile_options(-Wall -Wextra -Wpedantic)
+    add_compile_options(
+      -fno-exceptions
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wshadow
+      -Wdouble-promotion
+      -Wformat=2
+      -Wformat-truncation
+      -Wundef
+      -Wdeprecated
+      -fno-common
+      -fasynchronous-unwind-tables
+      -Wl,-z,defs
+      )
 endif()
