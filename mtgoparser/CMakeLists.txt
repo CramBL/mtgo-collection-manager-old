@@ -22,3 +22,11 @@ FetchContent_MakeAvailable(glaze)
 add_executable(${PROJECT_NAME} ${srcs})
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_link_libraries(${PROJECT_NAME} PRIVATE glaze::glaze)
+
+if (MSVC)
+    # warning level 4
+    add_compile_options(/W4)
+else()
+    # additional warnings
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
