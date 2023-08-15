@@ -7,9 +7,14 @@ namespace goatbots
    struct CardDefinition
    {
       std::string name{};
-      std::string set{};
+      std::string cardset{};
       std::string rarity{};
-      bool foil{};
+      uint8_t foil{}; // actually boolean but 0/1
+   };
+
+   struct PriceHistory
+   {
+      double price{};
    };
 }
 
@@ -17,5 +22,5 @@ template <>
 struct glz::meta<goatbots::CardDefinition>
 {
    using T = goatbots::CardDefinition;
-   static constexpr auto value = object("name", &T::name, "set", &T::set, "rarity", &T::rarity, "foil", &T::foil);
+   static constexpr auto value = object("name", &T::name, "cardset", &T::cardset, "rarity", &T::rarity, "foil", &T::foil);
 };
