@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glaze/glaze.hpp>
 #include "io.hpp"
+#include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
 
 #include <concepts>
@@ -33,7 +33,8 @@ template <goatbots_json T>
   // Read file into buffer and decode to populate map
   if (auto err_code = glz::read_json(json_map, io_util::ReadFile(path_json))) {
     // Handle error
-    spdlog::error("code {}: {}", err_code, glz::format_error(err_code, std::string{}));
+    spdlog::error("code {}: {}", err_code,
+                  glz::format_error(err_code, std::string{}));
     return std::nullopt;
   }
 
