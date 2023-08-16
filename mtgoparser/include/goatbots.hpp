@@ -18,7 +18,7 @@ namespace goatbots
    };
 
    using price_hist_map_t = std::unordered_map<std::string, double>;
-   using card_defs_map_t = std::unordered_map<std::string, goatbots::CardDefinition>;
+   using card_defs_map_t = std::unordered_map<std::string, CardDefinition>;
 
    template<class T>
    concept goatbots_json = std::disjunction<std::is_same<T, price_hist_map_t>, std::is_same<T, card_defs_map_t>>::value;
