@@ -1,7 +1,25 @@
+# Build directories and binary files
 rust-processing/target
-/chromedriver.exe
-/managed-files/*
 mtgogetter/mtgogetter.exe
 mtgoupdater/Cargo.lock
 mtgoupdater/target
-mtgoparser/build
+mtgoparser/build/
+mtgoparser/out/
+mtgoparser/cmake-build-*/
+mtgoparser/conan-cache/
+
+# User spesific settings
+mtgoparser/CMakeUserPresets.json
+
+# IDE files
+.vs/
+.idea/
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*~
+_ReSharper*
+*.log
