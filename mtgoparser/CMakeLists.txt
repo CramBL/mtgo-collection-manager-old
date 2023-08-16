@@ -15,7 +15,7 @@ project(
    mtgoparser
    VERSION 0.1.0
    DESCRIPTION "MTGO collection manager app"
-   HOMEPAGE_URL "%%https://github.com/CramBL/mtgo-collection-manager/%%"
+   HOMEPAGE_URL "https://github.com/CramBL/mtgo-collection-manager/"
    LANGUAGES CXX
 )
 
