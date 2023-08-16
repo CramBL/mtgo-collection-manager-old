@@ -2,7 +2,6 @@
 
 #include "goatbots.hpp"
 #include "io.hpp"
-#include <iostream>
 
 void example() {
   using goatbots::card_defs_map_t;
@@ -20,9 +19,7 @@ void example() {
 
   for (auto &&e : cards.value()) {
     if (e.second.name == "Black Lotus") {
-
-      std::cout << e.first << " " << e.second.name
-                << " price = " << prices.at(e.first) << " \n";
+      spdlog::info("{} : {} : {}", e.first, e.second.name, prices.at(e.first));
     }
   }
 }

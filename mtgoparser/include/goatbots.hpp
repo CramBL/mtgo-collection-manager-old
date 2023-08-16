@@ -1,10 +1,10 @@
 #pragma once
 
-#include "glaze/glaze.hpp"
+#include <glaze/glaze.hpp>
 #include "io.hpp"
+#include <spdlog/spdlog.h>
 
 #include <concepts>
-#include <iostream>
 #include <optional>
 
 namespace goatbots {
@@ -33,9 +33,7 @@ template <goatbots_json T>
   // Read file into buffer and decode to populate map
   if (auto err_code = glz::read_json(json_map, io_util::ReadFile(path_json))) {
     // Handle error
-    std::string descriptive_error = glz::format_error(err_code, std::string{});
-    std::cout << "ERR=" << err_code << " parsing json: " << descriptive_error
-              << '\n';
+    spdlog::error("code {}: {}", err_code, glz::format_error(err_code, std::string{}));
     return std::nullopt;
   }
 
