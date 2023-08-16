@@ -4,24 +4,21 @@
 #include <fstream>
 #include <string>
 
-namespace fs = std::filesystem;
-
 namespace io_util {
 
-[[nodiscard]] std::string ReadFile(fs::path path)
-{
-    // Open the stream to 'lock' the file.
-    std::ifstream f(path, std::ios::in | std::ios::binary);
+[[nodiscard]] auto ReadFile(std::filesystem::path fpath) -> std::string {
+  // Open the stream to 'lock' the file.
+  std::ifstream file(fpath, std::ios::in | std::ios::binary);
 
-    // Obtain the size of the file.
-    const auto sz = fs::file_size(path);
+  // Obtain the size of the file.
+  const auto fsize = std::filesystem::file_size(fpath);
 
-    // Create a buffer.
-    std::string buffer(sz, '\0');
+  // Create a buffer.
+  std::string str_buffer(fsize, '\0');
 
-    // Read the whole file into the buffer.
-    f.read(buffer.data(), sz);
+  // Read the whole file into the buffer.
+  file.read(str_buffer.data(), fsize);
 
-    return buffer;
+  return str_buffer;
 }
-}
+} // namespace io_util
