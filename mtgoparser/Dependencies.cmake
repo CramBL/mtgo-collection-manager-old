@@ -8,6 +8,10 @@ function(mtgoparser_setup_dependencies)
   # For each dependency, see if it's
   # already been provided to us by a parent project
 
+  if(NOT TARGET glaze::glaze)
+    cpmaddpackage("https://github.com/stephenberry/glaze.git#main")
+  endif()
+
   if(NOT TARGET fmtlib::fmtlib)
     cpmaddpackage("gh:fmtlib/fmt#9.1.0")
   endif()
@@ -30,6 +34,10 @@ function(mtgoparser_setup_dependencies)
 
   if(NOT TARGET tools::tools)
     cpmaddpackage("gh:lefticus/tools#update_build_system")
+  endif()
+
+  if(NOT TARGET rapidxml::rapidxml)
+    CPMAddPackage("gh:CodeFinder2/rapidxml@1.13")
   endif()
 
 endfunction()
