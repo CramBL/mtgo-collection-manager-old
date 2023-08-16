@@ -1,5 +1,3 @@
-#pragma once
-
 #include "goatbots.hpp"
 #include "io.hpp"
 
