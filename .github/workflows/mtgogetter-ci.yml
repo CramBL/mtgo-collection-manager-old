@@ -1,18 +1,20 @@
-name: Go-mtgogetter
+name: mtgogetter-ci
 
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
+  release:
+    types: [published]
+  push:
+    tags:
+      - main
+    branches:
+      - main
+      - develop
 
 jobs:
     # JOB to run change detection
   changes:
     runs-on: ubuntu-latest
-    # Required permissions
-    permissions:
-      pull-requests: read
     # Set job outputs to values from filter step
     outputs:
       mtgogetter: ${{ steps.filter.outputs.mtgogetter }}
