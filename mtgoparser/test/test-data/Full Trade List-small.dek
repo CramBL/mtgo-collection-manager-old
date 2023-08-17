@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Deck xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NetDeckID>0</NetDeckID>
+  <PreconstructedDeckID>0</PreconstructedDeckID>
+  <Cards CatID="1" Quantity="453" Sideboard="false" Name="Event Ticket" Annotation="0" />
+  <Cards CatID="235" Quantity="1" Sideboard="false" Name="Swamp" Annotation="0" />
+  <Cards CatID="31745" Quantity="1" Sideboard="false" Name="Noble Hierarch" Annotation="0" />
+  <Cards CatID="53155" Quantity="1" Sideboard="false" Name="Black Lotus" Annotation="0" />
+  <Cards CatID="110465" Quantity="1" Sideboard="false" Name="Tranquil Cove" Annotation="0" />
+</Deck>
