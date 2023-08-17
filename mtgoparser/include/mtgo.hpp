@@ -10,24 +10,22 @@
 namespace mtgo {
 void parse_dek_xml(std::filesystem::path path_xml)
 {
-  spdlog::info("Reading from {}", path_xml.string());
   std::vector<char> buf = io_util::ReadToCharBuf(path_xml);
-  spdlog::info("Got {} bytes", buf.size());
   rapidxml::xml_document<> doc;
   doc.parse<0>(&buf[0]);
 
-  spdlog::info("First node: {} with {}", doc.first_node()->name(), doc.first_node()->first_attribute()->name());
-  spdlog::info(
-    "First node: {} with {}", doc.first_node()->first_node()->name(), doc.first_node()->first_attribute()->name());
-  spdlog::info("First node: {} with {}",
-    doc.first_node()->first_node()->first_node()->name(),
-    doc.first_node()->first_attribute()->name());
+  rapidxml::xml_node<> *first_node_ptr = doc.first_node();// `Deck` node
+  // first_node() goes to `NetDeckID`
+  // next_sibling() goes to `PreconstructedDeckID`
+  // next_sibling goes to first `Cards` node
+  decltype(auto) first_card_node = first_node_ptr->first_node()->next_sibling()->next_sibling();
 
-  decltype(auto) start_of_card_siblings = doc.first_node();
-
-  for (decltype(auto) card = start_of_card_siblings->first_node(); card; card->next_sibling()) {
-    spdlog::info(
-      "card: ID:{} Quantity={}", card->first_attribute()->name(), card->first_attribute()->next_attribute()->name());
+  // Iterate through all siblings
+  for (decltype(auto) card = first_card_node; card; card = card->next_sibling()) {
+    // Iterate through all attributes
+    for (decltype(auto) attr = card->first_attribute(); attr; attr = attr->next_attribute()) {
+      spdlog::info("{}={}", attr->name(), attr->value());
+    }
   }
 }
 
