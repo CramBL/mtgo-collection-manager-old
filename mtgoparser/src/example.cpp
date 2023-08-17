@@ -1,5 +1,6 @@
 #include "goatbots.hpp"
 #include "io.hpp"
+#include "mtgo.hpp"
 
 void example()
 {
@@ -22,7 +23,9 @@ void example()
 int main()
 {
 
-  example();
+  // example();
+
+  mtgo::parse_dek_xml("./test/test-data/Full Trade List-small.dek");
 
   return 0;
 }

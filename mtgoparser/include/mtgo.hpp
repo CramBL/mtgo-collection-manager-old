@@ -16,7 +16,19 @@ void parse_dek_xml(std::filesystem::path path_xml)
   rapidxml::xml_document<> doc;
   doc.parse<0>(&buf[0]);
 
-  spdlog::info("First node: {}", doc.first_node()->name());
+  spdlog::info("First node: {} with {}", doc.first_node()->name(), doc.first_node()->first_attribute()->name());
+  spdlog::info(
+    "First node: {} with {}", doc.first_node()->first_node()->name(), doc.first_node()->first_attribute()->name());
+  spdlog::info("First node: {} with {}",
+    doc.first_node()->first_node()->first_node()->name(),
+    doc.first_node()->first_attribute()->name());
+
+  decltype(auto) start_of_card_siblings = doc.first_node();
+
+  for (decltype(auto) card = start_of_card_siblings->first_node(); card; card->next_sibling()) {
+    spdlog::info(
+      "card: ID:{} Quantity={}", card->first_attribute()->name(), card->first_attribute()->next_attribute()->name());
+  }
 }
 
 }// namespace mtgo
