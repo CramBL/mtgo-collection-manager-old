@@ -6,6 +6,7 @@
 
 #include <concepts>
 #include <optional>
+#include <string>
 #include <unordered_map>
 
 namespace goatbots {
