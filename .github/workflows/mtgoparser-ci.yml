@@ -16,7 +16,28 @@ env:
 
 
 jobs:
+  # JOB to run change detection
+  changes:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    # Set job outputs to values from filter step
+    outputs:
+      mtgoparser: ${{ steps.filter.outputs.mtgoparser }}
+    steps:
+    # For pull requests it's not necessary to checkout the code
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          mtgoparser:
+            - 'mtgoparser/**'
+
   Test:
+  # Only run if there's changes to the C++ code (in /mtgoparser)
+    needs: changes
+    if: ${{ needs.changes.outputs.mtgoparser == 'true' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
