@@ -7,8 +7,28 @@ on:
     branches: [ "master" ]
 
 jobs:
+    # JOB to run change detection
+  changes:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    # Set job outputs to values from filter step
+    outputs:
+      mtgogetter: ${{ steps.filter.outputs.mtgogetter }}
+    steps:
+    # For pull requests it's not necessary to checkout the code
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          mtgogetter:
+            - 'mtgogetter/**'
 
   build:
+    # Only run if there's changes to the Go code (in /mtgogetter)
+    needs: changes
+    if: ${{ needs.changes.outputs.mtgogetter == 'true' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -20,7 +40,7 @@ jobs:
 
     - name: Build
       run: go build -C mtgogetter -v
-      
+
     # TODO: Implement tests
     #- name: Test
     #  run: go test -v ./...
