@@ -6,7 +6,8 @@
 
 namespace io_util {
 
-[[nodiscard]] auto ReadFile(std::filesystem::path fpath) -> std::string {
+[[nodiscard]] auto ReadFile(std::filesystem::path fpath) -> std::string
+{
   // Open the stream to 'lock' the file.
   std::ifstream file(fpath, std::ios::in | std::ios::binary);
 
@@ -21,4 +22,4 @@ namespace io_util {
 
   return str_buffer;
 }
-} // namespace io_util
+}// namespace io_util
