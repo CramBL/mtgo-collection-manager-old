@@ -1,6 +1,7 @@
 #include "goatbots.hpp"
 #include "io.hpp"
 #include "mtgo.hpp"
+#include <collection.hpp>
 #include <spdlog/spdlog.h>
 
 void example_goatbots_json_parse()
@@ -29,6 +30,9 @@ void example_mtgo_xml_parse()
     spdlog::info(
       "id: {}, quantity: {}, name: {}, annotation: {}, set: {}", c.id_, c.quantity_, c.name_, c.annotation_, c.set_);
   }
+
+  auto collection = mtgo::Collection(std::move(cards));
+  spdlog::info("Collection size (card count): {}", collection.Size());
 }
 
 int main()
