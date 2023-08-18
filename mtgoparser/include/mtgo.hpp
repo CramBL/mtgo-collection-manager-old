@@ -12,7 +12,7 @@ namespace mtgo {
 
 struct Card
 {
-  [[nodiscard]] explicit Card(const char *id,
+  [[nodiscard]] explicit constexpr Card(const char *id,
     const char *quantity,
     const char *name,
     const char *annotation,
@@ -23,11 +23,11 @@ struct Card
   std::string id_;
   std::string quantity_;
   std::string name_;
-  std::string annotation_;
+  std::string annotation_;// This attribute seems useless (yet to see it be not 0)
   std::string set_;
 };
 namespace xml {
-  [[nodiscard]] auto card_from_xml(rapidxml::xml_node<> *card_node) -> Card
+  [[nodiscard]] inline auto card_from_xml(rapidxml::xml_node<> *card_node) -> Card
   {
     decltype(auto) first_attr = card_node->first_attribute();
     // 1st attribute
@@ -55,6 +55,7 @@ namespace xml {
     decltype(auto) first_card_node = first_node_ptr->first_node()->next_sibling()->next_sibling();
 
     std::vector<Card> cards{};
+    cards.reserve(500);
 
     // Iterate through all siblings
     for (decltype(auto) card = first_card_node; card; card = card->next_sibling()) {
