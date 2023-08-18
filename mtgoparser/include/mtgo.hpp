@@ -6,6 +6,10 @@
 #include <rapidxml/rapidxml_utils.hpp>
 #include <spdlog/spdlog.h>
 
+#include <filesystem>
+#include <string>
+#include <vector>
+
 
 namespace mtgo {
 
