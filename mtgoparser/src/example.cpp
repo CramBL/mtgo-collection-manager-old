@@ -28,7 +28,7 @@ void example_mtgo_xml_parse()
 
   for (auto &&c : cards) {
     spdlog::info(
-      "id: {}, quantity: {}, name: {}, annotation: {}, set: {}", c.id_, c.quantity_, c.name_, c.annotation_, c.set_);
+      "id: {}, quantity: {}, name: {}, set: {}", c.id_, c.quantity_, c.name_, c.set_);
   }
 
   auto collection = mtgo::Collection(std::move(cards));

@@ -19,15 +19,15 @@ struct Card
   [[nodiscard]] explicit constexpr Card(const char *id,
     const char *quantity,
     const char *name,
-    const char *annotation,
+    // const char *annotation,
     const char *set = "")
-    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }, annotation_{ annotation }
+    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }//, annotation_{ annotation }
   {}
 
   std::string id_;
   std::string quantity_;
   std::string name_;
-  std::string annotation_;// This attribute seems useless (yet to see it be not 0)
+  // std::string annotation_;// This attribute seems useless (yet to see it be not 0)
   std::string set_;
 };
 namespace xml {
@@ -40,10 +40,10 @@ namespace xml {
     auto quantity = first_attr->next_attribute()->value();
     // 4th attribute
     auto name = first_attr->next_attribute()->next_attribute()->next_attribute()->value();
-    // 5th attribute
-    auto annotation = first_attr->next_attribute()->next_attribute()->next_attribute()->next_attribute()->value();
+    // 5th attribute (seems useless)
+    // auto annotation = first_attr->next_attribute()->next_attribute()->next_attribute()->next_attribute()->value();
 
-    return Card(id, quantity, name, annotation);
+    return Card(id, quantity, name);
   }
 
   [[nodiscard]] auto parse_dek_xml(std::filesystem::path path_xml) -> std::vector<Card>
