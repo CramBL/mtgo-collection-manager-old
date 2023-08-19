@@ -48,7 +48,7 @@ jobs:
           - macos-11
           - windows-2022
         compiler:
-          - llvm-15.0.2
+          - llvm-15.0.0
           - gcc-12
         generator:
           - "Ninja Multi-Config"
@@ -72,7 +72,7 @@ jobs:
             gcov_executable: gcov
             enable_ipo: On
 
-          - compiler: llvm-15.0.2
+          - compiler: llvm-15.0.0
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
