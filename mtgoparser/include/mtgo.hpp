@@ -22,17 +22,20 @@ struct Card
     // const char *annotation,
     const char *set = "",
     const char *rarity = "",
-    bool foil = false)
-    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }, rarity_ {rarity}, foil_ {foil}//, annotation_{ annotation }
+    bool foil = false,
+    double price = 0)
+    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }, rarity_{ rarity }, foil_{ foil },
+      price_{ price }//, annotation_{ annotation }
   {}
 
-  std::string id_;
+  const std::string id_;
   std::string quantity_;
-  std::string name_;
+  const std::string name_;
   // std::string annotation_;// This attribute seems useless (yet to see it be not 0)
   std::string set_;
   std::string rarity_;
   bool foil_;
+  double price_;
 };
 namespace xml {
   [[nodiscard]] inline auto card_from_xml(rapidxml::xml_node<> *card_node) -> Card
