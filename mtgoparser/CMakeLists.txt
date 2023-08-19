@@ -14,8 +14,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 project(
    mtgoparser
    VERSION 0.1.0
-   DESCRIPTION "MTGO collection manager app"
-   HOMEPAGE_URL "https://github.com/CramBL/mtgo-collection-manager/"
+   DESCRIPTION "Parser library for the MTGO collection manager app"
+   HOMEPAGE_URL "https://github.com/CramBL/mtgo-collection-manager/mtgoparser"
    LANGUAGES CXX
 )
 
