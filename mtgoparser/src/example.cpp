@@ -27,8 +27,7 @@ void example_mtgo_xml_parse()
   auto cards = mtgo::xml::parse_dek_xml("./test/test-data/Full Trade List-small.dek");
 
   for (auto &&c : cards) {
-    spdlog::info(
-      "id: {}, quantity: {}, name: {}, set: {}", c.id_, c.quantity_, c.name_, c.set_);
+    spdlog::info("id: {}, quantity: {}, name: {}, set: {}", c.id_, c.quantity_, c.name_, c.set_);
   }
 
   auto collection = mtgo::Collection(std::move(cards));
