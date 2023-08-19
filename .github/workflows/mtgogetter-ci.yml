@@ -6,10 +6,13 @@ on:
     types: [published]
   push:
     tags:
-      - main
+      - master
     branches:
-      - main
       - develop
+      - master
+
+env:
+  VERBOSE: 1
 
 jobs:
     # JOB to run change detection
@@ -27,7 +30,7 @@ jobs:
           mtgogetter:
             - 'mtgogetter/**'
 
-  build:
+  build-Go:
     # Only run if there's changes to the Go code (in /mtgogetter)
     needs: changes
     if: ${{ needs.changes.outputs.mtgogetter == 'true' }}

@@ -1,7 +1,10 @@
 #include "goatbots.hpp"
 #include "io.hpp"
+#include "mtgo.hpp"
+#include <collection.hpp>
+#include <spdlog/spdlog.h>
 
-void example()
+void example_goatbots_json_parse()
 {
   using goatbots::card_defs_map_t;
   using goatbots::CardDefinition;
@@ -19,10 +22,23 @@ void example()
   }
 }
 
+void example_mtgo_xml_parse()
+{
+  auto cards = mtgo::xml::parse_dek_xml("./test/test-data/Full Trade List-small.dek");
+
+  for (auto &&c : cards) {
+    spdlog::info("id: {}, quantity: {}, name: {}, set: {}", c.id_, c.quantity_, c.name_, c.set_);
+  }
+
+  auto collection = mtgo::Collection(std::move(cards));
+  spdlog::info("Collection size (card count): {}", collection.Size());
+}
+
 int main()
 {
 
-  example();
+  example_goatbots_json_parse();
+  example_mtgo_xml_parse();
 
   return 0;
 }

@@ -5,20 +5,20 @@ on:
     types: [published]
   push:
     tags:
-      - main
+      - master
     branches:
-      - main
+      - master
       - develop
 
 env:
-  CLANG_TIDY_VERSION: "16.0.0"
+  CLANG_TIDY_VERSION: "15.0.0"
   VERBOSE: 1
 
 
 jobs:
   # JOB to run change detection
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Required permissions
     permissions:
       pull-requests: read
@@ -45,10 +45,10 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-10.15
-          - windows-2019
+          - macos-12
+          - windows-2022
         compiler:
-          - llvm-16.0.0
+          - llvm-15.0.0
           - gcc-13
         generator:
           - "Ninja Multi-Config"
@@ -62,7 +62,7 @@ jobs:
 
         exclude:
           # mingw is determined by this author to be too buggy to support
-          - os: windows-2019
+          - os: windows-2022
             compiler: gcc-13
 
         include:
@@ -72,11 +72,11 @@ jobs:
             gcov_executable: gcov
             enable_ipo: On
 
-          - compiler: llvm-16.0.0
+          - compiler: llvm-15.0.0
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
-          - os: macos-10.15
+          - os: macos-12
             enable_ipo: Off
 
           # Set up preferred package generators, for given build configurations
