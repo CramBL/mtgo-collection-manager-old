@@ -27,7 +27,7 @@ jobs:
           mtgogetter:
             - 'mtgogetter/**'
 
-  build:
+  build-Go:
     # Only run if there's changes to the Go code (in /mtgogetter)
     needs: changes
     if: ${{ needs.changes.outputs.mtgogetter == 'true' }}
