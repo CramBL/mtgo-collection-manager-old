@@ -1,6 +1,7 @@
 #pragma once
 
-#include "io.hpp"
+#include "mtgoparser/io.hpp"
+#include "mtgoparser/mtgo/card.hpp"
 
 #include <rapidxml/rapidxml.hpp>
 #include <rapidxml/rapidxml_utils.hpp>
@@ -13,23 +14,6 @@
 
 namespace mtgo {
 
-
-struct Card
-{
-  [[nodiscard]] explicit constexpr Card(const char *id,
-    const char *quantity,
-    const char *name,
-    // const char *annotation,
-    const char *set = "")
-    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }//, annotation_{ annotation }
-  {}
-
-  std::string id_;
-  std::string quantity_;
-  std::string name_;
-  // std::string annotation_;// This attribute seems useless (yet to see it be not 0)
-  std::string set_;
-};
 namespace xml {
   [[nodiscard]] inline auto card_from_xml(rapidxml::xml_node<> *card_node) -> Card
   {
