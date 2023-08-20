@@ -56,7 +56,12 @@ void example_collection_parse()
   collection.ExtractGoatbotsInfo(card_defs.value(), prices);
 
   spdlog::info("Collection size: {}", collection.Size());
+  spdlog::info("==> full collection print...");
   collection.Print();
+  spdlog::info("==> collection to json...");
+  spdlog::info("{}", collection.ToJson());
+  spdlog::info("==> collection to pretty json...");
+  spdlog::info("{}", collection.ToJsonPretty());
 }
 
 int main()
