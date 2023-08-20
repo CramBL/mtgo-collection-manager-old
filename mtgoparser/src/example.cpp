@@ -62,6 +62,16 @@ void example_collection_parse()
   spdlog::info("{}", collection.ToJson());
   spdlog::info("==> collection to pretty json...");
   spdlog::info("{}", collection.ToJsonPretty());
+
+  spdlog::info("==> collection to json string...");
+  auto collection_json = collection.ToJson();
+  spdlog::info("==> override collection from json string...");
+  collection.FromJson(collection_json);
+  collection.Print();
+  spdlog::info("==> new collection from json string...");
+  auto new_collection = mtgo::Collection(collection_json);
+  spdlog::info("==> new collection print...");
+  new_collection.Print();
 }
 
 int main()
