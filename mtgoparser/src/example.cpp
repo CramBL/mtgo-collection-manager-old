@@ -1,4 +1,3 @@
-#include "mtgoparser/collection.hpp"
 #include "mtgoparser/goatbots.hpp"
 #include "mtgoparser/io.hpp"
 #include "mtgoparser/mtgo.hpp"

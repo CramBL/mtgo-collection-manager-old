@@ -3,8 +3,6 @@
 #include <string>
 
 namespace mtgo {
-
-
 struct Card
 {
   [[nodiscard]] explicit constexpr Card(const char *id,

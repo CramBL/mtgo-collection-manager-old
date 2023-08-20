@@ -1,6 +1,6 @@
 #pragma once
 
-#include "io.hpp"
+#include "mtgoparser/io.hpp"
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
 

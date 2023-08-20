@@ -1,6 +1,7 @@
 #pragma once
 
-#include "io.hpp"
+#include "mtgoparser/io.hpp"
+#include "mtgoparser/mtgo/card.hpp"
 
 #include <rapidxml/rapidxml.hpp>
 #include <rapidxml/rapidxml_utils.hpp>
