@@ -23,19 +23,7 @@ public:
   void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs, const goatbots::price_hist_map_t &price_hist);
   [[nodiscard]] auto ToJson() const -> std::string;
   [[nodiscard]] auto ToJsonPretty() const -> std::string;
-  void Print()
-  {
-    for (const auto &c : cards_) {
-      spdlog::info("{} {}: price={}, quantity={}, set={}, foil={}, rarity={}",
-        c.id_,
-        c.name_,
-        c.price_,
-        c.quantity_,
-        c.set_,
-        c.foil_,
-        c.rarity_);
-    }
-  }
+  void Print();
 
 
 private:
@@ -79,6 +67,18 @@ void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
   glz::write<glz::opts{ .prettify = true }>(cards_, res);
   return res;
 }
-
+void Collection::Print()
+{
+  for (const auto &c : cards_) {
+    spdlog::info("{} {}: price={}, quantity={}, set={}, foil={}, rarity={}",
+      c.id_,
+      c.name_,
+      c.price_,
+      c.quantity_,
+      c.set_,
+      c.foil_,
+      c.rarity_);
+  }
+}
 
 }// namespace mtgo
