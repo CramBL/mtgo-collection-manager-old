@@ -1,7 +1,7 @@
-#include "collection.hpp"
-#include "goatbots.hpp"
-#include "io.hpp"
-#include "mtgo.hpp"
+#include "mtgoparser/collection.hpp"
+#include "mtgoparser/goatbots.hpp"
+#include "mtgoparser/io.hpp"
+#include "mtgoparser/mtgo.hpp"
 #include <spdlog/spdlog.h>
 
 void example_goatbots_json_parse()
