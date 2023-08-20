@@ -4,7 +4,9 @@
 #include "mtgoparser/mtgo/xml.hpp"
 
 #include "mtgoparser/goatbots.hpp"
+#include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
+#include <string>
 #include <vector>
 
 namespace mtgo {
@@ -19,6 +21,8 @@ public:
   [[nodiscard]] explicit Collection(std::vector<Card> &&cards) noexcept : cards_{ cards } {}
   [[nodiscard]] constexpr auto Size() const noexcept -> std::size_t;
   void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs, const goatbots::price_hist_map_t &price_hist);
+  [[nodiscard]] auto ToJson() const -> std::string;
+  [[nodiscard]] auto ToJsonPretty() const -> std::string;
   void Print()
   {
     for (const auto &c : cards_) {
@@ -47,7 +51,7 @@ private:
   }
 };
 
-constexpr auto mtgo::Collection::Size() const noexcept -> std::size_t { return cards_.size(); }
+constexpr auto Collection::Size() const noexcept -> std::size_t { return cards_.size(); }
 void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
   const goatbots::price_hist_map_t &price_hist)
 {
@@ -68,5 +72,13 @@ void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
     }
   }
 }
+[[nodiscard]] auto Collection::ToJson() const -> std::string { return glz::write_json(cards_); }
+[[nodiscard]] auto Collection::ToJsonPretty() const -> std::string
+{
+  std::string res{};
+  glz::write<glz::opts{ .prettify = true }>(cards_, res);
+  return res;
+}
+
 
 }// namespace mtgo
