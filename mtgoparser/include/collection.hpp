@@ -1,7 +1,7 @@
 #pragma once
 #include "goatbots.hpp"
 #include "mtgo.hpp"
-
+#include <spdlog/spdlog.h>
 #include <vector>
 
 namespace mtgo {
@@ -16,6 +16,19 @@ public:
   [[nodiscard]] explicit Collection(std::vector<Card> &&cards) noexcept : cards_{ cards } {}
   [[nodiscard]] constexpr auto Size() const noexcept -> std::size_t;
   void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs, const goatbots::price_hist_map_t &price_hist);
+  void Print()
+  {
+    for (const auto &c : cards_) {
+      spdlog::info("{} {}: price={}, quantity={}, set={}, foil={}, rarity={}",
+        c.id_,
+        c.name_,
+        c.price_,
+        c.quantity_,
+        c.set_,
+        c.foil_,
+        c.rarity_);
+    }
+  }
 
 
 private:
@@ -37,14 +50,19 @@ void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
 {
   for (auto &c : cards_) {
     // Extract set, rarity, and foil from goatbots card definitions
-    decltype(auto) card_def = card_defs.at(c.id_);
-
-    c.set_ = card_def.cardset;
-    c.rarity_ = card_def.rarity;
-    c.foil_ = card_def.foil == 1;
-
+    if (auto res = card_defs.find(c.id_); res != card_defs.end()) {
+      c.set_ = res->second.cardset;
+      c.rarity_ = res->second.rarity;
+      c.foil_ = res->second.foil == 1;
+    } else {
+      spdlog::warn("Card definition key not found: ID={}", c.id_);
+    }
     // Extract price from goatbots price history
-    c.price_ = price_hist.at(c.id_);
+    if (auto res = price_hist.find(c.id_); res != price_hist.end()) {
+      c.price_ = res->second;
+    } else {
+      spdlog::warn("Price history key not found: ID={}", c.id_);
+    }
   }
 }
 
