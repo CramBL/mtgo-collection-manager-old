@@ -18,6 +18,18 @@ struct Card
   //, annotation_{ annotation }
   {}
 
+  [[nodiscard]] explicit constexpr Card(std::string id = "",
+    std::string quantity = "",
+    std::string name = "",
+    // std::string annotation,
+    std::string set = "",
+    std::string rarity = "",
+    bool foil = false,
+    double price = 0)
+    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }, rarity_{ rarity }, foil_{ foil }, price_{ price }
+  //, annotation_{ annotation }
+  {}
+
   const std::string id_;
   std::string quantity_;
   const std::string name_;
