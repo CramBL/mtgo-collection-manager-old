@@ -30,9 +30,9 @@ struct Card
   //, annotation_{ annotation }
   {}
 
-  const std::string id_;
+  std::string id_;
   std::string quantity_;
-  const std::string name_;
+  std::string name_;
   // std::string annotation_;// This attribute seems useless (yet to see it be not 0)
   std::string set_;
   std::string rarity_;
