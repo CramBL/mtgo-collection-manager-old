@@ -13,8 +13,8 @@ struct Card
     const char *rarity = "",
     bool foil = false,
     double price = 0)
-    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }, rarity_{ rarity }, foil_{ foil },
-      price_{ price }//, annotation_{ annotation }
+    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }, rarity_{ rarity }, foil_{ foil }, price_{ price }
+      //, annotation_{ annotation }
   {}
 
   const std::string id_;
