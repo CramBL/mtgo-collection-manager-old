@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glaze/glaze.hpp>
 #include <string>
 
 namespace mtgo {
@@ -14,7 +15,7 @@ struct Card
     bool foil = false,
     double price = 0)
     : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }, rarity_{ rarity }, foil_{ foil }, price_{ price }
-      //, annotation_{ annotation }
+  //, annotation_{ annotation }
   {}
 
   const std::string id_;
@@ -27,3 +28,22 @@ struct Card
   double price_;
 };
 }// namespace mtgo
+
+template<> struct glz::meta<mtgo::Card>
+{
+  using T = mtgo::Card;
+  static constexpr auto value = object("id",
+    &T::id_,
+    "quantity",
+    &T::quantity_,
+    "name",
+    &T::name_,
+    "set",
+    &T::set_,
+    "rarity",
+    &T::rarity_,
+    "foil",
+    &T::foil_,
+    "price",
+    &T::price_);
+};
