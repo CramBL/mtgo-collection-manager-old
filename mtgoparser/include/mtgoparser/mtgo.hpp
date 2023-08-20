@@ -19,11 +19,16 @@ class Collection
 
 public:
   [[nodiscard]] explicit Collection(std::vector<Card> &&cards) noexcept : cards_{ cards } {}
+  [[nodiscard]] explicit Collection(const std::string &json_str) noexcept
+    : cards_{ glz::read_json<std::vector<Card>>(json_str).value() }
+  {}
   [[nodiscard]] constexpr auto Size() const noexcept -> std::size_t;
-  void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs, const goatbots::price_hist_map_t &price_hist);
+  void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
+    const goatbots::price_hist_map_t &price_hist) noexcept;
   [[nodiscard]] auto ToJson() const -> std::string;
   [[nodiscard]] auto ToJsonPretty() const -> std::string;
   void Print();
+  void FromJson(const std::string &json_str);
 
 
 private:
@@ -41,7 +46,7 @@ private:
 
 constexpr auto Collection::Size() const noexcept -> std::size_t { return cards_.size(); }
 void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
-  const goatbots::price_hist_map_t &price_hist)
+  const goatbots::price_hist_map_t &price_hist) noexcept
 {
   for (auto &c : cards_) {
     // Extract set, rarity, and foil from goatbots card definitions
@@ -66,6 +71,11 @@ void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
   std::string res{};
   glz::write<glz::opts{ .prettify = true }>(cards_, res);
   return res;
+}
+void Collection::FromJson(const std::string &json_str)
+{
+  auto ec = glz::read_json<std::vector<Card>>(std::ref(cards_), json_str);
+  // TODO: handle error
 }
 void Collection::Print()
 {
