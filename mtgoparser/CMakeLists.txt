@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20) # LLVM 16.0.0 requires >= 3.20.0
 
 # Only set the cxx_standard if it is not set by someone else
 if (NOT DEFINED CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 23)
+  set(CMAKE_CXX_STANDARD 20)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
