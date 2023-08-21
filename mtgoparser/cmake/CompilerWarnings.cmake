@@ -5,7 +5,7 @@
 function(
   mtgoparser_set_project_warnings
   project_name
-  WARNINGS_AS_ERRORS
+  # WARNINGS_AS_ERRORS #TODO: Prevent linting dependencies
   MSVC_WARNINGS
   CLANG_WARNINGS
   GCC_WARNINGS
