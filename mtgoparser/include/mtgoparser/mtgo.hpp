@@ -39,6 +39,7 @@ private:
     for (const auto &c : cards_) {
       // TODO: Parse quantity to ints and sum
       throw "Not yet implemented";
+      c.foil_;// Removes warning of c not used
     }
     return total;
   }
