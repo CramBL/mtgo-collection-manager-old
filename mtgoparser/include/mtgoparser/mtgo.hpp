@@ -27,22 +27,21 @@ public:
     const goatbots::price_hist_map_t &price_hist) noexcept;
   [[nodiscard]] auto ToJson() const -> std::string;
   [[nodiscard]] auto ToJsonPretty() const -> std::string;
-  void Print();
+  void Print() const;
   void FromJson(const std::string &json_str);
 
 
 private:
   // Helpers
-  [[nodiscard]] constexpr auto calc_total_card_quantity() const -> int
-  {
-    int total = 0;
-    for (const auto &c : cards_) {
-      // TODO: Parse quantity to ints and sum
-      throw "Not yet implemented";
-      c.foil_;// Removes warning of c not used
-    }
-    return total;
-  }
+  //   [[nodiscard]] constexpr auto calc_total_card_quantity() const -> int
+  //   {
+  //     int total = 0;
+  //     for (const auto &c : cards_) {
+  //       // TODO: Parse quantity to ints and sum
+  //       throw "Not yet implemented";
+  //     }
+  //     return total;
+  //   }
 };
 
 constexpr auto Collection::Size() const noexcept -> std::size_t { return cards_.size(); }
@@ -78,7 +77,7 @@ void Collection::FromJson(const std::string &json_str)
   auto ec = glz::read_json<std::vector<Card>>(std::ref(cards_), json_str);
   // TODO: handle error
 }
-void Collection::Print()
+void Collection::Print() const
 {
   for (const auto &c : cards_) {
     spdlog::info("{} {}: price={}, quantity={}, set={}, foil={}, rarity={}",
