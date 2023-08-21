@@ -13,7 +13,7 @@ struct Card
     const char *rarity = "",
     bool foil = false,
     double price = 0)
-    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }, rarity_{ rarity }, foil_{ foil }, price_{ price }
+    : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
 
   [[nodiscard]] explicit constexpr Card(std::string id = "",
@@ -23,7 +23,7 @@ struct Card
     std::string rarity = "",
     bool foil = false,
     double price = 0)
-    : id_{ id }, name_{ name }, set_{ set }, quantity_{ quantity }, rarity_{ rarity }, foil_{ foil }, price_{ price }
+    : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
 
   std::string id_;
