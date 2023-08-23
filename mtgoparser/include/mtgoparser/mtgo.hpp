@@ -74,8 +74,10 @@ void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
 }
 void Collection::FromJson(const std::string &json_str)
 {
+
   if (auto ec = glz::read_json<std::vector<Card>>(std::ref(cards_), json_str)) {
-    spdlog::error("code {}: {}", ec, glz::format_error(ec, std::string{}));
+    // TODO: Make it work
+    // spdlog::error("code {}: {}", ec, glz::format_error(ec, std::string{}));
   }
 }
 void Collection::Print() const
