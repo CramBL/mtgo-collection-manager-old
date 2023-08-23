@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <ios>
 #include <string>
 #include <vector>
 
@@ -19,7 +20,7 @@ namespace io_util {
   std::string str_buffer(fsize, '\0');
 
   // Read the whole file into the buffer.
-  file.read(str_buffer.data(), fsize);
+  file.read(str_buffer.data(), static_cast<std::streamsize>(fsize));
 
   return str_buffer;
 }
@@ -40,7 +41,7 @@ namespace io_util {
   char_buf[fsize] = '\0';
 
   // Read into buffer
-  file.read(&char_buf[0], fsize);
+  file.read(&char_buf[0], static_cast<std::streamsize>(fsize));
 
   return char_buf;
 }

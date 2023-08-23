@@ -8,26 +8,39 @@
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
-
 
 namespace mtgo {
 
 namespace xml {
-  [[nodiscard]] inline auto card_from_xml(rapidxml::xml_node<> *card_node) -> Card
+
+  // TODO: Refactor and add logging
+  [[nodiscard]] inline auto card_from_xml(rapidxml::xml_node<> *card_node) -> std::optional<Card>
   {
+    if (!card_node) { return std::nullopt; }
+
     decltype(auto) first_attr = card_node->first_attribute();
     // 1st attribute
     auto id = first_attr->value();
+
     // 2nd attribute
-    auto quantity = first_attr->next_attribute()->value();
+    auto second_attr = first_attr->next_attribute();
+    if (!second_attr) { return std::nullopt; }
+    auto quantity = second_attr->value();
+    // 3rd attribute
+    auto third_attr = second_attr->next_attribute();
+    if (!third_attr) { return std::nullopt; }
+
     // 4th attribute
-    auto name = first_attr->next_attribute()->next_attribute()->next_attribute()->value();
+    auto fourth_attr = third_attr->next_attribute();
+    if (!fourth_attr) { return std::nullopt; }
+    auto name = fourth_attr->value();
     // 5th attribute (seems useless)
     // auto annotation = first_attr->next_attribute()->next_attribute()->next_attribute()->next_attribute()->value();
 
-    return Card(id, quantity, name);
+    return Card{ id, quantity, name };
   }
 
   [[nodiscard]] auto parse_dek_xml(std::filesystem::path path_xml) -> std::vector<Card>
@@ -48,7 +61,7 @@ namespace xml {
     // Iterate through all siblings
     for (decltype(auto) card = first_card_node; card; card = card->next_sibling()) {
       // Iterate through all attributes
-      cards.emplace_back(card_from_xml(card));
+      if (auto c = card_from_xml(card)) { cards.emplace_back(c.value()); }
     }
 
     return cards;
