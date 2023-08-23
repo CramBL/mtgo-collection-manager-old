@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <ios>
 #include <string>
 #include <vector>
 
@@ -13,7 +14,7 @@ namespace io_util {
   std::ifstream file(fpath, std::ios::in | std::ios::binary);
 
   // Obtain the size of the file.
-  const auto fsize = std::filesystem::file_size(fpath);
+  const auto fsize = static_cast<std::streamsize>(std::filesystem::file_size(fpath));
 
   // Create a buffer.
   std::string str_buffer(fsize, '\0');
@@ -30,7 +31,7 @@ namespace io_util {
   std::ifstream file(fpath, std::ios::in | std::ios::binary);
 
   // Obtain the size of the file.
-  const auto fsize = std::filesystem::file_size(fpath);
+  const auto fsize = static_cast<std::streamsize>(std::filesystem::file_size(fpath));
 
   // Instantiate and pre-allocate
   std::vector<char> char_buf{};
