@@ -14,13 +14,13 @@ namespace io_util {
   std::ifstream file(fpath, std::ios::in | std::ios::binary);
 
   // Obtain the size of the file.
-  const auto fsize = static_cast<std::streamsize>(std::filesystem::file_size(fpath));
+  const auto fsize = std::filesystem::file_size(fpath);
 
   // Create a buffer.
   std::string str_buffer(fsize, '\0');
 
   // Read the whole file into the buffer.
-  file.read(str_buffer.data(), fsize);
+  file.read(str_buffer.data(), static_cast<std::streamsize>(fsize));
 
   return str_buffer;
 }
@@ -31,7 +31,7 @@ namespace io_util {
   std::ifstream file(fpath, std::ios::in | std::ios::binary);
 
   // Obtain the size of the file.
-  const auto fsize = static_cast<std::streamsize>(std::filesystem::file_size(fpath));
+  const auto fsize = std::filesystem::file_size(fpath);
 
   // Instantiate and pre-allocate
   std::vector<char> char_buf{};
@@ -41,7 +41,7 @@ namespace io_util {
   char_buf[fsize] = '\0';
 
   // Read into buffer
-  file.read(&char_buf[0], fsize);
+  file.read(&char_buf[0], static_cast<std::streamsize>(fsize));
 
   return char_buf;
 }
