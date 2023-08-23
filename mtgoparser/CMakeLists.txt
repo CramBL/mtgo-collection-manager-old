@@ -23,18 +23,6 @@ project(
    LANGUAGES CXX
 )
 
-file(GLOB srcs src/*.cpp include/*.hpp)
-
-# Define the library target
-add_library(mtgoparser INTERFACE)
-target_include_directories(mtgoparser INTERFACE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-target_link_system_library(${PROJECT_NAME} INTERFACE glaze::glaze)
-target_link_system_library(${PROJECT_NAME} INTERFACE spdlog::spdlog)
-target_link_system_library(${PROJECT_NAME} INTERFACE rapidxml)
-
 
 include(cmake/PreventInSourceBuilds.cmake)
 include(ProjectOptions.cmake)
@@ -67,6 +55,17 @@ add_library(mtgoparser::mtgoparser_warnings ALIAS mtgoparser_warnings)
 
 #add_library(mtgoparser::mtgoparser_options INTERFACE IMPORTED)
 #add_library(mtgoparser::mtgoparser_warnings INTERFACE IMPORTED)
+
+# Define the library target
+add_library(mtgoparser INTERFACE)
+target_include_directories(mtgoparser INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_system_library(${PROJECT_NAME} INTERFACE glaze::glaze)
+target_link_system_library(${PROJECT_NAME} INTERFACE spdlog::spdlog)
+target_link_system_library(${PROJECT_NAME} INTERFACE rapidxml)
+
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
