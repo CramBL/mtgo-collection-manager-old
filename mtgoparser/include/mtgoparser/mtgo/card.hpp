@@ -6,7 +6,7 @@
 namespace mtgo {
 struct Card
 {
-  [[nodiscard]] explicit constexpr Card(const char *id,
+  [[nodiscard]] explicit Card(const char *id,
     const char *quantity,
     const char *name,
     const char *set = "",
@@ -16,11 +16,11 @@ struct Card
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
 
-  [[nodiscard]] explicit constexpr Card(std::string id = "",
-    std::string quantity = "",
-    std::string name = "",
-    std::string set = "",
-    std::string rarity = "",
+  [[nodiscard]] explicit Card(std::string id = {},
+    std::string quantity = {},
+    std::string name = {},
+    std::string set = {},
+    std::string rarity = {},
     bool foil = false,
     double price = 0)
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
