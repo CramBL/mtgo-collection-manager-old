@@ -1,4 +1,8 @@
+include(cmake/SystemLink.cmake)
+
 cmake_minimum_required(VERSION 3.20) # LLVM 16.0.0 requires >= 3.20.0
+
+
 
 # Only set the cxx_standard if it is not set by someone else
 if (NOT DEFINED CMAKE_CXX_STANDARD)
@@ -27,9 +31,9 @@ target_include_directories(mtgoparser INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(${PROJECT_NAME} INTERFACE glaze::glaze)
-target_link_libraries(${PROJECT_NAME} INTERFACE spdlog::spdlog)
-target_link_libraries(${PROJECT_NAME} INTERFACE rapidxml)
+target_link_system_library(${PROJECT_NAME} INTERFACE glaze::glaze)
+target_link_system_library(${PROJECT_NAME} INTERFACE spdlog::spdlog)
+target_link_system_library(${PROJECT_NAME} INTERFACE rapidxml)
 
 
 include(cmake/PreventInSourceBuilds.cmake)
