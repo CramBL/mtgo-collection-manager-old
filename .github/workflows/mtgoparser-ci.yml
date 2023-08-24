@@ -11,7 +11,7 @@ on:
       - develop
 
 env:
-  CLANG_TIDY_VERSION: "15.0.3"
+  CLANG_TIDY_VERSION: "15.0.4"
   VERBOSE: 1
 
 
@@ -46,10 +46,10 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-13
+          - macos-12
           - windows-2022
         compiler:
-          - llvm-15.0.3
+          - llvm-15.0.4
           - gcc-13
         generator:
           - "Ninja Multi-Config"
@@ -73,11 +73,11 @@ jobs:
             gcov_executable: gcov
             enable_ipo: On
 
-          - compiler: llvm-15.0.3
+          - compiler: llvm-15.0.4
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
-          - os: macos-13
+          - os: macos-12
             enable_ipo: Off
 
           # Set up preferred package generators, for given build configurations
