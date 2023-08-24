@@ -23,12 +23,10 @@ include(Catch)
 add_executable(tests tests.cpp)
 target_link_libraries(tests PRIVATE
                                     mtgoparser::mtgoparser_warnings
-                                    #mtgoparser::mtgoparser_options
-                                    #mtgoparser::mtgoparser_optionstest
+                                    mtgoparser::mtgoparser_options
                                     mtgoparser
                                     Catch2::Catch2WithMain)
 
-message(VERBOSE "Is WIN32 and BUILD_SHARED_LIBS??")
 if(WIN32 AND BUILD_SHARED_LIBS)
   message(VERBOSE "WIN32 and BUILD_SHARED_LIBS")
   add_custom_command(
