@@ -74,7 +74,6 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion
 )
 install(TARGETS spdlog rapidxml fmt mtgoparser
-#install(TARGETS mtgoparser
     EXPORT mtgoparserTargets 
     LIBRARY DESTINATION lib COMPONENT Runtime
     ARCHIVE DESTINATION lib COMPONENT Development

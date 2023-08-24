@@ -11,7 +11,7 @@ on:
       - develop
 
 env:
-  CLANG_TIDY_VERSION: "15.0.0"
+  CLANG_TIDY_VERSION: "15.0.2"
   VERBOSE: 1
 
 
@@ -49,7 +49,7 @@ jobs:
           - macos-12
           - windows-2022
         compiler:
-          - llvm-15.0.0
+          - llvm-15.0.2
           - gcc-13
         generator:
           - "Ninja Multi-Config"
@@ -73,7 +73,7 @@ jobs:
             gcov_executable: gcov
             enable_ipo: On
 
-          - compiler: llvm-15.0.0
+          - compiler: llvm-15.0.2
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
