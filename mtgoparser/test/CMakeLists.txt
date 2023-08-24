@@ -1,3 +1,4 @@
+include(../cmake/SystemLink.cmake)
 cmake_minimum_required(VERSION 3.15)
 
 project(mtgoparserTests LANGUAGES CXX)
@@ -24,8 +25,9 @@ add_executable(tests tests.cpp)
 target_link_libraries(tests PRIVATE
                                     mtgoparser::mtgoparser_warnings
                                     mtgoparser::mtgoparser_options
-                                    mtgoparser
-                                    Catch2::Catch2WithMain)
+                                    mtgoparser)
+target_link_system_library(tests PRIVATE Catch2::Catch2WithMain)
+
 
 if(WIN32 AND BUILD_SHARED_LIBS)
   message(VERBOSE "WIN32 and BUILD_SHARED_LIBS")
