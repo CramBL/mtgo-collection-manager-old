@@ -4,6 +4,7 @@
 // False positive on macos-12 GCC-13 with Release mode.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wstringop-overread"
 #endif
 
 #include <mtgoparser/mtgo.hpp>
