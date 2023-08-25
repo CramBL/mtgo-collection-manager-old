@@ -4,28 +4,15 @@
 #define SUPPRESSING
 #pragma GCC diagnostic push
 #if defined(__clang__)
-#pragma clang diagnostic ignored "-Werror"
+// #pragma clang diagnostic ignored "-Werror"
 #else
 #pragma GCC diagnostic ignored "-Werror"
 #endif
 
-#pragma message "GNUC or CLANG and __has_warning defined -> suppressing selected warnings with false positives"
-#if defined(__GNUC__)
-#pragma message "GNUC defined"
-#endif
-#if defined(__clang__)
-#pragma message "clang defined"
-#endif
-#if defined(__has_warning)
-#pragma message "__has_warning defined"
-#endif
-
 #if __has_warning("-Warray-bounds")
-#pragma message "Disabling warning: -Warray-bounds"
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
 #if __has_warning("-Wstringop-overread")
-#pragma message "Disabling warning: -Wstringop-overread"
 #pragma GCC diagnostic ignored "-Wstringop-overread"
 #endif
 #endif
@@ -49,7 +36,6 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
 
 #ifdef SUPPRESSING
 #undef SUPPRESSING
-#pragma message "Reverting local warning suppressions"
 #pragma GCC diagnostic pop
 #endif
 // NOLINTEND
