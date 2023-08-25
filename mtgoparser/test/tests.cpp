@@ -1,14 +1,22 @@
 #include <catch2/catch_test_macros.hpp>
 
-#if defined(__GNUC__)
+
 // False positive on macos-12 GCC-13 with Release mode.
+#if __GNUC__ && defined(__has_warning)
+#define SUPPRESSING
 #pragma GCC diagnostic push
+#if __has_warning("-Warray-bounds")
 #pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+#if __has_warning("-Wstringop-overread")
 #pragma GCC diagnostic ignored "-Wstringop-overread"
+#endif
 #endif
 
 #include <mtgoparser/mtgo.hpp>
-#if defined(__GNUC__)
+
+#ifdef SUPPRESSING
+#undef SUPPRESSING
 #pragma GCC diagnostic pop
 #endif
 
