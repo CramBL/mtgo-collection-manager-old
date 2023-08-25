@@ -1,6 +1,10 @@
 // False positive on macos-12 GCC-13 with Release mode.
-#pragma message "Compiling tests.cpp"
 #if (defined(__GNUC__) || defined(__clang__)) && defined(__has_warning)
+#define SUPPRESSING
+#pragma GCC diagnostic push
+
+#pragma GCC diagnostic ignored "-Werror"
+
 #pragma message "GNUC or CLANG and __has_warning defined -> suppressing selected warnings with false positives"
 #if defined(__GNUC__)
 #pragma message "GNUC defined"
@@ -12,8 +16,6 @@
 #pragma message "__has_warning defined"
 #endif
 
-#define SUPPRESSING
-#pragma GCC diagnostic push
 #if __has_warning("-Warray-bounds")
 #pragma message "Disabling warning: -Warray-bounds"
 #pragma GCC diagnostic ignored "-Warray-bounds"
