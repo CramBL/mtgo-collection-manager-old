@@ -1,23 +1,5 @@
-// NOLINTBEGIN
-// False positive on macos-12 GCC-13 with Release mode.
-#if (defined(__GNUC__) || defined(__clang__)) && defined(__has_warning)
-#define SUPPRESSING
-#pragma GCC diagnostic push
-#if defined(__clang__)
-// #pragma clang diagnostic ignored "-Werror"
-#else
-#pragma GCC diagnostic ignored "-Werror"
-#endif
-
-#if __has_warning("-Warray-bounds")
-#pragma GCC diagnostic ignored "-Warray-bounds"
-#endif
-#if __has_warning("-Wstringop-overread")
-#pragma GCC diagnostic ignored "-Wstringop-overread"
-#endif
-#endif
-
 #include <catch2/catch_test_macros.hpp>
+
 #include <mtgoparser/mtgo.hpp>
 
 
@@ -32,10 +14,3 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
     CHECK(cards[0].id_ == "1");
   }
 }
-
-
-#ifdef SUPPRESSING
-#undef SUPPRESSING
-#pragma GCC diagnostic pop
-#endif
-// NOLINTEND
