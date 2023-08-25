@@ -1,4 +1,3 @@
-#include <catch2/catch_test_macros.hpp>
 
 
 // False positive on macos-12 GCC-13 with Release mode.
@@ -13,6 +12,7 @@
 #endif
 #endif
 
+#include <catch2/catch_test_macros.hpp>
 #include <mtgoparser/mtgo.hpp>
 
 #ifdef SUPPRESSING
