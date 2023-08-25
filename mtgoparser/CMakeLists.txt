@@ -74,8 +74,7 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion
 )
 install(TARGETS spdlog rapidxml fmt mtgoparser
-#install(TARGETS mtgoparser
-    EXPORT mtgoparserTargets
+    EXPORT mtgoparserTargets 
     LIBRARY DESTINATION lib COMPONENT Runtime
     ARCHIVE DESTINATION lib COMPONENT Development
     RUNTIME DESTINATION bin COMPONENT Runtime
@@ -103,11 +102,7 @@ if(NOT PROJECT_IS_TOP_LEVEL)
 endif()
 
 # Adding the tests:
-
-list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
-find_package(Catch2 3 REQUIRED)
 include(CTest)
-include(Catch)
 
 if(BUILD_TESTING)
   message(AUTHOR_WARNING "Building Tests. Be sure to check out test/constexpr_tests.cpp for constexpr testing")
