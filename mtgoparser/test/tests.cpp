@@ -1,13 +1,25 @@
-
-
 // False positive on macos-12 GCC-13 with Release mode.
-#if __GNUC__ && defined(__has_warning)
+#pragma message "Compiling tests.cpp"
+#if (defined(__GNUC__) || defined(__clang__)) && defined(__has_warning)
+#pragma message "GNUC or CLANG and __has_warning defined -> suppressing selected warnings with false positives"
+#if defined(__GNUC__)
+#pragma message "GNUC defined"
+#endif
+#if defined(__clang__)
+#pragma message "clang defined"
+#endif
+#if defined(__has_warning)
+#pragma message "__has_warning defined"
+#endif
+
 #define SUPPRESSING
 #pragma GCC diagnostic push
 #if __has_warning("-Warray-bounds")
+#pragma message "Disabling warning: -Warray-bounds"
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
 #if __has_warning("-Wstringop-overread")
+#pragma message "Disabling warning: -Wstringop-overread"
 #pragma GCC diagnostic ignored "-Wstringop-overread"
 #endif
 #endif
@@ -31,5 +43,6 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
 
 #ifdef SUPPRESSING
 #undef SUPPRESSING
+#pragma message "Reverting local warning suppressions"
 #pragma GCC diagnostic pop
 #endif
