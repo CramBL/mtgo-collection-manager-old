@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
-
+// False positive on macos-12 GCC-13 with Release mode.
+#pragma GCC diagnostic ignored "-Warray-bounds"
 #include <mtgoparser/mtgo.hpp>
 
 
