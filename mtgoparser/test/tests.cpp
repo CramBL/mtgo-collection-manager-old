@@ -12,5 +12,6 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
     REQUIRE(cards.size() == 5);
     CHECK(cards.at(0).name_ == "Event Ticket");
     CHECK(cards[0].id_ == "1");
+    CHECK(cards.at(0).quantity_ == "453");
   }
 }
