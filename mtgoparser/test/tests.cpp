@@ -1,8 +1,15 @@
 #include <catch2/catch_test_macros.hpp>
 
+#if defined(__GNUC__)
 // False positive on macos-12 GCC-13 with Release mode.
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 #include <mtgoparser/mtgo.hpp>
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 
 TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
