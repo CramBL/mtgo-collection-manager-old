@@ -2,8 +2,11 @@
 #if (defined(__GNUC__) || defined(__clang__)) && defined(__has_warning)
 #define SUPPRESSING
 #pragma GCC diagnostic push
-
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Werror"
+#else
 #pragma GCC diagnostic ignored "-Werror"
+#endif
 
 #pragma message "GNUC or CLANG and __has_warning defined -> suppressing selected warnings with false positives"
 #if defined(__GNUC__)
