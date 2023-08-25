@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 // False positive on macos-12 GCC-13 with Release mode.
 #if (defined(__GNUC__) || defined(__clang__)) && defined(__has_warning)
 #define SUPPRESSING
@@ -51,3 +52,4 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
 #pragma message "Reverting local warning suppressions"
 #pragma GCC diagnostic pop
 #endif
+// NOLINTEND
