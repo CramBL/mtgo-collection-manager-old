@@ -1,4 +1,3 @@
-#include <catch2/catch_test_macros.hpp>
 
 
 // False positive on macos-12 GCC-13 with Release mode.
@@ -13,12 +12,8 @@
 #endif
 #endif
 
+#include <catch2/catch_test_macros.hpp>
 #include <mtgoparser/mtgo.hpp>
-
-#ifdef SUPPRESSING
-#undef SUPPRESSING
-#pragma GCC diagnostic pop
-#endif
 
 
 TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
@@ -32,3 +27,9 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
     CHECK(cards[0].id_ == "1");
   }
 }
+
+
+#ifdef SUPPRESSING
+#undef SUPPRESSING
+#pragma GCC diagnostic pop
+#endif
