@@ -16,6 +16,12 @@ struct CardDefinition
   std::string cardset{};
   std::string rarity{};
   uint8_t foil{};// actually boolean but 0/1
+
+  [[nodiscard]] inline constexpr bool operator==(const CardDefinition &other) const
+  {
+    return name == other.name && cardset == other.cardset && rarity == other.rarity && foil == other.foil;
+  }
+  [[nodiscard]] inline constexpr bool operator!=(const CardDefinition &other) const { return !(*this == other); }
 };
 
 using price_hist_map_t = std::unordered_map<std::string, double>;
