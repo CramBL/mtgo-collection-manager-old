@@ -59,8 +59,8 @@ target_link_libraries(
   benchmark_xml_parse
   PRIVATE mtgoparser::mtgoparser_warnings
           mtgoparser::mtgoparser_options
-          mtgoparser
-          Catch2::Catch2WithMain)
+          mtgoparser)
+target_link_system_library(benchmark_xml_parse PRIVATE Catch2::Catch2WithMain)
 
 catch_discover_tests(
   benchmark_xml_parse

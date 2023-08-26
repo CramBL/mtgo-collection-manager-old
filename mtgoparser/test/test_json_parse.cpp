@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 #include <catch2/catch_test_macros.hpp>
 
 #include "mtgoparser/goatbots.hpp"
@@ -63,3 +64,4 @@ TEST_CASE("Card prices are correctly deserialized from Goatbots JSON", "[prices_
     CHECK(prices.contains("347"));
   }
 }
+// NOLINTEND
