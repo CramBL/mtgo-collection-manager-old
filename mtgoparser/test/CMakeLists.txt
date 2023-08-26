@@ -52,3 +52,25 @@ catch_discover_tests(
   "unittests."
   OUTPUT_SUFFIX
   .xml)
+
+# Add benchmarks
+add_executable(benchmarks benchmarks.cpp)
+target_link_libraries(
+  benchmarks
+  PRIVATE mtgoparser::mtgoparser_warnings
+          mtgoparser::mtgoparser_options
+          mtgoparser
+          Catch2::Catch2WithMain)
+
+catch_discover_tests(
+  benchmarks
+  TEST_PREFIX
+  "benchmarks."
+  REPORTER
+  XML
+  OUTPUT_DIR
+  .
+  OUTPUT_PREFIX
+  "benchmarks."
+  OUTPUT_SUFFIX
+  .xml)
