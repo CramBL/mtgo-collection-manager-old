@@ -11,7 +11,12 @@ TEST_CASE("CardDefinition structs are correctly deserialized from Goatbots JSON"
   using goatbots::card_defs_map_t;
   using goatbots::CardDefinition;
 
-  card_defs_map_t card_defs = goatbots::ReadJsonMap<card_defs_map_t>(path_goatbots_card_defs_small_5cards).value();
+  std::optional<card_defs_map_t> card_defs_opt =
+    goatbots::ReadJsonMap<card_defs_map_t>(path_goatbots_card_defs_small_5cards);
+
+  REQUIRE(card_defs_opt.has_value());
+
+  const auto card_defs = card_defs_opt.value();
 
   SECTION("Sanity tests - Card definitions")
   {
@@ -29,7 +34,7 @@ TEST_CASE("CardDefinition structs are correctly deserialized from Goatbots JSON"
       CHECK(card_defs.at("47483").rarity == "Uncommon");
       CHECK(card_defs.at("47483").foil == 0);
 
-      const auto windfall_id = "40516";
+      const char *const windfall_id = "40516";
       auto expect_windfall_def = CardDefinition{ "Windfall", "CMD", "Uncommon", 0 };
       auto windfall_def = card_defs.at(windfall_id);
       CHECK(windfall_def == expect_windfall_def);
@@ -40,8 +45,12 @@ TEST_CASE("CardDefinition structs are correctly deserialized from Goatbots JSON"
 TEST_CASE("Card prices are correctly deserialized from Goatbots JSON", "[prices_from_goatbots_json]")
 {
   using goatbots::price_hist_map_t;
-  price_hist_map_t prices = goatbots::ReadJsonMap<price_hist_map_t>(path_goatbots_price_hist_small_5cards).value();
+  std::optional<price_hist_map_t> prices_opt =
+    goatbots::ReadJsonMap<price_hist_map_t>(path_goatbots_price_hist_small_5cards);
 
+  REQUIRE(prices_opt.has_value());
+
+  const auto prices = prices_opt.value();
 
   SECTION("Sanity tests - Card prices")
   {
