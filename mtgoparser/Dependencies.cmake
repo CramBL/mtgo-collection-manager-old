@@ -32,10 +32,6 @@ function(mtgoparser_setup_dependencies)
     cpmaddpackage("gh:catchorg/Catch2@3.4.0")
   endif()
 
-  if(NOT TARGET tools::tools)
-    cpmaddpackage("gh:lefticus/tools#update_build_system")
-  endif()
-
   if(NOT TARGET rapidxml::rapidxml)
     CPMAddPackage("gh:CodeFinder2/rapidxml@1.13")
   endif()
