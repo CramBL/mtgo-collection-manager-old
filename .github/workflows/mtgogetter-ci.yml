@@ -47,6 +47,5 @@ jobs:
     - name: Build
       run: go build -C mtgogetter -v
 
-    # TODO: Implement tests
-    #- name: Test
-    #  run: go test -v ./...
+    - name: Test
+      run: go test -v ./...
