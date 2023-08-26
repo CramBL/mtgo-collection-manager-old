@@ -74,3 +74,36 @@ catch_discover_tests(
   "benchmark_xml_parse."
   OUTPUT_SUFFIX
   .xml)
+
+# JSON parsing tests
+add_executable(test_json_parse test_json_parse.cpp)
+target_link_libraries(test_json_parse PRIVATE
+                                    mtgoparser::mtgoparser_warnings
+                                    mtgoparser::mtgoparser_options
+                                    mtgoparser)
+target_link_system_library(test_json_parse PRIVATE Catch2::Catch2WithMain)
+
+
+if(WIN32 AND BUILD_SHARED_LIBS)
+  message(VERBOSE "WIN32 and BUILD_SHARED_LIBS")
+  add_custom_command(
+    TARGET test_json_parse
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:test_json_parse> $<TARGET_FILE_DIR:test_json_parse>
+    COMMAND_EXPAND_LISTS)
+endif()
+
+
+# automatically discover tests that are defined in catch based test files.
+catch_discover_tests(
+  test_json_parse
+  TEST_PREFIX
+  "test_json_parse."
+  REPORTER
+  XML
+  OUTPUT_DIR
+  .
+  OUTPUT_PREFIX
+  "test_json_parse."
+  OUTPUT_SUFFIX
+  .xml)
