@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Deck xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NetDeckID>0</NetDeckID>
+  <PreconstructedDeckID>0</PreconstructedDeckID>
+  <Cards CatID="1" Quantity="391" Sideboard="false" Name="Event Ticket" Annotation="0" />
+  <Cards CatID="235" Quantity="1" Sideboard="false" Name="Swamp" Annotation="0" />
+  <Cards CatID="237" Quantity="1" Sideboard="false" Name="Forest" Annotation="0" />
+  <Cards CatID="241" Quantity="1" Sideboard="false" Name="Mountain" Annotation="0" />
+  <Cards CatID="247" Quantity="1" Sideboard="false" Name="Island" Annotation="0" />
+  <Cards CatID="251" Quantity="1" Sideboard="false" Name="Forest" Annotation="0" />
+  <Cards CatID="255" Quantity="1" Sideboard="false" Name="Plains" Annotation="0" />
+  <Cards CatID="261" Quantity="1" Sideboard="false" Name="Plains" Annotation="0" />
+  <Cards CatID="271" Quantity="1" Sideboard="false" Name="Plains" Annotation="0" />
+  <Cards CatID="277" Quantity="1" Sideboard="false" Name="Mountain" Annotation="0" />
+  <Cards CatID="302" Quantity="4" Sideboard="false" Name="Forest" Annotation="0" />
+  <Cards CatID="304" Quantity="6" Sideboard="false" Name="Island" Annotation="0" />
+  <Cards CatID="306" Quantity="4" Sideboard="false" Name="Mountain" Annotation="0" />
+  <Cards CatID="308" Quantity="10" Sideboard="false" Name="Plains" Annotation="0" />
+  <Cards CatID="310" Quantity="6" Sideboard="false" Name="Swamp" Annotation="0" />
+  <Cards CatID="7531" Quantity="3" Sideboard="false" Name="Elephant Grass" Annotation="0" />
+  <Cards CatID="7661" Quantity="2" Sideboard="false" Name="Parapet" Annotation="0" />
+  <Cards CatID="9109" Quantity="1" Sideboard="false" Name="Mountain" Annotation="0" />
+  <Cards CatID="9117" Quantity="1" Sideboard="false" Name="Island" Annotation="0" />
+  <Cards CatID="9123" Quantity="1" Sideboard="false" Name="Plains" Annotation="0" />
+  <Cards CatID="9127" Quantity="1" Sideboard="false" Name="Plains" Annotation="0" />
+  <Cards CatID="9351" Quantity="1" Sideboard="false" Name="Peacekeeper" Annotation="0" />
+  <Cards CatID="9397" Quantity="4" Sideboard="false" Name="Veteran Explorer" Annotation="0" />
+  <Cards CatID="9631" Quantity="4" Sideboard="false" Name="Counterspell" Annotation="0" />
+  <Cards CatID="9995" Quantity="1" Sideboard="false" Name="Dread of Night" Annotation="0" />
+  <Cards CatID="10033" Quantity="2" Sideboard="false" Name="Choke" Annotation="0" />
+  <Cards CatID="10035" Quantity="4" Sideboard="false" Name="Wasteland" Annotation="0" />
+  <Cards CatID="10325" Quantity="1" Sideboard="false" Name="Mox Diamond" Annotation="0" />
+  <Cards CatID="10429" Quantity="2" Sideboard="false" Name="Volrath's Stronghold" Annotation="0" />
+  <Cards CatID="10499" Quantity="2" Sideboard="false" Name="Cataclysm" Annotation="0" />
+  <Cards CatID="10685" Quantity="4" Sideboard="false" Name="City of Traitors" Annotation="0" />
+  <Cards CatID="11893" Quantity="4" Sideboard="false" Name="Serra's Sanctum" Annotation="0" />
+  <Cards CatID="11961" Quantity="1" Sideboard="false" Name="Phyrexian Tower" Annotation="0" />
+  <Cards CatID="12059" Quantity="2" Sideboard="false" Name="Meltdown" Annotation="0" />
+  <Cards CatID="12085" Quantity="3" Sideboard="false" Name="Carpet of Flowers" Annotation="0" />
+  <Cards CatID="12153" Quantity="2" Sideboard="false" Name="Energy Field" Annotation="0" />
+  <Cards CatID="12547" Quantity="1" Sideboard="false" Name="Crop Rotation" Annotation="0" />
+  <Cards CatID="12553" Quantity="4" Sideboard="false" Name="Mother of Runes" Annotation="0" />
+  <Cards CatID="12623" Quantity="1" Sideboard="false" Name="Tinker" Annotation="0" />
+  <Cards CatID="13007" Quantity="1" Sideboard="false" Name="Thran Foundry" Annotation="0" />
+  <Cards CatID="13347" Quantity="1" Sideboard="false" Name="Plains" Annotation="0" />
+  <Cards CatID="13659" Quantity="1" Sideboard="false" Name="Gush" Annotation="0" />
+  <Cards CatID="14269" Quantity="2" Sideboard="false" Name="Spore Frog" Annotation="0" />
+  <Cards CatID="14697" Quantity="2" Sideboard="false" Name="Swamp" Annotation="0" />
+  <Cards CatID="14915" Quantity="2" Sideboard="false" Name="Island" Annotation="0" />
+  <Cards CatID="15758" Quantity="1" Sideboard="false" Name="Plains" Annotation="0" />
+  <Cards CatID="15952" Quantity="3" Sideboard="false" Name="Wild Growth" Annotation="0" />
+  <Cards CatID="16230" Quantity="2" Sideboard="false" Name="Pernicious Deed" Annotation="0" />
+  <Cards CatID="16805" Quantity="2" Sideboard="false" Name="Innocent Blood" Annotation="0" />
+  <Cards CatID="17183" Quantity="2" Sideboard="false" Name="Psychotic Haze" Annotation="0" />
+</Deck>

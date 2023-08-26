@@ -16,6 +16,12 @@ struct CardDefinition
   std::string cardset{};
   std::string rarity{};
   uint8_t foil{};// actually boolean but 0/1
+
+  [[nodiscard]] inline constexpr bool operator==(const CardDefinition &other) const
+  {
+    return name == other.name && cardset == other.cardset && rarity == other.rarity && foil == other.foil;
+  }
+  [[nodiscard]] inline constexpr bool operator!=(const CardDefinition &other) const { return !(*this == other); }
 };
 
 using price_hist_map_t = std::unordered_map<std::string, double>;
@@ -33,7 +39,7 @@ template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(std::filesystem::path p
   // Read file into buffer and decode to populate map
   if (auto err_code = glz::read_json(json_map, io_util::ReadToStrBuf(path_json))) {
     // Handle error
-    spdlog::error("code {}: {}", err_code, glz::format_error(err_code, std::string{}));
+    spdlog::error("{}", glz::format_error(err_code, std::string{}));
     return std::nullopt;
   }
 
