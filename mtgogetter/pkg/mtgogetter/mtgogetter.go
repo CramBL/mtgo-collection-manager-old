@@ -16,7 +16,6 @@ func DownloadBodyToBytes(url string) (respBody []byte) {
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 	defer resp.Body.Close()
 
