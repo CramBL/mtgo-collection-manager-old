@@ -20,7 +20,7 @@ project(
    VERSION 0.1.0
    DESCRIPTION "Parser library for the MTGO collection manager app"
    HOMEPAGE_URL "https://github.com/CramBL/mtgo-collection-manager/mtgoparser"
-   LANGUAGES CXX
+   LANGUAGES CXX C
 )
 
 
@@ -74,7 +74,7 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion
 )
 install(TARGETS spdlog rapidxml fmt mtgoparser
-    EXPORT mtgoparserTargets 
+    EXPORT mtgoparserTargets
     LIBRARY DESTINATION lib COMPONENT Runtime
     ARCHIVE DESTINATION lib COMPONENT Development
     RUNTIME DESTINATION bin COMPONENT Runtime
