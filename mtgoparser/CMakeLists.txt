@@ -95,6 +95,8 @@ install(FILES "${PROJECT_BINARY_DIR}/mtgoparserConfigVersion.cmake"
         DESTINATION lib/cmake/mtgoparser)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 
+# To build the binary executable that can do a full parse of all card data files
+add_subdirectory(src)
 
 # Don't even look at tests if we're not top level
 if(NOT PROJECT_IS_TOP_LEVEL)
