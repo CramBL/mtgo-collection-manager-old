@@ -3,6 +3,9 @@
 #include "mtgoparser/mtgo.hpp"
 #include <spdlog/spdlog.h>
 
+const auto trade_list_file_path_small_5cards = "../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
+
+
 void example_goatbots_json_parse()
 {
   spdlog::info("=== example_goatbots_json_parse ===");
@@ -25,7 +28,7 @@ void example_goatbots_json_parse()
 void example_mtgo_xml_parse()
 {
   spdlog::info("=== example_mtgo_xml_parse ===");
-  auto cards = mtgo::xml::parse_dek_xml("./test/test-data/Full Trade List-small.dek");
+  auto cards = mtgo::xml::parse_dek_xml(trade_list_file_path_small_5cards);
 
   for (auto &&c : cards) {
     spdlog::info("id: {}, quantity: {}, name: {}, set: {}", c.id_, c.quantity_, c.name_, c.set_);
@@ -50,7 +53,7 @@ void example_collection_parse()
   }
   price_hist_map_t prices = goatbots::ReadJsonMap<price_hist_map_t>("./test/test-data/price-hist-small.json").value();
   spdlog::info("==> parsing mtgo xml...");
-  auto cards = mtgo::xml::parse_dek_xml("./test/test-data/Full Trade List-small.dek");
+  auto cards = mtgo::xml::parse_dek_xml(trade_list_file_path_small_5cards);
   auto collection = mtgo::Collection(std::move(cards));
   spdlog::info("==> collection extract goatbots info...");
   collection.ExtractGoatbotsInfo(card_defs.value(), prices);
