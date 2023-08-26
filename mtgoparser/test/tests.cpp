@@ -2,11 +2,14 @@
 
 #include <mtgoparser/mtgo.hpp>
 
-const auto trade_list_file_path = "../../test/test-data/Full Trade List-small.dek";
+const auto trade_list_file_path_small_5cards = "../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
+const auto trade_list_file_path_small_50cards = "../../test/test-data/mtgo/Full Trade List-small-50cards.dek";
+const auto trade_list_file_path_small_500cards = "../../test/test-data/mtgo/Full Trade List-small-500cards.dek";
+const auto trade_list_file_path_medium_3000cards = "../../test/test-data/mtgo/Full Trade List-medium-3000cards.dek";
 
 TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
 {
-  std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(trade_list_file_path);
+  std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(trade_list_file_path_small_5cards);
 
   SECTION("Sanity tests")
   {
@@ -36,7 +39,7 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
 
 TEST_CASE("Deserialized cards throws with misuse", "[cards_from_xml]")
 {
-  std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(trade_list_file_path);
+  std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(trade_list_file_path_small_5cards);
 
   SECTION("Throws out-of-bounds")
   {
