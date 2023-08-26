@@ -15,7 +15,7 @@ TEST_CASE("CardDefinition structs are correctly deserialized from Goatbots JSON"
     goatbots::ReadJsonMap<card_defs_map_t>(path_goatbots_card_defs_small_5cards);
 
   REQUIRE(card_defs_opt.has_value());
-
+  if (!card_defs_opt.has_value()) { return; }// Make the compiler shut up
   const auto card_defs = card_defs_opt.value();
 
   SECTION("Sanity tests - Card definitions")
@@ -49,6 +49,7 @@ TEST_CASE("Card prices are correctly deserialized from Goatbots JSON", "[prices_
     goatbots::ReadJsonMap<price_hist_map_t>(path_goatbots_price_hist_small_5cards);
 
   REQUIRE(prices_opt.has_value());
+  if (!prices_opt.has_value()) { return; }// Make the compiler shut up
 
   const auto prices = prices_opt.value();
 
