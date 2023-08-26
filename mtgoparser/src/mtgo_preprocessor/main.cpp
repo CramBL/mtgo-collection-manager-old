@@ -7,6 +7,9 @@ const auto path_trade_list_small_5cards = "./test/test-data/mtgo/Full Trade List
 const auto path_goatbots_card_defs_small = "./test/test-data/goatbots/card-defs-small-5cards.json";
 const auto path_goatbots_price_hist_small = "./test/test-data/goatbots/price-hist-small-5cards.json";
 
+// TODO: VERY TEMPORARY NOLINT - AS SOON AS MAIN DOES SOMETHING USEFUL REMOVE THIS!!
+// NOLINTBEGIN
+
 auto example_collection_parse() -> int
 {
   spdlog::info("=== example_collection_parse ===");
@@ -49,3 +52,5 @@ auto example_collection_parse() -> int
 }
 
 int main() { return example_collection_parse(); }
+
+// NOLINTEND
