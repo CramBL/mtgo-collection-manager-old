@@ -77,7 +77,10 @@ catch_discover_tests(
 
 # JSON parsing tests
 add_executable(test_json_parse test_json_parse.cpp)
-target_link_system_library(test_json_parse PRIVATE mtgoparser)
+target_link_libraries(test_json_parse PRIVATE
+                                     mtgoparser::mtgoparser_warnings
+                                     mtgoparser::mtgoparser_options
+                                     mtgoparser)
 target_link_system_library(test_json_parse PRIVATE Catch2::Catch2WithMain)
 
 
