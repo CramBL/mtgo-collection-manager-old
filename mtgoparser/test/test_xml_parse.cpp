@@ -11,7 +11,7 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
 {
   std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(trade_list_file_path_small_5cards);
 
-  SECTION("Sanity tests")
+  SECTION("Sanity tests - small 5 cards")
   {
     REQUIRE(cards.size() == 5);
     CHECK(cards.at(0).name_ == "Event Ticket");
