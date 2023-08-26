@@ -23,3 +23,20 @@ TEST_CASE("CardDefinition structs are correctly deserialized from Goatbots JSON"
     CHECK(card_defs.contains("347"));
   }
 }
+
+TEST_CASE("Card prices are correctly deserialized from Goatbots JSON", "[prices_from_goatbots_json]")
+{
+  using goatbots::price_hist_map_t;
+  price_hist_map_t prices = goatbots::ReadJsonMap<price_hist_map_t>(path_goatbots_price_hist_small_5cards).value();
+
+
+  SECTION("Sanity tests - Card prices")
+  {
+    REQUIRE(prices.size() == 5);
+    CHECK(prices.contains("112348"));
+    CHECK(prices.contains("40516"));
+    CHECK(prices.contains("31745"));
+    CHECK(prices.contains("348"));
+    CHECK(prices.contains("347"));
+  }
+}
