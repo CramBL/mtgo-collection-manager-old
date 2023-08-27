@@ -127,7 +127,6 @@ macro(mtgoparser_local_options)
     ${mtgoparser_WARNINGS_AS_ERRORS}
     ""
     ""
-    ""
     "")
 
   if(mtgoparser_ENABLE_USER_LINKER)
