@@ -1,6 +1,7 @@
 #include "mtgoparser/goatbots.hpp"
 #include "mtgoparser/io.hpp"
 #include "mtgoparser/mtgo.hpp"
+#include <internal_use_only/config.hpp>
 #include <spdlog/spdlog.h>
 
 const auto path_trade_list_small_5cards = "./test/test-data/mtgo/Full Trade List-small-5cards.dek";
@@ -51,6 +52,10 @@ auto example_collection_parse() -> int
   return 0;
 }
 
-int main() { return example_collection_parse(); }
+int main()
+{
+  fmt::print("v{}\n", mtgoparser::cmake::project_version);
+  return example_collection_parse();
+}
 
 // NOLINTEND
