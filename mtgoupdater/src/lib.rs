@@ -15,7 +15,17 @@ pub fn download_goatbots_price_history() -> Result<std::process::Output, Box<dyn
 {
     let go_exec_out = Command::new(MTGOGETTER_BIN)
         .arg("download")
-        .arg("gph")
+        .arg("goatbots-price-history")
+        .output()?;
+
+    Ok(go_exec_out)
+}
+
+pub fn download_goatbots_card_definitions(
+) -> Result<std::process::Output, Box<dyn std::error::Error>> {
+    let go_exec_out = Command::new(MTGOGETTER_BIN)
+        .arg("download")
+        .arg("goatbots-card-definitions")
         .output()?;
 
     Ok(go_exec_out)
@@ -33,11 +43,38 @@ mod tests {
 
     #[test]
     fn test_call_mtgogetter_download_price_history() {
+        assert!(
+            std::path::Path::new(MTGOGETTER_BIN).exists(),
+            "mtgogetter binary does not exist, build mtgogetter before running this test"
+        );
         let test_out = download_goatbots_price_history();
         match test_out {
             Ok(output) => {
                 println!("Status:\n{status}", status = output.status,);
 
+                println!(
+                    "stdout:\n{stdout}",
+                    stdout = String::from_utf8_lossy(&output.stdout),
+                );
+                println!(
+                    "stderr:\n{stderr}",
+                    stderr = String::from_utf8_lossy(&output.stderr),
+                );
+            }
+            Err(e) => panic!("Unexpected error: {e}"),
+        }
+    }
+
+    #[test]
+    fn test_call_mtgogetter_download_card_definitions() {
+        assert!(
+            std::path::Path::new(MTGOGETTER_BIN).exists(),
+            "mtgogetter binary does not exist, build mtgogetter before running this test"
+        );
+        let test_out = download_goatbots_card_definitions();
+        match test_out {
+            Ok(output) => {
+                println!("Status:\n{status}", status = output.status,);
                 println!(
                     "stdout:\n{stdout}",
                     stdout = String::from_utf8_lossy(&output.stdout),
