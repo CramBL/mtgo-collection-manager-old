@@ -19,6 +19,10 @@ func DownloadBodyToBytes(url string) (respBody []byte) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		log.Fatalln("Get returned:",resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+
 	bodyAsBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
@@ -71,7 +75,7 @@ func UnzipFromBytes(byteSlice []byte) *zip.Reader {
 
 func FirstFileFromZipToDisk(fname string, zip_reader *zip.Reader) {
 	first_file_reader := zip_reader.File[0]
-	log.Println("Extracting:", first_file_reader.Name)
+	log.Println("Extracting:", first_file_reader.Name, "and saving as", fname)
 
 	first_file, err := first_file_reader.Open()
 	if err != nil {
