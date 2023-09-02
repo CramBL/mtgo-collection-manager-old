@@ -11,9 +11,9 @@
 // TODO: VERY TEMPORARY NOLINT - AS SOON AS MAIN DOES SOMETHING USEFUL REMOVE THIS!!
 // NOLINTBEGIN
 
-const auto path_trade_list_small_5cards = "./test/test-data/mtgo/Full Trade List-small-5cards.dek";
-const auto path_goatbots_card_defs_small = "./test/test-data/goatbots/card-defs-small-5cards.json";
-const auto path_goatbots_price_hist_small = "./test/test-data/goatbots/price-hist-small-5cards.json";
+const auto test_path_trade_list_small_5cards = "/mtgo/Full Trade List-small-5cards.dek";
+const auto test_path_goatbots_card_defs_small = "/goatbots/card-defs-small-5cards.json";
+const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5cards.json";
 
 
 auto example_collection_parse(const std::string &test_data_dir) -> int
@@ -24,21 +24,20 @@ auto example_collection_parse(const std::string &test_data_dir) -> int
   using goatbots::price_hist_map_t;
 
   spdlog::info("==> parsing goatbots json...");
-  spdlog::info(
-    "=> parsing goatbots card definitions from {}...", test_data_dir + "/goatbots/card-defs-small-5cards.json");
+  spdlog::info("=> parsing goatbots card definitions from {}...", test_data_dir + test_path_goatbots_card_defs_small);
   std::optional<card_defs_map_t> card_defs =
-    goatbots::ReadJsonMap<card_defs_map_t>(test_data_dir + "/goatbots/card-defs-small-5cards.json");
+    goatbots::ReadJsonMap<card_defs_map_t>(test_data_dir + test_path_goatbots_card_defs_small);
   if (!card_defs.has_value()) {
     // Error: ReadJsonMap() failed
     return 1;
   }
 
   spdlog::info(
-    "=> parsing goatbots price history json from {}...", test_data_dir + "/goatbots/price-hist-small-5cards.json");
+    "=> parsing goatbots price history json from {}...", test_data_dir + test_path_goatbots_price_hist_small);
   price_hist_map_t prices =
-    goatbots::ReadJsonMap<price_hist_map_t>(test_data_dir + "/goatbots/price-hist-small-5cards.json").value();
+    goatbots::ReadJsonMap<price_hist_map_t>(test_data_dir + test_path_goatbots_price_hist_small).value();
   spdlog::info("==> parsing mtgo xml...");
-  auto cards = mtgo::xml::parse_dek_xml(test_data_dir + "/mtgo/Full Trade List-small-5cards.dek");
+  auto cards = mtgo::xml::parse_dek_xml(test_data_dir + test_path_trade_list_small_5cards);
   auto collection = mtgo::Collection(std::move(cards));
   spdlog::info("==> collection extract goatbots info...");
   collection.ExtractGoatbotsInfo(card_defs.value(), prices);
