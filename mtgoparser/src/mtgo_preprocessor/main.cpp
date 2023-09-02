@@ -90,10 +90,7 @@ template<typename... Options>
 {
   static_assert(all_convertible_to_string_view<Options...>(), "Options must be convertible to std::string_view");
 
-  for (const auto &arg : args) {
-    if (equals_any(arg, option_names...)) { return true; }
-  }
-  return false;
+  return std::ranges::any_of(args, [&](const std::string_view &arg) { return equals_any(arg, option_names...); });
 }
 
 // Returns the argument to an option if the option or any of its aliases exists and it has an argument
