@@ -32,9 +32,12 @@ pub fn download_goatbots_card_definitions(
 }
 
 pub fn run_mtgo_preprocessor() -> Result<std::process::Output, Box<dyn std::error::Error>> {
-    let go_exec_out = Command::new(MTGOPARSER_BIN).output()?;
+    let pre_processor_exec_out = Command::new(MTGOPARSER_BIN)
+        .arg("--caller")
+        .arg("mtgoupdater")
+        .output()?;
 
-    Ok(go_exec_out)
+    Ok(pre_processor_exec_out)
 }
 
 #[cfg(test)]
