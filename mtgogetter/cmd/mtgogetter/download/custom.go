@@ -15,7 +15,9 @@ var BaseDownloadCustomCmd = &cobra.Command{
 
 
 func init() {
-	var Save_as_file string
-	BaseDownloadCustomCmd.PersistentFlags().StringVarP(&Save_as_file, "save-as", "s", "mtgogetter_tmp.txt", "Write downloaded content to specified filename")
+	var save_as_file_name string
+	BaseDownloadCustomCmd.PersistentFlags().StringVarP(&save_as_file_name, "save-as", "s", "mtgogetter_tmp.txt", "Write downloaded content to specified filename")
+	var do_decompress bool
+	BaseDownloadCustomCmd.PersistentFlags().BoolVarP(&do_decompress, "decompress", "d", false, "Specify that the downloaded content should be decompressed before writing to disk")
 	BaseDownloadCustomCmd.AddCommand(custom.DownloadCustomUrlStringCmd)
 }
