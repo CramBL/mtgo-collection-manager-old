@@ -12,7 +12,7 @@ var BaseDownloadCmd = &cobra.Command{
 	Use:       "download",
 	Aliases:   []string{"down", "dl"},
 	Short:     "Download card information through a subcommand such as price history",
-	ValidArgs: []string{"goatbots-price-history", "goatbots-card-definitions", "something else"},
+	ValidArgs: []string{"goatbots-price-history", "goatbots-card-definitions", "custom"},
 	Args:      cobra.ExactArgs(0),
 }
 
@@ -21,4 +21,5 @@ func init() {
 
 	BaseDownloadCmd.AddCommand(download.DownloadGoatbotsPriceHistoryCmd)
 	BaseDownloadCmd.AddCommand(download.DownloadGoatbotsCardDefinitionsCmd)
+	BaseDownloadCmd.AddCommand(download.BaseDownloadCustomCmd)
 }
