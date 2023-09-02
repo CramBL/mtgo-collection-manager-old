@@ -16,7 +16,7 @@ const auto path_goatbots_card_defs_small = "./test/test-data/goatbots/card-defs-
 const auto path_goatbots_price_hist_small = "./test/test-data/goatbots/price-hist-small-5cards.json";
 
 
-auto example_collection_parse() -> int
+auto example_collection_parse(const std::string &test_data_dir) -> int
 {
   spdlog::info("=== example_collection_parse ===");
   using goatbots::card_defs_map_t;
@@ -24,14 +24,21 @@ auto example_collection_parse() -> int
   using goatbots::price_hist_map_t;
 
   spdlog::info("==> parsing goatbots json...");
-  std::optional<card_defs_map_t> card_defs = goatbots::ReadJsonMap<card_defs_map_t>(path_goatbots_card_defs_small);
+  spdlog::info(
+    "=> parsing goatbots card definitions from {}...", test_data_dir + "/goatbots/card-defs-small-5cards.json");
+  std::optional<card_defs_map_t> card_defs =
+    goatbots::ReadJsonMap<card_defs_map_t>(test_data_dir + "/goatbots/card-defs-small-5cards.json");
   if (!card_defs.has_value()) {
     // Error: ReadJsonMap() failed
     return 1;
   }
-  price_hist_map_t prices = goatbots::ReadJsonMap<price_hist_map_t>(path_goatbots_price_hist_small).value();
+
+  spdlog::info(
+    "=> parsing goatbots price history json from {}...", test_data_dir + "/goatbots/price-hist-small-5cards.json");
+  price_hist_map_t prices =
+    goatbots::ReadJsonMap<price_hist_map_t>(test_data_dir + "/goatbots/price-hist-small-5cards.json").value();
   spdlog::info("==> parsing mtgo xml...");
-  auto cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+  auto cards = mtgo::xml::parse_dek_xml(test_data_dir + "/mtgo/Full Trade List-small-5cards.dek");
   auto collection = mtgo::Collection(std::move(cards));
   spdlog::info("==> collection extract goatbots info...");
   collection.ExtractGoatbotsInfo(card_defs.value(), prices);
@@ -125,12 +132,21 @@ template<typename... Options>
 
 int main(int argc, char *argv[])
 {
+  std::string test_data_dir{ "./test/test-data" };
+
   // Get command-line arguments as a vector of string_views
   const std::vector<std::string_view> args(argv + 1, argv + argc);
 
   if (auto option_arg = clap::has_option_arg(args, "--caller", "--calling")) {
     fmt::print("Called from: {}\n", option_arg.value());
-  };
+    if (option_arg.value() == "mtgoupdater") {
+      test_data_dir.assign("../mtgoparser/test/test-data");
+      fmt::print("Setting test directory to: {}\n", test_data_dir);
+    }
+  } else if (auto option_test_dir_arg = clap::has_option_arg(args, "--test-dir", "--data-dir")) {
+    test_data_dir.assign(option_test_dir_arg.value());
+    fmt::print("Setting test directory to: {}\n", option_test_dir_arg.value());
+  }
 
   if (clap::has_option(args, "--echo")) {
     for (const auto &arg : args) { fmt::print("{}\n", arg); }
@@ -138,7 +154,7 @@ int main(int argc, char *argv[])
 
   if (clap::has_option(args, "--version", "-V")) { fmt::print("v{}\n", mtgoparser::cmake::project_version); }
 
-  return example_collection_parse();
+  return example_collection_parse(test_data_dir);
 }
 
 // NOLINTEND
