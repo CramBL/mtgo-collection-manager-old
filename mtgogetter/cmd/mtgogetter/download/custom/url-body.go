@@ -9,9 +9,9 @@ import (
 )
 
 var DownloadCustomUrlStringCmd = &cobra.Command{
-	Use:     "url-string",
-	Aliases: []string{"url-text", "url-body-text"},
-	Short:   "Download the from a custom (user defined) URL",
+	Use:     "url-raw",
+	Aliases: []string{"url-body", "url-dump"},
+	Short:   "Download from a custom (user defined) URL and save the response body to a file",
 	Run: func(cmd *cobra.Command, args []string) {
 		fname := cmd.Flag("save-as").Value.String()
 		dl_bytes := mtgogetter.DownloadBodyToBytes(args[0])
