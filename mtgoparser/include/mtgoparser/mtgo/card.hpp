@@ -2,6 +2,7 @@
 
 #include <glaze/glaze.hpp>
 #include <string>
+#include <string_view>
 
 namespace mtgo {
 struct Card
@@ -12,7 +13,7 @@ struct Card
     const char *set = "",
     const char *rarity = "",
     bool foil = false,
-    double price = 0)
+    double price = 0) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
 
@@ -22,7 +23,17 @@ struct Card
     std::string set = {},
     std::string rarity = {},
     bool foil = false,
-    double price = 0)
+    double price = 0) noexcept
+    : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
+  {}
+
+  [[nodiscard]] explicit Card(std::string_view id,
+    std::string_view quantity,
+    std::string_view name,
+    std::string_view set,
+    std::string_view rarity,
+    bool foil,
+    double price) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
 

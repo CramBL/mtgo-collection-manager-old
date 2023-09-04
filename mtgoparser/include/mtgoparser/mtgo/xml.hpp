@@ -17,7 +17,7 @@ namespace mtgo {
 namespace xml {
 
   // TODO: Refactor and add logging
-  [[nodiscard]] inline auto card_from_xml(rapidxml::xml_node<> *card_node) -> std::optional<Card>
+  [[nodiscard]] inline auto card_from_xml(rapidxml::xml_node<> *card_node) noexcept -> std::optional<Card>
   {
     if (!card_node) { return std::nullopt; }
 
@@ -43,7 +43,7 @@ namespace xml {
     return Card{ id, quantity, name };
   }
 
-  [[nodiscard]] auto parse_dek_xml(std::filesystem::path path_xml) -> std::vector<Card>
+  [[nodiscard]] auto parse_dek_xml(std::filesystem::path path_xml) noexcept -> std::vector<Card>
   {
     std::vector<char> buf = io_util::ReadToCharBuf(path_xml);
     rapidxml::xml_document<> doc;
