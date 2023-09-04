@@ -27,13 +27,15 @@ struct Card
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
 
-  [[nodiscard]] constexpr explicit Card(std::string_view id, 
-  std::string_view quantity, 
-  std::string_view name, 
-  std::string_view set, 
-  std::string_view rarity, 
-  bool foil,
-  double price) noexcept: id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price } {}
+  [[nodiscard]] constexpr explicit Card(std::string_view id,
+    std::string_view quantity,
+    std::string_view name,
+    std::string_view set,
+    std::string_view rarity,
+    bool foil,
+    double price) noexcept
+    : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
+  {}
 
   std::string id_;
   std::string quantity_;
