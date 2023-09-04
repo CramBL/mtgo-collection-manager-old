@@ -45,4 +45,23 @@ func TestScryfallJsonParse(t *testing.T) {
 		t.Errorf("Expected 31746 got %d", second_card.Mtgo_foil_id)
 	}
 
+	// Check third cards prices
+	// Black Lotus from Vintage Masters (only on MTGO so other prices are null)
+	third_lotus := &bulk_data[2]
+
+	if third_lotus.Mtgo_id != 53155 {
+		t.Errorf("Expected 53155 got %d", third_lotus.Mtgo_id)
+	}
+
+	if third_lotus.Mtgo_foil_id != 53156 {
+		t.Errorf("Expected 53156 got %d", third_lotus.Mtgo_foil_id)
+	}
+
+	if third_lotus.Prices.Usd != "" { // null in JSON
+		t.Errorf("Expected empty string, got %s", third_lotus.Prices.Usd)
+	}
+
+	if third_lotus.Prices.Tix != "13.51" {
+		t.Errorf("Expected 13.51 got %s", third_lotus.Prices.Tix)
+	}
 }
