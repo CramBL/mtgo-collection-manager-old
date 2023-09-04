@@ -9,7 +9,10 @@ import (
 
 func TestScryfallJsonParse(t *testing.T) {
 	f_scryfall_json := "../../../test/test-data/scryfall/default-cards-small-5cards.json"
-    bulk_data := ReadBulkData(f_scryfall_json)
+    bulk_data, err := ScryfallCardsFromFile(f_scryfall_json)
+	if err != nil {
+		t.Errorf("Error when parsing Scryfall JSON: %s", err)
+	}
 
 	log.Println("Got", len(bulk_data), "cards")
 	if len(bulk_data) != 5 {
