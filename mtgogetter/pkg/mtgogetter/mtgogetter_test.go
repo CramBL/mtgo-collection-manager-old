@@ -7,6 +7,7 @@ import (
 	. "github.com/CramBL/mtgo-collection-manager/mtgogetter/pkg/mtgogetter"
 )
 
+// TODO: Mock HTTP requests: https://www.thegreatcodeadventure.com/mocking-http-requests-in-golang/
 func TestDownloadBodyToBytes(t *testing.T) {
     got_body_bytes := DownloadBodyToBytes("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/LICENSE")
     log.Println("Got body len ==", len(got_body_bytes))
