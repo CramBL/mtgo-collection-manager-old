@@ -5,9 +5,9 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
+	"github.com/CramBL/mtgo-collection-manager/mtgogetter/pkg/mtgogetter"
 	"github.com/spf13/cobra"
 )
 
@@ -74,9 +74,14 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 			log.Println("Error reading bulk data response body:", err)
 		}
 
-		// Write JSON to disk
-		if err:= os.WriteFile(fname, bulk_data , 0777); err != nil {
-			log.Println("Error creating file:", err)
+		// Deserialize to the ScryfallCard struct (Taking only the fields we need)
+		scryfall_cards, err := mtgogetter.DeserializeScryfallCards(bulk_data)
+		if err != nil {
+			log.Fatalln("Error when deserializing Scryfall JSON:", err)
+		}
+		// Serialize to JSON string and write to disk
+		if err := mtgogetter.ScryfallCardsToDisk(scryfall_cards, fname); err != nil {
+			log.Fatalln("Error when writing Scryfall JSON to disk:", err)
 		}
 	},
 }
