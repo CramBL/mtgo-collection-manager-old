@@ -7,7 +7,7 @@ import (
 	. "github.com/CramBL/mtgo-collection-manager/mtgogetter/pkg/mtgogetter"
 )
 
-func TestScryfallJsonParse(t *testing.T) {
+func TestScryfallJsonDeserialize(t *testing.T) {
 	f_scryfall_json := "../../../test/test-data/scryfall/default-cards-small-5cards.json"
     bulk_data, err := ScryfallCardsFromFile(f_scryfall_json)
 	if err != nil {
@@ -67,4 +67,37 @@ func TestScryfallJsonParse(t *testing.T) {
 	if third_lotus.Prices.Tix != "13.51" {
 		t.Errorf("Expected 13.51 got %s", third_lotus.Prices.Tix)
 	}
+}
+
+
+func TestScryfallJsonSerialize(t *testing.T) {
+	f_scryfall_json := "../../../test/test-data/scryfall/default-cards-small-5cards.json"
+    bulk_data, err := ScryfallCardsFromFile(f_scryfall_json)
+	if err != nil {
+		t.Errorf("Error when parsing Scryfall JSON: %s", err)
+	}
+
+	serialized_bulk_data, err := SerializeScryfallCards(bulk_data)
+	if err != nil {
+		t.Errorf("Error when serializing Scryfall JSON: %s", err)
+	}
+
+	// Deserialize again and check that it matches the first deserialization
+	deserialized_bulk_data, err := DeserializeScryfallCards(serialized_bulk_data)
+	if err != nil {
+		t.Errorf("Error when deserializing Scryfall JSON: %s", err)
+	}
+
+	if len(deserialized_bulk_data) != len(bulk_data) {
+		t.Errorf("Expected %d cards got %d", len(bulk_data), len(deserialized_bulk_data))
+	}
+
+	for i := range deserialized_bulk_data {
+
+		if deserialized_bulk_data[i] != bulk_data[i] {
+			t.Errorf("Expected %v got %v", bulk_data[i], deserialized_bulk_data[i])
+		}
+
+	}
+
 }
