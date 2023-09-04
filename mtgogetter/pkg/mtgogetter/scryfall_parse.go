@@ -42,3 +42,15 @@ func DeserializeScryfallCards(byteSlice []byte) ([]ScryfallCard, error) {
 	}
 	return bulk_data, nil
 }
+
+func SerializeScryfallCards(scryfall_cards []ScryfallCard) ([]byte, error) {
+	return json.Marshal(scryfall_cards)
+}
+
+func ScryfallCardsToDisk(scryfall_cards []ScryfallCard, fname string) error {
+	scryfall_cards_bytes, err := SerializeScryfallCards(scryfall_cards)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(fname, scryfall_cards_bytes, 0644)
+}
