@@ -11,7 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type Message struct {
+// Structs for JSON unmarshalling the response from the Scryfall API when requesting bulk data metadata, such as download uri, updated_at, size, etc.
+type ScryfallBulkDataInfo struct {
 	Download_uri string `json:"download_uri"`
 }
 
@@ -44,7 +45,7 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 			log.Fatalln(err)
 		}
 
-		var msg Message
+		var msg ScryfallBulkDataInfo
 		if err:= json.Unmarshal(bodyAsBytes, &msg); err != nil {
 			log.Fatalln("Error when Unmarshalling JSON:", err)
 		}
