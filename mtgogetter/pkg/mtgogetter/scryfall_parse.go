@@ -2,7 +2,6 @@ package mtgogetter
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 )
 
@@ -21,17 +20,25 @@ type ScryfallCard struct{
 	} `json:"prices"`
 }
 
-func ReadBulkData(fname string	) []ScryfallCard {
+func ScryfallCardsFromFile(fname string	) ([]ScryfallCard, error) {
 	// Read file to bytes
 	file_data, err := os.ReadFile(fname)
 	if err != nil {
-		log.Println("Error reading file:", err)
+		return nil, err
 	}
 	// Unmarshal JSON
-	var bulk_data []ScryfallCard
-	if err := json.Unmarshal(file_data, &bulk_data); err != nil {
-		log.Println("Error unmarshalling JSON:", err)
+	scryfall_cards, err := DeserializeScryfallCards(file_data)
+	if err != nil {
+		return nil, err
 	}
 
-	return bulk_data
+	return scryfall_cards, nil
+}
+
+func DeserializeScryfallCards(byteSlice []byte) ([]ScryfallCard, error) {
+	var bulk_data []ScryfallCard
+	if err := json.Unmarshal(byteSlice, &bulk_data); err != nil {
+		return nil, err
+	}
+	return bulk_data, nil
 }
