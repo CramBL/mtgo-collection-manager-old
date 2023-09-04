@@ -5,11 +5,19 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
+type Message struct {
+	download_uri string
+}
+
 const ScryfallInfoBulkUrl string = "https://api.scryfall.com/bulk-data/e2ef41e3-5778-4bc2-af3f-78eca4dd9c23"
+
+// Example download uri: https://data.scryfall.io/default-cards/default-cards-20230902211313.json
+const templateDownloadUri string = "https://data.scryfall.io/default-cards/default-cards-" // Needs timestamp + ".json"
 
 var DownloadScryfallBulkCmd = &cobra.Command{
 	Use:     "scryfall-bulk-data",
@@ -34,13 +42,14 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 			log.Fatalln(err)
 		}
 
-		var data map[string]interface{}
-		err = json.Unmarshal(bodyAsBytes, &data)
+		var msg Message
+		err = json.Unmarshal(bodyAsBytes, &msg)
 		if err != nil {
 			log.Fatalln("Error when Unmarshalling JSON:", err)
 		}
-		download_uri := data["download_uri"]
-		log.Println("Got download uri:", download_uri)
 
+		log.Println("Got download uri:", string(msg))
+		var split_msg = strings.SplitAfter(msg.download_uri, "default-cards-")
+		log.Println("Split message:", split_msg)
 	},
 }
