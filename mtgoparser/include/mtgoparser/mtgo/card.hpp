@@ -10,13 +10,13 @@ struct Card
 {
   // Default constructor
   // Note: some builds raises false positives in static analysis when simply declared as `Card() = default` )
-  [[nodiscard]] explicit Card(std::string id = {},
-    std::string quantity = {},
-    std::string name = {},
-    std::string set = {},
-    std::string rarity = {},
-    bool foil = {},
-    double price = {}) noexcept
+  [[nodiscard]] explicit Card(std::string id = "",
+    std::string quantity = "",
+    std::string name = "",
+    std::string set = "",
+    std::string rarity = "",
+    bool foil = false,
+    double price = 0) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
 
