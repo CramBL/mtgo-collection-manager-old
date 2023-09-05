@@ -22,8 +22,8 @@ const auto test_path_trade_list_small_5cards = "/mtgo/Full Trade List-small-5car
 const auto test_path_goatbots_card_defs_small = "/goatbots/card-defs-small-5cards.json";
 const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5cards.json";
 
-
-auto example_collection_parse(const std::string &test_data_dir) -> int
+namespace example {
+auto collection_parse(const std::string &test_data_dir) -> int
 {
   spdlog::info("=== example_collection_parse ===");
   using goatbots::card_defs_map_t;
@@ -69,6 +69,69 @@ auto example_collection_parse(const std::string &test_data_dir) -> int
 
   return 0;
 }
+
+void json_format_prints()
+{
+  spdlog::info("=== example of JSON format prints for struct definitions ===");
+
+  spdlog::info("==> Example JSON for scryfall::Card");
+  spdlog::info("Printing default constructed scryfall::Card");
+  auto scryfall_card = scryfall::Card{};
+  std::string out_json_default_constructed_scryfall;
+  glz::write<glz::opts{ .prettify = true }>(scryfall_card, out_json_default_constructed_scryfall);
+  fmt::print("{}\n", out_json_default_constructed_scryfall);
+
+  spdlog::info("Default constructed but without skipping null members");
+  std::string out_json_def_constr_with_null_scryfall;
+  glz::write<glz::opts{ .skip_null_members = false, .prettify = true }>(
+    scryfall_card, out_json_def_constr_with_null_scryfall);
+  fmt::print("{}\n", out_json_def_constr_with_null_scryfall);
+
+  spdlog::info("Overwriting the nested `prices` object with various values");
+  scryfall_card.prices = scryfall::Prices("", std::nullopt, "20", "0.34", "");
+  std::string out_json_overwritten_prices_scryfall;
+  glz::write<glz::opts{ .prettify = true }>(scryfall_card, out_json_overwritten_prices_scryfall);
+  fmt::print("{}\n", out_json_overwritten_prices_scryfall);
+
+  spdlog::info("Same but without skipping null members");
+  std::string out_json_overwritten_prices_with_null_scryfall;
+  glz::write<glz::opts{ .skip_null_members = false, .prettify = true }>(
+    scryfall_card, out_json_overwritten_prices_with_null_scryfall);
+  fmt::print("{}\n", out_json_overwritten_prices_with_null_scryfall);
+
+  spdlog::info("Priting JSON schema for scryfall::Card");
+  std::string schema_scryfall = glz::write_json_schema<scryfall::Card>();
+  fmt::print("{}\n", schema_scryfall);
+
+  spdlog::info("==> Example JSON for mtgo::Card");
+  spdlog::info("Printing default constructed mtgo::Card");
+  auto mtgo_card = mtgo::Card{};
+  std::string out_json_default_constructed_mtgo;
+  glz::write<glz::opts{ .prettify = true }>(mtgo_card, out_json_default_constructed_mtgo);
+  fmt::print("{}\n", out_json_default_constructed_mtgo);
+
+  spdlog::info("Default constructed but without skipping null members");
+  std::string out_json_def_constr_with_null_mtgo;
+  glz::write<glz::opts{ .skip_null_members = false, .prettify = true }>(mtgo_card, out_json_def_constr_with_null_mtgo);
+  fmt::print("{}\n", out_json_def_constr_with_null_mtgo);
+
+  spdlog::info("With values");
+  std::string_view id = "123";
+  std::string_view quantity = "1";
+  std::string_view name = "Godzilla";
+  std::string_view set = "Best Set";
+  std::string_view rarity = "Mythic";
+  mtgo::Card mtgo_card_vals = mtgo::Card(id, quantity, name, set, rarity, true, 100.);
+  std::string out_json_overwritten_vals_mtgo;
+  glz::write<glz::opts{ .skip_null_members = false, .prettify = true }>(mtgo_card_vals, out_json_overwritten_vals_mtgo);
+  fmt::print("{}\n", out_json_overwritten_vals_mtgo);
+
+  spdlog::info("Priting JSON schema for mtgo::Card");
+  std::string schema_mtgo = glz::write_json_schema<mtgo::Card>();
+  fmt::print("{}\n", schema_mtgo);
+}
+
+}// namespace example
 
 // Command-Line Argument Parsing (CLAP) utility
 namespace clap {
@@ -161,8 +224,12 @@ int main(int argc, char *argv[])
 
 
   if (clap::has_option(args, "--example", "--run-example", "--run")) {
-    auto res = example_collection_parse(test_data_dir);
+    auto res = example::collection_parse(test_data_dir);
     if (res == 0) { fmt::print("Example complete!"); }
+  }
+
+  if (clap::has_option(args, "--example-json-formats", "--example-json", "--run-example-json")) {
+    example::json_format_prints();
   }
 
   return 0;
