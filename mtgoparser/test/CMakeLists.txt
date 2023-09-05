@@ -1,4 +1,3 @@
-include(../cmake/SystemLink.cmake)
 cmake_minimum_required(VERSION 3.15)
 
 project(mtgoparserTests LANGUAGES CXX)
@@ -17,6 +16,7 @@ if(PROJECT_IS_TOP_LEVEL OR TEST_INSTALLED_VERSION)
 endif()
 
 # ---- Dependencies ----
+include(../cmake/SystemLink.cmake)
 
 list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
 find_package(Catch2 3 REQUIRED)
@@ -61,6 +61,16 @@ target_link_libraries(
           mtgoparser::mtgoparser_options
           mtgoparser)
 target_link_system_library(benchmark_xml_parse PRIVATE Catch2::Catch2WithMain)
+
+if(WIN32 AND BUILD_SHARED_LIBS)
+  message(VERBOSE "WIN32 and BUILD_SHARED_LIBS")
+  add_custom_command(
+    TARGET benchmark_xml_parse
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:benchmark_xml_parse> $<TARGET_FILE_DIR:benchmark_xml_parse>
+    COMMAND_EXPAND_LISTS)
+endif()
+
 
 catch_discover_tests(
   benchmark_xml_parse
