@@ -1,9 +1,11 @@
 // NOLINTBEGIN
+#if _MSC_VER && !__INTEL_COMPILER
+#pragma warning(disable : 4834)// Disable warning "discarding return value of function with 'nodiscard' attribute"
+#endif
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <mtgoparser/mtgo.hpp>
-#include <tuple>
 
 const auto path_trade_list_small_5cards = "../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
 const auto path_trade_list_small_50cards = "../../test/test-data/mtgo/Full Trade List-small-50cards.dek";
@@ -19,13 +21,9 @@ TEST_CASE("parse_dek_xml", "[.xml-parse-bench]")// .(dot) prefix hides the test 
   REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_small_500cards).size() == 500);
   REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards).size() == 3000);
 
-  BENCHMARK("small - 5 cards")
-  {
-    // Quell useless warnings
-    std::ignore = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
-  };
-  BENCHMARK("small - 50 cards") { std::ignore = mtgo::xml::parse_dek_xml(path_trade_list_small_50cards); };
-  BENCHMARK("small - 500 cards") { std::ignore = mtgo::xml::parse_dek_xml(path_trade_list_small_500cards); };
-  BENCHMARK("medium - 3000 cards") { std::ignore = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards); };
+  BENCHMARK("small - 5 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_small_5cards); };
+  BENCHMARK("small - 50 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_small_50cards); };
+  BENCHMARK("small - 500 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_small_500cards); };
+  BENCHMARK("medium - 3000 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards); };
 }
 // NOLINTEND
