@@ -10,11 +10,15 @@
 namespace scryfall {
 struct Prices
 {
-  std::optional<std::string> usd{};
-  std::optional<std::string> usd_foil{};
-  std::optional<std::string> eur{};
-  std::optional<std::string> eur_foil{};
-  std::optional<std::string> tix{};
+  using opt_str = std::optional<std::string>;
+
+  [[nodiscard]] explicit Prices(opt_str _usd = std::nullopt,
+    opt_str _usd_foil = std::nullopt,
+    opt_str _eur = std::nullopt,
+    opt_str _eur_foil = std::nullopt,
+    opt_str _tix = std::nullopt)
+    : usd{ _usd }, usd_foil{ _usd_foil }, eur{ _eur }, eur_foil{ _eur_foil }, tix{ _tix }
+  {}
 
 
   [[nodiscard]] inline constexpr bool operator==(const Prices &other) const
@@ -23,6 +27,12 @@ struct Prices
            && tix == other.tix;
   }
   [[nodiscard]] inline constexpr bool operator!=(const Prices &other) const { return !(*this == other); }
+
+  std::optional<std::string> usd;
+  std::optional<std::string> usd_foil;
+  std::optional<std::string> eur;
+  std::optional<std::string> eur_foil;
+  std::optional<std::string> tix;
 };
 
 struct Card
