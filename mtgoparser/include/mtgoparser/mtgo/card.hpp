@@ -33,7 +33,7 @@ struct Card
 
   // Templated constructor
   template<typename T>
-    requires std::convertible_to<T, std::string>
+  requires std::convertible_to<T, std::string>
   explicit Card(T id, T quantity, T name, T set, T rarity, bool foil = false, double price = 0) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
