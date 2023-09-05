@@ -1,3 +1,9 @@
+// NOLINTBEGIN
+#if _MSC_VER && !__INTEL_COMPILER
+// On MSVC: Disable warning "discarding return value of function with 'nodiscard' attribute"
+//  Because they warn on their own std::vector implementation, a warning that is discouraged by the standard...
+#pragma warning(disable : 4834)
+#endif
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 
@@ -22,3 +28,4 @@ TEST_CASE("parse_dek_xml", "[.xml-parse-bench]")// .(dot) prefix hides the test 
   BENCHMARK("small - 500 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_small_500cards); };
   BENCHMARK("medium - 3000 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards); };
 }
+// NOLINTEND

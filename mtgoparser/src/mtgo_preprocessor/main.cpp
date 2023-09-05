@@ -1,6 +1,13 @@
+#if _MSC_VER && !__INTEL_COMPILER
+// On MSVC: Disable warning "discarding return value of function with 'nodiscard' attribute"
+//  Because they warn on their own std::vector implementation, a warning that is discouraged by the standard...
+#pragma warning(disable : 4834)
+#endif
+
 #include "mtgoparser/goatbots.hpp"
 #include "mtgoparser/io.hpp"
 #include "mtgoparser/mtgo.hpp"
+#include "mtgoparser/scryfall.hpp"
 #include <algorithm>
 #include <internal_use_only/config.hpp>
 #include <optional>
@@ -152,7 +159,13 @@ int main(int argc, char *argv[])
 
   if (clap::has_option(args, "--version", "-V")) { fmt::print("v{}\n", mtgoparser::cmake::project_version); }
 
-  return example_collection_parse(test_data_dir);
+
+  if (clap::has_option(args, "--example", "--run-example", "--run")) {
+    auto res = example_collection_parse(test_data_dir);
+    if (res == 0) { fmt::print("Example complete!"); }
+  }
+
+  return 0;
 }
 
 // NOLINTEND

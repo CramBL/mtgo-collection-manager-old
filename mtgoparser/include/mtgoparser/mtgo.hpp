@@ -18,7 +18,7 @@ class Collection
   int total_quantity_ = 0;
 
 public:
-  [[nodiscard]] explicit Collection(std::vector<Card> &&cards) noexcept : cards_{ cards } {}
+  [[nodiscard]] explicit Collection(std::vector<Card> &&cards) noexcept : cards_{ std::move(cards) } {}
   [[nodiscard]] explicit Collection(const std::string &json_str) noexcept
     : cards_{ glz::read_json<std::vector<Card>>(json_str).value() }
   {}

@@ -62,7 +62,7 @@ namespace xml {
     for (decltype(auto) card = first_card_node; card; card = card->next_sibling()) {
       // Iterate through all attributes
       if (auto c = card_from_xml(card)) {
-        cards.emplace_back(c.value());
+        cards.emplace_back(std::move(c.value()));
       } else {
         spdlog::error("Decoding card from XML failed");
       }
