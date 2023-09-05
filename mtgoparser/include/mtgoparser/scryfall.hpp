@@ -15,6 +15,14 @@ struct Prices
   std::optional<std::string> eur{};
   std::optional<std::string> eur_foil{};
   std::optional<std::string> tix{};
+
+
+  [[nodiscard]] inline constexpr bool operator==(const Prices &other) const
+  {
+    return usd == other.usd && usd_foil == other.usd_foil && eur == other.eur && eur_foil == other.eur_foil
+           && tix == other.tix;
+  }
+  [[nodiscard]] inline constexpr bool operator!=(const Prices &other) const { return !(*this == other); }
 };
 
 struct Card
@@ -25,6 +33,14 @@ struct Card
   std::string released_at{};
   std::string rarity{};
   Prices prices{};
+
+  [[nodiscard]] inline constexpr bool operator==(const Card &other) const
+  {
+    return mtgo_id == other.mtgo_id && mtgo_foil_id == other.mtgo_foil_id && name == other.name
+           && released_at == other.released_at && rarity == other.rarity && prices == other.prices;
+  }
+
+  [[nodiscard]] inline constexpr bool operator!=(const Card &other) const { return !(*this == other); }
 };
 }// namespace scryfall
 
