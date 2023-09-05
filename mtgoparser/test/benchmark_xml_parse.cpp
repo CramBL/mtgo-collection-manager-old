@@ -3,6 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mtgoparser/mtgo.hpp>
+#include <tuple>
 
 const auto path_trade_list_small_5cards = "../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
 const auto path_trade_list_small_50cards = "../../test/test-data/mtgo/Full Trade List-small-50cards.dek";
@@ -21,23 +22,10 @@ TEST_CASE("parse_dek_xml", "[.xml-parse-bench]")// .(dot) prefix hides the test 
   BENCHMARK("small - 5 cards")
   {
     // Quell useless warnings
-    auto deck = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
-    return 0;
+    std::ignore = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
   };
-  BENCHMARK("small - 50 cards")
-  {
-    auto deck = mtgo::xml::parse_dek_xml(path_trade_list_small_50cards);
-    return 0;
-  };
-  BENCHMARK("small - 500 cards")
-  {
-    auto deck = mtgo::xml::parse_dek_xml(path_trade_list_small_500cards);
-    return 0;
-  };
-  BENCHMARK("medium - 3000 cards")
-  {
-    auto deck = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
-    return 0;
-  };
+  BENCHMARK("small - 50 cards") { std::ignore = mtgo::xml::parse_dek_xml(path_trade_list_small_50cards); };
+  BENCHMARK("small - 500 cards") { std::ignore = mtgo::xml::parse_dek_xml(path_trade_list_small_500cards); };
+  BENCHMARK("medium - 3000 cards") { std::ignore = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards); };
 }
 // NOLINTEND
