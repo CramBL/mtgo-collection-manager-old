@@ -20,23 +20,24 @@ TEST_CASE("parse_dek_xml", "[.xml-parse-bench]")// .(dot) prefix hides the test 
 
   BENCHMARK("small - 5 cards")
   {
+    // Quell useless warnings
     auto deck = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
-    return deck.size();
+    return 0;
   };
   BENCHMARK("small - 50 cards")
   {
     auto deck = mtgo::xml::parse_dek_xml(path_trade_list_small_50cards);
-    return deck.size();
+    return 0;
   };
   BENCHMARK("small - 500 cards")
   {
     auto deck = mtgo::xml::parse_dek_xml(path_trade_list_small_500cards);
-    return deck.size();
+    return 0;
   };
   BENCHMARK("medium - 3000 cards")
   {
     auto deck = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
-    return deck.size();
+    return 0;
   };
 }
 // NOLINTEND
