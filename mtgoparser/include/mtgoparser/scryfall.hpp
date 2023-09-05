@@ -44,6 +44,16 @@ struct Card
   std::string rarity{};
   Prices prices{};
 
+  [[nodiscard]] explicit Card(uint32_t _mtgo_id = 0,
+    uint32_t _mtgo_foil_id = 0,
+    std::string _name = "",
+    std::string _released_at = "",
+    std::string _rarity = "",
+    Prices _prices = scryfall::Prices{})
+    : mtgo_id{ _mtgo_id }, mtgo_foil_id{ _mtgo_foil_id }, name{ _name }, released_at{ _released_at }, rarity{ _rarity },
+      prices{ _prices }
+  {}
+
   [[nodiscard]] inline constexpr bool operator==(const Card &other) const
   {
     return mtgo_id == other.mtgo_id && mtgo_foil_id == other.mtgo_foil_id && name == other.name
