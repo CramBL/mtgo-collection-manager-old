@@ -1,6 +1,8 @@
 // NOLINTBEGIN
 #if _MSC_VER && !__INTEL_COMPILER
-#pragma warning(disable : 4834)// Disable warning "discarding return value of function with 'nodiscard' attribute"
+// On MSVC: Disable warning "discarding return value of function with 'nodiscard' attribute"
+//  Because they warn on their own std::vector implementation, a warning that is discouraged by the standard...
+#pragma warning(disable : 4834)
 #endif
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
