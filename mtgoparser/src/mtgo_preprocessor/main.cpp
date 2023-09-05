@@ -78,11 +78,15 @@ void json_format_prints()
   spdlog::info("Printing default constructed scryfall::Card");
   auto scryfall_card = scryfall::Card{};
   std::string out_json_default_constructed_scryfall;
+  glz::write_json(scryfall_card, out_json_default_constructed_scryfall);
+  fmt::print("{}\n", out_json_default_constructed_scryfall);
   glz::write<glz::opts{ .prettify = true }>(scryfall_card, out_json_default_constructed_scryfall);
   fmt::print("{}\n", out_json_default_constructed_scryfall);
 
   spdlog::info("Default constructed but without skipping null members");
   std::string out_json_def_constr_with_null_scryfall;
+  glz::write<glz::opts{ .skip_null_members = false }>(scryfall_card, out_json_def_constr_with_null_scryfall);
+  fmt::print("{}\n", out_json_def_constr_with_null_scryfall);
   glz::write<glz::opts{ .skip_null_members = false, .prettify = true }>(
     scryfall_card, out_json_def_constr_with_null_scryfall);
   fmt::print("{}\n", out_json_def_constr_with_null_scryfall);
@@ -90,11 +94,15 @@ void json_format_prints()
   spdlog::info("Overwriting the nested `prices` object with various values");
   scryfall_card.prices = scryfall::Prices("", std::nullopt, "20", "0.34", "");
   std::string out_json_overwritten_prices_scryfall;
+  glz::write_json(scryfall_card, out_json_overwritten_prices_scryfall);
+  fmt::print("{}\n", out_json_overwritten_prices_scryfall);
   glz::write<glz::opts{ .prettify = true }>(scryfall_card, out_json_overwritten_prices_scryfall);
   fmt::print("{}\n", out_json_overwritten_prices_scryfall);
 
   spdlog::info("Same but without skipping null members");
   std::string out_json_overwritten_prices_with_null_scryfall;
+  glz::write<glz::opts{ .skip_null_members = false }>(scryfall_card, out_json_overwritten_prices_with_null_scryfall);
+  fmt::print("{}\n", out_json_overwritten_prices_with_null_scryfall);
   glz::write<glz::opts{ .skip_null_members = false, .prettify = true }>(
     scryfall_card, out_json_overwritten_prices_with_null_scryfall);
   fmt::print("{}\n", out_json_overwritten_prices_with_null_scryfall);
@@ -107,13 +115,20 @@ void json_format_prints()
   spdlog::info("Printing default constructed mtgo::Card");
   auto mtgo_card = mtgo::Card{};
   std::string out_json_default_constructed_mtgo;
+  glz::write_json(mtgo_card, out_json_default_constructed_mtgo);
+  fmt::print("{}\n", out_json_default_constructed_mtgo);
+  out_json_default_constructed_mtgo.clear();
   glz::write<glz::opts{ .prettify = true }>(mtgo_card, out_json_default_constructed_mtgo);
   fmt::print("{}\n", out_json_default_constructed_mtgo);
 
   spdlog::info("Default constructed but without skipping null members");
   std::string out_json_def_constr_with_null_mtgo;
-  glz::write<glz::opts{ .skip_null_members = false, .prettify = true }>(mtgo_card, out_json_def_constr_with_null_mtgo);
+  glz::write_json(mtgo_card, out_json_def_constr_with_null_mtgo);
   fmt::print("{}\n", out_json_def_constr_with_null_mtgo);
+  out_json_def_constr_with_null_mtgo.clear();
+  glz::write<glz::opts{ .prettify = true }>(mtgo_card, out_json_def_constr_with_null_mtgo);
+  fmt::print("{}\n", out_json_def_constr_with_null_mtgo);
+
 
   spdlog::info("With values");
   std::string_view id = "123";
@@ -123,7 +138,10 @@ void json_format_prints()
   std::string_view rarity = "Mythic";
   mtgo::Card mtgo_card_vals = mtgo::Card(id, quantity, name, set, rarity, true, 100.);
   std::string out_json_overwritten_vals_mtgo;
-  glz::write<glz::opts{ .skip_null_members = false, .prettify = true }>(mtgo_card_vals, out_json_overwritten_vals_mtgo);
+  glz::write_json(mtgo_card_vals, out_json_overwritten_vals_mtgo);
+  fmt::print("{}\n", out_json_overwritten_vals_mtgo);
+  out_json_overwritten_vals_mtgo.clear();
+  glz::write<glz::opts{ .prettify = true }>(mtgo_card_vals, out_json_overwritten_vals_mtgo);
   fmt::print("{}\n", out_json_overwritten_vals_mtgo);
 
   spdlog::info("Priting JSON schema for mtgo::Card");
