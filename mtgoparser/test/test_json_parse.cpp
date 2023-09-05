@@ -2,7 +2,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "mtgoparser/goatbots.hpp"
+#include "mtgoparser/scryfall.hpp"
+#include <optional>
+#include <string>
 #include <utility>
+
 
 const auto path_goatbots_card_defs_small_5cards = "../../test/test-data/goatbots/card-defs-small-5cards.json";
 const auto path_goatbots_price_hist_small_5cards = "../../test/test-data/goatbots/price-hist-small-5cards.json";
@@ -64,4 +68,33 @@ TEST_CASE("Card prices are correctly deserialized from Goatbots JSON", "[prices_
     CHECK(prices.contains("347"));
   }
 }
+
+TEST_CASE("Scryfall JSON serializing", "[scryfall_serializing]")
+{
+  SECTION("Default prices nested object")
+  {
+    scryfall::Prices prices_default{};
+    REQUIRE(prices_default.usd == std::nullopt);
+    REQUIRE(prices_default.usd_foil == std::nullopt);
+    REQUIRE(prices_default.eur == std::nullopt);
+    REQUIRE(prices_default.eur_foil == std::nullopt);
+    REQUIRE(prices_default.tix == std::nullopt);
+
+    std::string json_str_prices_default{};
+    glz::write_json(prices_default, json_str_prices_default);
+
+    REQUIRE(json_str_prices_default == R"({})");// Empty JSON object as all members are null
+
+    json_str_prices_default.clear();
+    glz::write<glz::opts{ .skip_null_members = false }>(prices_default, json_str_prices_default);
+
+    // std::string::contains is in C++23 :/
+    CHECK(json_str_prices_default.find(R"("usd":null)") != std::string::npos);
+    CHECK(json_str_prices_default.find(R"("usd_foil":null)") != std::string::npos);
+    CHECK(json_str_prices_default.find(R"("eur":null)") != std::string::npos);
+    CHECK(json_str_prices_default.find(R"("eur_foil":null)") != std::string::npos);
+    CHECK(json_str_prices_default.find(R"("tix":null)") != std::string::npos);
+  }
+}
+
 // NOLINTEND
