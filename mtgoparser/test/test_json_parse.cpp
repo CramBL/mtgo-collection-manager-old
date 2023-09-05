@@ -95,6 +95,33 @@ TEST_CASE("Scryfall JSON serializing", "[scryfall_serializing]")
     CHECK(json_str_prices_default.find(R"("eur_foil":null)") != std::string::npos);
     CHECK(json_str_prices_default.find(R"("tix":null)") != std::string::npos);
   }
+
+  SECTION("Default scryfall::Card object")
+  {
+    scryfall::Card card_default{};
+
+    REQUIRE(card_default.mtgo_id == 0);
+    REQUIRE(card_default.mtgo_foil_id == 0);
+    REQUIRE(card_default.name == "");
+    REQUIRE(card_default.rarity == "");
+    REQUIRE(card_default.released_at == "");
+    REQUIRE(card_default.prices == scryfall::Prices{});// Equal to default object
+
+    std::string json_str_card_default;
+    glz::write_json(card_default, json_str_card_default);
+
+    CHECK(json_str_card_default.find(R"("mtgo_id":0)") != std::string::npos);
+    CHECK(json_str_card_default.find(R"("mtgo_foil_id":0)") != std::string::npos);
+    CHECK(json_str_card_default.find(R"("name":"")") != std::string::npos);
+    CHECK(json_str_card_default.find(R"("rarity":"")") != std::string::npos);
+    CHECK(json_str_card_default.find(R"("prices":{})") != std::string::npos);
+
+    // Now with values (not default)
+    scryfall::Card card_vals{ 0, 1, "Mother of Runes", "Rare", "2.01" };
+
+    // Construction with initializer list should be equivelant as
+    REQUIRE(card_vals == scryfall::Card(0, 1, "Mother of Runes", "Rare", "2.01"));
+  }
 }
 
 // NOLINTEND
