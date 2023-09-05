@@ -61,6 +61,8 @@ template<> struct glz::meta<scryfall::Card>
     &T::mtgo_foil_id,
     "name",
     &T::name,
+    "released_at",
+    &T::released_at,
     "rarity",
     &T::rarity,
     "prices",
