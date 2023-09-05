@@ -31,9 +31,21 @@ struct Card
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
 
+  // SAFETY: The string_views used for construction has to outlive the constructed instance
+  // Constructor with string_view beware of lifetimes
+  [[nodiscard]] explicit Card(std::string_view id,
+    std::string_view quantity,
+    std::string_view name,
+    std::string_view set,
+    std::string_view rarity,
+    bool foil = false,
+    double price = 0) noexcept
+    : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
+  {}
+
   // Templated constructor
   template<typename T>
-  requires std::convertible_to<T, std::string>
+    requires std::convertible_to<T, std::string>
   explicit Card(T id, T quantity, T name, T set, T rarity, bool foil = false, double price = 0) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil }, price_{ price }
   {}
