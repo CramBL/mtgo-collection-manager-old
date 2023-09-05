@@ -18,9 +18,25 @@ TEST_CASE("parse_dek_xml", "[.xml-parse-bench]")// .(dot) prefix hides the test 
   REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_small_500cards).size() == 500);
   REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards).size() == 3000);
 
-  BENCHMARK("small - 5 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_small_5cards); };
-  BENCHMARK("small - 50 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_small_50cards); };
-  BENCHMARK("small - 500 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_small_500cards); };
-  BENCHMARK("medium - 3000 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards); };
+  BENCHMARK("small - 5 cards")
+  {
+    auto deck = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+    return deck.size();
+  };
+  BENCHMARK("small - 50 cards")
+  {
+    auto deck = mtgo::xml::parse_dek_xml(path_trade_list_small_50cards);
+    return deck.size();
+  };
+  BENCHMARK("small - 500 cards")
+  {
+    auto deck = mtgo::xml::parse_dek_xml(path_trade_list_small_500cards);
+    return deck.size();
+  };
+  BENCHMARK("medium - 3000 cards")
+  {
+    auto deck = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
+    return deck.size();
+  };
 }
 // NOLINTEND
