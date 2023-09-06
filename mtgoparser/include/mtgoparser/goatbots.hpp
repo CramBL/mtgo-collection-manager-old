@@ -33,7 +33,7 @@ concept goatbots_json = std::disjunction<std::is_same<T, price_hist_map_t>, std:
 template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(std::filesystem::path path_json) -> std::optional<T>
 {
   // Instantiate and pre-allocate map
-  T json_map = {};
+  T json_map{};
   json_map.reserve(80000);
 
   // Read file into buffer and decode to populate map
