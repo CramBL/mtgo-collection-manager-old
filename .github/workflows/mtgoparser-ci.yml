@@ -208,5 +208,8 @@ jobs:
         if: runner.os == 'Windows'
         working-directory: ./mtgoparser/build
         run: |
-          OpenCppCoverage.exe --export_type cobertura:coverage.xml --cover_children -- ctest -C ${{matrix.build_type}} --verbose
+          OpenCppCoverage.exe --export_type cobertura:coverage.xml
+          --cover_children
+          --sources ../include/mtgoparser*
+          -- ctest -C ${{matrix.build_type}} --verbose
 
