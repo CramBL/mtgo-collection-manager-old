@@ -195,7 +195,14 @@ jobs:
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: |
           ctest -C ${{matrix.build_type}} --verbose
-          gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable '${{ matrix.gcov_executable }}'
+          gcovr -j 2
+          --delete
+          --root ../
+          --print-summary
+          --xml-pretty
+          --xml coverage.xml .
+          --gcov-executable '${{ matrix.gcov_executable }}'
+          --filter ../include/mtgoparser
 
       - name: Windows - Test and coverage
         if: runner.os == 'Windows'
