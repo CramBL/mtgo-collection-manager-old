@@ -182,20 +182,20 @@ jobs:
       - name: Configure CMake
         working-directory: ./mtgoparser
         run: |
-          cmake -S .
-          -B ./build
-          -G "${{matrix.generator}}"
-          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }}
-          -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}}
-          -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}}
-          -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }}
-          -DGIT_SHA:STRING=${{ github.sha }}
+          cmake -S . \
+            -B ./build \
+            -G "${{matrix.generator}}" \
+            -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} \
+            -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} \
+            -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} \
+            -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }} \
+            -DGIT_SHA:STRING=${{ github.sha }}
 
       - name: Build
         working-directory: ./mtgoparser
         run: |
-          cmake --build ./build
-          --config ${{matrix.build_type}}
+          cmake --build ./build \
+            --config ${{matrix.build_type}}
 
 
       - name: Unix - Test and coverage
@@ -205,21 +205,21 @@ jobs:
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: |
           ctest -C ${{matrix.build_type}} --verbose
-          gcovr -j 2
-          --delete
-          --root ../
-          --print-summary
-          --xml-pretty
-          --xml coverage.xml .
-          --gcov-executable '${{ matrix.gcov_executable }}'
-          --filter ../include/mtgoparser
+          gcovr -j 2 \
+            --delete \
+            --root ../ \
+            --print-summary \
+            --xml-pretty \
+            --xml coverage.xml . \
+            --gcov-executable '${{ matrix.gcov_executable }}' \
+            --filter ../include/mtgoparser
 
       - name: Windows - Test and coverage
         if: runner.os == 'Windows'
         working-directory: ./mtgoparser/build
         run: |
-          OpenCppCoverage.exe --export_type cobertura:coverage.xml
-          --cover_children
-          --sources ../include/mtgoparser*
-          -- ctest -C ${{matrix.build_type}} --verbose
+          OpenCppCoverage.exe --export_type cobertura:coverage.xml \
+            --cover_children \
+            --sources ../include/mtgoparser* \
+            -- ctest -C ${{matrix.build_type}} --verbose
 
