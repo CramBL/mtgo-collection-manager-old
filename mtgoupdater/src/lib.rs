@@ -31,6 +31,17 @@ pub fn download_goatbots_card_definitions(
     Ok(go_exec_out)
 }
 
+pub fn download_custom_url(url: &str) -> Result<std::process::Output, Box<dyn std::error::Error>> {
+    let go_exec_out = Command::new(MTGOGETTER_BIN)
+        .arg("download")
+        .arg("custom")
+        .arg("url-raw")
+        .arg(url)
+        .output()?;
+
+    Ok(go_exec_out)
+}
+
 pub fn run_mtgo_preprocessor_example() -> Result<std::process::Output, Box<dyn std::error::Error>> {
     let pre_processor_exec_out = Command::new(MTGOPARSER_BIN)
         .arg("--caller")
