@@ -9,7 +9,7 @@ import (
 
 func TestScryfallJsonDeserialize(t *testing.T) {
 	f_scryfall_json := "../../../test/test-data/scryfall/default-cards-small-5cards.json"
-    bulk_data, err := ScryfallCardsFromFile(f_scryfall_json)
+	bulk_data, err := ScryfallCardsFromFile(f_scryfall_json)
 	if err != nil {
 		t.Errorf("Error when parsing Scryfall JSON: %s", err)
 	}
@@ -28,7 +28,6 @@ func TestScryfallJsonDeserialize(t *testing.T) {
 	if first_card.Mtgo_foil_id != 25528 {
 		t.Errorf("Expected 25528 got %d", first_card.Mtgo_foil_id)
 	}
-
 
 	if first_card.Name != "Fury Sliver" {
 		t.Errorf("Expected Fury Sliver got %s", bulk_data[0].Name)
@@ -69,10 +68,9 @@ func TestScryfallJsonDeserialize(t *testing.T) {
 	}
 }
 
-
 func TestScryfallJsonSerialize(t *testing.T) {
 	f_scryfall_json := "../../../test/test-data/scryfall/default-cards-small-5cards.json"
-    bulk_data, err := ScryfallCardsFromFile(f_scryfall_json)
+	bulk_data, err := ScryfallCardsFromFile(f_scryfall_json)
 	if err != nil {
 		t.Errorf("Error when parsing Scryfall JSON: %s", err)
 	}

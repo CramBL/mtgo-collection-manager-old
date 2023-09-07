@@ -5,22 +5,22 @@ import (
 	"os"
 )
 
-type ScryfallCard struct{
-    Mtgo_id int32 `json:"mtgo_id"`
-	Mtgo_foil_id int32 `json:"mtgo_foil_id"`
-	Name string `json:"name"`
-	Released_at string `json:"released_at"`
-	Rarity string `json:"rarity"`
-	Prices struct { // All nullable (deserialized as empty string if null)
-		Usd string `json:"usd"`
+type ScryfallCard struct {
+	Mtgo_id      int32    `json:"mtgo_id"`
+	Mtgo_foil_id int32    `json:"mtgo_foil_id"`
+	Name         string   `json:"name"`
+	Released_at  string   `json:"released_at"`
+	Rarity       string   `json:"rarity"`
+	Prices       struct { // All nullable (deserialized as empty string if null)
+		Usd      string `json:"usd"`
 		Usd_foil string `json:"usd_foil"`
-		Eur string `json:"eur"`
+		Eur      string `json:"eur"`
 		Eur_foil string `json:"eur_foil"`
-		Tix string `json:"tix"`
+		Tix      string `json:"tix"`
 	} `json:"prices"`
 }
 
-func ScryfallCardsFromFile(fname string	) ([]ScryfallCard, error) {
+func ScryfallCardsFromFile(fname string) ([]ScryfallCard, error) {
 	// Read file to bytes
 	file_data, err := os.ReadFile(fname)
 	if err != nil {
