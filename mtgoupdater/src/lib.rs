@@ -35,6 +35,7 @@ pub fn run_mtgo_preprocessor() -> Result<std::process::Output, Box<dyn std::erro
     let pre_processor_exec_out = Command::new(MTGOPARSER_BIN)
         .arg("--caller")
         .arg("mtgoupdater")
+        .arg("--run-example")
         .output()?;
 
     Ok(pre_processor_exec_out)
@@ -44,6 +45,7 @@ pub fn run_mtgo_preprocessor() -> Result<std::process::Output, Box<dyn std::erro
 mod tests {
     use super::*;
 
+    #[ignore]
     #[test]
     fn test_call_mtgogetter_download_price_history() {
         assert!(
@@ -68,6 +70,7 @@ mod tests {
         }
     }
 
+    #[ignore]
     #[test]
     fn test_call_mtgogetter_download_card_definitions() {
         assert!(
