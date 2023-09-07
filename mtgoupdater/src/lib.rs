@@ -177,4 +177,32 @@ mod tests {
             Err(e) => panic!("Unexpected error: {e}"),
         }
     }
+
+    #[test]
+    fn test_mtgogetter_custom_url_download_scryfall_card_json() {
+        // From the repository
+        let scryfall_card_json_url = "https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/test/test-data/mtgogetter-out/scryfall-card.json";
+        let cmd_out = download_custom_url(
+            scryfall_card_json_url,
+            false,
+            None, // Goes to stdout
+        );
+        match cmd_out {
+            Ok(output) => {
+                println!("Status:\n{status}", status = output.status,);
+                let stdout_as_utf8 = String::from_utf8_lossy(&output.stdout);
+                println!("stdout:\n{stdout}", stdout = stdout_as_utf8,);
+                println!(
+                    "stderr:\n{stderr}",
+                    stderr = String::from_utf8_lossy(&output.stderr),
+                );
+                assert!(stdout_as_utf8.contains(r#""mtgo_id": 25527"#));
+                assert_eq!(
+                    stdout_as_utf8,
+                    include_str!("../../test/test-data/mtgogetter-out/scryfall-card.json")
+                );
+            }
+            Err(e) => panic!("Unexpected error: {e}"),
+        }
+    }
 }
