@@ -46,9 +46,11 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test --verbose -- --nocapture
+      - name: check
+        working-directory: ./mtgoupdater
+        run: |
+          cargo check --verbose
+      - name: test
+        working-directory: ./mtgoupdater
+        run: |
+          cargo test --verbose -- --nocapture
