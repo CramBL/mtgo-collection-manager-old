@@ -31,11 +31,22 @@ pub fn download_goatbots_card_definitions(
     Ok(go_exec_out)
 }
 
-pub fn run_mtgo_preprocessor() -> Result<std::process::Output, Box<dyn std::error::Error>> {
+pub fn run_mtgo_preprocessor_example() -> Result<std::process::Output, Box<dyn std::error::Error>> {
     let pre_processor_exec_out = Command::new(MTGOPARSER_BIN)
         .arg("--caller")
         .arg("mtgoupdater")
         .arg("--run-example")
+        .output()?;
+
+    Ok(pre_processor_exec_out)
+}
+
+pub fn run_mtgo_preprocessor_json_example(
+) -> Result<std::process::Output, Box<dyn std::error::Error>> {
+    let pre_processor_exec_out = Command::new(MTGOPARSER_BIN)
+        .arg("--caller")
+        .arg("mtgoupdater")
+        .arg("--run-example-json")
         .output()?;
 
     Ok(pre_processor_exec_out)
@@ -112,7 +123,7 @@ mod tests {
             "mtgo_preprocessor binary does not exist, build mtgoparser before running this test"
         );
 
-        let test_out = run_mtgo_preprocessor();
+        let test_out = run_mtgo_preprocessor_example();
         match test_out {
             Ok(output) => {
                 println!("Status:\n{status}", status = output.status,);
@@ -126,7 +137,26 @@ mod tests {
                     stderr = String::from_utf8_lossy(&output.stderr),
                 );
             }
-            Err(e) => println!("Unexpected error: {e}"),
+            Err(e) => panic!("Unexpected error: {e}"),
+        }
+    }
+
+    #[test]
+    fn test_call_mtgo_preprocessor_json_example() {
+        match run_mtgo_preprocessor_json_example() {
+            Ok(output) => {
+                println!("Status:\n{status}", status = output.status,);
+
+                println!(
+                    "stdout:\n{stdout}",
+                    stdout = String::from_utf8_lossy(&output.stdout),
+                );
+                println!(
+                    "stderr:\n{stderr}",
+                    stderr = String::from_utf8_lossy(&output.stderr),
+                );
+            }
+            Err(e) => panic!("Unexpected error: {e}"),
         }
     }
 }
