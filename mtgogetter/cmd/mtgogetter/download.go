@@ -15,7 +15,8 @@ var BaseDownloadCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(BaseDownloadCmd)
-
+	var save_as_file_name string
+	BaseDownloadCmd.PersistentFlags().StringVarP(&save_as_file_name, "save-as", "s", "stdout", "Write downloaded content to specified filename")
 	BaseDownloadCmd.AddCommand(download.DownloadGoatbotsPriceHistoryCmd)
 	BaseDownloadCmd.AddCommand(download.DownloadGoatbotsCardDefinitionsCmd)
 	BaseDownloadCmd.AddCommand(download.DownloadScryfallBulkCmd)

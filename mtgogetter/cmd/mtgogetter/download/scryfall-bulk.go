@@ -46,7 +46,7 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 		}
 
 		var msg ScryfallBulkDataInfo
-		if err:= json.Unmarshal(bodyAsBytes, &msg); err != nil {
+		if err := json.Unmarshal(bodyAsBytes, &msg); err != nil {
 			log.Fatalln("Error when Unmarshalling JSON:", err)
 		}
 		log.Println("Response contained download uri:", msg.Download_uri)
@@ -71,7 +71,7 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 
 		log.Println("Streaming bulk data response body to byte array")
 		// Read response body to bytes
-		bulk_data, err :=io.ReadAll(resp_bulk_data.Body)
+		bulk_data, err := io.ReadAll(resp_bulk_data.Body)
 		if err != nil {
 			log.Println("Error reading bulk data response body:", err)
 		}
