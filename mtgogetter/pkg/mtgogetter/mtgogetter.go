@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 func DownloadBodyToBytes(url string) (respBody []byte) {
@@ -120,4 +122,12 @@ func ReadCloserToDisk(read_closer io.ReadCloser, fname string) (int64, error) {
 		return written_bytes, err
 	}
 	return written_bytes, nil
+}
+
+// Determine if the user wants to write to stdout or a file
+func OutputIsStdout(cmd *cobra.Command) bool {
+	is_save_as_set := cmd.Flag("save-as").Changed
+	fname := cmd.Flag("save-as").Value.String()
+	// Written as an AND statement to allow short-circuiting (with de morgan's law)
+	return !(is_save_as_set && fname != "stdout")
 }
