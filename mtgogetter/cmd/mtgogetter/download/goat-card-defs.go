@@ -26,7 +26,8 @@ Card definitions includes a unique card ID with associated name, cardset, rarity
 			log.Fatalln("Error opening first file from zip archive: ", err)
 		}
 
-		if mtgogetter.OutputIsStdout(cmd) { // If the flag was not set, print to stdout
+		// If the --save-as flag was not set (or is set to stdout), print to stdout
+		if mtgogetter.OutputIsStdout(cmd) {
 			_, err := mtgogetter.ReadCloserToStdout(first_file_from_zip)
 			if err != nil {
 				log.Fatalln("Error printing to stdout:", err)
