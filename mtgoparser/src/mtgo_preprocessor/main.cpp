@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <internal_use_only/config.hpp>
 #include <optional>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <string_view>
 #include <type_traits>
@@ -218,6 +219,10 @@ template<typename... Options>
 
 int main(int argc, char *argv[])
 {
+  // https://github.com/gabime/spdlog/wiki/0.-FAQ#switch-the-default-logger-to-stderr
+  spdlog::set_default_logger(spdlog::stderr_color_st("rename_default_logger_to_keep_format"));
+  spdlog::set_default_logger(spdlog::stderr_color_st(""));
+
   std::string test_data_dir{ "./test/test-data" };
 
   // Get command-line arguments as a vector of string_views
