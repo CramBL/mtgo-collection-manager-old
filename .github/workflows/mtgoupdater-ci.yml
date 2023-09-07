@@ -30,3 +30,25 @@ jobs:
         filters: |
           mtgoupdater:
             - 'mtgoupdater/**'
+
+
+  test-ubuntu:
+    # Only run if there's changes to the Rust code (in /mtgoupdater)
+    needs: changes
+    if: ${{ needs.changes.outputs.mtgoupdater == 'true' }}
+    runs-on: ubuntu-latest
+
+    name: Build & Test Ubuntu
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test --verbose -- --nocapture
