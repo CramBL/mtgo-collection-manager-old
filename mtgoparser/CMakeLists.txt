@@ -58,10 +58,12 @@ add_subdirectory(configured_files)
 # Define the library target
 add_library(mtgoparser INTERFACE)
 target_include_directories(mtgoparser INTERFACE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
+$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+$<INSTALL_INTERFACE:include>
 )
 include(cmake/SystemLink.cmake)
+target_link_system_library(${PROJECT_NAME} INTERFACE fmt::fmt)
 target_link_system_library(${PROJECT_NAME} INTERFACE glaze::glaze)
 target_link_system_library(${PROJECT_NAME} INTERFACE spdlog::spdlog)
 target_link_system_library(${PROJECT_NAME} INTERFACE rapidxml)
@@ -110,25 +112,25 @@ if(CMAKE_SKIP_INSTALL_RULES)
   return()
 endif()
 
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-    "${PROJECT_SOURCE_DIR}/cmake/mtgoparserConfig.cmake.in"
-    "${PROJECT_BINARY_DIR}/mtgoparserConfig.cmake"
-    INSTALL_DESTINATION lib/cmake/mtgoparser
-)
-install(TARGETS spdlog rapidxml fmt mtgoparser
-    EXPORT mtgoparserTargets
-    LIBRARY DESTINATION lib COMPONENT Runtime
-    ARCHIVE DESTINATION lib COMPONENT Development
-    RUNTIME DESTINATION bin COMPONENT Runtime
-    PUBLIC_HEADER DESTINATION include COMPONENT Development
-    BUNDLE DESTINATION bin COMPONENT Runtime
-)
+# include(CMakePackageConfigHelpers)
+# configure_package_config_file(
+#     "${PROJECT_SOURCE_DIR}/cmake/mtgoparserConfig.cmake.in"
+#     "${PROJECT_BINARY_DIR}/mtgoparserConfig.cmake"
+#     INSTALL_DESTINATION lib/cmake/mtgoparser
+# )
+# install(TARGETS spdlog rapidxml fmt mtgoparser
+#     EXPORT mtgoparserTargets
+#     LIBRARY DESTINATION lib COMPONENT Runtime
+#     ARCHIVE DESTINATION lib COMPONENT Development
+#     RUNTIME DESTINATION bin COMPONENT Runtime
+#     PUBLIC_HEADER DESTINATION include COMPONENT Development
+#     BUNDLE DESTINATION bin COMPONENT Runtime
+# )
 
-install(EXPORT mtgoparserTargets DESTINATION lib/cmake/mtgoparser)
-install(FILES "${PROJECT_BINARY_DIR}/mtgoparserConfigVersion.cmake"
-              "${PROJECT_BINARY_DIR}/mtgoparserConfig.cmake"
-        DESTINATION lib/cmake/mtgoparser)
+#install(EXPORT mtgoparserTargets DESTINATION lib/cmake/mtgoparser)
+# install(FILES "${PROJECT_BINARY_DIR}/mtgoparserConfigVersion.cmake"
+#               "${PROJECT_BINARY_DIR}/mtgoparserConfig.cmake"
+#         DESTINATION lib/cmake/mtgoparser)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 
 
@@ -140,6 +142,7 @@ include(cmake/PackageProject.cmake)
 mtgoparser_package_project(
  TARGETS
  mtgo_preprocesser
+ VERSION 0.1.0
  mtgoparser_options
  mtgoparser_warnings
   #FIXME: this does not work! CK
@@ -153,10 +156,7 @@ set(CPACK_PACKAGE_FILE_NAME
    "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
 )
 
-
 include(InstallRequiredSystemLibraries)
 #set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
-set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
 set(CPACK_SOURCE_GENERATOR "TGZ")
 include(CPack)
