@@ -83,8 +83,12 @@ jobs:
       - name: Check CPP build artifacts
         working-directory: ./mtgoupdater
         run: |
+          echo "ls ../mtgoparser/build/src"
           ls ../mtgoparser/build/src
+          echo "ls ../mtgoparser/build/src/mtgo_preprocessor"
           ls ../mtgoparser/build/src/mtgo_preprocessor
+          echo "ls ../mtgoparser/build/src/mtgo_preprocessor/Release"
+          ls ../mtgoparser/build/src/mtgo_preprocessor/Release
 
       ## Build the MTGO Getter binary
       - name: Set up Go
