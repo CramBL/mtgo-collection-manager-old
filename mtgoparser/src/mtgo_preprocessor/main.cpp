@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <internal_use_only/config.hpp>
 #include <optional>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <string_view>
 #include <type_traits>
@@ -218,24 +219,28 @@ template<typename... Options>
 
 int main(int argc, char *argv[])
 {
+  // https://github.com/gabime/spdlog/wiki/0.-FAQ#switch-the-default-logger-to-stderr
+  spdlog::set_default_logger(spdlog::stderr_color_st("rename_default_logger_to_keep_format"));
+  spdlog::set_default_logger(spdlog::stderr_color_st(""));
+
   std::string test_data_dir{ "./test/test-data" };
 
   // Get command-line arguments as a vector of string_views
   const std::vector<std::string_view> args(argv + 1, argv + argc);
 
   if (auto option_arg = clap::has_option_arg(args, "--caller", "--calling")) {
-    fmt::print("Called from: {}\n", option_arg.value());
+    spdlog::info("Called from: {}\n", option_arg.value());
     if (option_arg.value() == "mtgoupdater") {
       test_data_dir.assign("../mtgoparser/test/test-data");
-      fmt::print("Setting test directory to: {}\n", test_data_dir);
+      spdlog::info("Setting test directory to: {}\n", test_data_dir);
     }
   } else if (auto option_test_dir_arg = clap::has_option_arg(args, "--test-dir", "--data-dir")) {
     test_data_dir.assign(option_test_dir_arg.value());
-    fmt::print("Setting test directory to: {}\n", option_test_dir_arg.value());
+    spdlog::info("Setting test directory to: {}\n", option_test_dir_arg.value());
   }
 
   if (clap::has_option(args, "--echo")) {
-    for (const auto &arg : args) { fmt::print("{}\n", arg); }
+    for (const auto &arg : args) { spdlog::info("{}\n", arg); }
   }
 
   if (clap::has_option(args, "--version", "-V")) { fmt::print("v{}\n", mtgoparser::cmake::project_version); }
@@ -243,7 +248,7 @@ int main(int argc, char *argv[])
 
   if (clap::has_option(args, "--example", "--run-example", "--run")) {
     auto res = example::collection_parse(test_data_dir);
-    if (res == 0) { fmt::print("Example complete!"); }
+    if (res == 0) { spdlog::info("Example complete!"); }
   }
 
   if (clap::has_option(args, "--example-json-formats", "--example-json", "--run-example-json")) {

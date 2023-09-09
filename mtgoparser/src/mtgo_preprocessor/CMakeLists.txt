@@ -1,3 +1,5 @@
+find_package(fmt)
+
 add_executable(mtgo_preprocesser main.cpp)
 
 
@@ -9,6 +11,7 @@ target_link_libraries(
 target_link_system_libraries(
   mtgo_preprocesser
   PRIVATE glaze::glaze
+          fmt::fmt
           spdlog::spdlog
           rapidxml
           mtgoparser
