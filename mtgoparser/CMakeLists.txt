@@ -68,19 +68,6 @@ target_link_system_library(${PROJECT_NAME} INTERFACE glaze::glaze)
 target_link_system_library(${PROJECT_NAME} INTERFACE spdlog::spdlog)
 target_link_system_library(${PROJECT_NAME} INTERFACE rapidxml)
 
-
-#include(CMakePackageConfigHelpers)
-# write_basic_package_version_file(
-#     "${PROJECT_BINARY_DIR}/mtgoparserConfigVersion.cmake"
-#     VERSION 0.0.1
-#     COMPATIBILITY AnyNewerVersion
-# )
-
-
-
-
-
-
 # To build the binary executable that can do a full parse of all card data files
 add_subdirectory(src)
 
@@ -112,30 +99,6 @@ if(CMAKE_SKIP_INSTALL_RULES)
   return()
 endif()
 
-# include(CMakePackageConfigHelpers)
-# configure_package_config_file(
-#     "${PROJECT_SOURCE_DIR}/cmake/mtgoparserConfig.cmake.in"
-#     "${PROJECT_BINARY_DIR}/mtgoparserConfig.cmake"
-#     INSTALL_DESTINATION lib/cmake/mtgoparser
-# )
-# install(TARGETS spdlog rapidxml fmt mtgoparser
-#     EXPORT mtgoparserTargets
-#     LIBRARY DESTINATION lib COMPONENT Runtime
-#     ARCHIVE DESTINATION lib COMPONENT Development
-#     RUNTIME DESTINATION bin COMPONENT Runtime
-#     PUBLIC_HEADER DESTINATION include COMPONENT Development
-#     BUNDLE DESTINATION bin COMPONENT Runtime
-# )
-
-#install(EXPORT mtgoparserTargets DESTINATION lib/cmake/mtgoparser)
-# install(FILES "${PROJECT_BINARY_DIR}/mtgoparserConfigVersion.cmake"
-#               "${PROJECT_BINARY_DIR}/mtgoparserConfig.cmake"
-#         DESTINATION lib/cmake/mtgoparser)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
-
-
-
-## Not ready
 include(cmake/PackageProject.cmake)
 
 # Add other targets here, by default we just package one executable
