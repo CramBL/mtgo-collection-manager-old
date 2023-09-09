@@ -4,6 +4,7 @@ on: [pull_request]
 jobs:
     # JOB to run change detection
   changes:
+    name: 🔎 Detect Code Changes before running CI Jobs 🔬
     runs-on: ubuntu-latest
     # Required permissions
     permissions:

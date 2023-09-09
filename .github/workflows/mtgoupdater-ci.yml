@@ -16,7 +16,8 @@ env:
 
 jobs:
     # JOB to run change detection
-  changes:
+  change-detection:
+    name: 🔎 Detect Code Changes before running CI Jobs 🔬
     runs-on: ubuntu-latest
     # Set job outputs to values from filter step
     outputs:
@@ -32,74 +33,85 @@ jobs:
             - 'mtgoupdater/**'
 
 
-  test-ubuntu:
+  Test:
     # Only run if there's changes to the Rust code (in /mtgoupdater)
-    needs: changes
-    if: ${{ needs.changes.outputs.mtgoupdater == 'true' }}
-    runs-on: ubuntu-latest
+    needs: change-detection
+    if: ${{ needs.change-detection.outputs.mtgoupdater == 'true' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            compiler: gcc-13
+            generator: "Ninja Multi-Config"
+            enable_ipo: On
 
-    name: Build & Test Ubuntu
+          - os: macos-12
+            compiler: llvm-15.0.3
+            generator: "Ninja Multi-Config"
+            enable_ipo: Off
+
+          - os: windows-2022
+            compiler: msvc
+            generator: "Visual Studio 17 2022"
+            enable_ipo: On
+
+
+    name: ⚒️ Build & Test 📝
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: moonrepo/setup-rust@v1
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: check & lint
+          components: clippy
+      - name: 🍄 Check & Lint MTGO Updater 🩺
         working-directory: ./mtgoupdater
         run: |
           cargo check --verbose
           cargo clean
           cargo clippy -- -D warnings --no-deps
 
-          # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
+      # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
       #  since the tests validate integration between MTGO Updater and Parser/Getter
       ## Build the MTGO Parser binary
-      - name: Setup Cpp
+      - name: ⚙️ Setup C++ Tools
         uses: aminya/setup-cpp@v1
         with:
-          compiler: gcc-13
+          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+          compiler: ${{ matrix.compiler }}
           cmake: true
           ninja: true
-      - name: Configure CMake
+      - name: 🔧 Configure CMake
         working-directory: ./mtgoparser
         run: >
           cmake -S .
           -B ./build
-          -G "Ninja Multi-Config"
-          -DBUILD_TESTING=OFF
-          -Dmtgoparser_ENABLE_IPO=On
+          -G "${{matrix.generator}}"
+          -Dmtgoparser_ENABLE_IPO=${{matrix.enable_ipo }}
           -DCMAKE_BUILD_TYPE:STRING=Release
-          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
-          -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=${{ github.sha }}
-      - name: Build
+          -DBUILD_TESTING=OFF
+          -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
+          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
+          -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
+          -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF
+          -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
+      - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser
         run: >
           cmake --build ./build
           --config Release
 
-      - name: Check CPP build artifacts
-        working-directory: ./mtgoupdater
-        run: |
-          echo "ls ../mtgoparser/build/src"
-          ls ../mtgoparser/build/src
-          echo "ls ../mtgoparser/build/src/mtgo_preprocessor"
-          ls ../mtgoparser/build/src/mtgo_preprocessor
-          echo "ls ../mtgoparser/build/src/mtgo_preprocessor/Release"
-          ls ../mtgoparser/build/src/mtgo_preprocessor/Release
-
       ## Build the MTGO Getter binary
-      - name: Set up Go
+      - name: Setup Go 🛠️ Toolchain
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - name: Build
+      - name: Build ⚒️ MTGO Getter 🐹
         run: go build -C mtgogetter -v
 
       ## Run the integration tests
-      - name: test
+      - name: Test 📝 MTGO Updater
         working-directory: ./mtgoupdater
         run: |
           cargo test --verbose -- --nocapture
