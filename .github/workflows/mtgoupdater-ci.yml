@@ -73,7 +73,7 @@ jobs:
           -DCMAKE_BUILD_TYPE:STRING=Release
           -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
-          -DGIT_SHA:STRING=70abfebcb2abbed97b05d51dc6b9fd4dc3650219
+          -DGIT_SHA:STRING=${{ github.sha }}
       - name: Build
         working-directory: ./mtgoparser
         run: >
