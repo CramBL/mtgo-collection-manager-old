@@ -50,9 +50,10 @@ jobs:
         working-directory: ./mtgoupdater
         run: |
           cargo check --verbose
-          - cargo clean
-          - cargo clippy -- -D warnings --no-deps
-      # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
+          cargo clean
+          cargo clippy -- -D warnings --no-deps
+
+          # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
       #  since the tests validate integration between MTGO Updater and Parser/Getter
       ## Build the MTGO Parser binary
       - name: Setup Cpp
