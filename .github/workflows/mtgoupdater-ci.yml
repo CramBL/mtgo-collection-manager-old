@@ -40,16 +40,54 @@ jobs:
 
     name: Build & Test Ubuntu
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
-      - name: check
+      - name: check & lint
         working-directory: ./mtgoupdater
         run: |
           cargo check --verbose
+          - cargo clean
+          - cargo clippy -- -D warnings --no-deps
+      # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
+      #  since the tests validate integration between MTGO Updater and Parser/Getter
+      ## Build the MTGO Parser binary
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-13
+          cmake: true
+          ninja: true
+      - name: Configure CMake
+        working-directory: ./mtgoparser
+        run: >
+          cmake -S .
+          -B ./build
+          -G "Ninja Multi-Config"
+          -DBUILD_TESTING=OFF
+          -Dmtgoparser_ENABLE_IPO=On
+          -DCMAKE_BUILD_TYPE:STRING=Release
+          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
+          -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
+          -DGIT_SHA:STRING=70abfebcb2abbed97b05d51dc6b9fd4dc3650219
+      - name: Build
+        working-directory: ./mtgoparser
+        run: >
+          cmake --build ./build
+          --config Release
+
+      ## Build the MTGO Getter binary
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - name: Build
+        run: go build -C mtgogetter -v
+
+      ## Run the integration tests
       - name: test
         working-directory: ./mtgoupdater
         run: |
