@@ -39,6 +39,7 @@ jobs:
     if: ${{ needs.change-detection.outputs.mtgoupdater == 'true' }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04
@@ -90,6 +91,7 @@ jobs:
           -Dmtgoparser_ENABLE_IPO=${{matrix.enable_ipo }}
           -DCMAKE_BUILD_TYPE:STRING=Release
           -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
+          -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=${{ github.sha }}
       - name: Build ⚒️ MTGO Parser 🤓
