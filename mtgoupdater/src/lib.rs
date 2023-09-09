@@ -138,7 +138,7 @@ mod tests {
         // Check the mtgo_preprocessor binary exists
         assert!(
             std::path::Path::new(MTGOPARSER_BIN).exists(),
-            "mtgo_preprocessor binary does not exist, build mtgoparser before running this test"
+            "mtgo_preprocessor binary ({MTGOPARSER_BIN}) does not exist, build mtgoparser before running this test"
         );
 
         let test_out = run_mtgo_preprocessor_example();
