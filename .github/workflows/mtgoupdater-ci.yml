@@ -33,13 +33,31 @@ jobs:
             - 'mtgoupdater/**'
 
 
-  test-ubuntu:
+  Test:
     # Only run if there's changes to the Rust code (in /mtgoupdater)
     needs: change-detection
     if: ${{ needs.change-detection.outputs.mtgoupdater == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            compiler: gcc-13
+            generator: "Ninja Multi-Config"
+            enable_ipo: On
 
-    name: Ubuntu 🐧 Build & Test
+          - os: macos-12
+            compiler: llvm-15.0.3
+            generator: "Ninja Multi-Config"
+            enable_ipo: Off
+
+          - os: windows-2022
+            compiler: msvc
+            generator: "Visual Studio 17 2022"
+            enable_ipo: On
+
+
+    name: ⚒️ Build & Test 📝
     steps:
       - uses: actions/checkout@v3
       - uses: moonrepo/setup-rust@v1
@@ -58,7 +76,8 @@ jobs:
       - name: ⚙️ Setup C++ Tools
         uses: aminya/setup-cpp@v1
         with:
-          compiler: gcc-13
+          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+          compiler: ${{ matrix.compiler }}
           cmake: true
           ninja: true
       - name: 🔧 Configure CMake
@@ -66,132 +85,11 @@ jobs:
         run: >
           cmake -S .
           -B ./build
-          -G "Ninja Multi-Config"
+          -G "${{matrix.generator}}"
           -DBUILD_TESTING=OFF
-          -Dmtgoparser_ENABLE_IPO=On
+          -Dmtgoparser_ENABLE_IPO=${{matrix.enable_ipo }}
           -DCMAKE_BUILD_TYPE:STRING=Release
-          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
-          -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
-          -DGIT_SHA:STRING=${{ github.sha }}
-      - name: Build ⚒️ MTGO Parser 🤓
-        working-directory: ./mtgoparser
-        run: >
-          cmake --build ./build
-          --config Release
-
-      ## Build the MTGO Getter binary
-      - name: Setup Go 🛠️ Toolchain
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-      - name: Build ⚒️ MTGO Getter 🐹
-        run: go build -C mtgogetter -v
-
-      ## Run the integration tests
-      - name: Test 📝 MTGO Updater
-        working-directory: ./mtgoupdater
-        run: |
-          cargo test --verbose -- --nocapture
-
-  test-windows:
-    # Only run if there's changes to the Rust code (in /mtgoupdater)
-    needs: change-detection
-    if: ${{ needs.change-detection.outputs.mtgoupdater == 'true' }}
-    runs-on: windows-2022
-
-    name: Windows 💻 Build & Test
-    steps:
-      - uses: actions/checkout@v3
-      - uses: moonrepo/setup-rust@v1
-        with:
-          components: clippy
-      - name: 🍄 Check & Lint MTGO Updater 🩺
-        working-directory: ./mtgoupdater
-        run: |
-          cargo check --verbose
-          cargo clean
-          cargo clippy -- -D warnings --no-deps
-
-      # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
-      #  since the tests validate integration between MTGO Updater and Parser/Getter
-      ## Build the MTGO Parser binary
-      - name: ⚙️ Setup C++ Tools
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: msvc
-          vcvarsall: true
-          cmake: true
-          ninja: true
-      - name: 🔧 Configure CMake
-        working-directory: ./mtgoparser
-        run: >
-          cmake -S .
-          -B ./build
-          -G "Visual Studio 17 2022"
-          -DBUILD_TESTING=OFF
-          -Dmtgoparser_ENABLE_IPO=On
-          -DCMAKE_BUILD_TYPE:STRING=Release
-          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
-          -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
-          -DGIT_SHA:STRING=${{ github.sha }}
-      - name: Build ⚒️ MTGO Parser 🤓
-        working-directory: ./mtgoparser
-        run: >
-          cmake --build ./build
-          --config Release
-
-      ## Build the MTGO Getter binary
-      - name: Setup Go 🛠️ Toolchain
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-      - name: Build ⚒️ MTGO Getter 🐹
-        run: go build -C mtgogetter -v
-
-      ## Run the integration tests
-      - name: Test 📝 MTGO Updater
-        working-directory: ./mtgoupdater
-        run: |
-          cargo test --verbose -- --nocapture
-
-  test-macos:
-    # Only run if there's changes to the Rust code (in /mtgoupdater)
-    needs: change-detection
-    if: ${{ needs.change-detection.outputs.mtgoupdater == 'true' }}
-    runs-on: macos-12
-
-    name: MacOS 🍎 Build & Test
-    steps:
-      - uses: actions/checkout@v3
-      - uses: moonrepo/setup-rust@v1
-        with:
-          components: clippy
-      - name: 🍄 Check & Lint MTGO Updater 🩺
-        working-directory: ./mtgoupdater
-        run: |
-          cargo check --verbose
-          cargo clean
-          cargo clippy -- -D warnings --no-deps
-
-      # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
-      #  since the tests validate integration between MTGO Updater and Parser/Getter
-      ## Build the MTGO Parser binary
-      - name: ⚙️ Setup C++ Tools
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: gcc-13
-          cmake: true
-          ninja: true
-      - name: 🔧 Configure CMake
-        working-directory: ./mtgoparser
-        run: >
-          cmake -S .
-          -B ./build
-          -G "Ninja Multi-Config"
-          -DBUILD_TESTING=OFF
-          -Dmtgoparser_ENABLE_IPO=Off
-          -DCMAKE_BUILD_TYPE:STRING=Release
-          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
+          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=${{ github.sha }}
       - name: Build ⚒️ MTGO Parser 🤓
