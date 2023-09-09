@@ -1,10 +1,12 @@
 use std::process::Command;
 
+// Path to the MTGO Getter binary in the repository
 const MTGOGETTER_BIN: &str = if cfg!(windows) {
     "../mtgogetter/mtgogetter.exe"
 } else {
     "../mtgogetter/mtgogetter"
 };
+
 const MTGOPARSER_BIN: &str = if cfg!(windows) {
     "../mtgoparser/build/src/mtgo_preprocessor/mtgo_preprocesser.exe"
 } else {
