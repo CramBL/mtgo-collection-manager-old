@@ -80,6 +80,14 @@ jobs:
           cmake --build ./build
           --config Release
 
+      - name: Check CPP build artifacts
+        working-directory: ./mtgoupdater
+        run: |
+          ll ../mtgoparser
+          ll ../mtgoparser/build
+          ll ../mtgoparser/build/src
+          ll ../mtgoparser/build/src/
+
       ## Build the MTGO Getter binary
       - name: Set up Go
         uses: actions/setup-go@v4
