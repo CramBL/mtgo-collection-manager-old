@@ -8,7 +8,7 @@ const MTGOGETTER_BIN: &str = if cfg!(windows) {
 const MTGOPARSER_BIN: &str = if cfg!(windows) {
     "../mtgoparser/build/src/mtgo_preprocessor/mtgo_preprocesser.exe"
 } else {
-    "../mtgoparser/build/src/mtgo_preprocessor/mtgo_preprocesser"
+    "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser"
 };
 
 pub fn download_goatbots_price_history() -> Result<std::process::Output, Box<dyn std::error::Error>>
