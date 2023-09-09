@@ -16,7 +16,7 @@ env:
 
 jobs:
     # JOB to run change detection
-  changes:
+  change-detection:
     runs-on: ubuntu-latest
     # Set job outputs to values from filter step
     outputs:
@@ -34,17 +34,17 @@ jobs:
 
   test-ubuntu:
     # Only run if there's changes to the Rust code (in /mtgoupdater)
-    needs: changes
-    if: ${{ needs.changes.outputs.mtgoupdater == 'true' }}
+    needs: change-detection
+    if: ${{ needs.change-detection.outputs.mtgoupdater == 'true' }}
     runs-on: ubuntu-latest
 
-    name: Build & Test Ubuntu
+    name: Ubuntu 🐧 Build & Test
     steps:
       - uses: actions/checkout@v3
       - uses: moonrepo/setup-rust@v1
         with:
           components: clippy
-      - name: check & lint
+      - name: 🍄 Check & Lint MTGO Updater 🩺
         working-directory: ./mtgoupdater
         run: |
           cargo check --verbose
@@ -60,7 +60,7 @@ jobs:
           compiler: gcc-13
           cmake: true
           ninja: true
-      - name: Configure CMake
+      - name: 📦 Configure CMake
         working-directory: ./mtgoparser
         run: >
           cmake -S .
@@ -72,49 +72,39 @@ jobs:
           -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=${{ github.sha }}
-      - name: Build
+      - name: Build ⚒️
         working-directory: ./mtgoparser
         run: >
           cmake --build ./build
           --config Release
 
-      - name: Check CPP build artifacts
-        working-directory: ./mtgoupdater
-        run: |
-          echo "ls ../mtgoparser/build/src"
-          ls ../mtgoparser/build/src
-          echo "ls ../mtgoparser/build/src/mtgo_preprocessor"
-          ls ../mtgoparser/build/src/mtgo_preprocessor
-          echo "ls ../mtgoparser/build/src/mtgo_preprocessor/Release"
-          ls ../mtgoparser/build/src/mtgo_preprocessor/Release
-
       ## Build the MTGO Getter binary
-      - name: Set up Go
+      - name: Setup Go 🛠️ Toolchain
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - name: Build
+      - name: Build ⚒️
         run: go build -C mtgogetter -v
 
       ## Run the integration tests
-      - name: test
+      - name: Test 📝 MTGO Updater
         working-directory: ./mtgoupdater
         run: |
           cargo test --verbose -- --nocapture
 
   test-windows:
     # Only run if there's changes to the Rust code (in /mtgoupdater)
-    needs: changes
-    if: ${{ needs.changes.outputs.mtgoupdater == 'true' }}
+    needs: change-detection
+    if: ${{ needs.change-detection.outputs.mtgoupdater == 'true' }}
     runs-on: windows-2022
 
-    name: Build & Test Windows
+    name: Windows 💻 Build & Test
     steps:
       - uses: actions/checkout@v3
       - uses: moonrepo/setup-rust@v1
         with:
           components: clippy
-      - name: check & lint
+      - name: 🍄 Check & Lint MTGO Updater 🩺
         working-directory: ./mtgoupdater
         run: |
           cargo check --verbose
@@ -131,7 +121,7 @@ jobs:
           vcvarsall: true
           cmake: true
           ninja: true
-      - name: Configure CMake
+      - name: 📦 Configure CMake
         working-directory: ./mtgoparser
         run: >
           cmake -S .
@@ -143,49 +133,39 @@ jobs:
           -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=${{ github.sha }}
-      - name: Build
+      - name: Build ⚒️
         working-directory: ./mtgoparser
         run: >
           cmake --build ./build
           --config Release
 
-      - name: Check CPP build artifacts
-        working-directory: ./mtgoupdater
-        run: |
-          echo "ls ../mtgoparser/build/src"
-          ls ../mtgoparser/build/src
-          echo "ls ../mtgoparser/build/src/mtgo_preprocessor"
-          ls ../mtgoparser/build/src/mtgo_preprocessor
-          echo "ls ../mtgoparser/build/src/mtgo_preprocessor/Release"
-          ls ../mtgoparser/build/src/mtgo_preprocessor/Release
-
       ## Build the MTGO Getter binary
-      - name: Set up Go
+      - name: Setup Go 🛠️ Toolchain
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - name: Build
+      - name: Build ⚒️
         run: go build -C mtgogetter -v
 
       ## Run the integration tests
-      - name: test
+      - name: Test 📝 MTGO Updater
         working-directory: ./mtgoupdater
         run: |
           cargo test --verbose -- --nocapture
 
   test-macos:
     # Only run if there's changes to the Rust code (in /mtgoupdater)
-    needs: changes
-    if: ${{ needs.changes.outputs.mtgoupdater == 'true' }}
+    needs: change-detection
+    if: ${{ needs.change-detection.outputs.mtgoupdater == 'true' }}
     runs-on: macos-12
 
-    name: Build & Test MacOS
+    name: MacOS 🍎 Build & Test
     steps:
       - uses: actions/checkout@v3
       - uses: moonrepo/setup-rust@v1
         with:
           components: clippy
-      - name: check & lint
+      - name: 🍄 Check & Lint MTGO Updater 🩺
         working-directory: ./mtgoupdater
         run: |
           cargo check --verbose
@@ -195,13 +175,13 @@ jobs:
       # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
       #  since the tests validate integration between MTGO Updater and Parser/Getter
       ## Build the MTGO Parser binary
-      - name: Setup Cpp
+      - name: Setup C++ Tools
         uses: aminya/setup-cpp@v1
         with:
           compiler: gcc-13
           cmake: true
           ninja: true
-      - name: Configure CMake
+      - name: 📦 Configure CMake
         working-directory: ./mtgoparser
         run: >
           cmake -S .
@@ -213,32 +193,22 @@ jobs:
           -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=${{ github.sha }}
-      - name: Build
+      - name: Build ⚒️
         working-directory: ./mtgoparser
         run: >
           cmake --build ./build
           --config Release
 
-      - name: Check CPP build artifacts
-        working-directory: ./mtgoupdater
-        run: |
-          echo "ls ../mtgoparser/build/src"
-          ls ../mtgoparser/build/src
-          echo "ls ../mtgoparser/build/src/mtgo_preprocessor"
-          ls ../mtgoparser/build/src/mtgo_preprocessor
-          echo "ls ../mtgoparser/build/src/mtgo_preprocessor/Release"
-          ls ../mtgoparser/build/src/mtgo_preprocessor/Release
-
       ## Build the MTGO Getter binary
-      - name: Set up Go
+      - name: Setup Go 🛠️ Toolchain
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - name: Build
+      - name: Build ⚒️
         run: go build -C mtgogetter -v
 
       ## Run the integration tests
-      - name: test
+      - name: Test 📝 MTGO Updater
         working-directory: ./mtgoupdater
         run: |
           cargo test --verbose -- --nocapture
