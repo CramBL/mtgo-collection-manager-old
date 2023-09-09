@@ -17,6 +17,7 @@ env:
 jobs:
     # JOB to run change detection
   change-detection:
+    name: 🔎 Detect Code Changes before running CI Jobs 🔬
     runs-on: ubuntu-latest
     # Set job outputs to values from filter step
     outputs:
@@ -51,16 +52,16 @@ jobs:
           cargo clean
           cargo clippy -- -D warnings --no-deps
 
-          # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
+      # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
       #  since the tests validate integration between MTGO Updater and Parser/Getter
       ## Build the MTGO Parser binary
-      - name: Setup Cpp
+      - name: ⚙️ Setup C++ Tools
         uses: aminya/setup-cpp@v1
         with:
           compiler: gcc-13
           cmake: true
           ninja: true
-      - name: 📦 Configure CMake
+      - name: 🔧 Configure CMake
         working-directory: ./mtgoparser
         run: >
           cmake -S .
@@ -72,7 +73,7 @@ jobs:
           -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=${{ github.sha }}
-      - name: Build ⚒️
+      - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser
         run: >
           cmake --build ./build
@@ -83,7 +84,7 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - name: Build ⚒️
+      - name: Build ⚒️ MTGO Getter 🐹
         run: go build -C mtgogetter -v
 
       ## Run the integration tests
@@ -111,17 +112,17 @@ jobs:
           cargo clean
           cargo clippy -- -D warnings --no-deps
 
-          # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
+      # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
       #  since the tests validate integration between MTGO Updater and Parser/Getter
       ## Build the MTGO Parser binary
-      - name: Setup Cpp
+      - name: ⚙️ Setup C++ Tools
         uses: aminya/setup-cpp@v1
         with:
           compiler: msvc
           vcvarsall: true
           cmake: true
           ninja: true
-      - name: 📦 Configure CMake
+      - name: 🔧 Configure CMake
         working-directory: ./mtgoparser
         run: >
           cmake -S .
@@ -133,7 +134,7 @@ jobs:
           -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=${{ github.sha }}
-      - name: Build ⚒️
+      - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser
         run: >
           cmake --build ./build
@@ -144,7 +145,7 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - name: Build ⚒️
+      - name: Build ⚒️ MTGO Getter 🐹
         run: go build -C mtgogetter -v
 
       ## Run the integration tests
@@ -175,13 +176,13 @@ jobs:
       # Now build MTGO Parser and MTGO Getter before running MTGO Updater tests
       #  since the tests validate integration between MTGO Updater and Parser/Getter
       ## Build the MTGO Parser binary
-      - name: Setup C++ Tools
+      - name: ⚙️ Setup C++ Tools
         uses: aminya/setup-cpp@v1
         with:
           compiler: gcc-13
           cmake: true
           ninja: true
-      - name: 📦 Configure CMake
+      - name: 🔧 Configure CMake
         working-directory: ./mtgoparser
         run: >
           cmake -S .
@@ -193,7 +194,7 @@ jobs:
           -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=${{ github.sha }}
-      - name: Build ⚒️
+      - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser
         run: >
           cmake --build ./build
@@ -204,7 +205,7 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - name: Build ⚒️
+      - name: Build ⚒️ MTGO Getter 🐹
         run: go build -C mtgogetter -v
 
       ## Run the integration tests

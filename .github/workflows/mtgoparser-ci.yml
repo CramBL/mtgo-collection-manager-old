@@ -19,6 +19,7 @@ env:
 jobs:
   # JOB to run change detection
   changes:
+    name: 🔎 Detect Code Changes before running CI Jobs 🔬
     runs-on: ubuntu-22.04
     # Required permissions
     permissions:
@@ -139,7 +140,7 @@ jobs:
 
 
     steps:
-      - name: Check for llvm version mismatches
+      - name: Check 🔬 for llvm version mismatches
         if: ${{ contains(matrix.compiler, 'llvm') && !contains(matrix.compiler, env.CLANG_TIDY_VERSION) }}
         uses: actions/github-script@v3
         with:
@@ -148,7 +149,7 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Setup Cache
+      - name: ⚙️ Setup Cache
         uses: ./.github/actions/setup_cache
         with:
           compiler: ${{ matrix.compiler }}
@@ -156,13 +157,13 @@ jobs:
           packaging_maintainer_mode: ${{ matrix.packaging_maintainer_mode }}
           generator: ${{ matrix.generator }}
 
-      - name: mtgoparser
+      - name: 🗻 Export constants as environment variables 🏝️
         uses: cardinalby/export-env-action@v2
         with:
           envFile: '.github/constants.env'
 
 
-      - name: Setup Cpp
+      - name: ⚙️ Setup C++ Tools
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
@@ -180,7 +181,7 @@ jobs:
           gcovr: true
           opencppcoverage: true
 
-      - name: Configure CMake
+      - name: 🔧 Configure CMake
         working-directory: ./mtgoparser
         run: >
           cmake -S .
@@ -192,14 +193,14 @@ jobs:
           -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }}
           -DGIT_SHA:STRING=${{ github.sha }}
 
-      - name: Build
+      - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser
         run: >
           cmake --build ./build
           --config ${{matrix.build_type}}
 
 
-      - name: Unix - Test and coverage
+      - name: Unix 🐧🍎 Test & coverage
         if: runner.os != 'Windows'
         working-directory: ./mtgoparser/build
         # Execute tests defined by the CMake configuration.
@@ -215,7 +216,7 @@ jobs:
           --gcov-executable '${{ matrix.gcov_executable }}'
           --filter ../include/mtgoparser
 
-      - name: Windows - Test and coverage
+      - name: Windows 💻 Test & coverage
         if: runner.os == 'Windows'
         working-directory: ./mtgoparser/build
         run: >
@@ -224,13 +225,13 @@ jobs:
           -- ctest -C ${{matrix.build_type}} --verbose
           # --sources ..\include\mtgoparser*
 
-      - name: CPack
+      - name: 📦 CPack
         if: matrix.package_generator != ''
         working-directory: ./mtgoparser/build
         run: |
           cpack -C ${{matrix.build_type}} -G ${{matrix.package_generator}}
 
-      - name: Upload package artifact (From CPack)
+      - name: 📩 Upload package artifact (From CPack)
         if: matrix.package_generator != ''
         uses: actions/upload-artifact@v3
         with:
@@ -239,7 +240,7 @@ jobs:
             mtgoparser/build/mtgoparser-*
           retention-days: 7
 
-      - name: Publish Tagged Release
+      - name: 🚀 Publish Tagged Release
         uses: softprops/action-gh-release@v1
         if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.package_generator != '' }}
         with:
