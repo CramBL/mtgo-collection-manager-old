@@ -71,7 +71,7 @@ jobs:
           -DBUILD_TESTING=OFF
           -Dmtgoparser_ENABLE_IPO=On
           -DCMAKE_BUILD_TYPE:STRING=Release
-          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
+          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -DGIT_SHA:STRING=70abfebcb2abbed97b05d51dc6b9fd4dc3650219
       - name: Build
