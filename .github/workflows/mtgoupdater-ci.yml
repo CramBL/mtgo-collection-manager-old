@@ -87,13 +87,15 @@ jobs:
           cmake -S .
           -B ./build
           -G "${{matrix.generator}}"
-          -DBUILD_TESTING=OFF
           -Dmtgoparser_ENABLE_IPO=${{matrix.enable_ipo }}
           -DCMAKE_BUILD_TYPE:STRING=Release
+          -DGIT_SHA:STRING=${{ github.sha }}
+          -DBUILD_TESTING=OFF
+          -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
           -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
           -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
-          -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
-          -DGIT_SHA:STRING=${{ github.sha }}
+          -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF
+          -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
       - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser
         run: >
