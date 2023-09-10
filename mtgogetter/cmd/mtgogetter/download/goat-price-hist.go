@@ -18,7 +18,10 @@ var DownloadGoatbotsPriceHistoryCmd = &cobra.Command{
 The price history appears as a JSON map of unique card IDs and associated tix price`,
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		dl_bytes := mtgogetter.DownloadBodyToBytes(GoatbotsPriceHistoryUrl)
+		dl_bytes, err := mtgogetter.DownloadBodyToBytes(GoatbotsPriceHistoryUrl)
+		if err != nil {
+			log.Fatalln("Error downloading body:", err)
+		}
 		reader := mtgogetter.UnzipFromBytes(dl_bytes)
 		first_file_from_zip, err := mtgogetter.FirstFileFromZip(reader)
 		if err != nil {

@@ -28,7 +28,10 @@ var DownloadCustomUrlStringCmd = &cobra.Command{
 			}
 		}
 
-		dl_bytes := mtgogetter.DownloadBodyToBytes(dl_url_arg)
+		dl_bytes, err := mtgogetter.DownloadBodyToBytes(dl_url_arg)
+		if err != nil {
+			log.Fatalln("Error downloading body:", err)
+		}
 
 		if mtgogetter.OutputIsStdout(cmd) {
 			if do_decompress {
