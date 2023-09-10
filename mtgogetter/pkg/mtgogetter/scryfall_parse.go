@@ -27,7 +27,7 @@ func ScryfallCardsFromFile(fname string) ([]ScryfallCard, error) {
 		return nil, err
 	}
 	// Unmarshal JSON
-	scryfall_cards, err := DeserializeScryfallCards(file_data)
+	scryfall_cards, err := ScryfallCardsFromJsonBytes(file_data)
 	if err != nil {
 		return nil, err
 	}
@@ -35,13 +35,22 @@ func ScryfallCardsFromFile(fname string) ([]ScryfallCard, error) {
 	return scryfall_cards, nil
 }
 
-func DeserializeScryfallCards(byteSlice []byte) ([]ScryfallCard, error) {
+func ScryfallCardsFromJsonBytes(byteSlice []byte) ([]ScryfallCard, error) {
 	var bulk_data []ScryfallCard
 	if err := json.Unmarshal(byteSlice, &bulk_data); err != nil {
 		return nil, err
 	}
 	return bulk_data, nil
 }
+
+func ScryfallCardsFromJsonStream(decoder *json.Decoder) ([]ScryfallCard, error) {
+	var bulk_data []ScryfallCard
+	if err := decoder.Decode(&bulk_data); err != nil {
+		return nil, err
+	}
+	return bulk_data, nil
+}
+
 
 func SerializeScryfallCards(scryfall_cards []ScryfallCard) ([]byte, error) {
 	return json.Marshal(scryfall_cards)

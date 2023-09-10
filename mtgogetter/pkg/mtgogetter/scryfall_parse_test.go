@@ -81,7 +81,7 @@ func TestScryfallJsonSerialize(t *testing.T) {
 	}
 
 	// Deserialize again and check that it matches the first deserialization
-	deserialized_bulk_data, err := DeserializeScryfallCards(serialized_bulk_data)
+	deserialized_bulk_data, err := ScryfallCardsFromJsonBytes(serialized_bulk_data)
 	if err != nil {
 		t.Errorf("Error when deserializing Scryfall JSON: %s", err)
 	}
