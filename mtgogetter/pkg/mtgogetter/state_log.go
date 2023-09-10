@@ -60,9 +60,15 @@ func (g *goatbots) UpdateCardDefinitionsTimestamp() {
 }
 
 type scryfall struct {
+    // Bulk data is updated every 12 hours
 	Bulk_data_updated_at time.Time
 }
 
+// Method for the scryfall struct to check if the bulk data is up to date.
+// outdated if the timestamp is older than the `updated_at` retrieved from the Scryfall API
+func (s *scryfall) IsBulkDataUpdated(api_timestamp time.Time) bool {
+    return s.Bulk_data_updated_at.After(api_timestamp)
+}
 type StateLog struct {
 	Title    string
 	Goatbots goatbots `toml:"goatbots"`
