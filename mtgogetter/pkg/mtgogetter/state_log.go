@@ -24,6 +24,11 @@ func (g *goatbots) IsPriceUpdated() bool {
     return g.Prices_updated_at.After(utc_4am_yesterday)
 }
 
+// Method for the goatbots struct to generate a new timestamp for the price data
+func (g *goatbots) UpdatePriceTimestamp() {
+    g.Prices_updated_at = time.Unix(time.Now().UTC().Unix(), 0)
+}
+
 
 type scryfall struct {
     Updated_at  time.Time
