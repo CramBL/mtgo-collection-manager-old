@@ -10,7 +10,7 @@ import (
 )
 
 type goatbots struct {
-    Updated_at  time.Time
+    Card_definitions_updated_at  time.Time
     Prices_updated_at  time.Time
 }
 
@@ -32,7 +32,7 @@ func NewStateLog() *StateLog {
         Title: "log for MTGO Getter state, such as updated_at timestamps",
         // Set time stamps to Unix epoch to signify that they have not been updated yet
         Goatbots: goatbots{
-            Updated_at: time.Unix(0, 0),
+            Card_definitions_updated_at: time.Unix(0, 0),
             Prices_updated_at: time.Unix(0, 0),
         },
         Scryfall: scryfall{

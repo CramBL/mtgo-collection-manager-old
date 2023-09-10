@@ -36,8 +36,8 @@ func TestStateLogDeserialize(t *testing.T) {
 		t.Errorf("Expected 'log for MTGO Getter state, such as updated_at timestamps' got %s", state_log.Title)
 	}
 
-	if !strings.Contains(state_log.Goatbots.Updated_at.String(), "1970-01-01 01:00:00") {
-		t.Errorf("Expected updated_at to contain '1970-01-01 01:00:00' got %s", state_log.Goatbots.Updated_at.String())
+	if !strings.Contains(state_log.Goatbots.Card_definitions_updated_at.String(), "1970-01-01 01:00:00") {
+		t.Errorf("Expected updated_at to contain '1970-01-01 01:00:00' got %s", state_log.Goatbots.Card_definitions_updated_at.String())
 	}
 
 	if state_log.Scryfall.Updated_at.Day() != 1 {
@@ -47,11 +47,11 @@ func TestStateLogDeserialize(t *testing.T) {
 		t.Errorf("Expected 1 got %d", state_log.Scryfall.Updated_at.Hour())
 	}
 
-	if !state_log.Scryfall.Updated_at.Equal(state_log.Goatbots.Updated_at) {
+	if !state_log.Scryfall.Updated_at.Equal(state_log.Goatbots.Card_definitions_updated_at) {
 		t.Errorf("Expected Goatbots and Scryfall updated_at to be the same")
 	}
-	if !state_log.Goatbots.Updated_at.Equal(state_log.Goatbots.Prices_updated_at) {
-		t.Errorf("Expected Goatbots and Goatbots prices_updated_at to be the same, but got \n%s\n!=\n%s\n", state_log.Goatbots.Updated_at.String(), state_log.Goatbots.Prices_updated_at.String())
+	if !state_log.Goatbots.Card_definitions_updated_at.Equal(state_log.Goatbots.Prices_updated_at) {
+		t.Errorf("Expected Goatbots and Goatbots prices_updated_at to be the same, but got \n%s\n!=\n%s\n", state_log.Goatbots.Card_definitions_updated_at.String(), state_log.Goatbots.Prices_updated_at.String())
 	}
 
 	// Check that the updated_at timestamps are equal to Unix epoch
