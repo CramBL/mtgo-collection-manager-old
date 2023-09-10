@@ -63,7 +63,16 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 
 		// Check if the bulk data has been updated since we last downloaded it.
 		// If it hasn't been updated, there's no need to download it again
-		state_log, err := mtgogetter.GetStateLog()
+		state_log_accesor, err := mtgogetter.GetStateLogAccessor()
+		if err != nil {
+			return fmt.Errorf("error getting state log accessor: %s", err)
+		}
+		state_log := state_log_accesor.GetStateLog()
+		// Release the state log immediately
+		// Assumes that the state log will not be used again for the same purpose as in this command
+		// while this command is running
+		// The way this breaks is if this command is run in parallel with itself which is faulty use
+		state_log_accesor.ReleaseStateLog()
 		if err != nil {
 			return fmt.Errorf("error getting state log: %s", err)
 		}
