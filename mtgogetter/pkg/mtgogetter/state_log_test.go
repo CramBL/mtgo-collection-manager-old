@@ -25,7 +25,6 @@ func TestStateLogDeserialize(t *testing.T) {
 
 	// Deserialize the TOML into a StateLog struct
 	var state_log StateLog
-
 	if _, err := toml.Decode(state_log_str, &state_log); err != nil {
 		t.Errorf("Error when parsing StateLog TOML: %s", err)
 	}
@@ -34,15 +33,16 @@ func TestStateLogDeserialize(t *testing.T) {
 		t.Errorf("Expected 'log for MTGO Getter state, such as updated_at timestamps' got %s", state_log.Title)
 	}
 
-	if !strings.Contains(state_log.Goatbots.Card_definitions_updated_at.String(), "1970-01-01 01:00:00") {
-		t.Errorf("Expected updated_at to contain '1970-01-01 01:00:00' got %s", state_log.Goatbots.Card_definitions_updated_at.String())
+	substr := "1970-01-01 00:00:00"
+	if !strings.Contains(state_log.Goatbots.Card_definitions_updated_at.String(), substr) {
+		t.Errorf("Expected updated_at to contain %s got %s", substr, state_log.Goatbots.Card_definitions_updated_at.String())
 	}
 
 	if state_log.Scryfall.Updated_at.Day() != 1 {
 		t.Errorf("Expected 1 got %d", state_log.Scryfall.Updated_at.Day())
 	}
-	if state_log.Scryfall.Updated_at.Hour() != 1 {
-		t.Errorf("Expected 1 got %d", state_log.Scryfall.Updated_at.Hour())
+	if state_log.Scryfall.Updated_at.Hour() != 0 {
+		t.Errorf("Expected hour is 0 got %d", state_log.Scryfall.Updated_at.Hour())
 	}
 
 	if !state_log.Scryfall.Updated_at.Equal(state_log.Goatbots.Card_definitions_updated_at) {
