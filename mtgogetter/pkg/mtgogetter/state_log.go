@@ -1,12 +1,14 @@
+// This file contains the structs and methods for the state log
+// To access the state log use the state_log_accessor.go file
+// it contains a singleton that handles thread safe access to the state log
+// If you want to update or read specific fields in the state log
+// you can use the methods in this file
+
 package mtgogetter
 
 import (
-	"errors"
 	"log"
-	"os"
 	"time"
-
-	"github.com/BurntSushi/toml"
 )
 
 type goatbots struct {
@@ -112,8 +114,6 @@ type StateLog struct {
 	Scryfall scryfall `toml:"scryfall"`
 }
 
-const StateLogPath string = "state_log.toml"
-
 func NewStateLog() *StateLog {
 	return &StateLog{
 		Title: "log for MTGO Getter state, such as updated_at timestamps",
@@ -125,47 +125,5 @@ func NewStateLog() *StateLog {
 		Scryfall: scryfall{
 			Bulk_data_updated_at: time.Unix(0, 0).UTC(),
 		},
-	}
-}
-
-func writeStateLogToFile(stateLog *StateLog) error {
-	f, err := os.Create(StateLogPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	if err := toml.NewEncoder(f).Encode(stateLog); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func GetStateLog() (*StateLog, error) {
-	var stateLog *StateLog
-	if StateLogExists() {
-		if _, err := toml.DecodeFile(StateLogPath, &stateLog); err != nil {
-			return nil, err
-		}
-	} else {
-		stateLog = NewStateLog()
-		if err := writeStateLogToFile(stateLog); err != nil {
-			return nil, err
-		}
-	}
-
-	return stateLog, nil
-}
-
-func StateLogExists() bool {
-	if _, err := os.Stat(StateLogPath); err == nil {
-		return true
-	} else if errors.Is(err, os.ErrNotExist) {
-		// Doesn't exist should be created
-		return false
-	} else {
-		log.Println(err)
-		return false
 	}
 }

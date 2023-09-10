@@ -1,7 +1,12 @@
 package mtgogetter
 
 import (
+	"errors"
+	"log"
+	"os"
 	"sync"
+
+	"github.com/BurntSushi/toml"
 )
 
 type StateLogAccesor struct {
@@ -11,9 +16,11 @@ type StateLogAccesor struct {
 
 var instance *StateLogAccesor = nil
 
+const stateLogPath string = "state_log.toml"
+
 // Get the state log accessor singleton
 func GetStateLogAccessor() (*StateLogAccesor, error) {
-	state_log, err := GetStateLog()
+	state_log, err := getStateLog()
 	if err != nil {
 		return nil, err
 	}
@@ -52,4 +59,49 @@ func (s *StateLogAccesor) UpdateStateLog(update_action func(*StateLog)) error {
 		return err
 	}
 	return nil
+}
+
+// Below are private helper functions for the state log accessor
+
+// Get the state log from disk if it exists, otherwise create a new one
+func getStateLog() (*StateLog, error) {
+	var stateLog *StateLog
+	if stateLogExists() {
+		if _, err := toml.DecodeFile(stateLogPath, &stateLog); err != nil {
+			return nil, err
+		}
+	} else {
+		stateLog = NewStateLog()
+		if err := writeStateLogToFile(stateLog); err != nil {
+			return nil, err
+		}
+	}
+
+	return stateLog, nil
+}
+
+func writeStateLogToFile(stateLog *StateLog) error {
+	f, err := os.Create(stateLogPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if err := toml.NewEncoder(f).Encode(stateLog); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func stateLogExists() bool {
+	if _, err := os.Stat(stateLogPath); err == nil {
+		return true
+	} else if errors.Is(err, os.ErrNotExist) {
+		// Doesn't exist should be created
+		return false
+	} else {
+		log.Println(err)
+		return false
+	}
 }
