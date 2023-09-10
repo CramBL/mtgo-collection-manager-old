@@ -15,13 +15,20 @@ type goatbots struct {
 }
 
 // Method for the goatbots struct to check if the price data is up to date.
-// it's outdated if it's been more than 24 hours since 6 AM CET on the previous day
+// it's outdated if it hasn't been updated since 4 AM UTC
 func (g *goatbots) IsPriceUpdated() bool {
     // Get the current time
     utc_now := time.Now().UTC()
-    // Check if the last update was before 4 AM UTC yesterday
-    utc_4am_yesterday := time.Date(utc_now.Year(), utc_now.Month(), utc_now.Day()-1, 4, 0, 0, 0, time.UTC)
-    return g.Prices_updated_at.After(utc_4am_yesterday)
+    utc_4am := time.Date(utc_now.Year(), utc_now.Month(), utc_now.Day(), 4, 0, 0, 0, time.UTC)
+
+    // If the current time is before 4 AM, then we want to check if the prices were updated yesterday
+    if utc_now.Before(utc_4am) {
+        utc_4am_yesterday := time.Date(utc_now.Year(), utc_now.Month(), utc_now.Day()-1, 4, 0, 0, 0, time.UTC)
+        return g.Prices_updated_at.After(utc_4am_yesterday)
+    } else {
+        // If the current time is after 4 AM, then we want to check if the prices were updated today
+        return g.Prices_updated_at.After(utc_4am)
+    }
 }
 
 // Method for the goatbots struct to generate a new timestamp for the price data
