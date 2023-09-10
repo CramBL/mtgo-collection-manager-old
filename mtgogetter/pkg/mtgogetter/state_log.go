@@ -55,8 +55,17 @@ func (g *goatbots) IsCardDefinitionsUpdated() bool {
 }
 
 // Method for the goatbots struct to generate a new timestamp for the card definitions
-func (g *goatbots) UpdateCardDefinitionsTimestamp() {
+func (g *goatbots) UpdateCardDefinitionsTimestamp() error {
 	g.Card_definitions_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
+    state_log, err := GetStateLog()
+	if err != nil {
+		return err
+	}
+	state_log.Goatbots.Card_definitions_updated_at = g.Card_definitions_updated_at
+	if err := WriteStateLogToFile(state_log); err != nil {
+		return err
+	}
+	return nil
 }
 
 type scryfall struct {
