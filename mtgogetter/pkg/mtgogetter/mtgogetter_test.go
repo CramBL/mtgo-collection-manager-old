@@ -26,11 +26,12 @@ func TestDownloadBodyToBytes(t *testing.T) {
 	}
 }
 
-
 func TestRetryingDownload(t *testing.T) {
 	attempts := 3
 	delay_ms := 1
-	function_download := func() ([]byte, error) { return DownloadBodyToBytes("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/LICENSE") }
+	function_download := func() ([]byte, error) {
+		return DownloadBodyToBytes("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/LICENSE")
+	}
 	resp_body, err := Retry(attempts, delay_ms, function_download)
 	if err != nil {
 		t.Errorf("Error downloading body: %s", err)

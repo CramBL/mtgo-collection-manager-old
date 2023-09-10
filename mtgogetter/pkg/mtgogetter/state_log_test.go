@@ -11,8 +11,6 @@ import (
 	. "github.com/CramBL/mtgo-collection-manager/mtgogetter/pkg/mtgogetter"
 )
 
-
-
 func TestStateLogDeserialize(t *testing.T) {
 	// Make default statelog and convert it to TOML and then to a string
 	state_log_default := NewStateLog()
@@ -112,7 +110,7 @@ func TestStateLogGoatbotsUpdateTime_PriceIsUpdated_local(t *testing.T) {
 
 	// Set the updated_at timestamp to the local time 25 hours ago (then it should be time to update)
 	local_now := time.Now().Local()
-	local_24_hours_ago := time.Date(local_now.Year(), local_now.Month(), local_now.Day()-1, local_now.Hour() , local_now.Minute(), 0, 0, local_now.Location())
+	local_24_hours_ago := time.Date(local_now.Year(), local_now.Month(), local_now.Day()-1, local_now.Hour(), local_now.Minute(), 0, 0, local_now.Location())
 	local_25_hours_ago := local_24_hours_ago.Add(-1 * time.Hour)
 
 	state_log.Goatbots.Prices_updated_at = time.Unix(local_25_hours_ago.Unix(), 0)

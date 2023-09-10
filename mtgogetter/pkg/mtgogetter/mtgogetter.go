@@ -137,16 +137,16 @@ func OutputIsStdout(cmd *cobra.Command) bool {
 // Let's a function that might fail retry a few times before giving up (such as file access)
 // uses exponential backoff
 func Retry[T any](attempts int, sleep_ms int, f func() (T, error)) (result T, err error) {
-    for i := 0; i < attempts; i++ {
-        if i > 0 {
-            log.Println("retrying after error:", err)
-            time.Sleep(time.Duration(sleep_ms) * time.Millisecond)
-            sleep_ms = sleep_ms * 2 // exponential backoff
-        }
-        result, err = f()
-        if err == nil {
-            return result, nil
-        }
-    }
-    return result, fmt.Errorf("after %d attempts, last error: %s", attempts, err)
+	for i := 0; i < attempts; i++ {
+		if i > 0 {
+			log.Println("retrying after error:", err)
+			time.Sleep(time.Duration(sleep_ms) * time.Millisecond)
+			sleep_ms = sleep_ms * 2 // exponential backoff
+		}
+		result, err = f()
+		if err == nil {
+			return result, nil
+		}
+	}
+	return result, fmt.Errorf("after %d attempts, last error: %s", attempts, err)
 }
