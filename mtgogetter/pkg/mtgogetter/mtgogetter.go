@@ -69,7 +69,7 @@ func UnzipBufAndWriteToDisk(byteSlice []byte) {
 	}
 }
 
-func UnzipFromBytes(byteSlice []byte) (*zip.Reader, error){
+func UnzipFromBytes(byteSlice []byte) (*zip.Reader, error) {
 	reader, err := zip.NewReader(bytes.NewReader(byteSlice), int64(len(byteSlice)))
 	if err != nil {
 		return nil, err
