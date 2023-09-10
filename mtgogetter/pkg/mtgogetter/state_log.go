@@ -114,7 +114,7 @@ type StateLog struct {
 
 const StateLogPath string = "state_log.toml"
 
-func newStateLog() *StateLog {
+func NewStateLog() *StateLog {
 	return &StateLog{
 		Title: "log for MTGO Getter state, such as updated_at timestamps",
 		// Set time stamps to Unix epoch to signify that they have not been updated yet
@@ -149,7 +149,7 @@ func GetStateLog() (*StateLog, error) {
 			return nil, err
 		}
 	} else {
-		stateLog = newStateLog()
+		stateLog = NewStateLog()
 		if err := writeStateLogToFile(stateLog); err != nil {
 			return nil, err
 		}
