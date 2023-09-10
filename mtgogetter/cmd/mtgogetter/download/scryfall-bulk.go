@@ -2,6 +2,7 @@ package download
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -30,7 +31,7 @@ var DownloadScryfallBulkCmd = &cobra.Command{
 	Long: `Download bulk card data from the Scryfall API.
 The data comes as a JSON file containing every card object on Scryfall in English or the printed language if the card is only available in one language.`,
 	Args: cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// 1. get the bulk data info from the Scryfall API.
 		// 	  It contains the download uri and updated_at timestamp
 		// 2. Check if the bulk data has been updated since we last downloaded it.
@@ -40,22 +41,22 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 		log.Println("GET bulk data info from:", ScryfallInfoBulkUrl)
 		resp, err := http.Get(ScryfallInfoBulkUrl)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("error when getting bulk data info: %s", err)
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != 200 {
-			log.Fatalln("GET returned:", resp.StatusCode, http.StatusText(resp.StatusCode))
+			return fmt.Errorf("GET returned: %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
 		}
 
 		bodyAsBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatalln(err)
+			return fmt.Errorf("error when reading response body: %s", err)
 		}
 
 		var msg ScryfallBulkDataInfo
 		if err := json.Unmarshal(bodyAsBytes, &msg); err != nil {
-			log.Fatalln("Error when Unmarshalling JSON:", err)
+			return fmt.Errorf("error when unmarshalling response body: %s", err)
 		}
 		log.Println("Response contained updated_at:", msg.Updated_at)
 		log.Println("Response contained download uri:", msg.Download_uri)
@@ -64,17 +65,17 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 		// If it hasn't been updated, there's no need to download it again
 		state_log, err := mtgogetter.GetStateLog()
 		if err != nil {
-			log.Fatalln("Error getting state log:", err)
+			return fmt.Errorf("error getting state log: %s", err)
 		}
 
 		t_updated_at, err := time.Parse(time.RFC3339, msg.Updated_at)
 		if err != nil {
-			log.Fatalln("Error parsing updated_at timestamp:", err)
+			return fmt.Errorf("error parsing timestamp from response body: %s", err)
 		}
 
 		if state_log.Scryfall.IsBulkDataUpdated(t_updated_at) {
 			log.Println("Bulk data is up to date - no need to download")
-			return
+			return nil
 		}
 
 		// Update the timestamp in the state log after downloading the bulk data
@@ -88,11 +89,11 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 
 		resp_bulk_data, err := http.Get(download_url)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("error when getting bulk data: %s", err)
 		}
 		defer resp.Body.Close()
 		if resp_bulk_data.StatusCode != 200 {
-			log.Fatalln("Get returned:", resp_bulk_data.StatusCode, http.StatusText(resp_bulk_data.StatusCode))
+			return fmt.Errorf("GET bulk data returned: %d %s", resp_bulk_data.StatusCode, http.StatusText(resp_bulk_data.StatusCode))
 		}
 
 		// Name is default-cards-<timestamp>.json
@@ -104,13 +105,14 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 		// Deserialize to the ScryfallCard struct (Taking only the fields we need)
 		scryfall_cards, err := mtgogetter.ScryfallCardsFromJsonStream(stream_decoder)
 		if err != nil {
-			log.Fatalln("Error when deserializing Scryfall JSON:", err)
+			return fmt.Errorf("error when deserializing JSON stream: %s", err)
 		}
 
 		log.Println("Serializing scryfall card array to JSON and writing to disk as:", fname)
 		// Serialize to JSON string and write to disk
 		if err := mtgogetter.ScryfallCardsToDisk(scryfall_cards, fname); err != nil {
-			log.Fatalln("Error when writing Scryfall JSON to disk:", err)
+			return fmt.Errorf("error when serializing scryfall cards to disk: %s", err)
 		}
+		return nil
 	},
 }

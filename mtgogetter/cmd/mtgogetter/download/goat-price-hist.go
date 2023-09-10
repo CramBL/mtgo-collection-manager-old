@@ -1,6 +1,7 @@
 package download
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/CramBL/mtgo-collection-manager/mtgogetter/pkg/mtgogetter"
@@ -17,18 +18,18 @@ var DownloadGoatbotsPriceHistoryCmd = &cobra.Command{
 
 The price history appears as a JSON map of unique card IDs and associated tix price`,
 	Args: cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// First check if the price history is up to date
 		// If it is, then we don't need to download it again
 
 		state_log, err := mtgogetter.GetStateLog()
 		if err != nil {
-			log.Fatalln("Error getting state log:", err)
+			return fmt.Errorf("error getting state log: %s", err)
 		}
 
 		if state_log.Goatbots.IsPriceUpdated() {
 			log.Println("Price history is up to date - no need to download")
-			return
+			return nil
 		} else {
 			log.Println("Price history is out of date - downloading")
 		}
@@ -39,30 +40,31 @@ The price history appears as a JSON map of unique card IDs and associated tix pr
 
 		dl_bytes, err := mtgogetter.DownloadBodyToBytes(GoatbotsPriceHistoryUrl)
 		if err != nil {
-			log.Fatalln("Error downloading body:", err)
+			return fmt.Errorf("error downloading price history: %s", err)
 		}
 		reader, err := mtgogetter.UnzipFromBytes(dl_bytes)
 		if err != nil {
-			log.Fatalln("Error unzipping bytes:", err)
+			return fmt.Errorf("error unzipping price history: %s", err)
 		}
 
 		first_file_from_zip, err := mtgogetter.FirstFileFromZip(reader)
 		if err != nil {
-			log.Fatalln("Error opening first file from zip archive: ", err)
+			return fmt.Errorf("error getting first file from zip: %s", err)
 		}
 
 		// If the --save-as flag was not set (or is set to stdout), print to stdout
 		if mtgogetter.OutputIsStdout(cmd) {
 			_, err := mtgogetter.ReadCloserToStdout(first_file_from_zip)
 			if err != nil {
-				log.Fatalln("Error printing to stdout:", err)
+				return fmt.Errorf("error writing file to stdout: %s", err)
 			}
 		} else {
 			fname := cmd.Flag("save-as").Value.String()
 			_, err := mtgogetter.ReadCloserToDisk(first_file_from_zip, fname)
 			if err != nil {
-				log.Fatalln("Error writing file:", err)
+				return fmt.Errorf("error writing file to disk: %s", err)
 			}
 		}
+		return nil
 	},
 }
