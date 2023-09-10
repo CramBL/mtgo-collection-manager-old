@@ -78,6 +78,23 @@ type scryfall struct {
 func (s *scryfall) IsBulkDataUpdated(api_timestamp time.Time) bool {
     return s.Bulk_data_updated_at.After(api_timestamp)
 }
+
+// Method for the scryfall struct to generate a new timestamp for the price data
+// This should be called after the bulk data is downloaded
+// It will then load the state log from disk and update the timestamp
+func (s *scryfall) UpdateBulkDataTimestamp() error {
+    s.Bulk_data_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
+    state_log, err := GetStateLog()
+    if err != nil {
+        return err
+    }
+    state_log.Scryfall.Bulk_data_updated_at = s.Bulk_data_updated_at
+    if err := WriteStateLogToFile(state_log); err != nil {
+        return err
+    }
+    return nil
+}
+
 type StateLog struct {
 	Title    string
 	Goatbots goatbots `toml:"goatbots"`
