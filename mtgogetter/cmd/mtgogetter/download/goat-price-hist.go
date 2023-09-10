@@ -18,11 +18,34 @@ var DownloadGoatbotsPriceHistoryCmd = &cobra.Command{
 The price history appears as a JSON map of unique card IDs and associated tix price`,
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		// First check if the price history is up to date
+		// If it is, then we don't need to download it again
+
+		state_log, err := mtgogetter.GetStateLog()
+		if err != nil {
+			log.Fatalln("Error getting state log:", err)
+		}
+
+		if state_log.Goatbots.IsPriceUpdated() {
+			log.Println("Price history is up to date - no need to download")
+			return
+		} else {
+			log.Println("Price history is out of date - downloading")
+		}
+
+		// Update the timestamp in the state log after downloading the price history
+		// Only runs if the download is successful (no call to log.Fatalln()/os.Exit())
+		defer state_log.Goatbots.UpdatePriceTimestamp()
+
 		dl_bytes, err := mtgogetter.DownloadBodyToBytes(GoatbotsPriceHistoryUrl)
 		if err != nil {
 			log.Fatalln("Error downloading body:", err)
 		}
-		reader := mtgogetter.UnzipFromBytes(dl_bytes)
+		reader, err := mtgogetter.UnzipFromBytes(dl_bytes)
+		if err != nil {
+			log.Fatalln("Error unzipping bytes:", err)
+		}
+
 		first_file_from_zip, err := mtgogetter.FirstFileFromZip(reader)
 		if err != nil {
 			log.Fatalln("Error opening first file from zip archive: ", err)
