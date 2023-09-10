@@ -29,6 +29,18 @@ func (g *goatbots) UpdatePriceTimestamp() {
     g.Prices_updated_at = time.Unix(time.Now().UTC().Unix(), 0)
 }
 
+// Method for the goatbots struct to check if the card definitions are up to date.
+// it's outdated if a new set has been released since the last update
+func (g *goatbots) IsCardDefinitionsUpdated() bool {
+    log.Fatalln("Not implemented yet")
+    return false
+}
+
+// Method for the goatbots struct to generate a new timestamp for the card definitions
+func (g *goatbots) UpdateCardDefinitionsTimestamp() {
+    g.Card_definitions_updated_at = time.Unix(time.Now().UTC().Unix(), 0)
+}
+
 
 type scryfall struct {
     Updated_at  time.Time
