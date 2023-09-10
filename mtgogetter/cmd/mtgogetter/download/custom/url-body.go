@@ -28,11 +28,17 @@ var DownloadCustomUrlStringCmd = &cobra.Command{
 			}
 		}
 
-		dl_bytes := mtgogetter.DownloadBodyToBytes(dl_url_arg)
+		dl_bytes, err := mtgogetter.DownloadBodyToBytes(dl_url_arg)
+		if err != nil {
+			log.Fatalln("Error downloading body:", err)
+		}
 
 		if mtgogetter.OutputIsStdout(cmd) {
 			if do_decompress {
-				reader := mtgogetter.UnzipFromBytes(dl_bytes)
+				reader, err := mtgogetter.UnzipFromBytes(dl_bytes)
+				if err != nil {
+					log.Fatalln("Error unzipping bytes:", err)
+				}
 				first_file_reader := reader.File[0]
 				log.Println("Extracting:", first_file_reader.Name, "and printing to stdout")
 
@@ -54,8 +60,13 @@ var DownloadCustomUrlStringCmd = &cobra.Command{
 			fname := cmd.Flag("save-as").Value.String()
 
 			if do_decompress {
-				reader := mtgogetter.UnzipFromBytes(dl_bytes)
-				mtgogetter.FirstFileFromZipToDisk(fname, reader)
+				reader, err := mtgogetter.UnzipFromBytes(dl_bytes)
+				if err != nil {
+					log.Fatalln("Error unzipping bytes:", err)
+				}
+				if err := mtgogetter.FirstFileFromZipToDisk(fname, reader); err != nil {
+					log.Fatalln("Error writing file:", err)
+				}
 			} else {
 				// Create file on disk for writing
 				err = os.WriteFile(fname, dl_bytes, 0777)

@@ -13,9 +13,9 @@ import (
 func GetGoatbotsDownloadPricesDoc() (*goquery.Document, error) {
 	// Get the HTML document
 	res, err := http.Get("https://www.goatbots.com/download-prices")
-  	if err != nil {
-   		log.Fatal(err)
- 	}
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
@@ -47,7 +47,7 @@ func GetPricesDate() {
 	// Get the HTML document
 	prices_html_doc, err := GetGoatbotsDownloadPricesDoc()
 	if err != nil {
-	  log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	// Find the date string within the HTML

@@ -3,7 +3,9 @@ package mtgogetter
 import (
 	"archive/zip"
 	"bytes"
+	"fmt"
 	"io"
+	"time"
 
 	"log"
 	"net/http"
@@ -12,25 +14,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func DownloadBodyToBytes(url string) (respBody []byte) {
+func DownloadBodyToBytes(url string) (respBody []byte, err error) {
 	log.Println("Downloading from", url)
 
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		log.Fatalln("Get returned:", resp.StatusCode, http.StatusText(resp.StatusCode))
+		return nil, fmt.Errorf("HTTP response code %d: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
 	}
 
 	bodyAsBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return bodyAsBytes
+	return bodyAsBytes, nil
 }
 
 func UnzipBufAndWriteToDisk(byteSlice []byte) {
@@ -67,28 +69,29 @@ func UnzipBufAndWriteToDisk(byteSlice []byte) {
 	}
 }
 
-func UnzipFromBytes(byteSlice []byte) *zip.Reader {
+func UnzipFromBytes(byteSlice []byte) (*zip.Reader, error) {
 	reader, err := zip.NewReader(bytes.NewReader(byteSlice), int64(len(byteSlice)))
 	if err != nil {
-		log.Fatalln("Error creating zip reader:", err)
+		return nil, err
 	}
-	return reader
+	return reader, nil
 }
 
-func FirstFileFromZipToDisk(fname string, zip_reader *zip.Reader) {
+func FirstFileFromZipToDisk(fname string, zip_reader *zip.Reader) error {
 	first_file_reader := zip_reader.File[0]
 	log.Println("Extracting:", first_file_reader.Name, "and saving as", fname)
 
 	first_file, err := first_file_reader.Open()
 	if err != nil {
-		log.Fatalln("Error opening first file from zip archive: ", err)
+		return err
 	}
 
 	// Create file on disk for writing
-	ReadCloserToDisk(first_file, fname)
+	_, err = ReadCloserToDisk(first_file, fname)
 	if err != nil {
-		log.Fatalln("Error writing file:", err)
+		return err
 	}
+	return nil
 }
 
 func FirstFileFromZip(zip_reader *zip.Reader) (io.ReadCloser, error) {
@@ -130,4 +133,21 @@ func OutputIsStdout(cmd *cobra.Command) bool {
 	fname := cmd.Flag("save-as").Value.String()
 	// Written as an AND statement to allow short-circuiting (with de morgan's law)
 	return !(is_save_as_set && fname != "stdout")
+}
+
+// Let's a function that might fail retry a few times before giving up (such as file access)
+// uses exponential backoff
+func Retry[T any](attempts int, sleep_ms int, f func() (T, error)) (result T, err error) {
+	for i := 0; i < attempts; i++ {
+		if i > 0 {
+			log.Println("retrying after error:", err)
+			time.Sleep(time.Duration(sleep_ms) * time.Millisecond)
+			sleep_ms = sleep_ms * 2 // exponential backoff
+		}
+		result, err = f()
+		if err == nil {
+			return result, nil
+		}
+	}
+	return result, fmt.Errorf("after %d attempts, last error: %s", attempts, err)
 }

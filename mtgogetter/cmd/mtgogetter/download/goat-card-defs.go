@@ -18,8 +18,14 @@ var DownloadGoatbotsCardDefinitionsCmd = &cobra.Command{
 Card definitions includes a unique card ID with associated name, cardset, rarity, and foil (0/1)`,
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		dl_bytes := mtgogetter.DownloadBodyToBytes(GoatbotsCardDefinitionsUrl)
-		reader := mtgogetter.UnzipFromBytes(dl_bytes)
+		dl_bytes, err := mtgogetter.DownloadBodyToBytes(GoatbotsCardDefinitionsUrl)
+		if err != nil {
+			log.Fatalln("Error downloading body:", err)
+		}
+		reader, err := mtgogetter.UnzipFromBytes(dl_bytes)
+		if err != nil {
+			log.Fatalln("Error unzipping bytes:", err)
+		}
 
 		first_file_from_zip, err := mtgogetter.FirstFileFromZip(reader)
 		if err != nil {
