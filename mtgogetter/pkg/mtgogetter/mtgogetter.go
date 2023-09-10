@@ -69,28 +69,29 @@ func UnzipBufAndWriteToDisk(byteSlice []byte) {
 	}
 }
 
-func UnzipFromBytes(byteSlice []byte) *zip.Reader {
+func UnzipFromBytes(byteSlice []byte) (*zip.Reader, error){
 	reader, err := zip.NewReader(bytes.NewReader(byteSlice), int64(len(byteSlice)))
 	if err != nil {
-		log.Fatalln("Error creating zip reader:", err)
+		return nil, err
 	}
-	return reader
+	return reader, nil
 }
 
-func FirstFileFromZipToDisk(fname string, zip_reader *zip.Reader) {
+func FirstFileFromZipToDisk(fname string, zip_reader *zip.Reader) error {
 	first_file_reader := zip_reader.File[0]
 	log.Println("Extracting:", first_file_reader.Name, "and saving as", fname)
 
 	first_file, err := first_file_reader.Open()
 	if err != nil {
-		log.Fatalln("Error opening first file from zip archive: ", err)
+		return err
 	}
 
 	// Create file on disk for writing
-	ReadCloserToDisk(first_file, fname)
+	_, err = ReadCloserToDisk(first_file, fname)
 	if err != nil {
-		log.Fatalln("Error writing file:", err)
+		return err
 	}
+	return nil
 }
 
 func FirstFileFromZip(zip_reader *zip.Reader) (io.ReadCloser, error) {
