@@ -35,7 +35,7 @@ func (g *goatbots) IsPriceUpdated() bool {
 // This should be called after the price data is downloaded
 // It will then load the state log from disk and update the timestamp
 func (g *goatbots) UpdatePriceTimestamp() error {
-	g.Prices_updated_at = time.Unix(time.Now().UTC().Unix(), 0)
+	g.Prices_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
 	state_log, err := GetStateLog()
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func (g *goatbots) IsCardDefinitionsUpdated() bool {
 
 // Method for the goatbots struct to generate a new timestamp for the card definitions
 func (g *goatbots) UpdateCardDefinitionsTimestamp() {
-	g.Card_definitions_updated_at = time.Unix(time.Now().UTC().Unix(), 0)
+	g.Card_definitions_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
 }
 
 type scryfall struct {
@@ -76,11 +76,11 @@ func NewStateLog() *StateLog {
 		Title: "log for MTGO Getter state, such as updated_at timestamps",
 		// Set time stamps to Unix epoch to signify that they have not been updated yet
 		Goatbots: goatbots{
-			Card_definitions_updated_at: time.Unix(0, 0),
-			Prices_updated_at:           time.Unix(0, 0),
+			Card_definitions_updated_at: time.Unix(0, 0).UTC(),
+			Prices_updated_at:           time.Unix(0, 0).UTC(),
 		},
 		Scryfall: scryfall{
-			Updated_at: time.Unix(0, 0),
+			Updated_at: time.Unix(0, 0).UTC(),
 		},
 	}
 }
