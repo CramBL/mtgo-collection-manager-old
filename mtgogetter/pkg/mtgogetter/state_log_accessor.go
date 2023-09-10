@@ -5,7 +5,7 @@ import (
 )
 
 type StateLogAccesor struct {
-	mut 	  sync.Mutex
+	mut       sync.Mutex
 	state_log *StateLog
 }
 
@@ -20,7 +20,7 @@ func GetStateLogAccessor() (*StateLogAccesor, error) {
 
 	if instance == nil {
 		instance = &StateLogAccesor{
-			mut: sync.Mutex{},
+			mut:       sync.Mutex{},
 			state_log: state_log,
 		}
 	}
@@ -47,7 +47,8 @@ func (s *StateLogAccesor) UpdateStateLog(update_action func(*StateLog)) error {
 	update_action(s.state_log)
 
 	// Write the state log to disk
-	err := writeStateLogToFile(s.state_log); if err != nil {
+	err := writeStateLogToFile(s.state_log)
+	if err != nil {
 		return err
 	}
 	return nil

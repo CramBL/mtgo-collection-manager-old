@@ -42,7 +42,8 @@ func (g *goatbots) UpdatePriceTimestamp() error {
 	update_action := func(state_log *StateLog) {
 		state_log.Goatbots.Prices_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
 	}
-	err = state_log_accesor.UpdateStateLog(update_action); if err != nil {
+	err = state_log_accesor.UpdateStateLog(update_action)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -65,7 +66,8 @@ func (g *goatbots) UpdateCardDefinitionsTimestamp() error {
 	update_action := func(state_log *StateLog) {
 		state_log.Goatbots.Card_definitions_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
 	}
-	err = state_log_accesor.UpdateStateLog(update_action); if err != nil {
+	err = state_log_accesor.UpdateStateLog(update_action)
+	if err != nil {
 		return err
 	}
 
@@ -96,7 +98,8 @@ func (s *scryfall) UpdateBulkDataTimestamp() error {
 	update_action := func(state_log *StateLog) {
 		state_log.Scryfall.Bulk_data_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
 	}
-	err = state_log_accesor.UpdateStateLog(update_action); if err != nil {
+	err = state_log_accesor.UpdateStateLog(update_action)
+	if err != nil {
 		return err
 	}
 
