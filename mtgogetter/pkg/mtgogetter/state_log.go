@@ -1,12 +1,14 @@
+// This file contains the structs and methods for the state log
+// To access the state log use the state_log_accessor.go file
+// it contains a singleton that handles thread safe access to the state log
+// If you want to update or read specific fields in the state log
+// you can use the methods in this file
+
 package mtgogetter
 
 import (
-	"errors"
 	"log"
-	"os"
 	"time"
-
-	"github.com/BurntSushi/toml"
 )
 
 type goatbots struct {
@@ -35,13 +37,15 @@ func (g *goatbots) IsPriceUpdated() bool {
 // This should be called after the price data is downloaded
 // It will then load the state log from disk and update the timestamp
 func (g *goatbots) UpdatePriceTimestamp() error {
-	g.Prices_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
-	state_log, err := GetStateLog()
+	state_log_accesor, err := GetStateLogAccessor()
 	if err != nil {
 		return err
 	}
-	state_log.Goatbots.Prices_updated_at = g.Prices_updated_at
-	if err := WriteStateLogToFile(state_log); err != nil {
+	update_action := func(state_log *StateLog) {
+		state_log.Goatbots.Prices_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
+	}
+	err = state_log_accesor.UpdateStateLog(update_action)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -56,15 +60,19 @@ func (g *goatbots) IsCardDefinitionsUpdated() bool {
 
 // Method for the goatbots struct to generate a new timestamp for the card definitions
 func (g *goatbots) UpdateCardDefinitionsTimestamp() error {
-	g.Card_definitions_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
-	state_log, err := GetStateLog()
+	state_log_accesor, err := GetStateLogAccessor()
 	if err != nil {
 		return err
 	}
-	state_log.Goatbots.Card_definitions_updated_at = g.Card_definitions_updated_at
-	if err := WriteStateLogToFile(state_log); err != nil {
+
+	update_action := func(state_log *StateLog) {
+		state_log.Goatbots.Card_definitions_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
+	}
+	err = state_log_accesor.UpdateStateLog(update_action)
+	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -83,15 +91,20 @@ func (s *scryfall) IsBulkDataUpdated(api_timestamp time.Time) bool {
 // This should be called after the bulk data is downloaded
 // It will then load the state log from disk and update the timestamp
 func (s *scryfall) UpdateBulkDataTimestamp() error {
-	s.Bulk_data_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
-	state_log, err := GetStateLog()
+
+	state_log_accesor, err := GetStateLogAccessor()
 	if err != nil {
 		return err
 	}
-	state_log.Scryfall.Bulk_data_updated_at = s.Bulk_data_updated_at
-	if err := WriteStateLogToFile(state_log); err != nil {
+
+	update_action := func(state_log *StateLog) {
+		state_log.Scryfall.Bulk_data_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
+	}
+	err = state_log_accesor.UpdateStateLog(update_action)
+	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -100,8 +113,6 @@ type StateLog struct {
 	Goatbots goatbots `toml:"goatbots"`
 	Scryfall scryfall `toml:"scryfall"`
 }
-
-const StateLogPath string = "state_log.toml"
 
 func NewStateLog() *StateLog {
 	return &StateLog{
@@ -114,47 +125,5 @@ func NewStateLog() *StateLog {
 		Scryfall: scryfall{
 			Bulk_data_updated_at: time.Unix(0, 0).UTC(),
 		},
-	}
-}
-
-func WriteStateLogToFile(stateLog *StateLog) error {
-	f, err := os.Create(StateLogPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	if err := toml.NewEncoder(f).Encode(stateLog); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func GetStateLog() (*StateLog, error) {
-	var stateLog *StateLog
-	if StateLogExists() {
-		if _, err := toml.DecodeFile(StateLogPath, &stateLog); err != nil {
-			return nil, err
-		}
-	} else {
-		stateLog = NewStateLog()
-		if err := WriteStateLogToFile(stateLog); err != nil {
-			return nil, err
-		}
-	}
-
-	return stateLog, nil
-}
-
-func StateLogExists() bool {
-	if _, err := os.Stat(StateLogPath); err == nil {
-		return true
-	} else if errors.Is(err, os.ErrNotExist) {
-		// Doesn't exist should be created
-		return false
-	} else {
-		log.Println(err)
-		return false
 	}
 }

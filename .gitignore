@@ -24,3 +24,4 @@ mtgoparser/CMakeUserPresets.json
 _ReSharper*
 *.log
 mtgogetter/state_log.toml
+mtgoupdater/state_log.toml
