@@ -38,14 +38,14 @@ func TestStateLogDeserialize(t *testing.T) {
 		t.Errorf("Expected updated_at to contain %s got %s", substr, state_log.Goatbots.Card_definitions_updated_at.String())
 	}
 
-	if state_log.Scryfall.Updated_at.Day() != 1 {
-		t.Errorf("Expected 1 got %d", state_log.Scryfall.Updated_at.Day())
+	if state_log.Scryfall.Bulk_data_updated_at.Day() != 1 {
+		t.Errorf("Expected 1 got %d", state_log.Scryfall.Bulk_data_updated_at.Day())
 	}
-	if state_log.Scryfall.Updated_at.Hour() != 0 {
-		t.Errorf("Expected hour is 0 got %d", state_log.Scryfall.Updated_at.Hour())
+	if state_log.Scryfall.Bulk_data_updated_at.Hour() != 0 {
+		t.Errorf("Expected hour is 0 got %d", state_log.Scryfall.Bulk_data_updated_at.Hour())
 	}
 
-	if !state_log.Scryfall.Updated_at.Equal(state_log.Goatbots.Card_definitions_updated_at) {
+	if !state_log.Scryfall.Bulk_data_updated_at.Equal(state_log.Goatbots.Card_definitions_updated_at) {
 		t.Errorf("Expected Goatbots and Scryfall updated_at to be the same")
 	}
 	if !state_log.Goatbots.Card_definitions_updated_at.Equal(state_log.Goatbots.Prices_updated_at) {
@@ -53,8 +53,8 @@ func TestStateLogDeserialize(t *testing.T) {
 	}
 
 	// Check that the updated_at timestamps are equal to Unix epoch
-	if !state_log.Scryfall.Updated_at.Equal(time.Unix(0, 0)) {
-		t.Errorf("Expected the timestamps to be equal to the unix epoch, got %d", state_log.Scryfall.Updated_at.Unix())
+	if !state_log.Scryfall.Bulk_data_updated_at.Equal(time.Unix(0, 0)) {
+		t.Errorf("Expected the timestamps to be equal to the unix epoch, got %d", state_log.Scryfall.Bulk_data_updated_at.Unix())
 	}
 }
 

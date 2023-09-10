@@ -60,7 +60,7 @@ func (g *goatbots) UpdateCardDefinitionsTimestamp() {
 }
 
 type scryfall struct {
-	Updated_at time.Time
+	Bulk_data_updated_at time.Time
 }
 
 type StateLog struct {
@@ -80,7 +80,7 @@ func NewStateLog() *StateLog {
 			Prices_updated_at:           time.Unix(0, 0).UTC(),
 		},
 		Scryfall: scryfall{
-			Updated_at: time.Unix(0, 0).UTC(),
+			Bulk_data_updated_at: time.Unix(0, 0).UTC(),
 		},
 	}
 }
