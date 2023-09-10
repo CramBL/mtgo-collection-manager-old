@@ -2,6 +2,7 @@ package mtgogetter_test
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -22,6 +23,7 @@ func TestStateLogDeserialize(t *testing.T) {
 	}
 
 	state_log_str := state_log_buf.String()
+	fmt.Printf("state_log_str:\n%s\n", state_log_str)
 
 	// Deserialize the TOML into a StateLog struct
 	var state_log StateLog
@@ -47,6 +49,9 @@ func TestStateLogDeserialize(t *testing.T) {
 
 	if !state_log.Scryfall.Updated_at.Equal(state_log.Goatbots.Updated_at) {
 		t.Errorf("Expected Goatbots and Scryfall updated_at to be the same")
+	}
+	if !state_log.Goatbots.Updated_at.Equal(state_log.Goatbots.Prices_updated_at) {
+		t.Errorf("Expected Goatbots and Goatbots prices_updated_at to be the same, but got \n%s\n!=\n%s\n", state_log.Goatbots.Updated_at.String(), state_log.Goatbots.Prices_updated_at.String())
 	}
 
 	// Check that the updated_at timestamps are equal to Unix epoch
