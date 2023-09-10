@@ -147,7 +147,7 @@ func TestIsBulkDataUpdated_NotUpdated(t *testing.T) {
 
 	// Set the updated_at timestamps to yesterday (then it should be NOT be up-to-date)
 	utc_now := time.Now().UTC().Unix()
-	state_log.Scryfall.Bulk_data_updated_at = time.Unix(utc_now - 84600, 0).UTC()
+	state_log.Scryfall.Bulk_data_updated_at = time.Unix(utc_now-84600, 0).UTC()
 	fmt.Println("Bulk data updated_at:", state_log.Scryfall.Bulk_data_updated_at.UTC().String())
 
 	// Set the updated_at timestamp `received from the Scryfall API` to 30 minutes ago
