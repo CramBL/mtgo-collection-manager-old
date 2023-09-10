@@ -14,6 +14,17 @@ type goatbots struct {
     Prices_updated_at  time.Time
 }
 
+// Method for the goatbots struct to check if the price data is up to date.
+// it's outdated if it's been more than 24 hours since 6 AM CET on the previous day
+func (g *goatbots) IsPriceUpdated() bool {
+    // Get the current time
+    utc_now := time.Now().UTC()
+    // Check if the last update was before 4 AM UTC yesterday
+    utc_4am_yesterday := time.Date(utc_now.Year(), utc_now.Month(), utc_now.Day()-1, 4, 0, 0, 0, time.UTC)
+    return g.Prices_updated_at.After(utc_4am_yesterday)
+}
+
+
 type scryfall struct {
     Updated_at  time.Time
 }
