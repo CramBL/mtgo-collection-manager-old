@@ -61,24 +61,19 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer resp.Body.Close()
 		if resp_bulk_data.StatusCode != 200 {
 			log.Fatalln("Get returned:", resp_bulk_data.StatusCode, http.StatusText(resp_bulk_data.StatusCode))
 		}
-		defer resp.Body.Close()
 
 		// Name is default-cards-<timestamp>.json
 		fname := "default-cards-" + split_msg[1]
 
-		log.Println("Streaming bulk data response body to byte array")
-		// Read response body to bytes
-		bulk_data, err := io.ReadAll(resp_bulk_data.Body)
-		if err != nil {
-			log.Println("Error reading bulk data response body:", err)
-		}
+		log.Println("Deserializing raw scryfall JSON from stream")
+		stream_decoder := json.NewDecoder(resp_bulk_data.Body)
 
-		log.Println("Deserializing raw scryfall JSON")
 		// Deserialize to the ScryfallCard struct (Taking only the fields we need)
-		scryfall_cards, err := mtgogetter.DeserializeScryfallCards(bulk_data)
+		scryfall_cards, err := mtgogetter.ScryfallCardsFromJsonStream(stream_decoder)
 		if err != nil {
 			log.Fatalln("Error when deserializing Scryfall JSON:", err)
 		}
