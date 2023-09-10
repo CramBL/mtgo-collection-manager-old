@@ -55,12 +55,44 @@ func (g *goatbots) IsCardDefinitionsUpdated() bool {
 }
 
 // Method for the goatbots struct to generate a new timestamp for the card definitions
-func (g *goatbots) UpdateCardDefinitionsTimestamp() {
+func (g *goatbots) UpdateCardDefinitionsTimestamp() error {
 	g.Card_definitions_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
+	state_log, err := GetStateLog()
+	if err != nil {
+		return err
+	}
+	state_log.Goatbots.Card_definitions_updated_at = g.Card_definitions_updated_at
+	if err := WriteStateLogToFile(state_log); err != nil {
+		return err
+	}
+	return nil
 }
 
 type scryfall struct {
-	Updated_at time.Time
+	// Bulk data is updated every 12 hours
+	Bulk_data_updated_at time.Time
+}
+
+// Method for the scryfall struct to check if the bulk data is up to date.
+// outdated if the timestamp is older than the `updated_at` retrieved from the Scryfall API
+func (s *scryfall) IsBulkDataUpdated(api_timestamp time.Time) bool {
+	return s.Bulk_data_updated_at.After(api_timestamp)
+}
+
+// Method for the scryfall struct to generate a new timestamp for the price data
+// This should be called after the bulk data is downloaded
+// It will then load the state log from disk and update the timestamp
+func (s *scryfall) UpdateBulkDataTimestamp() error {
+	s.Bulk_data_updated_at = time.Unix(time.Now().UTC().Unix(), 0).UTC()
+	state_log, err := GetStateLog()
+	if err != nil {
+		return err
+	}
+	state_log.Scryfall.Bulk_data_updated_at = s.Bulk_data_updated_at
+	if err := WriteStateLogToFile(state_log); err != nil {
+		return err
+	}
+	return nil
 }
 
 type StateLog struct {
@@ -80,7 +112,7 @@ func NewStateLog() *StateLog {
 			Prices_updated_at:           time.Unix(0, 0).UTC(),
 		},
 		Scryfall: scryfall{
-			Updated_at: time.Unix(0, 0).UTC(),
+			Bulk_data_updated_at: time.Unix(0, 0).UTC(),
 		},
 	}
 }

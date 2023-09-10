@@ -38,14 +38,14 @@ func TestStateLogDeserialize(t *testing.T) {
 		t.Errorf("Expected updated_at to contain %s got %s", substr, state_log.Goatbots.Card_definitions_updated_at.String())
 	}
 
-	if state_log.Scryfall.Updated_at.Day() != 1 {
-		t.Errorf("Expected 1 got %d", state_log.Scryfall.Updated_at.Day())
+	if state_log.Scryfall.Bulk_data_updated_at.Day() != 1 {
+		t.Errorf("Expected 1 got %d", state_log.Scryfall.Bulk_data_updated_at.Day())
 	}
-	if state_log.Scryfall.Updated_at.Hour() != 0 {
-		t.Errorf("Expected hour is 0 got %d", state_log.Scryfall.Updated_at.Hour())
+	if state_log.Scryfall.Bulk_data_updated_at.Hour() != 0 {
+		t.Errorf("Expected hour is 0 got %d", state_log.Scryfall.Bulk_data_updated_at.Hour())
 	}
 
-	if !state_log.Scryfall.Updated_at.Equal(state_log.Goatbots.Card_definitions_updated_at) {
+	if !state_log.Scryfall.Bulk_data_updated_at.Equal(state_log.Goatbots.Card_definitions_updated_at) {
 		t.Errorf("Expected Goatbots and Scryfall updated_at to be the same")
 	}
 	if !state_log.Goatbots.Card_definitions_updated_at.Equal(state_log.Goatbots.Prices_updated_at) {
@@ -53,8 +53,8 @@ func TestStateLogDeserialize(t *testing.T) {
 	}
 
 	// Check that the updated_at timestamps are equal to Unix epoch
-	if !state_log.Scryfall.Updated_at.Equal(time.Unix(0, 0)) {
-		t.Errorf("Expected the timestamps to be equal to the unix epoch, got %d", state_log.Scryfall.Updated_at.Unix())
+	if !state_log.Scryfall.Bulk_data_updated_at.Equal(time.Unix(0, 0)) {
+		t.Errorf("Expected the timestamps to be equal to the unix epoch, got %d", state_log.Scryfall.Bulk_data_updated_at.Unix())
 	}
 }
 
@@ -119,5 +119,43 @@ func TestStateLogGoatbotsUpdateTime_PriceIsUpdated_local(t *testing.T) {
 	// Test that the function returns true when the updated_at timestamp is after 4 AM yesterday
 	if state_log.Goatbots.IsPriceUpdated() {
 		t.Errorf("Expected PriceUpdateAvailable to return true for: %s", state_log.Goatbots.Prices_updated_at.String())
+	}
+}
+
+func TestIsBulkDataUpdated_IsUpdated(t *testing.T) {
+	// Test that the PriceUpdateAvailable function works as expected
+	state_log := NewStateLog()
+
+	// Set the updated_at timestamps to now (then it should be up-to-date)
+	utc_now := time.Now().UTC().Unix()
+	state_log.Scryfall.Bulk_data_updated_at = time.Unix(utc_now, 0).UTC()
+	fmt.Println("Bulk data updated_at:", state_log.Scryfall.Bulk_data_updated_at.UTC().String())
+
+	// Set the updated_at timestamp `received from the Scryfall API` to 1 hour ago
+	utc_1_hour_ago := time.Unix(utc_now-3600, 0).UTC()
+	fmt.Println("MOCK Scryfall API timestamp:", utc_1_hour_ago.UTC().String())
+
+	// Test that the function returns true when the updated_at timestamp is after 4 AM yesterday
+	if !state_log.Scryfall.IsBulkDataUpdated(utc_1_hour_ago) {
+		t.Errorf("Expected PriceUpdateAvailable to return true for: %s", state_log.Scryfall.Bulk_data_updated_at.UTC().String())
+	}
+}
+
+func TestIsBulkDataUpdated_NotUpdated(t *testing.T) {
+	// Test that the PriceUpdateAvailable function works as expected
+	state_log := NewStateLog()
+
+	// Set the updated_at timestamps to yesterday (then it should be NOT be up-to-date)
+	utc_now := time.Now().UTC().Unix()
+	state_log.Scryfall.Bulk_data_updated_at = time.Unix(utc_now-84600, 0).UTC()
+	fmt.Println("Bulk data updated_at:", state_log.Scryfall.Bulk_data_updated_at.UTC().String())
+
+	// Set the updated_at timestamp `received from the Scryfall API` to 30 minutes ago
+	utc_30_min_ago := time.Unix(utc_now-300, 0).UTC()
+	fmt.Println("MOCK Scryfall API timestamp:", utc_30_min_ago.UTC().String())
+
+	// Test that the function returns true when the updated_at timestamp is after 4 AM yesterday
+	if state_log.Scryfall.IsBulkDataUpdated(utc_30_min_ago) {
+		t.Errorf("Expected PriceUpdateAvailable to return true for: %s", state_log.Scryfall.Bulk_data_updated_at.UTC().String())
 	}
 }

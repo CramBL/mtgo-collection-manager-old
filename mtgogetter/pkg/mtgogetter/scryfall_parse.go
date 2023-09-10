@@ -51,7 +51,6 @@ func ScryfallCardsFromJsonStream(decoder *json.Decoder) ([]ScryfallCard, error) 
 	return bulk_data, nil
 }
 
-
 func SerializeScryfallCards(scryfall_cards []ScryfallCard) ([]byte, error) {
 	return json.Marshal(scryfall_cards)
 }

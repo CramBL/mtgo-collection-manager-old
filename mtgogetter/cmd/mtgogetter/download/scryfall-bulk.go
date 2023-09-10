@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/CramBL/mtgo-collection-manager/mtgogetter/pkg/mtgogetter"
 	"github.com/spf13/cobra"
@@ -14,6 +15,7 @@ import (
 // Structs for JSON unmarshalling the response from the Scryfall API when requesting bulk data metadata, such as download uri, updated_at, size, etc.
 type ScryfallBulkDataInfo struct {
 	Download_uri string `json:"download_uri"`
+	Updated_at   string `json:"updated_at"`
 }
 
 const ScryfallInfoBulkUrl string = "https://api.scryfall.com/bulk-data/e2ef41e3-5778-4bc2-af3f-78eca4dd9c23"
@@ -29,6 +31,12 @@ var DownloadScryfallBulkCmd = &cobra.Command{
 The data comes as a JSON file containing every card object on Scryfall in English or the printed language if the card is only available in one language.`,
 	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		// 1. get the bulk data info from the Scryfall API.
+		// 	  It contains the download uri and updated_at timestamp
+		// 2. Check if the bulk data has been updated since we last downloaded it.
+		// 	  If it hasn't been updated, there's no need to download it again
+		//(3.) IF new bulk data is available: Download the bulk data from the Scryfall API
+
 		log.Println("GET bulk data info from:", ScryfallInfoBulkUrl)
 		resp, err := http.Get(ScryfallInfoBulkUrl)
 		if err != nil {
@@ -49,7 +57,28 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 		if err := json.Unmarshal(bodyAsBytes, &msg); err != nil {
 			log.Fatalln("Error when Unmarshalling JSON:", err)
 		}
+		log.Println("Response contained updated_at:", msg.Updated_at)
 		log.Println("Response contained download uri:", msg.Download_uri)
+
+		// Check if the bulk data has been updated since we last downloaded it.
+		// If it hasn't been updated, there's no need to download it again
+		state_log, err := mtgogetter.GetStateLog()
+		if err != nil {
+			log.Fatalln("Error getting state log:", err)
+		}
+
+		t_updated_at, err := time.Parse(time.RFC3339, msg.Updated_at)
+		if err != nil {
+			log.Fatalln("Error parsing updated_at timestamp:", err)
+		}
+
+		if state_log.Scryfall.IsBulkDataUpdated(t_updated_at) {
+			log.Println("Bulk data is up to date - no need to download")
+			return
+		}
+
+		// Update the timestamp in the state log after downloading the bulk data
+		defer state_log.Scryfall.UpdateBulkDataTimestamp()
 
 		var split_msg = strings.SplitAfter(msg.Download_uri, "default-cards-")
 		// Concatenate the end (timestamp + .json) of the received download_uri with what we know the prefix URL should be
