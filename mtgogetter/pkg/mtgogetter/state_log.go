@@ -32,8 +32,19 @@ func (g *goatbots) IsPriceUpdated() bool {
 }
 
 // Method for the goatbots struct to generate a new timestamp for the price data
-func (g *goatbots) UpdatePriceTimestamp() {
+// This should be called after the price data is downloaded
+// It will then load the state log from disk and update the timestamp
+func (g *goatbots) UpdatePriceTimestamp() error {
 	g.Prices_updated_at = time.Unix(time.Now().UTC().Unix(), 0)
+    state_log, err := GetStateLog()
+    if err != nil {
+        return err
+    }
+    state_log.Goatbots.Prices_updated_at = g.Prices_updated_at
+    if err := WriteStateLogToFile(state_log); err != nil {
+        return err
+    }
+    return nil
 }
 
 // Method for the goatbots struct to check if the card definitions are up to date.

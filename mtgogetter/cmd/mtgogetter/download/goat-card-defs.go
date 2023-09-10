@@ -22,7 +22,10 @@ Card definitions includes a unique card ID with associated name, cardset, rarity
 		if err != nil {
 			log.Fatalln("Error downloading body:", err)
 		}
-		reader := mtgogetter.UnzipFromBytes(dl_bytes)
+		reader, err := mtgogetter.UnzipFromBytes(dl_bytes)
+		if err != nil {
+			log.Fatalln("Error unzipping bytes:", err)
+		}
 
 		first_file_from_zip, err := mtgogetter.FirstFileFromZip(reader)
 		if err != nil {
