@@ -50,7 +50,7 @@ TEST_CASE("Test CLAP with options and values")
 {
 
   char argv0[] = "mtgo_preprocessor";
-  char arg_version[] = "--version";
+  // char arg_version[] = "--version";
   char arg_save_as[] = "--save-as";
   char arg_save_as_val[] = "saved.txt";
 
