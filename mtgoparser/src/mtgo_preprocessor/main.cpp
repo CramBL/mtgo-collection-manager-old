@@ -114,7 +114,7 @@ auto scryfall_cards_parse() -> scryfall::scryfall_card_vec
   return scryfall_card_vec.value();
 }
 
-auto collection_parse(const std::string &test_data_dir) -> int
+void collection_parse(const std::string &test_data_dir)
 {
   spdlog::info("=== example_collection_parse ===");
 
@@ -129,6 +129,8 @@ auto collection_parse(const std::string &test_data_dir) -> int
   auto collection = mtgo::Collection(std::move(cards));
 
   auto scryfall_cards = scryfall_cards_parse();
+  spdlog::info("got {} scryfall cards", scryfall_cards.size());
+  spdlog::warn("TODO: Parse scryfall cards into collection info");
 
   spdlog::info("==> collection extract goatbots info...");
   collection.ExtractGoatbotsInfo(card_defs.value(), prices);
@@ -150,8 +152,6 @@ auto collection_parse(const std::string &test_data_dir) -> int
   auto new_collection = mtgo::Collection(collection_json);
   spdlog::info("==> new collection print...");
   new_collection.Print();
-
-  return 0;
 }
 
 void json_format_prints()
@@ -267,8 +267,8 @@ int main(int argc, char *argv[])
 
 
   if (config.FlagSet("--example", "--run-example", "--run")) {
-    auto res = example::collection_parse(test_data_dir);
-    if (res == 0) { spdlog::info("Example complete!"); }
+    example::collection_parse(test_data_dir);
+    spdlog::info("Example complete!");
   }
 
   if (config.FlagSet("--example-json-formats", "--example-json", "--run-example-json")) {
