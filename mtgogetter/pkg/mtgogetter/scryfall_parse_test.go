@@ -25,10 +25,6 @@ func TestScryfallJsonDeserialize(t *testing.T) {
 		t.Errorf("Expected 25527 got %d", first_card.Mtgo_id)
 	}
 
-	if first_card.Mtgo_foil_id != 25528 {
-		t.Errorf("Expected 25528 got %d", first_card.Mtgo_foil_id)
-	}
-
 	if first_card.Name != "Fury Sliver" {
 		t.Errorf("Expected Fury Sliver got %s", bulk_data[0].Name)
 	}
@@ -43,20 +39,12 @@ func TestScryfallJsonDeserialize(t *testing.T) {
 		t.Errorf("Expected 31745 got %d", second_card.Mtgo_id)
 	}
 
-	if second_card.Mtgo_foil_id != 31746 {
-		t.Errorf("Expected 31746 got %d", second_card.Mtgo_foil_id)
-	}
-
 	// Check third cards prices
 	// Black Lotus from Vintage Masters (only on MTGO so other prices are null)
 	third_lotus := &bulk_data[2]
 
 	if third_lotus.Mtgo_id != 53155 {
 		t.Errorf("Expected 53155 got %d", third_lotus.Mtgo_id)
-	}
-
-	if third_lotus.Mtgo_foil_id != 53156 {
-		t.Errorf("Expected 53156 got %d", third_lotus.Mtgo_foil_id)
 	}
 
 	if third_lotus.Prices.Usd != "" { // null in JSON
@@ -125,10 +113,6 @@ func TestScryfallJson_Deserialize_50cards(t *testing.T) {
 		t.Errorf("Expected 25527 got %d", first_card.Mtgo_id)
 	}
 
-	if first_card.Mtgo_foil_id != 25528 {
-		t.Errorf("Expected 25528 got %d", first_card.Mtgo_foil_id)
-	}
-
 	if first_card.Name != "Fury Sliver" {
 		t.Errorf("Expected Fury Sliver got %s", bulk_data[0].Name)
 	}
@@ -143,19 +127,11 @@ func TestScryfallJson_Deserialize_50cards(t *testing.T) {
 		t.Errorf("Expected 34586 got %d", second_card.Mtgo_id)
 	}
 
-	if second_card.Mtgo_foil_id != 34587 {
-		t.Errorf("Expected 34587 got %d", second_card.Mtgo_foil_id)
-	}
-
 	// Check third card
 	third_card := &bulk_data[2]
 
 	if third_card.Mtgo_id != 65170 {
 		t.Errorf("Expected 65170 got %d", third_card.Mtgo_id)
-	}
-
-	if third_card.Mtgo_foil_id != 65171 {
-		t.Errorf("Expected 65170 got %d", third_card.Mtgo_foil_id)
 	}
 
 	if third_card.Prices.Usd != "0.03" {
@@ -193,10 +169,6 @@ func TestScryfallJson_Deserialize_50cards_streamed(t *testing.T) {
 		t.Errorf("Expected 25527 got %d", first_card.Mtgo_id)
 	}
 
-	if first_card.Mtgo_foil_id != 25528 {
-		t.Errorf("Expected 25528 got %d", first_card.Mtgo_foil_id)
-	}
-
 	if first_card.Name != "Fury Sliver" {
 		t.Errorf("Expected Fury Sliver got %s", bulk_data[0].Name)
 	}
@@ -211,19 +183,11 @@ func TestScryfallJson_Deserialize_50cards_streamed(t *testing.T) {
 		t.Errorf("Expected 34586 got %d", second_card.Mtgo_id)
 	}
 
-	if second_card.Mtgo_foil_id != 34587 {
-		t.Errorf("Expected 34587 got %d", second_card.Mtgo_foil_id)
-	}
-
 	// Check third card
 	third_card := &bulk_data[2]
 
 	if third_card.Mtgo_id != 65170 {
 		t.Errorf("Expected 65170 got %d", third_card.Mtgo_id)
-	}
-
-	if third_card.Mtgo_foil_id != 65171 {
-		t.Errorf("Expected 65170 got %d", third_card.Mtgo_foil_id)
 	}
 
 	if third_card.Prices.Usd != "0.03" {

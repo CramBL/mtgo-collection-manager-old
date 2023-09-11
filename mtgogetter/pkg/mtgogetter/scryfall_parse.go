@@ -6,12 +6,11 @@ import (
 )
 
 type ScryfallCard struct {
-	Mtgo_id      int32    `json:"mtgo_id"`
-	Mtgo_foil_id int32    `json:"mtgo_foil_id"`
-	Name         string   `json:"name"`
-	Released_at  string   `json:"released_at"`
-	Rarity       string   `json:"rarity"`
-	Prices       struct { // All nullable (deserialized as empty string if null)
+	Mtgo_id     int32    `json:"mtgo_id"`
+	Name        string   `json:"name"`
+	Released_at string   `json:"released_at"`
+	Rarity      string   `json:"rarity"`
+	Prices      struct { // All nullable (deserialized as empty string if null)
 		Usd      string `json:"usd"`
 		Usd_foil string `json:"usd_foil"`
 		Eur      string `json:"eur"`
