@@ -59,7 +59,7 @@ void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
     }
     // Extract price from goatbots price history
     if (auto res = price_hist.find(c.id_); res != price_hist.end()) {
-      c.price_ = res->second;
+      c.goatbots_price_ = res->second;
     } else {
       spdlog::warn("Price history key not found: ID={}", c.id_);
     }
@@ -85,7 +85,7 @@ void Collection::Print() const
     spdlog::info("{} {}: price={}, quantity={}, set={}, foil={}, rarity={}",
       c.id_,
       c.name_,
-      c.price_,
+      c.goatbots_price_,
       c.quantity_,
       c.set_,
       c.foil_,
