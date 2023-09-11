@@ -151,3 +151,26 @@ func Retry[T any](attempts int, sleep_ms int, f func() (T, error)) (result T, er
 	}
 	return result, fmt.Errorf("after %d attempts, last error: %s", attempts, err)
 }
+
+// Function for filtering from a slice with a predicate, and returning a new slice
+// https://stackoverflow.com/a/37563128
+func Filter[T any](ss []T, test func(T) bool) (ret []T) {
+	for _, s := range ss {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return
+}
+
+// Function for filtering from a slice with a predicate, and returning a new slice that is preallocated
+// adapted from: https://stackoverflow.com/a/37563128
+func FilterPrealloc[T any](ss []T, test func(T) bool, prealloc int) []T {
+	ret := make([]T, 0, prealloc)
+	for _, s := range ss {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return ret
+}
