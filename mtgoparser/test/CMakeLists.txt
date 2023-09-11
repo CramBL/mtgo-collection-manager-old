@@ -117,3 +117,24 @@ catch_discover_tests(
   "test_json_parse."
   OUTPUT_SUFFIX
   .xml)
+
+# Misc. tests
+add_executable(tests tests.cpp)
+target_link_libraries(tests PRIVATE
+                                     mtgoparser::mtgoparser_warnings
+                                     mtgoparser::mtgoparser_options
+                                     mtgoparser)
+target_link_system_library(tests PRIVATE Catch2::Catch2WithMain)
+
+catch_discover_tests(
+  tests
+  TEST_PREFIX
+  "tests."
+  REPORTER
+  XML
+  OUTPUT_DIR
+  .
+  OUTPUT_PREFIX
+  "tests."
+  OUTPUT_SUFFIX
+  .xml)
