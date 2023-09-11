@@ -1,21 +1,59 @@
+#![allow(dead_code)]
 use std::process::Command;
 
-// Path to the MTGO Getter binary in the repository
-const MTGOGETTER_BIN: &str = if cfg!(windows) {
-    "../mtgogetter/mtgogetter.exe"
-} else {
-    "../mtgogetter/mtgogetter"
-};
+use std::sync::OnceLock;
 
-const MTGOPARSER_BIN: &str = if cfg!(windows) {
-    "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser.exe"
-} else {
-    "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser"
-};
+static MTGOGETTER_BIN: OnceLock<String> = OnceLock::new();
+static MTGOPARSER_BIN: OnceLock<String> = OnceLock::new();
+
+pub fn set_mtgogetter_bin(bin_path: &str) -> Result<(), String> {
+    MTGOGETTER_BIN.set(bin_path.to_string())
+}
+
+pub fn set_mtgoparser_bin(bin_path: &str) -> Result<(), String> {
+    MTGOPARSER_BIN.set(bin_path.to_string())
+}
+
+fn mtgogetter_bin() -> &'static str {
+    MTGOGETTER_BIN.get().expect("MTGOGETTER_BIN not set")
+}
+
+fn mtgoparser_bin() -> &'static str {
+    MTGOPARSER_BIN.get().expect("MTGOPARSER_BIN not set")
+}
+
+pub mod internal_only {
+    use super::*;
+
+    // Safe to call multiple times from different threads (for tests)
+    pub fn dev_try_init_mtgogetter_bin() {
+        if MTGOGETTER_BIN.get().is_none() {
+            _ = set_mtgogetter_bin(DEV_MTGOGETTER_BIN);
+        }
+    }
+    // Safe to call multiple times from different threads (for tests)
+    pub fn dev_try_init_mtgoparser_bin() {
+        if MTGOPARSER_BIN.get().is_none() {
+            _ = set_mtgogetter_bin(DEV_MTGOPARSER_BIN);
+        }
+    }
+
+    // Path to the MTGO Getter binary in the repository
+    pub const DEV_MTGOGETTER_BIN: &str = if cfg!(windows) {
+        "../mtgogetter/mtgogetter.exe"
+    } else {
+        "../mtgogetter/mtgogetter"
+    };
+    pub const DEV_MTGOPARSER_BIN: &str = if cfg!(windows) {
+        "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser.exe"
+    } else {
+        "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser"
+    };
+}
 
 pub fn download_goatbots_price_history() -> Result<std::process::Output, Box<dyn std::error::Error>>
 {
-    let go_exec_out = Command::new(MTGOGETTER_BIN)
+    let go_exec_out = Command::new(mtgogetter_bin())
         .arg("download")
         .arg("goatbots-price-history")
         .output()?;
@@ -25,7 +63,7 @@ pub fn download_goatbots_price_history() -> Result<std::process::Output, Box<dyn
 
 pub fn download_goatbots_card_definitions(
 ) -> Result<std::process::Output, Box<dyn std::error::Error>> {
-    let go_exec_out = Command::new(MTGOGETTER_BIN)
+    let go_exec_out = Command::new(mtgogetter_bin())
         .arg("download")
         .arg("goatbots-card-definitions")
         .output()?;
@@ -46,13 +84,13 @@ pub fn download_custom_url(
         custom_args.push("--save-as");
         custom_args.push(save_as);
     }
-    let go_exec_out = Command::new(MTGOGETTER_BIN).args(custom_args).output()?;
+    let go_exec_out = Command::new(mtgogetter_bin()).args(custom_args).output()?;
 
     Ok(go_exec_out)
 }
 
 pub fn run_mtgo_preprocessor_example() -> Result<std::process::Output, Box<dyn std::error::Error>> {
-    let pre_processor_exec_out = Command::new(MTGOPARSER_BIN)
+    let pre_processor_exec_out = Command::new(mtgoparser_bin())
         .arg("--caller")
         .arg("mtgoupdater")
         .arg("--run-example")
@@ -63,7 +101,7 @@ pub fn run_mtgo_preprocessor_example() -> Result<std::process::Output, Box<dyn s
 
 pub fn run_mtgo_preprocessor_json_example(
 ) -> Result<std::process::Output, Box<dyn std::error::Error>> {
-    let pre_processor_exec_out = Command::new(MTGOPARSER_BIN)
+    let pre_processor_exec_out = Command::new(mtgoparser_bin())
         .arg("--caller")
         .arg("mtgoupdater")
         .arg("--run-example-json")
@@ -75,55 +113,6 @@ pub fn run_mtgo_preprocessor_json_example(
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[ignore]
-    #[test]
-    fn test_call_mtgogetter_download_price_history() {
-        assert!(
-            std::path::Path::new(MTGOGETTER_BIN).exists(),
-            "mtgogetter binary does not exist, build mtgogetter before running this test"
-        );
-        let test_out = download_goatbots_price_history();
-        match test_out {
-            Ok(output) => {
-                println!("Status:\n{status}", status = output.status,);
-
-                println!(
-                    "stdout:\n{stdout}",
-                    stdout = String::from_utf8_lossy(&output.stdout),
-                );
-                println!(
-                    "stderr:\n{stderr}",
-                    stderr = String::from_utf8_lossy(&output.stderr),
-                );
-            }
-            Err(e) => panic!("Unexpected error: {e}"),
-        }
-    }
-
-    #[ignore]
-    #[test]
-    fn test_call_mtgogetter_download_card_definitions() {
-        assert!(
-            std::path::Path::new(MTGOGETTER_BIN).exists(),
-            "mtgogetter binary does not exist, build mtgogetter before running this test"
-        );
-        let test_out = download_goatbots_card_definitions();
-        match test_out {
-            Ok(output) => {
-                println!("Status:\n{status}", status = output.status,);
-                println!(
-                    "stdout:\n{stdout}",
-                    stdout = String::from_utf8_lossy(&output.stdout),
-                );
-                println!(
-                    "stderr:\n{stderr}",
-                    stderr = String::from_utf8_lossy(&output.stderr),
-                );
-            }
-            Err(e) => panic!("Unexpected error: {e}"),
-        }
-    }
 
     #[test]
     fn test_call_mtgo_preprocessor() {
@@ -139,8 +128,8 @@ mod tests {
         );
         // Check the mtgo_preprocessor binary exists
         assert!(
-            std::path::Path::new(MTGOPARSER_BIN).exists(),
-            "mtgo_preprocessor binary ({MTGOPARSER_BIN}) does not exist, build mtgoparser before running this test"
+            std::path::Path::new(mtgoparser_bin()).exists(),
+            "mtgo_preprocessor binary ({mtgoparser_bin}) does not exist, build mtgoparser before running this test", mtgoparser_bin = mtgoparser_bin()
         );
 
         let test_out = run_mtgo_preprocessor_example();
@@ -174,34 +163,6 @@ mod tests {
                 println!(
                     "stderr:\n{stderr}",
                     stderr = String::from_utf8_lossy(&output.stderr),
-                );
-            }
-            Err(e) => panic!("Unexpected error: {e}"),
-        }
-    }
-
-    #[test]
-    fn test_mtgogetter_custom_url_download_scryfall_card_json() {
-        // From the repository
-        let scryfall_card_json_url = "https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/test/test-data/mtgogetter-out/scryfall-card.json";
-        let cmd_out = download_custom_url(
-            scryfall_card_json_url,
-            false,
-            None, // Goes to stdout
-        );
-        match cmd_out {
-            Ok(output) => {
-                println!("Status:\n{status}", status = output.status,);
-                let stdout_as_utf8 = String::from_utf8_lossy(&output.stdout);
-                println!("stdout:\n{stdout}", stdout = stdout_as_utf8,);
-                println!(
-                    "stderr:\n{stderr}",
-                    stderr = String::from_utf8_lossy(&output.stderr),
-                );
-                assert!(stdout_as_utf8.contains(r#""mtgo_id": 25527"#));
-                assert_eq!(
-                    stdout_as_utf8,
-                    include_str!("../../test/test-data/mtgogetter-out/scryfall-card.json")
                 );
             }
             Err(e) => panic!("Unexpected error: {e}"),
