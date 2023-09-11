@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <concepts>
 #include <optional>
@@ -74,25 +75,22 @@ template<size_t N_options> class Clap
     size_t errors = 0;
     for (auto it = _args.value().cbegin(), end = _args.value().cend(); it != end; ++it) {
 
-      bool found = false;
-      for (const auto &opt_p : _options) {
-        if (*it == opt_p.first) {
-          if (opt_p.second) {
-            if ((it + 1 != end) && (*(it + 1)).starts_with("-")) {
-              ++errors;
-              spdlog::error("Option passed with missing value");
-            } else {
-              // Increment as we already validated the option value and we don't want to parse it as an option in the
-              // next iteration
-              ++it;
-            }
-          }
+      auto is_defined = [it](std::pair<std::string_view, bool> opt_p) { return opt_p.first == *it; };
 
-          found = true;
-          break;
+      if (auto opt_it = std::find_if(_options.cbegin(), _options.cend(), is_defined); opt_it != std::end(_options)) {
+        // Check if it is an option that should have a value
+        if ((*opt_it).second) {
+          // Then check for the value in the arguments
+          if ((it + 1 != end) && (*(it + 1)).starts_with("-")) {
+            ++errors;
+            spdlog::error("Option passed with missing value");
+          } else {
+            // Increment as we already validated the option value and we don't want to parse it as an option in the
+            // next iteration
+            ++it;
+          }
         }
-      }
-      if (!found) {
+      } else {
         ++errors;
         spdlog::error("Unknown option: {}", *it);
       }
