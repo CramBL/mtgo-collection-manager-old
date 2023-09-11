@@ -81,7 +81,7 @@ template<size_t N_options> class Clap
         // Check if it is an option that should have a value
         if ((*opt_it).second) {
           // Then check for the value in the arguments
-          if ((it + 1 != end) && (*(it + 1)).starts_with("-")) {
+          if ((it + 1 == end) || (*(it + 1)).starts_with("-")) {
             ++errors;
             spdlog::error("Option passed with missing value");
           } else {

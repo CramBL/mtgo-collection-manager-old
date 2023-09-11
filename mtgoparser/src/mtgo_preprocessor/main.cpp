@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
   };
 
   if (auto option_arg = config.OptionValue("--caller", "calling")) {
-    spdlog::info("Called from: {}\n", option_arg.value());
+    spdlog::info("Called from: {}", option_arg.value());
     if (option_arg.value() == "mtgoupdater") {
       test_data_dir.assign("../mtgoparser/test/test-data");
       spdlog::info("Setting test directory to: {}\n", test_data_dir);
