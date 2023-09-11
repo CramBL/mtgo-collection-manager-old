@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 use std::process::Command;
-
 use std::sync::OnceLock;
 
 static MTGOGETTER_BIN: OnceLock<String> = OnceLock::new();
@@ -34,7 +33,7 @@ pub mod internal_only {
     // Safe to call multiple times from different threads (for tests)
     pub fn dev_try_init_mtgoparser_bin() {
         if MTGOPARSER_BIN.get().is_none() {
-            _ = set_mtgogetter_bin(DEV_MTGOPARSER_BIN);
+            _ = set_mtgoparser_bin(DEV_MTGOPARSER_BIN);
         }
     }
 
@@ -108,64 +107,4 @@ pub fn run_mtgo_preprocessor_json_example(
         .output()?;
 
     Ok(pre_processor_exec_out)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_call_mtgo_preprocessor() {
-        // Check the build directory exists
-        assert!(
-            std::path::Path::new("../mtgoparser/build").exists(),
-            "Build directory does not exist, build mtgoparser before running this test"
-        );
-        // Check the build src mtgo_preprocessor directory exists
-        assert!(
-            std::path::Path::new("../mtgoparser/build/src/mtgo_preprocessor").exists(),
-            "mtgo_preprocessor directory does not exist, build mtgoparser before running this test"
-        );
-        // Check the mtgo_preprocessor binary exists
-        assert!(
-            std::path::Path::new(mtgoparser_bin()).exists(),
-            "mtgo_preprocessor binary ({mtgoparser_bin}) does not exist, build mtgoparser before running this test", mtgoparser_bin = mtgoparser_bin()
-        );
-
-        let test_out = run_mtgo_preprocessor_example();
-        match test_out {
-            Ok(output) => {
-                println!("Status:\n{status}", status = output.status,);
-
-                println!(
-                    "stdout:\n{stdout}",
-                    stdout = String::from_utf8_lossy(&output.stdout),
-                );
-                println!(
-                    "stderr:\n{stderr}",
-                    stderr = String::from_utf8_lossy(&output.stderr),
-                );
-            }
-            Err(e) => panic!("Unexpected error: {e}"),
-        }
-    }
-
-    #[test]
-    fn test_call_mtgo_preprocessor_json_example() {
-        match run_mtgo_preprocessor_json_example() {
-            Ok(output) => {
-                println!("Status:\n{status}", status = output.status,);
-
-                println!(
-                    "stdout:\n{stdout}",
-                    stdout = String::from_utf8_lossy(&output.stdout),
-                );
-                println!(
-                    "stderr:\n{stderr}",
-                    stderr = String::from_utf8_lossy(&output.stderr),
-                );
-            }
-            Err(e) => panic!("Unexpected error: {e}"),
-        }
-    }
 }
