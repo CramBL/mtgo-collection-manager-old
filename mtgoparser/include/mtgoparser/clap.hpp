@@ -37,7 +37,7 @@ namespace {// Utility used by the Clap class
 
     // Cannot use std::ranges because apple clang still does not support it...
     return std::any_of(
-      args.begin(), args.end(), [&](const std::string_view &arg) { return equals_any(arg, option_names...); });
+      args.cbegin(), args.cend(), [&](const std::string_view &arg) { return equals_any(arg, option_names...); });
   }
 
   // Returns the argument to an option if the option or any of its aliases exists and it has an argument
@@ -48,7 +48,7 @@ namespace {// Utility used by the Clap class
     static_assert(all_convertible_to_string_view<Options...>(), "Options must be convertible to std::string_view");
 
 
-    for (auto it = args.begin(), end = args.end(); it != end; ++it) {
+    for (auto it = args.cbegin(), end = args.cend(); it != end; ++it) {
       if (equals_any(*it, option_names...)) {
         if (it + 1 != end) {
           return *(it + 1);
