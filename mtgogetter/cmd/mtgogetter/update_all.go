@@ -20,7 +20,7 @@ var UpdateAllCmd = &cobra.Command{
 	Aliases: []string{"update-all", "run-all-downloads", "update-all-downloads"},
 	Short:   "Update all downloaded data",
 	Args:    cobra.ExactArgs(0),
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	PreRun: func(cmd *cobra.Command, args []string) {
 		// Set the save-as flag for all subcommands
 		if err := download.DownloadGoatbotsPriceHistoryCmd.Flag("save-as").Value.Set("price-history.json"); err != nil {
 			log.Fatalf("error setting flag: %s", err)
