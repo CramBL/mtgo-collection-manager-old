@@ -69,7 +69,7 @@ template<size_t N_options> class Clap
   std::optional<std::vector<std::string_view>> _args;
 
   // Returns the number of arguments that failed validation
-  [[nodiscard]] auto validate_args() -> size_t
+  [[nodiscard]] auto validate_args() noexcept -> size_t
   {
     size_t errors = 0;
     for (auto it = _args.value().cbegin(), end = _args.value().cend(); it != end; ++it) {
@@ -103,7 +103,7 @@ template<size_t N_options> class Clap
 
 public:
   template<std::convertible_to<std::string_view>... Options>
-  [[nodiscard]] constexpr explicit Clap(std::pair<Options, bool>... opts)
+  [[nodiscard]] constexpr explicit Clap(std::pair<Options, bool>... opts) noexcept
   {
     static_assert(sizeof...(Options) == N_options);
 
@@ -111,7 +111,7 @@ public:
   }
 
   // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
-  [[nodiscard]] auto Parse(int argc, char *argv[]) -> size_t
+  [[nodiscard]] auto Parse(int argc, char *argv[]) noexcept -> size_t
   {
     _args = std::vector<std::string_view>(argv + 1, argv + argc);
     return validate_args();
