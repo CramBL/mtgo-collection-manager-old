@@ -3,6 +3,7 @@ use std::process::Command;
 use std::sync::OnceLock;
 
 pub mod internal_only;
+mod mtgo_preprocessor_api;
 mod mtgogetter_api;
 
 static MTGOGETTER_BIN: OnceLock<String> = OnceLock::new();
@@ -22,25 +23,4 @@ pub(crate) fn mtgogetter_bin() -> &'static str {
 
 pub(crate) fn mtgoparser_bin() -> &'static str {
     MTGOPARSER_BIN.get().expect("MTGOPARSER_BIN not set")
-}
-
-pub fn run_mtgo_preprocessor_example() -> Result<std::process::Output, Box<dyn std::error::Error>> {
-    let pre_processor_exec_out = Command::new(mtgoparser_bin())
-        .arg("--caller")
-        .arg("mtgoupdater")
-        .arg("--run-example")
-        .output()?;
-
-    Ok(pre_processor_exec_out)
-}
-
-pub fn run_mtgo_preprocessor_json_example(
-) -> Result<std::process::Output, Box<dyn std::error::Error>> {
-    let pre_processor_exec_out = Command::new(mtgoparser_bin())
-        .arg("--caller")
-        .arg("mtgoupdater")
-        .arg("--run-example-json")
-        .output()?;
-
-    Ok(pre_processor_exec_out)
 }
