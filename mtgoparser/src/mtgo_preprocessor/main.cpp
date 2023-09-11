@@ -23,6 +23,26 @@
 const auto test_path_trade_list_small_5cards = "/mtgo/Full Trade List-small-5cards.dek";
 const auto test_path_goatbots_card_defs_small = "/goatbots/card-defs-small-5cards.json";
 const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5cards.json";
+// Relative to a project subfolder such as mtgoparser/mtgogetter/mtgoupdater
+const auto top_test_dir_path = "../test/test-data";
+const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
+
+
+constinit auto config = clap::Clap<15>(std::make_pair("--version", false),
+  std::make_pair("-V", false),
+  std::make_pair("--verbose", false),
+  std::make_pair("--echo", false),
+  std::make_pair("--caller", true),
+  std::make_pair("--calling", true),
+  std::make_pair("--test-dir", true),
+  std::make_pair("--data-dir", true),
+  std::make_pair("--example", false),
+  std::make_pair("--run-example", false),
+  std::make_pair("--run", false),
+  std::make_pair("--example-json-formats", false),
+  std::make_pair("--example-json", false),
+  std::make_pair("--run-example-json", false),
+  std::make_pair("--run-example-scryfall", false));
 
 namespace example {
 using goatbots::card_defs_map_t;
@@ -50,6 +70,50 @@ auto goatbots_price_history_parse(const std::string &test_data_dir) -> price_his
   return prices;
 }
 
+auto scryfall_cards_parse() -> scryfall::scryfall_card_vec
+{
+  spdlog::info("=> parsing scryfall json from {}...", top_path_scryfall_default_small_500cards);
+
+  auto scryfall_card_vec = scryfall::ReadJsonVector(top_path_scryfall_default_small_500cards);
+
+  if (config.FlagSet("--verbose")) {
+    fmt::print("Deserialized scryfall cards:\n");
+    for (const auto &c : scryfall_card_vec.value()) {
+      fmt::print("mtgo_id: {}\n", c.mtgo_id);
+      fmt::print("name: {}\n", c.name);
+      fmt::print("rarity: {}\n", c.rarity);
+      fmt::print("released_at: {}\n", c.released_at);
+      if (c.prices.eur.has_value()) {
+        fmt::print("\tprices.eur: {}\n", c.prices.eur.value());
+      } else {
+        fmt::print("\tprices.eur: null\n");
+      }
+      if (c.prices.eur_foil.has_value()) {
+        fmt::print("\tprices.eur_foil: {}\n", c.prices.eur_foil.value());
+      } else {
+        fmt::print("\tprices.eur_foil: null\n");
+      }
+      if (c.prices.usd.has_value()) {
+        fmt::print("\tprices.usd: {}\n", c.prices.usd.value());
+      } else {
+        fmt::print("\tprices.usd: null\n");
+      }
+      if (c.prices.usd_foil.has_value()) {
+        fmt::print("\tprices.usd_foil: {}\n", c.prices.usd_foil.value());
+      } else {
+        fmt::print("\tprices.usd_foil: null\n");
+      }
+      if (c.prices.tix.has_value()) {
+        fmt::print("\tprices.tix: {}\n", c.prices.tix.value());
+      } else {
+        fmt::print("\tprices.tix: null\n");
+      }
+    }
+  }
+
+  return scryfall_card_vec.value();
+}
+
 auto collection_parse(const std::string &test_data_dir) -> int
 {
   spdlog::info("=== example_collection_parse ===");
@@ -63,6 +127,8 @@ auto collection_parse(const std::string &test_data_dir) -> int
   spdlog::info("==> parsing mtgo xml...");
   auto cards = mtgo::xml::parse_dek_xml(test_data_dir + test_path_trade_list_small_5cards);
   auto collection = mtgo::Collection(std::move(cards));
+
+  auto scryfall_cards = scryfall_cards_parse();
 
   spdlog::info("==> collection extract goatbots info...");
   collection.ExtractGoatbotsInfo(card_defs.value(), prices);
@@ -169,19 +235,6 @@ void json_format_prints()
 
 }// namespace example
 
-constinit auto config = clap::Clap<13>(std::make_pair("--version", false),
-  std::make_pair("-V", false),
-  std::make_pair("--echo", false),
-  std::make_pair("--caller", true),
-  std::make_pair("--calling", true),
-  std::make_pair("--test-dir", true),
-  std::make_pair("--data-dir", true),
-  std::make_pair("--example", false),
-  std::make_pair("--run-example", false),
-  std::make_pair("--run", false),
-  std::make_pair("--example-json-formats", false),
-  std::make_pair("--example-json", false),
-  std::make_pair("--run-example-json", false));
 
 int main(int argc, char *argv[])
 {
@@ -220,6 +273,11 @@ int main(int argc, char *argv[])
 
   if (config.FlagSet("--example-json-formats", "--example-json", "--run-example-json")) {
     example::json_format_prints();
+  }
+
+  if (config.FlagSet("--run-example-scryfall")) {
+    auto scryfall_cards = example::scryfall_cards_parse();
+    spdlog::info("got {} scryfall cards", scryfall_cards.size());
   }
 
   return 0;
