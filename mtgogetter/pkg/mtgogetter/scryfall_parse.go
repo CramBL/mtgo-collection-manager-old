@@ -2,6 +2,7 @@ package mtgogetter
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 )
 
@@ -40,14 +41,36 @@ func ScryfallCardsFromJsonBytes(byteSlice []byte) ([]ScryfallCard, error) {
 	if err := json.Unmarshal(byteSlice, &bulk_data); err != nil {
 		return nil, err
 	}
-	return bulk_data, nil
+
+	// Remove cards with mtgo_id == 0 (cards that are not available on MTGO)
+	prealloc_size := (len(bulk_data) / 2) + 1
+
+	bulk_data_mtgo := FilterPrealloc(bulk_data, func(c ScryfallCard) bool {
+		return c.Mtgo_id != 0
+	}, prealloc_size)
+
+	return bulk_data_mtgo, nil
 }
 
+// ScryfallCardsFromJsonStream takes a json.Decoder and returns a slice of ScryfallCard structs
+// Skips cards with mtgo_id == 0 (cards that are not available on MTGO)
 func ScryfallCardsFromJsonStream(decoder *json.Decoder) ([]ScryfallCard, error) {
 	var bulk_data []ScryfallCard
-	if err := decoder.Decode(&bulk_data); err != nil {
-		return nil, err
+
+	for {
+		var card ScryfallCard
+		if err := decoder.Decode(&card); err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+
+		// Check if the mtgo_id is non-zero before appending
+		if card.Mtgo_id != 0 {
+			bulk_data = append(bulk_data, card)
+		}
 	}
+
 	return bulk_data, nil
 }
 
