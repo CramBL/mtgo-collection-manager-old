@@ -1,7 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <mtgoparser/clap.hpp>
+#include <utility>
 
-constinit auto static_clap = clap::Clap<1>("--version");
+constinit auto static_clap = clap::Clap<1>(std::make_pair("--version", false));
 
 TEST_CASE("Test basic CLAP")
 {
@@ -14,7 +15,7 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Dynamically initialized - Show version")
   {
-    auto clap = clap::Clap<1>("--version");
+    auto clap = clap::Clap<1>(std::make_pair("--version", false));
     fmt::print("Options are:\n");
     clap.PrintOptions();
 
@@ -33,7 +34,7 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Alias version cmd - Show version")
   {
-    auto clap_alias_version = clap::Clap<2>("--version", "-V");
+    auto clap_alias_version = clap::Clap<2>(std::make_pair("--version", false), std::make_pair("-V", false));
     clap_alias_version.Parse(argc, argv);
 
     fmt::print("Arguments are:\n");
@@ -58,7 +59,10 @@ TEST_CASE("Test CLAP with options and values")
     char *argv[] = { argv0, arg_save_as, arg_save_as_val };
     int argc = 3;
 
-    auto clap = clap::Clap<4>("--version", "-V", "--save-as", "-s");
+    auto clap = clap::Clap<4>(std::make_pair("--version", false),
+      std::make_pair("-V", false),
+      std::make_pair("--save-as", true),
+      std::make_pair("-s", true));
 
     clap.Parse(argc, argv);
     fmt::print("Got args:\n");

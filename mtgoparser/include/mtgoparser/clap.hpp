@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 // Command-Line Argument Parsing (CLAP) utility
@@ -64,11 +65,18 @@ namespace {// Utility used by the Clap class
 
 template<size_t N_options> class Clap
 {
-  std::array<std::string_view, N_options> _options;
+  std::array<std::pair<std::string_view, bool>, N_options> _options;
   std::optional<std::vector<std::string_view>> _args;
 
+  // Returns non-zero if arguments failed validation
+  //   [[nodiscard]] auto validate_args() -> size_t {
+
+  //   }
+
+
 public:
-  template<std::convertible_to<std::string_view>... Options> [[nodiscard]] constexpr explicit Clap(Options... opts)
+  template<std::convertible_to<std::string_view>... Options>
+  [[nodiscard]] constexpr explicit Clap(std::pair<Options, bool>... opts)
   {
     static_assert(sizeof...(Options) == N_options);
 
@@ -79,7 +87,7 @@ public:
 
   void PrintOptions() const
   {
-    for (const auto &opt : _options) { fmt::print("{}\n", opt); }
+    for (const auto &opt : _options) { fmt::print("{}\n", opt.first); }
   }
 
   void PrintArgs() const
