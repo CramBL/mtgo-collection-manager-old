@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 #include <catch2/catch_test_macros.hpp>
 #include <mtgoparser/clap.hpp>
 #include <utility>
@@ -72,3 +73,4 @@ TEST_CASE("Test CLAP with options and values")
     CHECK(clap.FlagSet("--version", "-V") == false);
   }
 }
+// NOLINTEND
