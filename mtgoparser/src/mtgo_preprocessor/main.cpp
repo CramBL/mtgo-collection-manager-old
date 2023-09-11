@@ -138,7 +138,7 @@ void json_format_prints()
   std::string_view name = "Godzilla";
   std::string_view set = "Best Set";
   std::string_view rarity = "Mythic";
-  mtgo::Card mtgo_card_vals = mtgo::Card(id, quantity, name, set, rarity, true, 100.);
+  mtgo::Card mtgo_card_vals = mtgo::Card(id, quantity, name, set, rarity, true, 100.1239, 0.6);
   std::string out_json_overwritten_vals_mtgo;
   glz::write_json(mtgo_card_vals, out_json_overwritten_vals_mtgo);
   fmt::print("{}\n", out_json_overwritten_vals_mtgo);

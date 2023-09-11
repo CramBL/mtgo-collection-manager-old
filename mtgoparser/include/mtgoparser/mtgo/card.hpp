@@ -27,9 +27,10 @@ struct Card
     std::string set = "",
     std::string rarity = "",
     bool foil = false,
-    double goatbots_price = 0) noexcept
+    double goatbots_price = 0,
+    double scryfall_price = 0) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil },
-      goatbots_price_{ goatbots_price }
+      goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
   {}
 
   // Partially parametrised constructor used to construct a card from MTGO .dek XML
@@ -39,9 +40,10 @@ struct Card
     const char *set = "",
     const char *rarity = "",
     bool foil = false,
-    double goatbots_price = 0) noexcept
+    double goatbots_price = 0,
+    double scryfall_price = 0) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil },
-      goatbots_price_{ goatbots_price }
+      goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
   {}
 
   // SAFETY: The string_views used for construction has to outlive the constructed instance
@@ -52,24 +54,32 @@ struct Card
     std::string_view set,
     std::string_view rarity,
     bool foil = false,
-    double goatbots_price = 0) noexcept
+    double goatbots_price = 0,
+    double scryfall_price = 0) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil },
-      goatbots_price_{ goatbots_price }
+      goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
   {}
 
   // Templated constructor
   template<typename T>
     requires std::convertible_to<T, std::string>
-  explicit Card(T id, T quantity, T name, T set, T rarity, bool foil = false, double goatbots_price = 0) noexcept
+  explicit Card(T id,
+    T quantity,
+    T name,
+    T set,
+    T rarity,
+    bool foil = false,
+    double goatbots_price = 0,
+    double scryfall_price = 0) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil },
-      goatbots_price_{ goatbots_price }
+      goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
   {}
 
   // Move constructor
   [[nodiscard]] Card(Card &&other) noexcept
     : id_(std::move(other.id_)), quantity_(std::move(other.quantity_)), name_(std::move(other.name_)),
       set_(std::move(other.set_)), rarity_(std::move(other.rarity_)), foil_(other.foil_),
-      goatbots_price_(other.goatbots_price_)
+      goatbots_price_(other.goatbots_price_), scryfall_price_(other.scryfall_price_)
   {}
 
   // Move assignment operator
@@ -83,6 +93,7 @@ struct Card
       rarity_ = std::move(other.rarity_);
       foil_ = other.foil_;
       goatbots_price_ = other.goatbots_price_;
+      scryfall_price_ = other.scryfall_price_;
     }
 
     return *this;
@@ -106,5 +117,7 @@ template<> struct glz::meta<mtgo::Card>
     "foil",
     &T::foil_,
     "goatbots_price",
-    &T::goatbots_price_);
+    &T::goatbots_price_,
+    "scryfall_price",
+    &T::scryfall_price_);
 };
