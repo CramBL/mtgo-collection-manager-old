@@ -19,7 +19,7 @@ TEST_CASE("Test basic CLAP")
     fmt::print("Options are:\n");
     clap.PrintOptions();
 
-    clap.Parse(argc, argv);
+    CHECK(clap.Parse(argc, argv) == 0);
     fmt::print("Arguments are:\n");
     clap.PrintArgs();
   }
@@ -27,7 +27,7 @@ TEST_CASE("Test basic CLAP")
   SECTION("Static initialized - show version")
   {
     fmt::print("Parsing arguments with constinit Clap\n");
-    static_clap.Parse(argc, argv);
+    CHECK(static_clap.Parse(argc, argv) == 0);
     fmt::print("Arguments are:\n");
     static_clap.PrintArgs();
   }
@@ -35,7 +35,7 @@ TEST_CASE("Test basic CLAP")
   SECTION("Alias version cmd - Show version")
   {
     auto clap_alias_version = clap::Clap<2>(std::make_pair("--version", false), std::make_pair("-V", false));
-    clap_alias_version.Parse(argc, argv);
+    CHECK(clap_alias_version.Parse(argc, argv) == 0);
 
     fmt::print("Arguments are:\n");
     clap_alias_version.PrintArgs();
@@ -64,7 +64,7 @@ TEST_CASE("Test CLAP with options and values")
       std::make_pair("--save-as", true),
       std::make_pair("-s", true));
 
-    clap.Parse(argc, argv);
+    CHECK(clap.Parse(argc, argv) == 0);
     fmt::print("Got args:\n");
     clap.PrintArgs();
 
