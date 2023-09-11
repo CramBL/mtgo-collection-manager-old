@@ -68,10 +68,37 @@ template<size_t N_options> class Clap
   std::array<std::pair<std::string_view, bool>, N_options> _options;
   std::optional<std::vector<std::string_view>> _args;
 
-  // Returns non-zero if arguments failed validation
-  //   [[nodiscard]] auto validate_args() -> size_t {
+  // Returns the number of arguments that failed validation
+  [[nodiscard]] auto validate_args() -> size_t
+  {
+    size_t errors = 0;
+    for (auto it = _args.value().cbegin(), end = _args.value().cend(); it != end; ++it) {
 
-  //   }
+      bool found = false;
+      for (const auto &opt_p : _options) {
+        if (*it == opt_p.first) {
+          if (opt_p.second) {
+            if ((it + 1 != end) && (*(it + 1)).starts_with("-")) {
+              ++errors;
+              spdlog::error("Option passed with missing value");
+            } else {
+              // Increment as we already validated the option value and we don't want to parse it as an option in the
+              // next iteration
+              ++it;
+            }
+          }
+
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        ++errors;
+        spdlog::error("Unknown option: {}", *it);
+      }
+    }
+    return errors;
+  }
 
 
 public:
@@ -83,7 +110,12 @@ public:
     _options = { opts... };
   }
 
-  void Parse(int argc, char *argv[]) { _args = std::vector<std::string_view>(argv + 1, argv + argc); }
+  // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
+  [[nodiscard]] auto Parse(int argc, char *argv[]) -> size_t
+  {
+    _args = std::vector<std::string_view>(argv + 1, argv + argc);
+    return validate_args();
+  }
 
   void PrintOptions() const
   {
