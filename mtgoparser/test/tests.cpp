@@ -86,7 +86,7 @@ TEST_CASE("Test CLAP with options and values")
       char *argv[] = { argv0, arg_save_as };
       int argc = 2;
       fmt::print("Got args:\n");
-      fmt::print("Should fail as --save-as doesn't have a value provided");
+      fmt::print("Should fail as --save-as doesn't have a value provided\n");
       CHECK(clap.Parse(argc, argv) != 0);
     }
 
@@ -96,7 +96,7 @@ TEST_CASE("Test CLAP with options and values")
       int argc = 3;
       fmt::print("Got args:\n");
       fmt::print(
-        "Should fail as --save-as doesn't have a value provided, instead it's followed by the --version option");
+        "Should fail as --save-as doesn't have a value provided, instead it's followed by the --version option\n");
       CHECK(clap.Parse(argc, argv) != 0);
     }
   }
