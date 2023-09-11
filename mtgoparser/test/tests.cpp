@@ -51,7 +51,7 @@ TEST_CASE("Test CLAP with options and values")
 {
 
   char argv0[] = "mtgo_preprocessor";
-  // char arg_version[] = "--version";
+  char arg_version[] = "--version";
   char arg_save_as[] = "--save-as";
   char arg_save_as_val[] = "saved.txt";
 
@@ -71,6 +71,34 @@ TEST_CASE("Test CLAP with options and values")
 
     CHECK(clap.OptionValue("--save-as", "-s").value() == arg_save_as_val);
     CHECK(clap.FlagSet("--version", "-V") == false);
+  }
+
+  SECTION("Argument validation catches errors")
+  {
+
+    auto clap = clap::Clap<4>(std::make_pair("--version", false),
+      std::make_pair("-V", false),
+      std::make_pair("--save-as", true),
+      std::make_pair("-s", true));
+
+    SECTION("Missing option value - end of args")
+    {
+      char *argv[] = { argv0, arg_save_as };
+      int argc = 2;
+      fmt::print("Got args:\n");
+      fmt::print("Should fail as --save-as doesn't have a value provided");
+      CHECK(clap.Parse(argc, argv) != 0);
+    }
+
+    SECTION("Missing option value - next option instead of value")
+    {
+      char *argv[] = { argv0, arg_save_as, arg_version };
+      int argc = 3;
+      fmt::print("Got args:\n");
+      fmt::print(
+        "Should fail as --save-as doesn't have a value provided, instead it's followed by the --version option");
+      CHECK(clap.Parse(argc, argv) != 0);
+    }
   }
 }
 // NOLINTEND
