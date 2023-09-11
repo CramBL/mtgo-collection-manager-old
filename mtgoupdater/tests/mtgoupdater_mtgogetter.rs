@@ -1,11 +1,10 @@
-use mtgoupdater::download_goatbots_price_history;
 use mtgoupdater::internal_only;
 
 #[ignore]
 #[test]
 fn test_call_mtgogetter_download_price_history() {
     internal_only::dev_try_init_mtgogetter_bin();
-    let test_out = download_goatbots_price_history();
+    let test_out = mtgoupdater::get_goatbots_price_history();
     match test_out {
         Ok(output) => {
             println!("Status:\n{status}", status = output.status,);
@@ -27,7 +26,7 @@ fn test_call_mtgogetter_download_price_history() {
 #[test]
 fn test_call_mtgogetter_download_card_definitions() {
     internal_only::dev_try_init_mtgogetter_bin();
-    let test_out = mtgoupdater::download_goatbots_card_definitions();
+    let test_out = mtgoupdater::get_goatbots_card_definitions();
     match test_out {
         Ok(output) => {
             println!("Status:\n{status}", status = output.status,);
@@ -49,7 +48,7 @@ fn test_mtgogetter_custom_url_download_scryfall_card_json() {
     internal_only::dev_try_init_mtgogetter_bin();
     // From the repository
     let scryfall_card_json_url = "https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/test/test-data/mtgogetter-out/scryfall-card.json";
-    let cmd_out = mtgoupdater::download_custom_url(
+    let cmd_out = mtgoupdater::get_custom_url(
         scryfall_card_json_url,
         false,
         None, // Goes to stdout

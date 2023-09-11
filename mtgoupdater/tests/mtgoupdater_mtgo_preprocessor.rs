@@ -19,7 +19,7 @@ fn test_call_mtgo_preprocessor() {
         "mtgo_preprocessor binary ({mtgoparser_bin}) does not exist, build mtgoparser before running this test", mtgoparser_bin = internal_only::DEV_MTGOPARSER_BIN
     );
 
-    let test_out = mtgoupdater::run_mtgo_preprocessor_example();
+    let test_out = mtgoupdater::run_mtgo_preprocessor_exaple();
     match test_out {
         Ok(output) => {
             println!("Status:\n{status}", status = output.status,);
@@ -40,7 +40,7 @@ fn test_call_mtgo_preprocessor() {
 #[test]
 fn test_call_mtgo_preprocessor_json_example() {
     internal_only::dev_try_init_mtgoparser_bin();
-    match mtgoupdater::run_mtgo_preprocessor_json_example() {
+    match mtgoupdater::run_mtgo_preprocessor_exaple() {
         Ok(output) => {
             println!("Status:\n{status}", status = output.status,);
 
