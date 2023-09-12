@@ -225,18 +225,6 @@ jobs:
           -- ctest -C ${{matrix.build_type}} --verbose
           # --sources ..\include\mtgoparser*
 
-      - name: Windows 🔥💻🔥 Benchmarking⚡
-        if: runner.os == 'Windows'
-        working-directory: ./mtgoparser/build/test
-        run: |
-          .\Release\benchmark_xml_parse.exe [.] --benchmark-warmup-time 2000
-
-      - name: Unix 🔥🐧🔥 Benchmarking⚡
-        if: runner.os != 'Windows'
-        working-directory: ./mtgoparser/build/test
-        run: |
-          ./Release/benchmark_xml_parse [.] --benchmark-warmup-time 2000
-
       - name: 📦 CPack
         if: matrix.package_generator != ''
         working-directory: ./mtgoparser/build
