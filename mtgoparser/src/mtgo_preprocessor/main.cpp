@@ -24,7 +24,7 @@ const auto test_path_trade_list_small_5cards = "/mtgo/Full Trade List-small-5car
 const auto test_path_goatbots_card_defs_small = "/goatbots/card-defs-small-5cards.json";
 const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5cards.json";
 // Relative to a project subfolder such as mtgoparser/mtgogetter/mtgoupdater
-const auto top_test_dir_path = "../test/test-data";
+// const auto top_test_dir_path = "../test/test-data";
 const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
 
 
