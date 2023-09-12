@@ -32,7 +32,7 @@ public:
     : cards_{ glz::read_json<std::vector<Card>>(json_str).value() }
   {}
   [[nodiscard]] constexpr auto Size() const noexcept -> std::size_t;
-  [[nodiscard]] constexpr auto TotalCards() -> uint32_t { return calc_total_card_quantity(); }
+  [[nodiscard]] auto TotalCards() -> uint32_t { return calc_total_card_quantity(); }
 
   void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
     const goatbots::price_hist_map_t &price_hist) noexcept;
@@ -44,7 +44,7 @@ public:
 
 private:
   // Helpers
-  [[nodiscard]] constexpr auto calc_total_card_quantity() -> uint32_t
+  [[nodiscard]] auto calc_total_card_quantity() -> uint32_t
   {
 
     // Return memoized value if it exists
