@@ -83,7 +83,7 @@ struct Card
   {}
 
   // Move assignment operator
-  [[nodiscard]] Card &operator=(Card &&other) noexcept
+  Card &operator=(Card &&other) noexcept
   {
     if (this != &other) {
       id_ = std::move(other.id_);

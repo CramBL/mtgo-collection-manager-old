@@ -157,6 +157,27 @@ TEST_CASE("MTGO card - Initialize and use of")
     CHECK(mtgo_card4 == mtgo_card3);
     CHECK(mtgo_card4 != mtgo_card2);
   }
+
+  SECTION("Card Move semantics")
+  {
+    // Test move constructors and move assignment
+
+    mtgo::Card mtgo_card = mtgo::Card("1", "1", "name", "set", "rarity", true, 1.0, 2.0);
+    mtgo::Card mtgo_card2 = mtgo::Card("1", "1", "name", "set", "rarity", true, 1.0, 2.0);
+
+    // Move constructor
+    mtgo::Card mtgo_card3(std::move(mtgo_card));
+    CHECK(mtgo_card3 == mtgo_card2);
+    // Check that mtgo_card is now invalid
+    CHECK(mtgo_card.id_ == "");
+
+    // Move assignment
+    auto mtgo_card_tmp = mtgo::Card("2", "1", "name", "set", "rarity", true, 1.0, 2.0);
+    mtgo_card3 = std::move(mtgo_card_tmp);
+    CHECK(mtgo_card3 != mtgo_card2);// ID should differ
+    // Check that mtgo_card_tmp is now invalid
+    CHECK(mtgo_card_tmp.id_ == "");
+  }
 }
 
 // NOLINTEND
