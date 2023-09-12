@@ -229,13 +229,13 @@ jobs:
         if: runner.os == 'Windows'
         working-directory: ./mtgoparser/build/test
         run: |
-          cd ${{matrix.build_type}} && .\benchmark_xml_parse.exe [.] --benchmark-warmup-time 2000
+          .\Release\benchmark_xml_parse.exe [.] --benchmark-warmup-time 2000
 
       - name: Unix 🔥🐧🔥 Benchmarking⚡
         if: runner.os != 'Windows'
         working-directory: ./mtgoparser/build/test
         run: |
-          cd ${{matrix.build_type}} && ./benchmark_xml_parse [.] --benchmark-warmup-time 2000
+          ./Release/benchmark_xml_parse [.] --benchmark-warmup-time 2000
 
       - name: 📦 CPack
         if: matrix.package_generator != ''
