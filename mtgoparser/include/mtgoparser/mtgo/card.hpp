@@ -99,7 +99,14 @@ struct Card
     return *this;
   }
 
-  constexpr auto operator<=>(const Card &) const = default;
+  [[nodiscard]] inline constexpr bool operator==(const Card &other) const
+  {
+    return id_ == other.id_ && quantity_ == other.quantity_ && name_ == other.name_ && set_ == other.set_
+           && rarity_ == other.rarity_ && foil_ == other.foil_ && goatbots_price_ == other.goatbots_price_
+           && scryfall_price_ == other.scryfall_price_;
+  }
+
+  [[nodiscard]] inline constexpr bool operator!=(const Card &other) const { return !(*this == other); }
 };
 }// namespace mtgo
 
