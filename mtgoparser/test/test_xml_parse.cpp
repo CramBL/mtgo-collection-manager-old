@@ -65,3 +65,41 @@ TEST_CASE("Deserialized cards throws with misuse", "[cards_from_xml]")
     REQUIRE_THROWS(cards.at(6));
   }
 }
+
+
+TEST_CASE("MTGO collection")
+{
+  SECTION("Collection initialization and size")
+  {
+    SECTION("Small collection")
+    {
+      // From cards vector
+      std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+      auto collection = mtgo::Collection(std::move(cards));
+      REQUIRE(collection.Size() == 5);
+
+      // From JSON string
+      auto collection2 = mtgo::Collection(collection.ToJson());
+      REQUIRE(collection2.Size() == collection.Size());
+
+      // Total quantity
+      CHECK(collection.TotalCards() == 457);// Hand counted :)
+    }
+
+    SECTION("Medium collection - 3000 cards")
+    {
+      // From cards vector
+      std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
+      auto collection = mtgo::Collection(std::move(cards));
+      REQUIRE(collection.Size() == 3000);
+
+      // From JSON string
+      auto collection2 = mtgo::Collection(collection.ToJson());
+      REQUIRE(collection2.Size() == collection.Size());
+
+      // Total quantity
+      CHECK(collection.TotalCards()
+            == 8859);// Hand counted :) (with grep and this regex: `(?:Quantity=")(.*)(?=\" Sideboard)`)
+    }
+  }
+}

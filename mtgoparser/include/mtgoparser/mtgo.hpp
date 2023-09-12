@@ -1,12 +1,16 @@
 #pragma once
 
+#include "mtgoparser/goatbots.hpp"
 #include "mtgoparser/mtgo/card.hpp"
 #include "mtgoparser/mtgo/xml.hpp"
 
-#include "mtgoparser/goatbots.hpp"
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
+
+#include <algorithm>
+#include <numeric>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace mtgo {
@@ -15,7 +19,12 @@ class Collection
   // Member variables
   // TODO: Add timestamp
   std::vector<Card> cards_;
-  int total_quantity_ = 0;
+
+  // Memoization
+  // Don't have much more than 4 billion cards users please
+  std::optional<uint32_t> total_quantity_ = std::nullopt;
+  // Don't have much more than 60k of the same card users please
+  std::optional<std::vector<uint16_t>> card_quantity_ = std::nullopt;
 
 public:
   [[nodiscard]] explicit Collection(std::vector<Card> &&cards) noexcept : cards_{ std::move(cards) } {}
@@ -23,6 +32,14 @@ public:
     : cards_{ glz::read_json<std::vector<Card>>(json_str).value() }
   {}
   [[nodiscard]] constexpr auto Size() const noexcept -> std::size_t;
+  [[nodiscard]] auto TotalCards() -> uint32_t
+  {
+    // If the memoized value doesn't exist, do the work
+    if (!this->total_quantity_.has_value()) { memoize_card_quantities(); }
+    // Return memoized value
+    return this->total_quantity_.value();
+  }
+
   void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
     const goatbots::price_hist_map_t &price_hist) noexcept;
   [[nodiscard]] auto ToJson() const -> std::string;
@@ -33,18 +50,36 @@ public:
 
 private:
   // Helpers
-  //   [[nodiscard]] constexpr auto calc_total_card_quantity() const -> int
-  //   {
-  //     int total = 0;
-  //     for (const auto &c : cards_) {
-  //       // TODO: Parse quantity to ints and sum
-  //       throw "Not yet implemented";
-  //     }
-  //     return total;
-  //   }
+
+  // The first time anything related to card quantities is needed/called this function is called to avoid doing
+  // double work
+  void memoize_card_quantities()
+  {
+    // Parse quantity from string to uint32_t
+    // Keep this result in memory for future calls including calls to specific card quantities
+    std::vector<uint16_t> card_quantity_tmp(cards_.size(), 0);
+
+    std::transform(
+      // Building the vector of quantities is fully parallelizable but apple clang has not implemented std::execution :(
+      // std::execution::par,
+      this->cards_.begin(),
+      this->cards_.end(),
+      card_quantity_tmp.begin(),
+      [](const mtgo::Card &c) -> uint16_t { return static_cast<uint16_t>(std::stoul(c.quantity_)); });
+
+    // Then sum the quantities in using reduce to prepare for when apple clang implements std::execution in the
+    // future...
+    this->total_quantity_ = std::reduce(
+      card_quantity_tmp.begin(), card_quantity_tmp.end(), 0, [](const auto &a, const auto &b) { return a + b; });
+
+    // Move the vector to the member variable
+    this->card_quantity_ = std::move(card_quantity_tmp);
+  }
 };
 
+
 constexpr auto Collection::Size() const noexcept -> std::size_t { return cards_.size(); }
+
 void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
   const goatbots::price_hist_map_t &price_hist) noexcept
 {

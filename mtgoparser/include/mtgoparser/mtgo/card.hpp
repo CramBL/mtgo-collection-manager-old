@@ -1,10 +1,10 @@
 #pragma once
 
+#include <compare>
 #include <concepts>
 #include <glaze/glaze.hpp>
 #include <string>
 #include <string_view>
-
 namespace mtgo {
 
 struct Card
@@ -83,7 +83,7 @@ struct Card
   {}
 
   // Move assignment operator
-  [[nodiscard]] Card &operator=(Card &&other) noexcept
+  Card &operator=(Card &&other) noexcept
   {
     if (this != &other) {
       id_ = std::move(other.id_);
@@ -98,6 +98,15 @@ struct Card
 
     return *this;
   }
+
+  [[nodiscard]] inline constexpr bool operator==(const Card &other) const
+  {
+    return id_ == other.id_ && quantity_ == other.quantity_ && name_ == other.name_ && set_ == other.set_
+           && rarity_ == other.rarity_ && foil_ == other.foil_ && goatbots_price_ == other.goatbots_price_
+           && scryfall_price_ == other.scryfall_price_;
+  }
+
+  [[nodiscard]] inline constexpr bool operator!=(const Card &other) const { return !(*this == other); }
 };
 }// namespace mtgo
 
