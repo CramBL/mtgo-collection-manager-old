@@ -8,7 +8,6 @@
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
-#include <execution>
 #include <numeric>
 #include <string>
 #include <utility>
@@ -47,6 +46,7 @@ private:
   // Helpers
   [[nodiscard]] constexpr auto calc_total_card_quantity() -> uint32_t
   {
+
     // Return memoized value if it exists
     if (this->total_quantity_.has_value()) { return this->total_quantity_.value(); }
 
@@ -54,19 +54,17 @@ private:
     // Keep this result in memory for future calls including calls to specific card quantities
     std::vector<uint16_t> card_quantity_tmp(cards_.size(), 0);
 
-    // Building the vector of quantities is fully parallelizable
-    std::transform(std::execution::par,
+    std::transform(
+      // Building the vector of quantities is fully parallelizable but apple clang has not implemented std::execution :(
+      // std::execution::par,
       this->cards_.begin(),
       this->cards_.end(),
       card_quantity_tmp.begin(),
       [](const mtgo::Card &c) -> uint16_t { return static_cast<uint16_t>(std::stoul(c.quantity_)); });
 
     // Then sum the quantities in parallel and store the result
-    this->total_quantity_ = std::reduce(std::execution::par_unseq,
-      card_quantity_tmp.begin(),
-      card_quantity_tmp.end(),
-      0,
-      [](const auto &a, const auto &b) { return a + b; });
+    this->total_quantity_ = std::reduce(
+      card_quantity_tmp.begin(), card_quantity_tmp.end(), 0, [](const auto &a, const auto &b) { return a + b; });
 
     // Move the vector to the member variable
     this->card_quantity_ = std::move(card_quantity_tmp);
