@@ -105,7 +105,6 @@ TEST_CASE("Scryfall JSON serializing", "[scryfall_serializing]")
     scryfall::Card card_default{};
 
     REQUIRE(card_default.mtgo_id == 0);
-    REQUIRE(card_default.mtgo_foil_id == 0);
     REQUIRE(card_default.name == "");
     REQUIRE(card_default.rarity == "");
     REQUIRE(card_default.released_at == "");
@@ -118,7 +117,6 @@ TEST_CASE("Scryfall JSON serializing", "[scryfall_serializing]")
       glz::write_json(card_default, json_str_card_default);
 
       CHECK_THAT(json_str_card_default, ContainsSubstring(R"("mtgo_id":0)"));
-      CHECK_THAT(json_str_card_default, ContainsSubstring(R"("mtgo_foil_id":0)"));
       CHECK_THAT(json_str_card_default, ContainsSubstring(R"("name":"")"));
       CHECK_THAT(json_str_card_default, ContainsSubstring(R"("rarity":"")"));
       CHECK_THAT(json_str_card_default, ContainsSubstring(R"("prices":{})"));
@@ -129,19 +127,15 @@ TEST_CASE("Scryfall JSON serializing", "[scryfall_serializing]")
     {
       {
         scryfall::Card card_vals{
-          0, 1, "Mother of Runes", "2006-10-06", "rare", scryfall::Prices{ "0", "0.2", "3.0", std::nullopt, "0.05" }
+          0, "Mother of Runes", "2006-10-06", "rare", scryfall::Prices{ "0", "0.2", "3.0", std::nullopt, "0.05" }
         };
 
         // Construction with initializer list should be equivelant as
-        REQUIRE(card_vals
-                == scryfall::Card(0,
-                  1,
-                  "Mother of Runes",
-                  "2006-10-06",
-                  "rare",
-                  scryfall::Prices{ "0", "0.2", "3.0", std::nullopt, "0.05" }));
+        REQUIRE(
+          card_vals
+          == scryfall::Card(
+            0, "Mother of Runes", "2006-10-06", "rare", scryfall::Prices{ "0", "0.2", "3.0", std::nullopt, "0.05" }));
         REQUIRE(card_vals.mtgo_id == 0);
-        REQUIRE(card_vals.mtgo_foil_id == 1);
         REQUIRE(card_vals.name == "Mother of Runes");
         REQUIRE(card_vals.rarity == "rare");
         REQUIRE(card_vals.released_at == "2006-10-06");
@@ -155,7 +149,6 @@ TEST_CASE("Scryfall JSON serializing", "[scryfall_serializing]")
           glz::write_json(card_vals, json_str_card_vals);
 
           CHECK_THAT(json_str_card_vals, ContainsSubstring(R"("mtgo_id":0)"));
-          CHECK_THAT(json_str_card_vals, ContainsSubstring(R"("mtgo_foil_id":1)"));
           CHECK_THAT(json_str_card_vals, ContainsSubstring(R"("name":"Mother of Runes")"));
           CHECK_THAT(json_str_card_vals, ContainsSubstring(R"("rarity":"rare")"));
           CHECK_THAT(json_str_card_vals, ContainsSubstring(R"("released_at":"2006-10-06")"));
@@ -174,7 +167,6 @@ TEST_CASE("Scryfall JSON serializing", "[scryfall_serializing]")
             glz::write<glz::opts{ .skip_null_members = false }>(card_vals, json_str_card_vals_with_null);
 
             CHECK_THAT(json_str_card_vals_with_null, ContainsSubstring(R"("mtgo_id":0)"));
-            CHECK_THAT(json_str_card_vals_with_null, ContainsSubstring(R"("mtgo_foil_id":1)"));
             CHECK_THAT(json_str_card_vals_with_null, ContainsSubstring(R"("name":"Mother of Runes")"));
             CHECK_THAT(json_str_card_vals_with_null, ContainsSubstring(R"("rarity":"rare")"));
             CHECK_THAT(json_str_card_vals_with_null, ContainsSubstring(R"("released_at":"2006-10-06")"));

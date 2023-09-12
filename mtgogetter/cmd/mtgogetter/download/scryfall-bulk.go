@@ -112,7 +112,8 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 		stream_decoder := json.NewDecoder(resp_bulk_data.Body)
 
 		// Deserialize to the ScryfallCard struct (Taking only the fields we need)
-		scryfall_cards, err := mtgogetter.ScryfallCardsFromJsonStream(stream_decoder)
+		// Preallocate 100,000 cards (most recent bulk data as of 2023-09-11 contains 87,000 cards, so 100,000 should be enough for a while)
+		scryfall_cards, err := mtgogetter.ScryfallCardsFromStreamPrealloc(stream_decoder, 100000)
 		if err != nil {
 			return fmt.Errorf("error when deserializing JSON stream: %s", err)
 		}

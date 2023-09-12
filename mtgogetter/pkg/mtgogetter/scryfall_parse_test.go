@@ -25,10 +25,6 @@ func TestScryfallJsonDeserialize(t *testing.T) {
 		t.Errorf("Expected 25527 got %d", first_card.Mtgo_id)
 	}
 
-	if first_card.Mtgo_foil_id != 25528 {
-		t.Errorf("Expected 25528 got %d", first_card.Mtgo_foil_id)
-	}
-
 	if first_card.Name != "Fury Sliver" {
 		t.Errorf("Expected Fury Sliver got %s", bulk_data[0].Name)
 	}
@@ -43,20 +39,12 @@ func TestScryfallJsonDeserialize(t *testing.T) {
 		t.Errorf("Expected 31745 got %d", second_card.Mtgo_id)
 	}
 
-	if second_card.Mtgo_foil_id != 31746 {
-		t.Errorf("Expected 31746 got %d", second_card.Mtgo_foil_id)
-	}
-
 	// Check third cards prices
 	// Black Lotus from Vintage Masters (only on MTGO so other prices are null)
 	third_lotus := &bulk_data[2]
 
 	if third_lotus.Mtgo_id != 53155 {
 		t.Errorf("Expected 53155 got %d", third_lotus.Mtgo_id)
-	}
-
-	if third_lotus.Mtgo_foil_id != 53156 {
-		t.Errorf("Expected 53156 got %d", third_lotus.Mtgo_foil_id)
 	}
 
 	if third_lotus.Prices.Usd != "" { // null in JSON
@@ -98,4 +86,115 @@ func TestScryfallJsonSerialize(t *testing.T) {
 
 	}
 
+}
+
+func TestScryfallJson_Deserialize_50cards(t *testing.T) {
+	// Contains 50 cards with mtgo_id (cards that exist on MTGO)
+	// But contains 87 card objects in total
+	// the cards that don't exist on MTGO have mtgo_id == 0 and should not be deserialized
+	f_scryfall_json := "../../../test/test-data/scryfall/default-cards-small-87objs-50cards.json"
+
+	bulk_data, err := ScryfallCardsFromFile(f_scryfall_json)
+	if err != nil {
+		t.Fatalf("Error when parsing Scryfall JSON: %s", err)
+	}
+
+	if len(bulk_data) != 50 {
+		t.Errorf("Expected 50 cards got %d", len(bulk_data))
+	}
+
+	if err != nil {
+		t.Errorf("Error when parsing Scryfall JSON: %s", err)
+	}
+
+	first_card := &bulk_data[0]
+
+	if first_card.Mtgo_id != 25527 {
+		t.Errorf("Expected 25527 got %d", first_card.Mtgo_id)
+	}
+
+	if first_card.Name != "Fury Sliver" {
+		t.Errorf("Expected Fury Sliver got %s", bulk_data[0].Name)
+	}
+
+	if first_card.Prices.Usd != "0.47" {
+		t.Errorf("Expected 0.47 got %s", bulk_data[0].Prices.Usd)
+	}
+
+	second_card := &bulk_data[1]
+
+	if second_card.Mtgo_id != 34586 {
+		t.Errorf("Expected 34586 got %d", second_card.Mtgo_id)
+	}
+
+	// Check third card
+	third_card := &bulk_data[2]
+
+	if third_card.Mtgo_id != 65170 {
+		t.Errorf("Expected 65170 got %d", third_card.Mtgo_id)
+	}
+
+	if third_card.Prices.Usd != "0.03" {
+		t.Errorf("Expected 0.03, got %s", third_card.Prices.Usd)
+	}
+
+	if third_card.Prices.Tix != "0.03" {
+		t.Errorf("Expected 0.03 got %s", third_card.Prices.Tix)
+	}
+}
+
+func TestScryfallJson_Deserialize_50cards_streamed(t *testing.T) {
+	// Contains 50 cards with mtgo_id (cards that exist on MTGO)
+	// But contains 87 card objects in total
+	// the cards that don't exist on MTGO have mtgo_id == 0 and should not be deserialized
+	f_scryfall_json := "../../../test/test-data/scryfall/default-cards-small-87objs-50cards.json"
+
+	bulk_data, err := ScryfallCardsFromFileStreamed(f_scryfall_json)
+
+	if err != nil {
+		t.Fatalf("Error when parsing Scryfall JSON: %s", err)
+	}
+
+	if len(bulk_data) != 50 {
+		t.Fatalf("Expected 50 cards got %d", len(bulk_data))
+	}
+
+	if err != nil {
+		t.Errorf("Error when parsing Scryfall JSON: %s", err)
+	}
+
+	first_card := &bulk_data[0]
+
+	if first_card.Mtgo_id != 25527 {
+		t.Errorf("Expected 25527 got %d", first_card.Mtgo_id)
+	}
+
+	if first_card.Name != "Fury Sliver" {
+		t.Errorf("Expected Fury Sliver got %s", bulk_data[0].Name)
+	}
+
+	if first_card.Prices.Usd != "0.47" {
+		t.Errorf("Expected 0.47 got %s", bulk_data[0].Prices.Usd)
+	}
+
+	second_card := &bulk_data[1]
+
+	if second_card.Mtgo_id != 34586 {
+		t.Errorf("Expected 34586 got %d", second_card.Mtgo_id)
+	}
+
+	// Check third card
+	third_card := &bulk_data[2]
+
+	if third_card.Mtgo_id != 65170 {
+		t.Errorf("Expected 65170 got %d", third_card.Mtgo_id)
+	}
+
+	if third_card.Prices.Usd != "0.03" {
+		t.Errorf("Expected 0.03, got %s", third_card.Prices.Usd)
+	}
+
+	if third_card.Prices.Tix != "0.03" {
+		t.Errorf("Expected 0.03 got %s", third_card.Prices.Tix)
+	}
 }

@@ -1,0 +1,1302 @@
+[
+    {
+      "mtgo_id": 25527,
+      "name": "Fury Sliver",
+      "released_at": "2006-10-06",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.47",
+        "usd_foil": "4.48",
+        "eur": "0.05",
+        "eur_foil": "0.50",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 34586,
+      "name": "Kor Outfitter",
+      "released_at": "2009-10-02",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.25",
+        "usd_foil": "7.87",
+        "eur": "0.25",
+        "eur_foil": "4.25",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 65170,
+      "name": "Siren Lookout",
+      "released_at": "2017-09-29",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.03",
+        "usd_foil": "0.22",
+        "eur": "0.17",
+        "eur_foil": "0.05",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 116428,
+      "name": "Obyra's Attendants // Desperate Parry",
+      "released_at": "2023-09-08",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.05",
+        "usd_foil": "0.12",
+        "eur": "0.08",
+        "eur_foil": "0.10",
+        "tix": "0.01"
+      }
+    },
+    {
+      "mtgo_id": 78170,
+      "name": "Venerable Knight",
+      "released_at": "2019-10-04",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.09",
+        "usd_foil": "0.28",
+        "eur": "0.07",
+        "eur_foil": "0.17",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 81171,
+      "name": "Mystic Skyfish",
+      "released_at": "2020-07-03",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.12",
+        "usd_foil": "",
+        "eur": "0.08",
+        "eur_foil": "",
+        "tix": "0.19"
+      }
+    },
+    {
+      "mtgo_id": 9701,
+      "name": "Swamp",
+      "released_at": "1997-10-14",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.39",
+        "usd_foil": "",
+        "eur": "0.10",
+        "eur_foil": "",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 102562,
+      "name": "Battlewing Mystic",
+      "released_at": "2022-09-09",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.04",
+        "usd_foil": "0.04",
+        "eur": "0.03",
+        "eur_foil": "0.09",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 38804,
+      "name": "Bronze Horse",
+      "released_at": "2011-01-10",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.05"
+      }
+    },
+    {
+      "mtgo_id": 14297,
+      "name": "Wall of Vipers",
+      "released_at": "2000-06-05",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.19",
+        "usd_foil": "8.39",
+        "eur": "0.10",
+        "eur_foil": "2.20",
+        "tix": "0.09"
+      }
+    },
+    {
+      "mtgo_id": 110316,
+      "name": "War Historian",
+      "released_at": "2023-04-21",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.01",
+        "usd_foil": "0.02",
+        "eur": "0.02",
+        "eur_foil": "0.02",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 108071,
+      "name": "Mystical Tutor",
+      "released_at": "2023-01-13",
+      "rarity": "rare",
+      "prices": {
+        "usd": "5.91",
+        "usd_foil": "9.34",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "1.25"
+      }
+    },
+    {
+      "mtgo_id": 95481,
+      "name": "Essence Warden",
+      "released_at": "2021-11-20",
+      "rarity": "rare",
+      "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.20"
+      }
+    },
+    {
+      "mtgo_id": 69499,
+      "name": "Blood Operative",
+      "released_at": "2018-10-05",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.10",
+        "usd_foil": "0.34",
+        "eur": "0.08",
+        "eur_foil": "0.49",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 39840,
+      "name": "Fresh Meat",
+      "released_at": "2011-05-13",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.21",
+        "usd_foil": "1.14",
+        "eur": "0.19",
+        "eur_foil": "0.99",
+        "tix": "0.01"
+      }
+    },
+    {
+      "mtgo_id": 47621,
+      "name": "Orzhov Guildgate",
+      "released_at": "2013-02-01",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.15",
+        "usd_foil": "2.37",
+        "eur": "0.05",
+        "eur_foil": "0.98",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 112892,
+      "name": "Mortify",
+      "released_at": "2023-06-23",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.16",
+        "usd_foil": "",
+        "eur": "0.18",
+        "eur_foil": "",
+        "tix": "0.26"
+      }
+    },
+    {
+      "mtgo_id": 86451,
+      "name": "Sinew Sliver",
+      "released_at": "2021-03-19",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.25",
+        "usd_foil": "1.72",
+        "eur": "0.15",
+        "eur_foil": "0.75",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 67485,
+      "name": "Charge",
+      "released_at": "2018-04-27",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.03",
+        "usd_foil": "0.11",
+        "eur": "0.02",
+        "eur_foil": "0.02",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 78656,
+      "name": "Island",
+      "released_at": "2019-10-04",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.08",
+        "usd_foil": "0.26",
+        "eur": "0.02",
+        "eur_foil": "0.12",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 68221,
+      "name": "Novice Knight",
+      "released_at": "2018-07-13",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.07",
+        "usd_foil": "0.43",
+        "eur": "0.09",
+        "eur_foil": "0.45",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 7545,
+      "name": "Fallen Askari",
+      "released_at": "1997-02-03",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.18",
+        "usd_foil": "",
+        "eur": "0.02",
+        "eur_foil": "",
+        "tix": "0.09"
+      }
+    },
+    {
+      "mtgo_id": 16777,
+      "name": "Afflict",
+      "released_at": "2001-10-01",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.17",
+        "usd_foil": "0.28",
+        "eur": "0.08",
+        "eur_foil": "0.30",
+        "tix": "0.06"
+      }
+    },
+    {
+      "mtgo_id": 113182,
+      "name": "Crown of Gondor",
+      "released_at": "2023-06-23",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.50",
+        "usd_foil": "",
+        "eur": "0.75",
+        "eur_foil": "",
+        "tix": "0.13"
+      }
+    },
+    {
+      "mtgo_id": 42282,
+      "name": "Invisible Stalker",
+      "released_at": "2011-09-30",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.49",
+        "usd_foil": "9.85",
+        "eur": "1.03",
+        "eur_foil": "5.00",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 90761,
+      "name": "Dakkon, Shadow Slayer",
+      "released_at": "2021-06-18",
+      "rarity": "mythic",
+      "prices": {
+        "usd": "0.37",
+        "usd_foil": "3.16",
+        "eur": "1.13",
+        "eur_foil": "3.49",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 62727,
+      "name": "Destructive Tampering",
+      "released_at": "2017-01-20",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.01",
+        "usd_foil": "0.21",
+        "eur": "0.10",
+        "eur_foil": "0.14",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 7171,
+      "name": "Nocturnal Raid",
+      "released_at": "1996-10-08",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.18",
+        "usd_foil": "",
+        "eur": "0.09",
+        "eur_foil": "",
+        "tix": "0.09"
+      }
+    },
+    {
+      "mtgo_id": 116290,
+      "name": "Archon of the Wild Rose",
+      "released_at": "2023-09-08",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.18",
+        "usd_foil": "0.29",
+        "eur": "0.23",
+        "eur_foil": "0.36",
+        "tix": "0.01"
+      }
+    },
+    {
+      "mtgo_id": 39473,
+      "name": "Flensermite",
+      "released_at": "2011-02-04",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.10",
+        "usd_foil": "2.73",
+        "eur": "0.45",
+        "eur_foil": "0.30",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 100590,
+      "name": "Gorion, Wise Mentor",
+      "released_at": "2022-06-10",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.13",
+        "usd_foil": "0.16",
+        "eur": "0.30",
+        "eur_foil": "0.25",
+        "tix": "0.15"
+      }
+    },
+    {
+      "mtgo_id": 56380,
+      "name": "Gate Smasher",
+      "released_at": "2015-03-27",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.05",
+        "usd_foil": "0.69",
+        "eur": "0.09",
+        "eur_foil": "0.12",
+        "tix": "0.05"
+      }
+    },
+    {
+      "mtgo_id": 59563,
+      "name": "World Breaker",
+      "released_at": "2016-01-22",
+      "rarity": "mythic",
+      "prices": {
+        "usd": "0.76",
+        "usd_foil": "5.01",
+        "eur": "2.50",
+        "eur_foil": "5.00",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 48672,
+      "name": "Mad Auntie",
+      "released_at": "2013-06-07",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.63",
+        "usd_foil": "0.91",
+        "eur": "0.59",
+        "eur_foil": "1.90",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 22387,
+      "name": "Coral Eel",
+      "released_at": "2005-07-29",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.15",
+        "usd_foil": "",
+        "eur": "0.08",
+        "eur_foil": "",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 110392,
+      "name": "Invasion of Tolvada // The Broken Sky",
+      "released_at": "2023-04-21",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.36",
+        "usd_foil": "0.49",
+        "eur": "0.42",
+        "eur_foil": "0.37",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 53035,
+      "name": "Spark Spray",
+      "released_at": "2014-06-16",
+      "rarity": "common",
+      "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 52505,
+      "name": "Remand",
+      "released_at": "2014-03-14",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "1.23",
+        "usd_foil": "",
+        "eur": "2.94",
+        "eur_foil": "",
+        "tix": "1.37"
+      }
+    },
+    {
+      "mtgo_id": 12977,
+      "name": "Bubbling Beebles",
+      "released_at": "1999-06-07",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.18",
+        "usd_foil": "9.15",
+        "eur": "0.07",
+        "eur_foil": "5.50",
+        "tix": "0.09"
+      }
+    },
+    {
+      "mtgo_id": 111968,
+      "name": "Second Breakfast",
+      "released_at": "2023-06-23",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.02",
+        "usd_foil": "0.09",
+        "eur": "0.02",
+        "eur_foil": "0.15",
+        "tix": "0.01"
+      }
+    },
+    {
+      "mtgo_id": 102062,
+      "name": "Ulasht, the Hate Seed",
+      "released_at": "2022-07-08",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.14",
+        "usd_foil": "0.26",
+        "eur": "0.15",
+        "eur_foil": "0.20",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 15948,
+      "name": "Unholy Strength",
+      "released_at": "2001-04-11",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.12",
+        "usd_foil": "",
+        "eur": "0.04",
+        "eur_foil": "",
+        "tix": "0.11"
+      }
+    },
+    {
+      "mtgo_id": 71464,
+      "name": "Consecrate // Consume",
+      "released_at": "2019-01-25",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.07",
+        "usd_foil": "0.27",
+        "eur": "0.02",
+        "eur_foil": "0.18",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 60863,
+      "name": "Thornwood Falls",
+      "released_at": "2016-06-10",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.06",
+        "usd_foil": "0.14",
+        "eur": "0.15",
+        "eur_foil": "0.99",
+        "tix": "0.05"
+      }
+    },
+    {
+      "mtgo_id": 105234,
+      "name": "Farid, Enterprising Salvager",
+      "released_at": "2022-11-18",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.10",
+        "usd_foil": "",
+        "eur": "0.14",
+        "eur_foil": "",
+        "tix": "0.20"
+      }
+    },
+    {
+      "mtgo_id": 30598,
+      "name": "Wings of Aesthir",
+      "released_at": "2008-09-22",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.06"
+      }
+    },
+    {
+      "mtgo_id": 45682,
+      "name": "Mwonvuli Beast Tracker",
+      "released_at": "2012-07-13",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.19",
+        "usd_foil": "0.98",
+        "eur": "0.16",
+        "eur_foil": "0.75",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 87969,
+      "name": "Return to Dust",
+      "released_at": "2021-02-05",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.10",
+        "usd_foil": "",
+        "eur": "0.07",
+        "eur_foil": "",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 107305,
+      "name": "Royal Assassin",
+      "released_at": "2023-01-13",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.49",
+        "usd_foil": "0.92",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 62923,
+      "name": "Shock",
+      "released_at": "2017-01-20",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.04",
+        "usd_foil": "0.23",
+        "eur": "0.02",
+        "eur_foil": "0.52",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 65276,
+      "name": "Walk the Plank",
+      "released_at": "2017-09-29",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.11",
+        "usd_foil": "0.42",
+        "eur": "0.10",
+        "eur_foil": "0.10",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 63381,
+      "name": "Sphinx's Revelation",
+      "released_at": "2017-03-17",
+      "rarity": "mythic",
+      "prices": {
+        "usd": "1.22",
+        "usd_foil": "5.38",
+        "eur": "0.50",
+        "eur_foil": "7.99",
+        "tix": "0.13"
+      }
+    },
+    {
+      "mtgo_id": 58735,
+      "name": "Kor Entanglers",
+      "released_at": "2015-10-02",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.05",
+        "usd_foil": "0.41",
+        "eur": "0.02",
+        "eur_foil": "0.14",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 97897,
+      "name": "The Restoration of Eiganjo // Architect of Restoration",
+      "released_at": "2022-02-20",
+      "rarity": "rare",
+      "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.94"
+      }
+    },
+    {
+      "mtgo_id": 57294,
+      "name": "Spread the Sickness",
+      "released_at": "2015-05-22",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.23",
+        "usd_foil": "0.46",
+        "eur": "0.02",
+        "eur_foil": "0.05",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 22118,
+      "name": "Celestial Kirin",
+      "released_at": "2005-06-03",
+      "rarity": "rare",
+      "prices": {
+        "usd": "1.03",
+        "usd_foil": "14.05",
+        "eur": "1.00",
+        "eur_foil": "8.00",
+        "tix": "0.01"
+      }
+    },
+    {
+      "mtgo_id": 70675,
+      "name": "Saheeli's Directive",
+      "released_at": "2018-12-06",
+      "rarity": "rare",
+      "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.30"
+      }
+    },
+    {
+      "mtgo_id": 22713,
+      "name": "Festering Goblin",
+      "released_at": "2005-07-29",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.10",
+        "usd_foil": "",
+        "eur": "0.02",
+        "eur_foil": "",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 63950,
+      "name": "Initiate's Companion",
+      "released_at": "2017-04-28",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.05",
+        "usd_foil": "0.42",
+        "eur": "0.08",
+        "eur_foil": "0.15",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 14643,
+      "name": "Tsabo's Assassin",
+      "released_at": "2000-10-02",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.43",
+        "usd_foil": "7.95",
+        "eur": "0.10",
+        "eur_foil": "9.99",
+        "tix": "0.05"
+      }
+    },
+    {
+      "mtgo_id": 110478,
+      "name": "Darksteel Splicer",
+      "released_at": "2023-04-21",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.48",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": ""
+      }
+    },
+    {
+      "mtgo_id": 72776,
+      "name": "Hogaak, Arisen Necropolis",
+      "released_at": "2019-06-14",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.92",
+        "usd_foil": "6.74",
+        "eur": "0.98",
+        "eur_foil": "6.25",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 26009,
+      "name": "Jasmine Boreal",
+      "released_at": "2006-10-06",
+      "rarity": "special",
+      "prices": {
+        "usd": "0.22",
+        "usd_foil": "5.98",
+        "eur": "0.13",
+        "eur_foil": "5.00",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 53005,
+      "name": "Grizzly Fate",
+      "released_at": "2014-06-16",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.06"
+      }
+    },
+    {
+      "mtgo_id": 14707,
+      "name": "Ancient Spring",
+      "released_at": "2000-10-02",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.17",
+        "usd_foil": "4.86",
+        "eur": "0.05",
+        "eur_foil": "5.99",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 98659,
+      "name": "Security Rhox",
+      "released_at": "2022-04-29",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.04",
+        "usd_foil": "0.03",
+        "eur": "0.03",
+        "eur_foil": "0.03",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 13741,
+      "name": "Belbe's Armor",
+      "released_at": "2000-02-14",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.22",
+        "usd_foil": "2.94",
+        "eur": "0.24",
+        "eur_foil": "3.50",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 12979,
+      "name": "Slinking Skirge",
+      "released_at": "1999-06-07",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.10",
+        "usd_foil": "3.97",
+        "eur": "0.04",
+        "eur_foil": "0.99",
+        "tix": "0.09"
+      }
+    },
+    {
+      "mtgo_id": 97498,
+      "name": "Scoured Barrens",
+      "released_at": "2022-02-18",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.08",
+        "usd_foil": "0.18",
+        "eur": "0.07",
+        "eur_foil": "0.13",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 90228,
+      "name": "Shaile, Dean of Radiance // Embrose, Dean of Shadow",
+      "released_at": "2021-05-01",
+      "rarity": "rare",
+      "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 65232,
+      "name": "Grim Captain's Call",
+      "released_at": "2017-09-29",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.07",
+        "usd_foil": "0.24",
+        "eur": "0.08",
+        "eur_foil": "0.20",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 115465,
+      "name": "Reassembling Skeleton",
+      "released_at": "2023-08-04",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.12",
+        "usd_foil": "0.26",
+        "eur": "0.18",
+        "eur_foil": "0.22",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 78582,
+      "name": "Enchanted Carriage",
+      "released_at": "2019-10-04",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.08",
+        "usd_foil": "0.22",
+        "eur": "0.07",
+        "eur_foil": "0.05",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 21877,
+      "name": "Floodbringer",
+      "released_at": "2005-02-04",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.17",
+        "usd_foil": "3.93",
+        "eur": "0.02",
+        "eur_foil": "0.29",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 39443,
+      "name": "Phyresis",
+      "released_at": "2011-02-04",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.31",
+        "usd_foil": "12.77",
+        "eur": "0.57",
+        "eur_foil": "6.48",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 64602,
+      "name": "Banewhip Punisher",
+      "released_at": "2017-07-14",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.22",
+        "usd_foil": "0.76",
+        "eur": "0.12",
+        "eur_foil": "0.15",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 52427,
+      "name": "Corpse Traders",
+      "released_at": "2014-03-14",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.08",
+        "usd_foil": "",
+        "eur": "0.19",
+        "eur_foil": "",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 35086,
+      "name": "Zodiac Rabbit",
+      "released_at": "2014-10-17",
+      "rarity": "common",
+      "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": ""
+      }
+    },
+    {
+      "mtgo_id": 54008,
+      "name": "Rite of the Serpent",
+      "released_at": "2014-09-26",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.05",
+        "usd_foil": "0.25",
+        "eur": "0.02",
+        "eur_foil": "0.29",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 55225,
+      "name": "Skullclamp",
+      "released_at": "2014-11-07",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "3.69",
+        "usd_foil": "",
+        "eur": "4.07",
+        "eur_foil": "",
+        "tix": "0.90"
+      }
+    },
+    {
+      "mtgo_id": 21815,
+      "name": "Skullmane Baku",
+      "released_at": "2005-02-04",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.09",
+        "usd_foil": "0.15",
+        "eur": "0.05",
+        "eur_foil": "0.10",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 16795,
+      "name": "Infected Vermin",
+      "released_at": "2001-10-01",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.54",
+        "usd_foil": "11.49",
+        "eur": "0.28",
+        "eur_foil": "0.99",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 88999,
+      "name": "Venerable Warsinger",
+      "released_at": "2021-04-23",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.12",
+        "usd_foil": "0.26",
+        "eur": "0.44",
+        "eur_foil": "0.25",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 19195,
+      "name": "Murderous Betrayal",
+      "released_at": "2003-07-28",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.13",
+        "usd_foil": "",
+        "eur": "0.57",
+        "eur_foil": "",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 88003,
+      "name": "Eyeblight Massacre",
+      "released_at": "2021-02-05",
+      "rarity": "uncommon",
+      "prices": {
+        "usd": "0.08",
+        "usd_foil": "",
+        "eur": "0.09",
+        "eur_foil": "",
+        "tix": "0.04"
+      }
+    },
+    {
+      "mtgo_id": 13445,
+      "name": "Saprazzan Skerry",
+      "released_at": "1999-10-04",
+      "rarity": "common",
+      "prices": {
+        "usd": "3.27",
+        "usd_foil": "38.66",
+        "eur": "5.80",
+        "eur_foil": "24.00",
+        "tix": "1.39"
+      }
+    },
+    {
+      "mtgo_id": 31917,
+      "name": "Sphinx Summoner",
+      "released_at": "2009-02-06",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.32",
+        "usd_foil": "2.70",
+        "eur": "0.10",
+        "eur_foil": "1.13",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 19115,
+      "name": "Worship",
+      "released_at": "2003-07-28",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.70",
+        "usd_foil": "",
+        "eur": "0.90",
+        "eur_foil": "",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 65226,
+      "name": "Duress",
+      "released_at": "2017-09-29",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.05",
+        "usd_foil": "0.31",
+        "eur": "0.02",
+        "eur_foil": "0.48",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 36640,
+      "name": "Flame Slash",
+      "released_at": "2010-04-23",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.28",
+        "usd_foil": "11.92",
+        "eur": "0.30",
+        "eur_foil": "9.00",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 58435,
+      "name": "Touch of the Void",
+      "released_at": "2015-10-02",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.03",
+        "usd_foil": "0.24",
+        "eur": "0.02",
+        "eur_foil": "0.15",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 108896,
+      "name": "Danitha, New Benalia's Light",
+      "released_at": "2023-05-12",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.42",
+        "usd_foil": "0.32",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 71500,
+      "name": "Warrant // Warden",
+      "released_at": "2019-01-25",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.09",
+        "usd_foil": "0.51",
+        "eur": "0.10",
+        "eur_foil": "0.49",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 55500,
+      "name": "Lightning Shrieker",
+      "released_at": "2015-01-23",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.04",
+        "usd_foil": "0.34",
+        "eur": "0.15",
+        "eur_foil": "0.13",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 24551,
+      "name": "Diamond Faerie",
+      "released_at": "2006-07-21",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.55",
+        "usd_foil": "9.99",
+        "eur": "0.26",
+        "eur_foil": "1.00",
+        "tix": "0.02"
+      }
+    },
+    {
+      "mtgo_id": 105210,
+      "name": "Titania, Nature's Force",
+      "released_at": "2022-11-18",
+      "rarity": "mythic",
+      "prices": {
+        "usd": "8.49",
+        "usd_foil": "10.16",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "2.17"
+      }
+    },
+    {
+      "mtgo_id": 110222,
+      "name": "Blighted Burgeoning",
+      "released_at": "2023-04-21",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.03",
+        "usd_foil": "0.04",
+        "eur": "0.06",
+        "eur_foil": "0.16",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 83155,
+      "name": "Deadly Alliance",
+      "released_at": "2020-09-25",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.02",
+        "usd_foil": "0.08",
+        "eur": "0.17",
+        "eur_foil": "0.07",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 57914,
+      "name": "Deep-Sea Terror",
+      "released_at": "2015-07-17",
+      "rarity": "common",
+      "prices": {
+        "usd": "0.03",
+        "usd_foil": "0.24",
+        "eur": "0.05",
+        "eur_foil": "0.14",
+        "tix": "0.03"
+      }
+    },
+    {
+      "mtgo_id": 26858,
+      "name": "Steamflogger Boss",
+      "released_at": "2007-05-04",
+      "rarity": "rare",
+      "prices": {
+        "usd": "0.22",
+        "usd_foil": "10.86",
+        "eur": "0.15",
+        "eur_foil": "6.59",
+        "tix": "0.01"
+      }
+    }
+]

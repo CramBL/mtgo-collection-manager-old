@@ -38,26 +38,23 @@ struct Prices
 struct Card
 {
   uint32_t mtgo_id{};
-  uint32_t mtgo_foil_id{};
   std::string name{};
   std::string released_at{};
   std::string rarity{};
   Prices prices{};
 
   [[nodiscard]] explicit Card(uint32_t _mtgo_id = 0,
-    uint32_t _mtgo_foil_id = 0,
     std::string _name = "",
     std::string _released_at = "",
     std::string _rarity = "",
     Prices _prices = scryfall::Prices{})
-    : mtgo_id{ _mtgo_id }, mtgo_foil_id{ _mtgo_foil_id }, name{ _name },
-      released_at{ _released_at }, rarity{ _rarity }, prices{ _prices }
+    : mtgo_id{ _mtgo_id }, name{ _name }, released_at{ _released_at }, rarity{ _rarity }, prices{ _prices }
   {}
 
   [[nodiscard]] inline constexpr bool operator==(const Card &other) const
   {
-    return mtgo_id == other.mtgo_id && mtgo_foil_id == other.mtgo_foil_id && name == other.name
-           && released_at == other.released_at && rarity == other.rarity && prices == other.prices;
+    return mtgo_id == other.mtgo_id && name == other.name && released_at == other.released_at && rarity == other.rarity
+           && prices == other.prices;
   }
 
   [[nodiscard]] inline constexpr bool operator!=(const Card &other) const { return !(*this == other); }
@@ -77,8 +74,6 @@ template<> struct glz::meta<scryfall::Card>
   using T = scryfall::Card;
   static constexpr auto value = object("mtgo_id",
     &T::mtgo_id,
-    "mtgo_foil_id",
-    &T::mtgo_foil_id,
     "name",
     &T::name,
     "released_at",
@@ -88,3 +83,23 @@ template<> struct glz::meta<scryfall::Card>
     "prices",
     &T::prices);
 };
+
+namespace scryfall {
+using scryfall_card_vec = std::vector<scryfall::Card>;
+
+[[nodiscard]] auto ReadJsonVector(std::filesystem::path path_json) -> std::optional<scryfall_card_vec>
+{
+  // Instantiate and pre-allocate map
+  scryfall_card_vec scryfall_vec{};
+  scryfall_vec.reserve(50000);// about 43000 cards as of 2023-09-11
+
+  // Read file into buffer and decode to populate map
+  if (auto err_code = glz::read_json(scryfall_vec, io_util::ReadToStrBuf(path_json))) {
+    // Handle error
+    spdlog::error("{}", glz::format_error(err_code, std::string{}));
+    return std::nullopt;
+  }
+
+  return scryfall_vec;
+}
+}// namespace scryfall
