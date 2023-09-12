@@ -1,10 +1,10 @@
 #pragma once
 
+#include <compare>
 #include <concepts>
 #include <glaze/glaze.hpp>
 #include <string>
 #include <string_view>
-
 namespace mtgo {
 
 struct Card
@@ -62,7 +62,7 @@ struct Card
 
   // Templated constructor
   template<typename T>
-  requires std::convertible_to<T, std::string>
+    requires std::convertible_to<T, std::string>
   explicit Card(T id,
     T quantity,
     T name,
@@ -98,6 +98,8 @@ struct Card
 
     return *this;
   }
+
+  constexpr auto operator<=>(const Card &) const = default;
 };
 }// namespace mtgo
 
