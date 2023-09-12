@@ -32,7 +32,13 @@ public:
     : cards_{ glz::read_json<std::vector<Card>>(json_str).value() }
   {}
   [[nodiscard]] constexpr auto Size() const noexcept -> std::size_t;
-  [[nodiscard]] auto TotalCards() -> uint32_t { return calc_total_card_quantity(); }
+  [[nodiscard]] auto TotalCards() -> uint32_t
+  {
+    // If the memoized value doesn't exist, do the work
+    if (!this->total_quantity_.has_value()) { memoize_card_quantities(); }
+    // Return memoized value
+    return this->total_quantity_.value();
+  }
 
   void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
     const goatbots::price_hist_map_t &price_hist) noexcept;
@@ -44,12 +50,11 @@ public:
 
 private:
   // Helpers
-  [[nodiscard]] auto calc_total_card_quantity() -> uint32_t
+
+  // The first time anything related to card quantities is needed/called this function is called to avoid doing
+  // double work
+  void memoize_card_quantities()
   {
-
-    // Return memoized value if it exists
-    if (this->total_quantity_.has_value()) { return this->total_quantity_.value(); }
-
     // Parse quantity from string to uint32_t
     // Keep this result in memory for future calls including calls to specific card quantities
     std::vector<uint16_t> card_quantity_tmp(cards_.size(), 0);
@@ -62,14 +67,13 @@ private:
       card_quantity_tmp.begin(),
       [](const mtgo::Card &c) -> uint16_t { return static_cast<uint16_t>(std::stoul(c.quantity_)); });
 
-    // Then sum the quantities in parallel and store the result
+    // Then sum the quantities in using reduce to prepare for when apple clang implements std::execution in the
+    // future...
     this->total_quantity_ = std::reduce(
       card_quantity_tmp.begin(), card_quantity_tmp.end(), 0, [](const auto &a, const auto &b) { return a + b; });
 
     // Move the vector to the member variable
     this->card_quantity_ = std::move(card_quantity_tmp);
-
-    return this->total_quantity_.value();
   }
 };
 
