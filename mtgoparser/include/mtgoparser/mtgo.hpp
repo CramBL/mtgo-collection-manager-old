@@ -1,12 +1,17 @@
 #pragma once
 
+#include "mtgoparser/goatbots.hpp"
 #include "mtgoparser/mtgo/card.hpp"
 #include "mtgoparser/mtgo/xml.hpp"
 
-#include "mtgoparser/goatbots.hpp"
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
+
+#include <algorithm>
+#include <execution>
+#include <numeric>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace mtgo {
@@ -15,7 +20,12 @@ class Collection
   // Member variables
   // TODO: Add timestamp
   std::vector<Card> cards_;
-  int total_quantity_ = 0;
+
+  // Memoization
+  // Don't have much more than 4 billion cards users please
+  std::optional<uint32_t> total_quantity_ = std::nullopt;
+  // Don't have much more than 60k of the same card users please
+  std::optional<std::vector<uint16_t>> card_quantity_ = std::nullopt;
 
 public:
   [[nodiscard]] explicit Collection(std::vector<Card> &&cards) noexcept : cards_{ std::move(cards) } {}
@@ -23,6 +33,8 @@ public:
     : cards_{ glz::read_json<std::vector<Card>>(json_str).value() }
   {}
   [[nodiscard]] constexpr auto Size() const noexcept -> std::size_t;
+  [[nodiscard]] constexpr auto TotalCards() -> uint32_t { return calc_total_card_quantity(); }
+
   void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
     const goatbots::price_hist_map_t &price_hist) noexcept;
   [[nodiscard]] auto ToJson() const -> std::string;
@@ -33,18 +45,39 @@ public:
 
 private:
   // Helpers
-  //   [[nodiscard]] constexpr auto calc_total_card_quantity() const -> int
-  //   {
-  //     int total = 0;
-  //     for (const auto &c : cards_) {
-  //       // TODO: Parse quantity to ints and sum
-  //       throw "Not yet implemented";
-  //     }
-  //     return total;
-  //   }
+  [[nodiscard]] constexpr auto calc_total_card_quantity() -> uint32_t
+  {
+    // Return memoized value if it exists
+    if (this->total_quantity_.has_value()) { return this->total_quantity_.value(); }
+
+    // Parse quantity from string to uint32_t
+    // Keep this result in memory for future calls including calls to specific card quantities
+    std::vector<uint16_t> card_quantity_tmp(cards_.size(), 0);
+
+    // Building the vector of quantities is fully parallelizable
+    std::transform(std::execution::par,
+      this->cards_.begin(),
+      this->cards_.end(),
+      card_quantity_tmp.begin(),
+      [](const mtgo::Card &c) -> uint16_t { return static_cast<uint16_t>(std::stoul(c.quantity_)); });
+
+    // Then sum the quantities in parallel and store the result
+    this->total_quantity_ = std::reduce(std::execution::par_unseq,
+      card_quantity_tmp.begin(),
+      card_quantity_tmp.end(),
+      0,
+      [](const auto &a, const auto &b) { return a + b; });
+
+    // Move the vector to the member variable
+    this->card_quantity_ = std::move(card_quantity_tmp);
+
+    return this->total_quantity_.value();
+  }
 };
 
+
 constexpr auto Collection::Size() const noexcept -> std::size_t { return cards_.size(); }
+
 void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
   const goatbots::price_hist_map_t &price_hist) noexcept
 {

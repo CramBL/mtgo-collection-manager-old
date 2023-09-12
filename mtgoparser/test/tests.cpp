@@ -1,7 +1,7 @@
 // NOLINTBEGIN
 #include <catch2/catch_test_macros.hpp>
 #include <mtgoparser/clap.hpp>
-#include <mtgoparser/mtgo.hpp>
+#include <mtgoparser/mtgo/card.hpp>
 #include <utility>
 
 constinit auto static_clap = clap::Clap<1>(std::make_pair("--version", false));
