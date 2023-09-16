@@ -31,15 +31,14 @@ jobs:
             generator: "Ninja Multi-Config"
             enable_ipo: Off
 
-          # TODO: Implement for windows (also with make?)
+          # TODO: Implement for windows (alsowith make?)
           #- os: windows-2022
             #compiler: msvc
             #generator: "Visual Studio 17 2022"
             #enable_ipo: On
 
-    name: ⚒️ Build & Test 📝
+    name: ⚙️ Setup toolchains
     steps:
-      - name: ⚙️ Setup toolchains
       - uses: actions/checkout@v3
       - uses: moonrepo/setup-rust@v1
       - uses: aminya/setup-cpp@v1
