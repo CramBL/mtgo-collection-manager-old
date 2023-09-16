@@ -1,8 +1,14 @@
+# Default flags
+MTGOPARSER_GENERATOR := "Ninja Multi-Config"
+MTGOPARSER_IPO := On
+MTGOPARSER_BUILD_MODE := Release
+
+# Minimum supported versions
 RUST_MIN_VERSION := 1.70.0
 GO_MIN_VERSION := 1.20
 CMAKE_MIN_VERSION := 3.20
 
-
+# Get version from a unix-like terminal
 RUST_VERSION := $(shell rustc --version | cut -d' ' -f2)
 GO_VERSION := $(shell go version | cut -d' ' -f3 | sed 's/go//')
 CMAKE_VERSION := $(shell cmake --version | cut -d' ' -f3 | head -n 1)
@@ -43,8 +49,8 @@ test_mtgogetter:
 .PHONY: build_mtgoparser
 build_mtgoparser:
 	@echo "==> Building MTGO Parser..."
-	cd mtgoparser && cmake -S . -B build -G "Ninja Multi-Config"
-	cd mtgoparser && cmake --build build --config Release
+	cd mtgoparser && cmake -S . -B build -G $(MTGOPARSER_GENERATOR) -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO)
+	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
 	@echo "=== Done building MTGO Parser ==="
 
 .PHONY: test_mtgoparser

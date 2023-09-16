@@ -37,7 +37,7 @@ jobs:
             #generator: "Visual Studio 17 2022"
             #enable_ipo: On
 
-    name: ⚙️ Setup toolchains
+    name: Test
     steps:
       - uses: actions/checkout@v3
       - uses: moonrepo/setup-rust@v1
@@ -53,6 +53,6 @@ jobs:
 
       - name: 📝 Build & Run tests
         run: |
-          make all
+          make MTGOPARSER_IPO=${{matrix.enable_ipo }} MTGOPARSER_GENERATOR=${{ matrix.generator }}
           make test
     
