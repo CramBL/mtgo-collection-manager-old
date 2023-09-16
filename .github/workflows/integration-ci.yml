@@ -53,6 +53,6 @@ jobs:
 
       - name: 📝 Build & Run tests
         run: |
-          make MTGOPARSER_IPO=${{matrix.enable_ipo }} MTGOPARSER_GENERATOR=${{ matrix.generator }}
+          make MTGOPARSER_IPO=${{matrix.enable_ipo }}
           make test
     

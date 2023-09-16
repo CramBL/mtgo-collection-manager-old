@@ -1,7 +1,16 @@
 # Default flags
-MTGOPARSER_GENERATOR := "Ninja Multi-Config"
+# MTGOPARSER_GENERATOR := "Ninja Multi-Config"
 MTGOPARSER_IPO := On
-MTGOPARSER_BUILD_MODE := Release
+MTGOPARSER_BUILD_MODE := Release	
+
+# Set generator to "Ninja Multi-Config" for unix-like systems.
+platform_id != uname
+MTGOPARSER_GENERATOR != if [ $(platform_id) = Linux ] || \
+    [ $(platform_id) = Darwin ]; then \
+        echo "Ninja Multi-Config"; \
+    else \
+        echo "Visual Studio 17 2022"; \
+    fi
 
 # Minimum supported versions
 RUST_MIN_VERSION := 1.70.0
@@ -49,7 +58,7 @@ test_mtgogetter:
 .PHONY: build_mtgoparser
 build_mtgoparser:
 	@echo "==> Building MTGO Parser..."
-	cd mtgoparser && cmake -S . -B build -G $(MTGOPARSER_GENERATOR) -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO)
+	cd mtgoparser && cmake -S . -B build -G "$(MTGOPARSER_GENERATOR)" -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO)
 	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
 	@echo "=== Done building MTGO Parser ==="
 
