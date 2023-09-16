@@ -9,5 +9,5 @@ Secondary purpose is to learn basic but idiomatic Go.
 
 ## Get started
 1. [Install Go](https://go.dev/doc/install)
-2. run `go run . --help` this should compile and run `mtgogetter` and displaying the help text
+2. run `go run . --help` this should compile and run `mtgogetter` and display the help text
 3. run tests with `go test ./...`
