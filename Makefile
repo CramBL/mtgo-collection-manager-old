@@ -2,6 +2,7 @@
 # MTGOPARSER_GENERATOR := "Ninja Multi-Config"
 MTGOPARSER_IPO := Off
 MTGOPARSER_BUILD_MODE := Release
+MTGOPARSER_ENABLE_COV := false
 
 # Set generator to "Ninja Multi-Config" for unix-like systems.
 ifeq ($(shell uname -s),Linux)
@@ -35,6 +36,13 @@ all:\
 	build-mtgoparser \
 	build-mtgoupdater \
 
+.PHONY: build-integration
+build-integration:\
+	show-versions \
+	build-mtgogetter \
+	build-mtgoparser-integration \
+	build-mtgoupdater \
+
 .PHONY: test
 test:\
 	show-versions \
@@ -48,6 +56,7 @@ show-versions:
 	@echo "Rust : $(RUST_VERSION) (min. $(RUST_MIN_VERSION))"
 	@echo "Go   : $(GO_VERSION) (min. $(GO_MIN_VERSION))"
 	@echo "CMake: $(CMAKE_VERSION) (min. $(CMAKE_MIN_VERSION))"
+	@echo "CMake generator: $(MTGOPARSER_GENERATOR)"
 
 .PHONY: build-mtgogetter
 build-mtgogetter:
@@ -64,7 +73,15 @@ test-mtgogetter:
 .PHONY: build-mtgoparser
 build-mtgoparser:
 	@echo "==> Building MTGO Parser..."
-	cd mtgoparser && cmake -S . -B build -G "$(MTGOPARSER_GENERATOR)" -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE)
+	cd mtgoparser && cmake -S . -B build -G "$(MTGOPARSER_GENERATOR)" -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV)
+	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
+	@echo "=== Done building MTGO Parser ==="
+
+# For CI, turning off warnings as errors and other things (trusting the MTGO Parser CI for the more rigorous testing and static analysis)
+.PHONY: build-mtgoparser-integration
+build-mtgoparser-integration:
+	@echo "==> Building MTGO Parser..."
+	cd mtgoparser && cmake -S . -B build -G "$(MTGOPARSER_GENERATOR)" -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
 	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
 	@echo "=== Done building MTGO Parser ==="
 
