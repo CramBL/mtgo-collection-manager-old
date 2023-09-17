@@ -1,0 +1,62 @@
+name: integraton-ci
+
+on:
+  pull_request:
+  release:
+    types: [published]
+  push:
+    tags:
+      - master
+    branches:
+      - develop
+      - master
+
+env:
+  VERBOSE: 1
+
+jobs:
+  Test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            compiler: gcc-13
+            generator: "Ninja Multi-Config"
+            enable_ipo: On
+            packaging_maintainer_mode: OFF
+            build_shared: OFF
+
+          - os: macos-12
+            compiler: llvm-15.0.3
+            generator: "Ninja Multi-Config"
+            enable_ipo: Off
+            packaging_maintainer_mode: OFF
+            build_shared: OFF
+
+          # TODO: Implement for windows (alsowith make?)
+          #- os: windows-2022
+            #compiler: msvc
+            #generator: "Visual Studio 17 2022"
+            #enable_ipo: On
+
+    name: Test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: moonrepo/setup-rust@v1
+      - uses: aminya/setup-cpp@v1
+        with:
+          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+          compiler: ${{ matrix.compiler }}
+          cmake: true
+          ninja: true
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: 📝 Build & Run tests
+        run: |
+          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }}
+          make test
+

@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.20) # LLVM 16.0.0 requires >= 3.20.0
 
-
-
 # Only set the cxx_standard if it is not set by someone else
 if (NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 20)
@@ -52,9 +50,6 @@ add_library(mtgoparser::mtgoparser_options ALIAS mtgoparser_options)
 add_library(mtgoparser::mtgoparser_warnings ALIAS mtgoparser_warnings)
 add_subdirectory(configured_files)
 
-#add_library(mtgoparser::mtgoparser_options INTERFACE IMPORTED)
-#add_library(mtgoparser::mtgoparser_warnings INTERFACE IMPORTED)
-
 # Define the library target
 add_library(mtgoparser INTERFACE)
 target_include_directories(mtgoparser INTERFACE
@@ -80,7 +75,6 @@ endif()
 include(CTest)
 
 if(BUILD_TESTING)
-  message(AUTHOR_WARNING "Building Tests. Be sure to check out test/constexpr_tests.cpp for constexpr testing")
   add_subdirectory(test)
 endif()
 
