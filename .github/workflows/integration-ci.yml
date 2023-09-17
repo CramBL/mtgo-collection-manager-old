@@ -24,7 +24,7 @@ jobs:
           - os: ubuntu-22.04
             compiler: gcc-13
             generator: "Ninja Multi-Config"
-            enable_ipo: On
+            enable_ipo: Off
 
           - os: macos-12
             compiler: llvm-15.0.3
@@ -55,4 +55,4 @@ jobs:
         run: |
           make MTGOPARSER_IPO=${{matrix.enable_ipo }}
           make test
-    
+
