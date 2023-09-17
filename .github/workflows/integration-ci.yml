@@ -24,12 +24,16 @@ jobs:
           - os: ubuntu-22.04
             compiler: gcc-13
             generator: "Ninja Multi-Config"
-            enable_ipo: Off
+            enable_ipo: On
+            packaging_maintainer_mode: OFF
+            build_shared: OFF
 
           - os: macos-12
             compiler: llvm-15.0.3
             generator: "Ninja Multi-Config"
             enable_ipo: Off
+            packaging_maintainer_mode: OFF
+            build_shared: OFF
 
           # TODO: Implement for windows (alsowith make?)
           #- os: windows-2022
@@ -53,6 +57,6 @@ jobs:
 
       - name: 📝 Build & Run tests
         run: |
-          make MTGOPARSER_IPO=${{matrix.enable_ipo }}
+          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }}
           make test
 
