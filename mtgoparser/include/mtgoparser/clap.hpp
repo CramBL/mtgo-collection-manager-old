@@ -75,11 +75,12 @@ struct Option
 {
   std::string_view name_;
   bool flag_;
+  // Array should be optional, will then be std::nullopt instead of empty array if there's no aliases
   std::optional<std::array<std::optional<std::string_view>, clap::MAX_ALIAS_COUNT>> aliases_;
 
   template<std::convertible_to<std::string_view> T_Name,
     std::convertible_to<std::optional<std::string_view>>... T_Alias>
-  [[nodiscard]] constexpr explicit Option(T_Name name, bool is_flag, T_Alias... aliases)
+  [[nodiscard]] constexpr explicit Option(T_Name name, bool is_flag, T_Alias... aliases) noexcept
     : name_{ name }, flag_{ is_flag }
   {
     // Just to improve compiler error
@@ -88,6 +89,8 @@ struct Option
 
     aliases_ = { aliases... };
   }
+
+  constexpr bool has_alias() const { return aliases_.has_value() && aliases_.value().front().has_value(); }
 };
 
 // Struct for defining commands
@@ -95,6 +98,7 @@ struct Command
 {
   std::string_view name_;
   bool flag_;
+  // Array should be optional, will then be std::nullopt instead of empty array if there's no aliases
   std::optional<std::array<std::optional<std::string_view>, clap::MAX_ALIAS_COUNT>> aliases_;
 
   template<std::convertible_to<std::string_view> T_Name,
@@ -123,7 +127,7 @@ template<size_t N_opts> struct OptionArray
 {
   using T_opt = clap::Option;
 
-  std::array<T_opt, N_Opts> opts_;
+  std::array<T_opt, N_opts> opts_;
   template<class... T> [[nodiscard]] constexpr explicit OptionArray(T... opts) : opts_{ opts... } {}
 };
 
