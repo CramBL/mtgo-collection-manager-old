@@ -4,6 +4,7 @@
 #include <concepts>
 #include <optional>
 #include <spdlog/spdlog.h>
+#include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -65,6 +66,100 @@ namespace {// Utility used by the Clap class
 
 }// namespace
 
+
+// More than 3 aliases is just too much
+static inline constexpr size_t MAX_ALIAS_COUNT = 3;
+
+// Struct for defining options
+struct Option
+{
+  std::string_view name_;
+  bool flag_;
+  // Array should be optional, will then be std::nullopt instead of empty array if there's no aliases
+  std::optional<std::array<std::optional<std::string_view>, clap::MAX_ALIAS_COUNT>> aliases_;
+
+  template<std::convertible_to<std::string_view> T_Name,
+    std::convertible_to<std::optional<std::string_view>>... T_Alias>
+  [[nodiscard]] constexpr explicit Option(T_Name name, bool is_flag, T_Alias... aliases) noexcept
+    : name_{ name }, flag_{ is_flag }
+  {
+    // Just to improve compiler error
+    static_assert(
+      sizeof...(aliases) <= clap::MAX_ALIAS_COUNT, "Too many aliases provided in initialization of struct `Option`");
+
+    aliases_ = { aliases... };
+  }
+
+  constexpr bool has_alias() const { return aliases_.has_value() && aliases_.value().front().has_value(); }
+};
+
+// Struct for defining commands
+struct Command
+{
+  std::string_view name_;
+  bool flag_;
+  // Array should be optional, will then be std::nullopt instead of empty array if there's no aliases
+  std::optional<std::array<std::optional<std::string_view>, clap::MAX_ALIAS_COUNT>> aliases_;
+
+  template<std::convertible_to<std::string_view> T_Name,
+    std::convertible_to<std::optional<std::string_view>>... T_Alias>
+  [[nodiscard]] constexpr explicit Command(T_Name name, bool is_flag, T_Alias... aliases)
+    : name_{ name }, flag_{ is_flag }
+  {
+    // Just to improve compiler error
+    static_assert(
+      sizeof...(aliases) <= clap::MAX_ALIAS_COUNT, "Too many aliases provided in initialization of struct `Command`");
+    aliases_ = { aliases... };
+  }
+};
+
+// Helper wrapper for a Command array
+template<size_t N_cmds> struct CommandArray
+{
+  using T_cmd = clap::Command;
+
+  std::array<T_cmd, N_cmds> cmds_;
+  template<class... T> [[nodiscard]] constexpr explicit CommandArray(T... cmds) : cmds_{ cmds... } {}
+
+  [[nodiscard]] constexpr auto size() const { return cmds_.size(); }
+
+  void print() const
+  {
+    for (const T_cmd &cmd : cmds_) { fmt::print("{}\n", cmd.name_); }
+  }
+};
+
+// Helper wrapper for an Option array
+template<size_t N_opts> struct OptionArray
+{
+  using T_opt = clap::Option;
+
+  std::array<T_opt, N_opts> opts_;
+  template<class... T> [[nodiscard]] constexpr explicit OptionArray(T... opts) : opts_{ opts... } {}
+
+  [[nodiscard]] constexpr auto size() const { return opts_.size(); }
+
+  void print() const
+  {
+    for (const T_opt &opt : opts_) { fmt::print("{}\n", opt.name_); }
+  }
+
+  [[nodiscard]] auto find(std::string_view opt_name) -> std::optional<T_opt>
+  {
+    for (const T_opt &o : opts_) {
+      if (o.name_ == opt_name) {
+        return o;
+      } else if (o.has_alias()) {
+        for (const auto &a : o.aliases_.value()) {
+          if (a.has_value() && a.value() == opt_name) { return o; }
+        }
+      }
+    }
+    return std::nullopt;
+  }
+};
+
+// The command-line argument parser class
 template<size_t N_options> class Clap
 {
   std::array<std::pair<std::string_view, bool>, N_options> _options;
@@ -150,5 +245,98 @@ public:
   }
 };
 
+namespace new_clap {
+
+  // The command-line argument parser class
+  template<size_t N_opts, size_t N_cmds> class Clap
+  {
+    // User-defined options and commands
+    std::optional<clap::OptionArray<N_opts>> options_;
+    std::optional<clap::CommandArray<N_cmds>> commands_;
+    std::optional<std::vector<std::string_view>> args_;
+
+    // Options/command set from the command-line (generated from parsing the command-line arguments)
+    std::optional<std::vector<clap::Option>> set_options_;
+    std::optional<clap::Command> set_cmd;// only single command allowed (TODO: support subcommands)
+
+  public:
+    [[nodiscard]] constexpr explicit Clap(clap::OptionArray<N_opts> opts_arr,
+      clap::CommandArray<N_cmds> cmds_arr) noexcept
+      : options_{ opts_arr }, commands_{ cmds_arr }
+    {}
+
+    [[nodiscard]] constexpr std::size_t option_count() const
+    {
+      if constexpr (N_opts == 0) {
+        return 0;
+      } else {
+        return options_.value().size();
+      }
+    }
+
+    [[nodiscard]] constexpr std::size_t command_count() const
+    {
+      if constexpr (N_cmds == 0) {
+        return 0;
+      } else {
+        return commands_.value().size();
+      }
+    }
+
+    void PrintOptions() const
+    {
+      if constexpr (N_opts == 0) {
+        fmt::print("No options defined\n");
+      } else {
+        options_.value().print();
+      }
+    }
+
+    void PrintCommands() const
+    {
+      if constexpr (N_cmds == 0) {
+        fmt::print("No commands defined\n");
+      } else {
+        commands_.value().print();
+      }
+    }
+
+    // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
+    [[nodiscard]] auto Parse(int argc, char *argv[]) noexcept -> size_t
+    {
+      args_ = std::vector<std::string_view>(argv + 1, argv + argc);
+
+      // for (const auto &arg : tmp_args) {
+      //   // Option
+      //   if (arg[0] == '-') {
+      //     // Find in option array
+      //   }
+      // }
+      // TODO: return validate_args();
+      return 0;
+    }
+
+
+    // void PrintArgs() const
+    // {
+    //   if (args_.has_value()) {
+    //     for (const auto &arg : args_.value()) { fmt::print("{}\n", arg); }
+    //   } else {
+    //     spdlog::warn("No arguments found - did you remember to parse them first?");
+    //   }
+    // }
+
+    template<std::convertible_to<std::string_view>... Flags> [[nodiscard]] auto FlagSet(Flags... flags) -> bool
+    {
+      if (!args_.has_value()) {
+        spdlog::warn("Attempted to check if a CL flag was set before parsing CL arguments");
+        return false;
+      }
+      return has_option(args_.value(), flags...);
+    }
+  };
+
+
+}// namespace new_clap
 
 }// namespace clap
