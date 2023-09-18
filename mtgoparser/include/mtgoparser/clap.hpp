@@ -143,20 +143,6 @@ template<size_t N_opts> struct OptionArray
   {
     for (const T_opt &opt : opts_) { fmt::print("{}\n", opt.name_); }
   }
-
-  [[nodiscard]] auto find(std::string_view opt_name) -> std::optional<T_opt>
-  {
-    for (const T_opt &o : opts_) {
-      if (o.name_ == opt_name) {
-        return o;
-      } else if (o.has_alias()) {
-        for (const auto &a : o.aliases_.value()) {
-          if (a.has_value() && a.value() == opt_name) { return o; }
-        }
-      }
-    }
-    return std::nullopt;
-  }
 };
 
 // The command-line argument parser class
@@ -250,14 +236,9 @@ namespace new_clap {
   // The command-line argument parser class
   template<size_t N_opts, size_t N_cmds> class Clap
   {
-    // User-defined options and commands
     std::optional<clap::OptionArray<N_opts>> options_;
     std::optional<clap::CommandArray<N_cmds>> commands_;
     std::optional<std::vector<std::string_view>> args_;
-
-    // Options/command set from the command-line (generated from parsing the command-line arguments)
-    std::optional<std::vector<clap::Option>> set_options_;
-    std::optional<clap::Command> set_cmd;// only single command allowed (TODO: support subcommands)
 
   public:
     [[nodiscard]] constexpr explicit Clap(clap::OptionArray<N_opts> opts_arr,
@@ -301,21 +282,6 @@ namespace new_clap {
       }
     }
 
-    // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
-    [[nodiscard]] auto Parse(int argc, char *argv[]) noexcept -> size_t
-    {
-      args_ = std::vector<std::string_view>(argv + 1, argv + argc);
-
-      // for (const auto &arg : tmp_args) {
-      //   // Option
-      //   if (arg[0] == '-') {
-      //     // Find in option array
-      //   }
-      // }
-      // TODO: return validate_args();
-      return 0;
-    }
-
 
     // void PrintArgs() const
     // {
@@ -325,15 +291,6 @@ namespace new_clap {
     //     spdlog::warn("No arguments found - did you remember to parse them first?");
     //   }
     // }
-
-    template<std::convertible_to<std::string_view>... Flags> [[nodiscard]] auto FlagSet(Flags... flags) -> bool
-    {
-      if (!args_.has_value()) {
-        spdlog::warn("Attempted to check if a CL flag was set before parsing CL arguments");
-        return false;
-      }
-      return has_option(args_.value(), flags...);
-    }
   };
 
 
