@@ -120,13 +120,6 @@ template<size_t N_cmds> struct CommandArray
 
   std::array<T_cmd, N_cmds> cmds_;
   template<class... T> [[nodiscard]] constexpr explicit CommandArray(T... cmds) : cmds_{ cmds... } {}
-
-  [[nodiscard]] constexpr auto size() const { return cmds_.size(); }
-
-  void print() const
-  {
-    for (const T_cmd &cmd : cmds_) { fmt::print("{}\n", cmd.name_); }
-  }
 };
 
 // Helper wrapper for an Option array
@@ -136,13 +129,6 @@ template<size_t N_opts> struct OptionArray
 
   std::array<T_opt, N_opts> opts_;
   template<class... T> [[nodiscard]] constexpr explicit OptionArray(T... opts) : opts_{ opts... } {}
-
-  [[nodiscard]] constexpr auto size() const { return opts_.size(); }
-
-  void print() const
-  {
-    for (const T_opt &opt : opts_) { fmt::print("{}\n", opt.name_); }
-  }
 };
 
 // The command-line argument parser class
@@ -231,69 +217,5 @@ public:
   }
 };
 
-namespace new_clap {
-
-  // The command-line argument parser class
-  template<size_t N_opts, size_t N_cmds> class Clap
-  {
-    std::optional<clap::OptionArray<N_opts>> options_;
-    std::optional<clap::CommandArray<N_cmds>> commands_;
-    std::optional<std::vector<std::string_view>> args_;
-
-  public:
-    [[nodiscard]] constexpr explicit Clap(clap::OptionArray<N_opts> opts_arr,
-      clap::CommandArray<N_cmds> cmds_arr) noexcept
-      : options_{ opts_arr }, commands_{ cmds_arr }
-    {}
-
-    [[nodiscard]] constexpr std::size_t option_count() const
-    {
-      if constexpr (N_opts == 0) {
-        return 0;
-      } else {
-        return options_.value().size();
-      }
-    }
-
-    [[nodiscard]] constexpr std::size_t command_count() const
-    {
-      if constexpr (N_cmds == 0) {
-        return 0;
-      } else {
-        return commands_.value().size();
-      }
-    }
-
-    void PrintOptions() const
-    {
-      if constexpr (N_opts == 0) {
-        fmt::print("No options defined\n");
-      } else {
-        options_.value().print();
-      }
-    }
-
-    void PrintCommands() const
-    {
-      if constexpr (N_cmds == 0) {
-        fmt::print("No commands defined\n");
-      } else {
-        commands_.value().print();
-      }
-    }
-
-
-    // void PrintArgs() const
-    // {
-    //   if (args_.has_value()) {
-    //     for (const auto &arg : args_.value()) { fmt::print("{}\n", arg); }
-    //   } else {
-    //     spdlog::warn("No arguments found - did you remember to parse them first?");
-    //   }
-    // }
-  };
-
-
-}// namespace new_clap
 
 }// namespace clap
