@@ -118,14 +118,6 @@ template<size_t N_cmds> struct CommandArray
   template<class... T> [[nodiscard]] constexpr explicit CommandArray(T... cmds) : cmds_{ cmds... } {}
 };
 
-// Helper wrapper for an Option array
-template<size_t N_opts> struct OptionArray
-{
-  using T_opt = clap::Option;
-
-  std::array<T_opt, N_Opts> opts_;
-  template<class... T> [[nodiscard]] constexpr explicit OptionArray(T... opts) : opts_{ opts... } {}
-};
 
 // The command-line argument parser class
 template<size_t N_options> class Clap
