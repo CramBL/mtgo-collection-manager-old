@@ -179,4 +179,87 @@ TEST_CASE("MTGO card - Initialize and use of")
   }
 }
 
+TEST_CASE("Command struct")
+{
+  // Command with no aliases
+  constexpr clap::Command cmd{ "my-cmd", false };
+  CHECK(cmd.name_ == "my-cmd");
+  CHECK(cmd.flag_ == false);
+  CHECK(cmd.aliases_.has_value() == false);
+
+  // with alias
+  constexpr clap::Command cmd_w_alias{ "my-cmd-with-alias", false, "my-cmd-alias" };
+  CHECK(cmd_w_alias.name_ == "my-cmd-with-alias");
+  CHECK(cmd_w_alias.flag_ == false);
+  CHECK(cmd_w_alias.aliases_.has_value() == true);
+
+  // With multiple aliases
+  constexpr clap::Command cmd_w_aliases{ "my-cmd-with-aliases", true, "my-cmd-alias0", "my-cmd-alias1" };
+  CHECK(cmd_w_aliases.name_ == "my-cmd-with-aliases");
+  CHECK(cmd_w_aliases.flag_ == true);
+  REQUIRE(cmd_w_aliases.aliases_.has_value() == true);
+  CHECK(cmd_w_aliases.aliases_.value().at(0) == "my-cmd-alias0");
+  CHECK(cmd_w_aliases.aliases_.value().at(1) == "my-cmd-alias1");
+
+  // They can fit in same cmd array
+  constexpr std::array<clap::Command, 3> cmd_arr = { cmd, cmd_w_alias, cmd_w_aliases };
+  REQUIRE(cmd_arr.at(0).name_ == cmd.name_);
+  CHECK(cmd.flag_ == false);
+  CHECK(cmd.aliases_ == std::nullopt);
+
+  REQUIRE(cmd_arr.at(2).name_ == "my-cmd-with-aliases");
+  REQUIRE(cmd_arr.at(2).flag_ == true);
+  REQUIRE(cmd_arr.at(2).aliases_.has_value() == true);
+  CHECK(cmd_arr.at(2).aliases_.value().at(0).has_value() == true);
+  CHECK(cmd_arr.at(2).aliases_.value().at(0).value() == "my-cmd-alias0");
+  CHECK(cmd_arr.at(2).aliases_.value().at(1).value() == "my-cmd-alias1");
+  CHECK(cmd_arr.at(2).aliases_.value().at(2).has_value() == false);
+  // Compile-time error: static_assert failed: Too many aliases in initialization of struct Command
+  // constexpr clap::Command cmd_w_too_many_aliases{
+  //   "my-cmd-with-aliases", false, "my-cmd-alias0", "my-cmd-alias1", "my-cmd-alias2", "my-cmd-alias-one-too-many"
+  // };
+
+  constexpr clap::CommandArray<3> my_cmd_arr{ cmd, cmd_w_alias, cmd_w_aliases };
+}
+
+TEST_CASE("Option struct")
+{
+  constexpr clap::Option opt{ "--my-option", true };
+  constexpr clap::Option opt_w_alias("--my-option", true, "--my-alias");
+
+  constexpr bool opt_has_alias = opt.has_alias();
+  REQUIRE(opt_has_alias == false);
+
+  constexpr bool opt_w_alias_has_alias = opt_w_alias.has_alias();
+  REQUIRE(opt_w_alias_has_alias == true);
+
+  constexpr clap::OptionArray<2> opt_arr{ opt, opt_w_alias };
+
+  constexpr int s = opt_arr.size();
+  CHECK(s == 2);
+
+  // clap::new_clap::Clap<1, 0>(
+}
+
+TEST_CASE("New and improved CLAP")
+{
+
+  constexpr clap::Option my_static_opt{ "--my-option", true, "--my-option-alis", "-m" };
+  constexpr clap::OptionArray<1> my_static_opt_arr{ my_static_opt };
+  constexpr clap::Command my_static_cmd{ "mycmd", true };
+  constexpr clap::CommandArray<1> my_static_cmd_arr{ my_static_cmd };
+  constexpr clap::new_clap::Clap new_static_clap{ my_static_opt_arr, my_static_cmd_arr };
+
+  constexpr std::size_t cmd_count = new_static_clap.command_count();
+  CHECK(cmd_count == 1);
+
+
+  constexpr auto opt_count = new_static_clap.option_count();
+  auto non_const_opt_count = new_static_clap.option_count();
+  CHECK(opt_count == 1);
+  CHECK(non_const_opt_count == 1);
+
+  new_static_clap.PrintOptions();
+}
+
 // NOLINTEND
