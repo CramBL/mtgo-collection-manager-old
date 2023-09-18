@@ -4,7 +4,6 @@
 #include <concepts>
 #include <optional>
 #include <spdlog/spdlog.h>
-#include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -66,60 +65,6 @@ namespace {// Utility used by the Clap class
 
 }// namespace
 
-
-// More than 3 aliases is just too much
-static inline constexpr size_t MAX_ALIAS_COUNT = 3;
-
-// Struct for defining options
-struct Option
-{
-  std::string_view name_;
-  bool flag_;
-  std::optional<std::array<std::optional<std::string_view>, clap::MAX_ALIAS_COUNT>> aliases_;
-
-  template<std::convertible_to<std::string_view> T_Name,
-    std::convertible_to<std::optional<std::string_view>>... T_Alias>
-  [[nodiscard]] constexpr explicit Option(T_Name name, bool is_flag, T_Alias... aliases)
-    : name_{ name }, flag_{ is_flag }
-  {
-    // Just to improve compiler error
-    static_assert(
-      sizeof...(aliases) <= clap::MAX_ALIAS_COUNT, "Too many aliases provided in initialization of struct `Option`");
-
-    aliases_ = { aliases... };
-  }
-};
-
-// Struct for defining commands
-struct Command
-{
-  std::string_view name_;
-  bool flag_;
-  std::optional<std::array<std::optional<std::string_view>, clap::MAX_ALIAS_COUNT>> aliases_;
-
-  template<std::convertible_to<std::string_view> T_Name,
-    std::convertible_to<std::optional<std::string_view>>... T_Alias>
-  [[nodiscard]] constexpr explicit Command(T_Name name, bool is_flag, T_Alias... aliases)
-    : name_{ name }, flag_{ is_flag }
-  {
-    // Just to improve compiler error
-    static_assert(
-      sizeof...(aliases) <= clap::MAX_ALIAS_COUNT, "Too many aliases provided in initialization of struct `Command`");
-    aliases_ = { aliases... };
-  }
-};
-
-// Helper wrapper for a Command array
-template<size_t N_cmds> struct CommandArray
-{
-  using T_cmd = clap::Command;
-
-  std::array<T_cmd, N_cmds> cmds_;
-  template<class... T> [[nodiscard]] constexpr explicit CommandArray(T... cmds) : cmds_{ cmds... } {}
-};
-
-
-// The command-line argument parser class
 template<size_t N_options> class Clap
 {
   std::array<std::pair<std::string_view, bool>, N_options> _options;
