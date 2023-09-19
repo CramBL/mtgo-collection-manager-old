@@ -182,44 +182,29 @@ TEST_CASE("MTGO card - Initialize and use of")
 TEST_CASE("Command struct")
 {
   // Command with no aliases
-  constexpr clap::Command cmd{ "my-cmd", false };
-  CHECK(cmd.name_ == "my-cmd");
-  CHECK(cmd.flag_ == false);
-  CHECK(cmd.aliases_.has_value() == false);
+  constexpr clap::Command cmd0{ "my-cmd", false };
+  CHECK(cmd0.name_ == "my-cmd");
+  CHECK(cmd0.flag_ == false);
 
   // with alias
-  constexpr clap::Command cmd_w_alias{ "my-cmd-with-alias", false, "my-cmd-alias" };
-  CHECK(cmd_w_alias.name_ == "my-cmd-with-alias");
-  CHECK(cmd_w_alias.flag_ == false);
-  CHECK(cmd_w_alias.aliases_.has_value() == true);
+  constexpr clap::Command cmd1{ "my-cmd1", false };
+  CHECK(cmd1.name_ == "my-cmd1");
+  CHECK(cmd1.flag_ == false);
 
   // With multiple aliases
-  constexpr clap::Command cmd_w_aliases{ "my-cmd-with-aliases", true, "my-cmd-alias0", "my-cmd-alias1" };
-  CHECK(cmd_w_aliases.name_ == "my-cmd-with-aliases");
-  CHECK(cmd_w_aliases.flag_ == true);
-  REQUIRE(cmd_w_aliases.aliases_.has_value() == true);
-  CHECK(cmd_w_aliases.aliases_.value().at(0) == "my-cmd-alias0");
-  CHECK(cmd_w_aliases.aliases_.value().at(1) == "my-cmd-alias1");
+  constexpr clap::Command cmd2{ "my-cmd2", true };
+  CHECK(cmd2.name_ == "my-cmd2");
+  CHECK(cmd2.flag_ == true);
 
   // They can fit in same cmd array
-  constexpr std::array<clap::Command, 3> cmd_arr = { cmd, cmd_w_alias, cmd_w_aliases };
-  REQUIRE(cmd_arr.at(0).name_ == cmd.name_);
-  CHECK(cmd.flag_ == false);
-  CHECK(cmd.aliases_ == std::nullopt);
+  constexpr std::array<clap::Command, 3> cmd_arr = { cmd0, cmd1, cmd2 };
+  REQUIRE(cmd_arr.at(0).name_ == cmd0.name_);
+  CHECK(cmd0.flag_ == false);
 
-  REQUIRE(cmd_arr.at(2).name_ == "my-cmd-with-aliases");
+  REQUIRE(cmd_arr.at(2).name_ == "my-cmd2");
   REQUIRE(cmd_arr.at(2).flag_ == true);
-  REQUIRE(cmd_arr.at(2).aliases_.has_value() == true);
-  CHECK(cmd_arr.at(2).aliases_.value().at(0).has_value() == true);
-  CHECK(cmd_arr.at(2).aliases_.value().at(0).value() == "my-cmd-alias0");
-  CHECK(cmd_arr.at(2).aliases_.value().at(1).value() == "my-cmd-alias1");
-  CHECK(cmd_arr.at(2).aliases_.value().at(2).has_value() == false);
-  // Compile-time error: static_assert failed: Too many aliases in initialization of struct Command
-  // constexpr clap::Command cmd_w_too_many_aliases{
-  //   "my-cmd-with-aliases", false, "my-cmd-alias0", "my-cmd-alias1", "my-cmd-alias2", "my-cmd-alias-one-too-many"
-  // };
 
-  constexpr clap::CommandArray<3> my_cmd_arr{ cmd, cmd_w_alias, cmd_w_aliases };
+  constexpr clap::CommandArray<3> my_cmd_arr{ cmd0, cmd1, cmd2 };
 }
 
 TEST_CASE("Option struct")
