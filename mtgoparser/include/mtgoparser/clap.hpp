@@ -144,18 +144,22 @@ template<size_t N_opts> struct OptionArray
     for (const T_opt &opt : opts_) { fmt::print("{}\n", opt.name_); }
   }
 
-  [[nodiscard]] auto find(std::string_view opt_name) -> std::optional<T_opt>
+  [[nodiscard]] auto find(std::string_view opt_name) const -> std::optional<T_opt>
   {
-    for (const T_opt &o : opts_) {
-      if (o.name_ == opt_name) {
-        return o;
-      } else if (o.has_alias()) {
-        for (const auto &a : o.aliases_.value()) {
-          if (a.has_value() && a.value() == opt_name) { return o; }
-        }
-      }
+    auto match_option_name = [&](const T_opt &opt) {
+      return opt.name_ == opt_name
+             || (opt.has_alias()
+                 && std::any_of(opt.aliases_.value().begin(), opt.aliases_.value().end(), [&](const auto &a) {
+                      return a.has_value() && a.value() == opt_name;
+                    }));
+    };
+
+
+    if (auto it = std::find_if(opts_.begin(), opts_.end(), match_option_name); it != opts_.end()) {
+      return *it;
+    } else {
+      return std::nullopt;
     }
-    return std::nullopt;
   }
 };
 
@@ -257,12 +261,13 @@ namespace new_clap {
 
     // Options/command set from the command-line (generated from parsing the command-line arguments)
     std::optional<std::vector<clap::Option>> set_options_;
-    std::optional<clap::Command> set_cmd;// only single command allowed (TODO: support subcommands)
+    std::optional<clap::Command> set_cmd_;// only single command allowed (TODO: support subcommands)
 
   public:
     [[nodiscard]] constexpr explicit Clap(clap::OptionArray<N_opts> opts_arr,
       clap::CommandArray<N_cmds> cmds_arr) noexcept
-      : options_{ opts_arr }, commands_{ cmds_arr }
+      : options_{ opts_arr }, commands_{ cmds_arr }, args_{ std::nullopt }, set_options_{ std::nullopt },
+        set_cmd_{ std::nullopt }
     {}
 
     [[nodiscard]] constexpr std::size_t option_count() const
