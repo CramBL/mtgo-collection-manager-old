@@ -432,7 +432,7 @@ namespace new_clap {
 
         if (res != this->set_options_.value().end()) {
           if (!(*res).second.has_value()) {
-            spdlog::warn("No value found for option: {}", *res);
+            spdlog::warn("No value found for option: {}", (*res).first.name_);
             return std::nullopt;
           } else {
             return (*res).second.value();
