@@ -356,10 +356,20 @@ namespace new_clap {
     }
 
 
-    // void PrintArgs() const
-    // {
-    //   print set options and set command
-    // }
+    void PrintArgs() const
+    {
+      if (this->set_cmd_.has_value()) {
+        fmt::print("Set command: {}", this->set_cmd_.value().name_);
+      } else {
+        fmt::print("No command set");
+      }
+      if (this->set_options_.has_value()) {
+        fmt::print("{} options set:\n", this->set_options_.value().size());
+        for (const auto &opt : this->set_options_.value()) { fmt::print("\t{}\n", opt.name_); }
+      } else {
+        fmt::print("No options set");
+      }
+    }
 
     // template<std::convertible_to<std::string_view>... Flags> [[nodiscard]] auto FlagSet(Flags... flags) -> bool
     // {
