@@ -396,6 +396,8 @@ namespace new_clap {
     {
       if constexpr (N_opts == 0) {
         return false;
+      } else if (!this->set_options_.has_value()) {
+        return false;
       } else {
         auto res = std::find_if(
           this->set_options_.value().begin(), this->set_options_.value().end(), [flag_name](const auto &opt) {
@@ -419,6 +421,8 @@ namespace new_clap {
     {
       if constexpr (N_opts == 0) {
         return std::nullopt;
+      } else if (!this->set_options_.has_value()) {
+        return std::nullopt;
       } else {
 
         auto res = std::find_if(
@@ -440,6 +444,14 @@ namespace new_clap {
         } else {
           return std::nullopt;
         }
+      }
+    }
+    [[nodiscard]] constexpr auto CmdSet(std::string_view cmd_name) const -> bool
+    {
+      if constexpr (N_cmds == 0) {
+        return false;
+      } else {
+        return (this->set_cmd_.has_value() && this->set_cmd_.value().name_ == cmd_name);
       }
     }
   };

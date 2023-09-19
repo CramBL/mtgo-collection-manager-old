@@ -28,26 +28,21 @@ const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5ca
 const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
 
 
-constinit auto config = clap::Clap<15>(std::make_pair("--version", false),
-  std::make_pair("-V", false),
-  std::make_pair("--verbose", false),
-  std::make_pair("--echo", false),
-  std::make_pair("--caller", true),
-  std::make_pair("--calling", true),
-  std::make_pair("--test-dir", true),
-  std::make_pair("--data-dir", true),
-  std::make_pair("--example", false),
-  std::make_pair("--run-example", false),
-  std::make_pair("--run", false),
-  std::make_pair("--example-json-formats", false),
-  std::make_pair("--example-json", false),
-  std::make_pair("--run-example-json", false),
-  std::make_pair("--run-example-scryfall", false));
+#define OPTION_COUNT 8
+constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
+  clap::Option("--verbose", true, "-V"),
+  clap::Option("--echo", true),
+  clap::Option("--example-json", true, "--example-json-formats"),
+  clap::Option("--caller", false, "--calling"),
+  clap::Option("--test-dir", false, "--data-dir"),
+  clap::Option("--example-json", true),
+  clap::Option("--example-json-formats", true),
+  clap::Option("--example-scryfall", true),
+};
+#define COMMAND_COUNT 1
+constexpr clap::CommandArray cmd_array = clap::CommandArray<COMMAND_COUNT>{ clap::Command("run", true) };
 
-constexpr clap::OptionArray<2> opt_arr = clap::OptionArray<2>{ clap::Option("--verbose", true, "-V"),
-  clap::Option("--example-json", true, "--example-json-formats") };
-constexpr clap::CommandArray<1> cmd_arr = clap::CommandArray<1>{ clap::Command("run", true) };
-constinit auto new_clap = clap::new_clap::Clap<2, 1>{ opt_arr, cmd_arr };
+constinit auto config = clap::new_clap::Clap{ opt_array, cmd_array };
 
 namespace example {
 using goatbots::card_defs_map_t;
@@ -255,48 +250,37 @@ int main(int argc, char *argv[])
     return 1;
   };
 
-  if (auto errors = new_clap.Parse(argc, argv)) {
-    spdlog::error("{} arguments failed to validate", errors);
-    return 1;
-  };
 
-  spdlog::info("New CLAP command count: {}", new_clap.command_count());
-  fmt::print("NEW CLAP OPTIONS:\n");
-  new_clap.PrintOptions();
-  fmt::print("NEW CLAP COMMANDS:\n");
-  new_clap.PrintCommands();
-  fmt::print("NEW CLAP PARSED ARGS:\n");
-  new_clap.PrintArgs();
-
-  if (auto option_arg = config.OptionValue("--caller", "calling")) {
+  if (auto option_arg = config.OptionValue("--caller")) {
     spdlog::info("Called from: {}", option_arg.value());
     if (option_arg.value() == "mtgoupdater") {
       test_data_dir.assign("../mtgoparser/test/test-data");
       spdlog::info("Setting test directory to: {}\n", test_data_dir);
     }
-  } else if (auto option_test_dir_arg = config.OptionValue("--test-dir", "--data-dir")) {
+  } else if (auto option_test_dir_arg = config.OptionValue("--test-dir")) {
     test_data_dir.assign(option_test_dir_arg.value());
     spdlog::info("Setting test directory to: {}\n", option_test_dir_arg.value());
   }
 
   if (config.FlagSet("--echo")) { config.PrintArgs(); }
 
-  if (config.FlagSet("--version", "-V")) { fmt::print("v{}\n", mtgoparser::cmake::project_version); }
+  if (config.FlagSet("--version")) { fmt::print("v{}\n", mtgoparser::cmake::project_version); }
 
+  if (config.CmdSet("run")) {
+    spdlog::info("MTGO Preprocessor run mode");
+    if (config.FlagSet("--example")) {
+      example::collection_parse(test_data_dir);
+      spdlog::info("Example complete!");
+    }
 
-  if (config.FlagSet("--example", "--run-example", "--run")) {
-    example::collection_parse(test_data_dir);
-    spdlog::info("Example complete!");
+    if (config.FlagSet("--example-json-formats")) { example::json_format_prints(); }
+
+    if (config.FlagSet("--example-scryfall")) {
+      auto scryfall_cards = example::scryfall_cards_parse();
+      spdlog::info("got {} scryfall cards", scryfall_cards.size());
+    }
   }
 
-  if (config.FlagSet("--example-json-formats", "--example-json", "--run-example-json")) {
-    example::json_format_prints();
-  }
-
-  if (config.FlagSet("--run-example-scryfall")) {
-    auto scryfall_cards = example::scryfall_cards_parse();
-    spdlog::info("got {} scryfall cards", scryfall_cards.size());
-  }
 
   return 0;
 }
