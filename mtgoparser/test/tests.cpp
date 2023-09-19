@@ -224,8 +224,8 @@ TEST_CASE("Option struct")
 
   constexpr clap::OptionArray<2> opt_arr{ opt, opt_w_alias };
 
-  constexpr int s = opt_arr.size();
-  CHECK(s == 2);
+  constexpr auto arr_sz = opt_arr.size();
+  CHECK(arr_sz == 2);
 
   CHECK(opt_arr.find("--my-option").has_value() == true);
   CHECK(opt_arr.find("--my-alias").has_value() == true);
