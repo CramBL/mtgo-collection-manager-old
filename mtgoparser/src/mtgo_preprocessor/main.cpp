@@ -44,6 +44,11 @@ constinit auto config = clap::Clap<15>(std::make_pair("--version", false),
   std::make_pair("--run-example-json", false),
   std::make_pair("--run-example-scryfall", false));
 
+constexpr clap::OptionArray<2> opt_arr = clap::OptionArray<2>{ clap::Option("--verbose", true, "-V"),
+  clap::Option("--example-json", true, "--example-json-formats") };
+constexpr clap::CommandArray<1> cmd_arr = clap::CommandArray<1>{ clap::Command("run", true) };
+constinit auto new_clap = clap::new_clap::Clap<2, 1>{ opt_arr, cmd_arr };
+
 namespace example {
 using goatbots::card_defs_map_t;
 using goatbots::price_hist_map_t;
@@ -249,6 +254,19 @@ int main(int argc, char *argv[])
     spdlog::error("{} arguments failed to validate", errors);
     return 1;
   };
+
+  if (auto errors = new_clap.Parse(argc, argv)) {
+    spdlog::error("{} arguments failed to validate", errors);
+    return 1;
+  };
+
+  spdlog::info("New CLAP command count: {}", new_clap.command_count());
+  fmt::print("NEW CLAP OPTIONS:\n");
+  new_clap.PrintOptions();
+  fmt::print("NEW CLAP COMMANDS:\n");
+  new_clap.PrintCommands();
+  fmt::print("NEW CLAP PARSED ARGS:\n");
+  new_clap.PrintArgs();
 
   if (auto option_arg = config.OptionValue("--caller", "calling")) {
     spdlog::info("Called from: {}", option_arg.value());
