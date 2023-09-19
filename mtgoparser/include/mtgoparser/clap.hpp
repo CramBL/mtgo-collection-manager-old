@@ -74,14 +74,14 @@ static inline constexpr size_t MAX_ALIAS_COUNT = 3;
 struct Option
 {
   std::string_view name_;
-  bool flag_;
+  bool is_flag_;
   // Array should be optional, will then be std::nullopt instead of empty array if there's no aliases
   std::optional<std::array<std::optional<std::string_view>, clap::MAX_ALIAS_COUNT>> aliases_;
 
   template<std::convertible_to<std::string_view> T_Name,
     std::convertible_to<std::optional<std::string_view>>... T_Alias>
   [[nodiscard]] constexpr explicit Option(T_Name name, bool is_flag, T_Alias... aliases) noexcept
-    : name_{ name }, flag_{ is_flag }
+    : name_{ name }, is_flag_{ is_flag }
   {
     // Just to improve compiler error
     static_assert(
@@ -97,11 +97,11 @@ struct Option
 struct Command
 {
   std::string_view name_;
-  bool flag_;
+  bool is_flag_;
 
   template<std::convertible_to<std::string_view> T_Name,
     std::convertible_to<std::optional<std::string_view>>... T_Alias>
-  [[nodiscard]] constexpr explicit Command(T_Name name, bool is_flag) : name_{ name }, flag_{ is_flag }
+  [[nodiscard]] constexpr explicit Command(T_Name name, bool is_flag) : name_{ name }, is_flag_{ is_flag }
   {}
 };
 
@@ -319,43 +319,44 @@ namespace new_clap {
       size_t errors = 0;
 
       auto tmp_args = std::vector<std::string_view>(argv + 1, argv + argc);
-
-      for (const auto &arg : tmp_args) {
-        // Option
-        if (arg[0] == '-') {
+      for (auto it = tmp_args.cbegin(), end = tmp_args.cend(); it != end; ++it) {
+        if ((*it)[0] == '-') {
           // Find in option array
           if constexpr (N_opts == 0) {
             ++errors;
-            spdlog::error("Got option '{}' but no options have been defined", arg);
+            spdlog::error("Got option '{}' but no options have been defined", *it);
           } else {
-            if (std::optional<clap::Option> found_opt = this->options_.value().find(arg)) {
+            if (std::optional<clap::Option> found_opt = this->options_.value().find(*it)) {
               if (!this->set_options_.has_value()) {
+                // if (found_opt.value().is_flag_)
                 this->set_options_ = std::vector<clap::Option>{ std::move(found_opt.value()) };
               } else {
                 this->set_options_.value().emplace_back(std::move(found_opt.value()));
               }
             }
           }
+
         } else {
           // Find in command array
           if constexpr (N_cmds == 0) {
             ++errors;
-            spdlog::error("Got command '{}' but no commands have been defined", arg);
+            spdlog::error("Got command '{}' but no commands have been defined", *it);
           } else {
-            if (auto found_cmd = this->commands_.value().find(arg)) {
+            if (auto found_cmd = this->commands_.value().find(*it)) {
               if (!this->set_cmd_.has_value()) {
                 this->set_cmd_ = std::move(found_cmd);
               } else {
                 ++errors;
                 spdlog::error(
                   "Attempted setting command: '{}' when a command was already set: '{}'. Only one command is allowed",
-                  arg,
+                  *it,
                   this->set_cmd_.value().name_);
               }
             }
           }
         }
       }
+
       return errors;
     }
 
