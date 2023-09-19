@@ -351,7 +351,6 @@ namespace new_clap {
           }
         }
       }
-      // TODO: return validate_args();
       return errors;
     }
 
@@ -371,14 +370,27 @@ namespace new_clap {
       }
     }
 
-    // template<std::convertible_to<std::string_view>... Flags> [[nodiscard]] auto FlagSet(Flags... flags) -> bool
-    // {
-    //   if (!args_.has_value()) {
-    //     spdlog::warn("Attempted to check if a CL flag was set before parsing CL arguments");
-    //     return false;
-    //   }
-    //   return has_option(args_.value(), flags...);
-    // }
+    [[nodiscard]] constexpr auto FlagSet(std::string_view flag_name) const -> bool
+    {
+      if constexpr (N_opts == 0) {
+        return false;
+      } else {
+        auto res = std::find_if(
+          this->set_options_.value().begin(), this->set_options_.value().end(), [flag_name](const auto &opt) {
+            return opt.name_ == flag_name
+                   || (opt.has_alias()
+                       && std::any_of(opt.aliases_.value().begin(),
+                         opt.aliases_.value().end(),
+                         [flag_name](const auto &a) { return a.has_value() && a.value() == flag_name; }));
+          });
+
+        if (res != this->set_options_.value().end()) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
   };
 
 
