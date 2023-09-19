@@ -30,9 +30,9 @@ const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgoget
 
 #define OPTION_COUNT 8
 constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
-  clap::Option("--verbose", true, "-V"),
+  clap::Option("--version", true, "-V"),
+  clap::Option("--verbose", true),
   clap::Option("--echo", true),
-  clap::Option("--example-json", true, "--example-json-formats"),
   clap::Option("--caller", false, "--calling"),
   clap::Option("--test-dir", false, "--data-dir"),
   clap::Option("--example-json", true),
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
 
   if (config.CmdSet("run")) {
     spdlog::info("MTGO Preprocessor run mode");
-    if (config.FlagSet("--example")) {
+    if (config.FlagSet("--example-json")) {
       example::collection_parse(test_data_dir);
       spdlog::info("Example complete!");
     }

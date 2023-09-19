@@ -349,6 +349,10 @@ namespace new_clap {
                 this->set_options_.value().emplace_back(
                   std::make_pair(std::move(found_opt.value()), std::move(opt_value)));
               }
+            } else {
+              // Provided option not found
+              ++errors;
+              spdlog::error("Unknown option '{}'", *it);
             }
           }
 
