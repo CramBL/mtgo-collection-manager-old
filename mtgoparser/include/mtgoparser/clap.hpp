@@ -266,8 +266,9 @@ namespace new_clap {
   public:
     [[nodiscard]] constexpr explicit Clap(clap::OptionArray<N_opts> opts_arr,
       clap::CommandArray<N_cmds> cmds_arr) noexcept
-      : options_{ opts_arr }, commands_{ cmds_arr }, args_{ std::nullopt }, set_options_{ std::nullopt },
-        set_cmd_{ std::nullopt }
+      : options_{ opts_arr }, commands_{ cmds_arr }, args_{ std::nullopt }, set_options_{ std::nullopt }, set_cmd_{
+          std::nullopt
+        }
     {}
 
     [[nodiscard]] constexpr std::size_t option_count() const
