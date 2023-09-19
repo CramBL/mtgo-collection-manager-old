@@ -47,7 +47,7 @@ TEST_CASE("Test basic CLAP")
     clap_alias_version.PrintArgs();
 
     CHECK(clap_alias_version.FlagSet("--version"));
-    CHECK(!clap_alias_version.FlagSet("-V"));
+    CHECK(clap_alias_version.FlagSet("-V"));
   }
 }
 
@@ -187,31 +187,31 @@ TEST_CASE("Command struct")
   // Command with no aliases
   constexpr clap::Command cmd0{ "my-cmd", false };
   CHECK(cmd0.name_ == "my-cmd");
-  CHECK(cmd0.flag_ == false);
+  CHECK(cmd0.is_flag_ == false);
 
   // with alias
   constexpr clap::Command cmd1{ "my-cmd1", false };
   CHECK(cmd1.name_ == "my-cmd1");
-  CHECK(cmd1.flag_ == false);
+  CHECK(cmd1.is_flag_ == false);
 
   // With multiple aliases
   constexpr clap::Command cmd2{ "my-cmd2", true };
   CHECK(cmd2.name_ == "my-cmd2");
-  CHECK(cmd2.flag_ == true);
+  CHECK(cmd2.is_flag_ == true);
 
   // They can fit in same cmd array
   constexpr std::array<clap::Command, 3> cmd_arr = { cmd0, cmd1, cmd2 };
   REQUIRE(cmd_arr.at(0).name_ == cmd0.name_);
-  CHECK(cmd0.flag_ == false);
+  CHECK(cmd0.is_flag_ == false);
 
   REQUIRE(cmd_arr.at(2).name_ == "my-cmd2");
-  REQUIRE(cmd_arr.at(2).flag_ == true);
+  REQUIRE(cmd_arr.at(2).is_flag_ == true);
 
   constexpr clap::CommandArray<3> my_cmd_arr{ cmd0, cmd1, cmd2 };
   REQUIRE(my_cmd_arr.size() == 3);
   CHECK(my_cmd_arr.find("my-cmd2").has_value());
   CHECK(my_cmd_arr.find("my-cmd1").value().name_ == "my-cmd1");
-  CHECK(my_cmd_arr.find("my-cmd1").value().flag_ == false);
+  CHECK(my_cmd_arr.find("my-cmd1").value().is_flag_ == false);
 }
 
 TEST_CASE("Option struct")
