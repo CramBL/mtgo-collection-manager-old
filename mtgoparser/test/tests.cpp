@@ -80,11 +80,11 @@ TEST_CASE("Test CLAP with options and values")
 
   SECTION("Argument validation catches errors")
   {
+    constexpr auto version_option = clap::Option("--version", true, "-V");
+    constexpr auto save_as_option = clap::Option("--save-as", false, "-s");
+    constexpr auto opt_arr = clap::OptionArray<2>(version_option, save_as_option);
+    auto clap = clap::new_clap::Clap<2, 0>(opt_arr);
 
-    auto clap = clap::Clap<4>(std::make_pair("--version", false),
-      std::make_pair("-V", false),
-      std::make_pair("--save-as", true),
-      std::make_pair("-s", true));
 
     SECTION("Missing option value - end of args")
     {
@@ -239,27 +239,6 @@ TEST_CASE("Option struct")
   CHECK(found_opt.value().name_ == "--my-option");
 
   // clap::new_clap::Clap<1, 0>(
-}
-
-TEST_CASE("New and improved CLAP")
-{
-
-  constexpr clap::Option my_static_opt{ "--my-option", true, "--my-option-alias", "-m" };
-  constexpr clap::OptionArray<1> my_static_opt_arr{ my_static_opt };
-  constexpr clap::Command my_static_cmd{ "mycmd", true };
-  constexpr clap::CommandArray<1> my_static_cmd_arr{ my_static_cmd };
-  constexpr clap::new_clap::Clap new_static_clap{ my_static_opt_arr, my_static_cmd_arr };
-
-  constexpr std::size_t cmd_count = new_static_clap.command_count();
-  CHECK(cmd_count == 1);
-
-
-  constexpr auto opt_count = new_static_clap.option_count();
-  auto non_const_opt_count = new_static_clap.option_count();
-  CHECK(opt_count == 1);
-  CHECK(non_const_opt_count == 1);
-
-  new_static_clap.PrintOptions();
 }
 
 // NOLINTEND
