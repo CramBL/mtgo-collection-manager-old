@@ -413,6 +413,35 @@ namespace new_clap {
         }
       }
     }
+
+
+    [[nodiscard]] auto OptionValue(std::string_view opt_name) const -> std::optional<std::string_view>
+    {
+      if constexpr (N_opts == 0) {
+        return std::nullopt;
+      } else {
+
+        auto res = std::find_if(
+          this->set_options_.value().begin(), this->set_options_.value().end(), [opt_name](const auto &opt) {
+            return opt.first.name_ == opt_name
+                   || (opt.first.has_alias()
+                       && std::any_of(opt.first.aliases_.value().begin(),
+                         opt.first.aliases_.value().end(),
+                         [opt_name](const auto &a) { return a.has_value() && a.value() == opt_name; }));
+          });
+
+        if (res != this->set_options_.value().end()) {
+          if (!(*res).second.has_value()) {
+            spdlog::warn("No value found for option: {}", *res);
+            return std::nullopt;
+          } else {
+            return (*res).second.value();
+          }
+        } else {
+          return std::nullopt;
+        }
+      }
+    }
   };
 
 
