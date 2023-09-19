@@ -4,7 +4,9 @@
 #include <mtgoparser/mtgo/card.hpp>
 #include <utility>
 
-constinit auto static_clap = clap::Clap<1>(std::make_pair("--version", false));
+
+constinit auto static_clap = clap::new_clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
+
 
 TEST_CASE("Test basic CLAP")
 {
@@ -17,7 +19,7 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Dynamically initialized - Show version")
   {
-    auto clap = clap::Clap<1>(std::make_pair("--version", false));
+    auto clap = clap::new_clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
     fmt::print("Options are:\n");
     clap.PrintOptions();
 
@@ -36,14 +38,15 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Alias version cmd - Show version")
   {
-    auto clap_alias_version = clap::Clap<2>(std::make_pair("--version", false), std::make_pair("-V", false));
+
+    auto clap_alias_version = clap::new_clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true, "-V")));
+
     CHECK(clap_alias_version.Parse(argc, argv) == 0);
 
     fmt::print("Arguments are:\n");
     clap_alias_version.PrintArgs();
 
     CHECK(clap_alias_version.FlagSet("--version"));
-    CHECK(clap_alias_version.FlagSet("--version", "-V"));
     CHECK(!clap_alias_version.FlagSet("-V"));
   }
 }
@@ -240,7 +243,7 @@ TEST_CASE("Option struct")
 TEST_CASE("New and improved CLAP")
 {
 
-  constexpr clap::Option my_static_opt{ "--my-option", true, "--my-option-alis", "-m" };
+  constexpr clap::Option my_static_opt{ "--my-option", true, "--my-option-alias", "-m" };
   constexpr clap::OptionArray<1> my_static_opt_arr{ my_static_opt };
   constexpr clap::Command my_static_cmd{ "mycmd", true };
   constexpr clap::CommandArray<1> my_static_cmd_arr{ my_static_cmd };
