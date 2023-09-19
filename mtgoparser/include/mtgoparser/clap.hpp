@@ -272,6 +272,11 @@ namespace new_clap {
       : options_{ opts_arr }, commands_{ cmds_arr }, set_options_{ std::nullopt }, set_cmd_{ std::nullopt }
     {}
 
+    [[nodiscard]] constexpr explicit Clap(std::optional<clap::OptionArray<N_opts>> opts_arr = std::nullopt,
+      std::optional<clap::CommandArray<N_cmds>> cmds_arr = std::nullopt) noexcept
+      : options_{ opts_arr }, commands_{ cmds_arr }, set_options_{ std::nullopt }, set_cmd_{ std::nullopt }
+    {}
+
     [[nodiscard]] constexpr std::size_t option_count() const
     {
       if constexpr (N_opts == 0) {
