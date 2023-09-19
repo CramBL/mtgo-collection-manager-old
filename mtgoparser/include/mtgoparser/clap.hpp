@@ -319,21 +319,21 @@ namespace new_clap {
         // Option
         if (arg[0] == '-') {
           // Find in option array
-          if constexpr (this->option_count() == 0) {
+          if constexpr (N_opts == 0) {
             ++errors;
             spdlog::error("Got option '{}' but no options have been defined", arg);
           } else {
-            if (auto found_opt = this->options_.value().find(arg)) {
+            if (std::optional<clap::Option> found_opt = this->options_.value().find(arg)) {
               if (!this->set_options_.has_value()) {
-                this->set_options_ = { std::move(found_opt) };
+                this->set_options_ = std::vector<clap::Option>{ std::move(found_opt.value()) };
               } else {
-                this->set_options_.value().emplace_back(std::move(found_opt));
+                this->set_options_.value().emplace_back(std::move(found_opt.value()));
               }
             }
           }
         } else {
           // Find in command array
-          if constexpr (this->command_count() == 0) {
+          if constexpr (N_cmds == 0) {
             ++errors;
             spdlog::error("Got command '{}' but no commands have been defined", arg);
           } else {
@@ -345,7 +345,7 @@ namespace new_clap {
                 spdlog::error(
                   "Attempted setting command: '{}' when a command was already set: '{}'. Only one command is allowed",
                   arg,
-                  this->set_cmd_.value());
+                  this->set_cmd_.value().name_);
               }
             }
           }
@@ -361,13 +361,13 @@ namespace new_clap {
       if (this->set_cmd_.has_value()) {
         fmt::print("Set command: {}", this->set_cmd_.value().name_);
       } else {
-        fmt::print("No command set");
+        fmt::print("No command set\n");
       }
       if (this->set_options_.has_value()) {
         fmt::print("{} options set:\n", this->set_options_.value().size());
         for (const auto &opt : this->set_options_.value()) { fmt::print("\t{}\n", opt.name_); }
       } else {
-        fmt::print("No options set");
+        fmt::print("No options set\n");
       }
     }
 
