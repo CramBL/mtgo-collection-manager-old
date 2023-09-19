@@ -238,6 +238,13 @@ TEST_CASE("Option struct")
   constexpr int s = opt_arr.size();
   CHECK(s == 2);
 
+  CHECK(opt_arr.find("--my-option").has_value() == true);
+  CHECK(opt_arr.find("--my-alias").has_value() == true);
+
+  auto found_opt = opt_arr.find("--my-alias");
+  REQUIRE(found_opt.has_value() == true);
+  CHECK(found_opt.value().name_ == "--my-option");
+
   // clap::new_clap::Clap<1, 0>(
 }
 
