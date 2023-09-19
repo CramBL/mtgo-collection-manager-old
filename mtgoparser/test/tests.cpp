@@ -64,17 +64,18 @@ TEST_CASE("Test CLAP with options and values")
     char *argv[] = { argv0, arg_save_as, arg_save_as_val };
     int argc = 3;
 
-    auto clap = clap::Clap<4>(std::make_pair("--version", false),
-      std::make_pair("-V", false),
-      std::make_pair("--save-as", true),
-      std::make_pair("-s", true));
+    auto clap = clap::new_clap::Clap<2, 0>(
+      clap::OptionArray<2>(clap::Option("--version", true, "-V"), clap::Option("--save-as", false, "-s")));
+
 
     CHECK(clap.Parse(argc, argv) == 0);
     fmt::print("Got args:\n");
     clap.PrintArgs();
 
-    CHECK(clap.OptionValue("--save-as", "-s").value() == arg_save_as_val);
-    CHECK(clap.FlagSet("--version", "-V") == false);
+    CHECK(clap.OptionValue("--save-as").value() == arg_save_as_val);
+    CHECK(clap.OptionValue("-s").value() == arg_save_as_val);
+    CHECK(clap.FlagSet("--version") == false);
+    CHECK(clap.FlagSet("-V") == false);
   }
 
   SECTION("Argument validation catches errors")
