@@ -263,7 +263,7 @@ namespace new_clap {
     std::optional<clap::CommandArray<N_cmds>> commands_;
 
     // Options/command set from the command-line (generated from parsing the command-line arguments)
-    std::optional<std::vector<clap::Option>> set_options_;
+    std::optional<std::vector<std::pair<clap::Option, std::optional<std::string_view>>>> set_options_;
     std::optional<clap::Command> set_cmd_;// only single command allowed (TODO: support subcommands)
 
   public:
@@ -327,11 +327,27 @@ namespace new_clap {
             spdlog::error("Got option '{}' but no options have been defined", *it);
           } else {
             if (std::optional<clap::Option> found_opt = this->options_.value().find(*it)) {
+              // Check if it is not a flag, then the next argument should be the attached value
+              std::optional<std::string_view> opt_value = std::nullopt;
+              if (!found_opt.value().is_flag_) {
+                // Then check for the value in the arguments
+                if ((it + 1 == end) || (*(it + 1)).starts_with("-")) {
+                  ++errors;
+                  spdlog::error("Option {} passed with missing value", *it);
+                } else {
+                  opt_value = *(it + 1);
+                  // Increment as we already validated the option value and we don't want to parse it as an option in
+                  // the next iteration
+                  ++it;
+                }
+              }
               if (!this->set_options_.has_value()) {
-                // if (found_opt.value().is_flag_)
-                this->set_options_ = std::vector<clap::Option>{ std::move(found_opt.value()) };
+                this->set_options_ = std::vector<std::pair<clap::Option, std::optional<std::string_view>>>{
+                  std::make_pair(std::move(found_opt.value()), std::move(opt_value))
+                };
               } else {
-                this->set_options_.value().emplace_back(std::move(found_opt.value()));
+                this->set_options_.value().emplace_back(
+                  std::make_pair(std::move(found_opt.value()), std::move(opt_value)));
               }
             }
           }
@@ -370,7 +386,7 @@ namespace new_clap {
       }
       if (this->set_options_.has_value()) {
         fmt::print("{} options set:\n", this->set_options_.value().size());
-        for (const auto &opt : this->set_options_.value()) { fmt::print("\t{}\n", opt.name_); }
+        for (const auto &opt : this->set_options_.value()) { fmt::print("\t{}\n", opt.first.name_); }
       } else {
         fmt::print("No options set\n");
       }
@@ -383,10 +399,10 @@ namespace new_clap {
       } else {
         auto res = std::find_if(
           this->set_options_.value().begin(), this->set_options_.value().end(), [flag_name](const auto &opt) {
-            return opt.name_ == flag_name
-                   || (opt.has_alias()
-                       && std::any_of(opt.aliases_.value().begin(),
-                         opt.aliases_.value().end(),
+            return opt.first.name_ == flag_name
+                   || (opt.first.has_alias()
+                       && std::any_of(opt.first.aliases_.value().begin(),
+                         opt.first.aliases_.value().end(),
                          [flag_name](const auto &a) { return a.has_value() && a.value() == flag_name; }));
           });
 
