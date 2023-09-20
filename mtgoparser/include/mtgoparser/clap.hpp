@@ -225,6 +225,21 @@ public:
     }
   }
 
+  // Print help text when invoked with an option equivelant to "-h" or "help" in many command-line apps
+  //
+  // For long help (usually "--help") use PrintLongHelp
+  void PrintShortHelp() const
+  {
+    spdlog::warn("TODO: Add description fields to Options and Commands");
+    spdlog::warn("TODO: PrintAbout");
+    spdlog::warn("TODO: Print Commands header");
+    this->PrintCommands();
+    spdlog::warn("TODO: Print Options header");
+    this->PrintOptions();
+  }
+
+  // TODO: Long help
+
   // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
   [[nodiscard]] auto Parse(int argc, char *argv[]) noexcept -> size_t
   {
@@ -308,6 +323,10 @@ public:
     }
   }
 
+  // Lookup if a flag is set by an Option instant, return if it's set or not
+  [[nodiscard]] constexpr auto FlagSet(const clap::Option &opt_inst) const -> bool { return FlagSet(opt_inst.name_); }
+
+  // Lookup if a flag is set by name, return if it's set or not
   [[nodiscard]] constexpr auto FlagSet(std::string_view flag_name) const -> bool
   {
     if constexpr (N_opts == 0) {
@@ -333,13 +352,23 @@ public:
   }
 
 
+  // Lookup option by supplying a partial or fully equivelant `Option` struct, and if it is set, get the value.
+  [[nodiscard]] auto OptionValue(const clap::Option &opt_inst) const -> std::optional<std::string_view>
+  {
+    return OptionValue(opt_inst.name_);// :)
+  }
+
+  // Lookup option by name (or alias) and if it is set, get the value.
   [[nodiscard]] auto OptionValue(std::string_view opt_name) const -> std::optional<std::string_view>
   {
     if constexpr (N_opts == 0) {
+      // If instantiated with 0 options
       return std::nullopt;
     } else if (!this->set_options_.has_value()) {
+      // If no set options
       return std::nullopt;
     } else {
+      // If set options, look for match
 
       auto res =
         std::find_if(this->set_options_.value().begin(), this->set_options_.value().end(), [opt_name](const auto &opt) {
@@ -362,6 +391,8 @@ public:
       }
     }
   }
+
+  // Lookup command by name, and return if it is set or not
   [[nodiscard]] constexpr auto CmdSet(std::string_view cmd_name) const -> bool
   {
     if constexpr (N_cmds == 0) {
