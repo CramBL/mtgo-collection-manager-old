@@ -9,7 +9,7 @@ pub use mtgogetter_api::download_custom_url as get_custom_url;
 pub use mtgogetter_api::download_goatbots_card_definitions as get_goatbots_card_definitions;
 pub use mtgogetter_api::download_goatbots_price_history as get_goatbots_price_history;
 
-pub use mtgo_preprocessor_api::run_mtgo_preprocessor_example as run_mtgo_preprocessor_exaple;
+pub use mtgo_preprocessor_api::run_mtgo_preprocessor_example;
 pub use mtgo_preprocessor_api::run_mtgo_preprocessor_json_example as run_process_json_example;
 
 static MTGOGETTER_BIN: OnceLock<String> = OnceLock::new();
