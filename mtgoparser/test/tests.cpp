@@ -5,7 +5,7 @@
 #include <utility>
 
 
-constinit auto static_clap = clap::new_clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
+constinit auto static_clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
 
 
 TEST_CASE("Test basic CLAP")
@@ -19,7 +19,7 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Dynamically initialized - Show version")
   {
-    auto clap = clap::new_clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
+    auto clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
     fmt::print("Options are:\n");
     clap.PrintOptions();
 
@@ -39,7 +39,7 @@ TEST_CASE("Test basic CLAP")
   SECTION("Alias version cmd - Show version")
   {
 
-    auto clap_alias_version = clap::new_clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true, "-V")));
+    auto clap_alias_version = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true, "-V")));
 
     CHECK(clap_alias_version.Parse(argc, argv) == 0);
 
@@ -64,7 +64,7 @@ TEST_CASE("Test CLAP with options and values")
     char *argv[] = { argv0, arg_save_as, arg_save_as_val };
     int argc = 3;
 
-    auto clap = clap::new_clap::Clap<2, 0>(
+    auto clap = clap::Clap<2, 0>(
       clap::OptionArray<2>(clap::Option("--version", true, "-V"), clap::Option("--save-as", false, "-s")));
 
 
@@ -83,7 +83,7 @@ TEST_CASE("Test CLAP with options and values")
     constexpr auto version_option = clap::Option("--version", true, "-V");
     constexpr auto save_as_option = clap::Option("--save-as", false, "-s");
     constexpr auto opt_arr = clap::OptionArray<2>(version_option, save_as_option);
-    auto clap = clap::new_clap::Clap<2, 0>(opt_arr);
+    auto clap = clap::Clap<2, 0>(opt_arr);
 
 
     SECTION("Missing option value - end of args")
@@ -238,8 +238,6 @@ TEST_CASE("Option struct")
   auto found_opt = opt_arr.find("--my-alias");
   REQUIRE(found_opt.has_value() == true);
   CHECK(found_opt.value().name_ == "--my-option");
-
-  // clap::new_clap::Clap<1, 0>(
 }
 
 // NOLINTEND

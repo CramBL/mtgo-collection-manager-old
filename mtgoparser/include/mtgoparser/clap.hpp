@@ -168,299 +168,208 @@ template<size_t N_opts> struct OptionArray
 };
 
 // The command-line argument parser class
-template<size_t N_options> class Clap
+template<size_t N_opts, size_t N_cmds> class Clap
 {
-  std::array<std::pair<std::string_view, bool>, N_options> _options;
-  std::optional<std::vector<std::string_view>> _args;
+  // User-defined options and commands
+  std::optional<clap::OptionArray<N_opts>> options_;
+  std::optional<clap::CommandArray<N_cmds>> commands_;
 
-  // Returns the number of arguments that failed validation
-  [[nodiscard]] auto validate_args() noexcept -> size_t
-  {
-    size_t errors = 0;
-    for (auto it = _args.value().cbegin(), end = _args.value().cend(); it != end; ++it) {
-
-      auto is_defined = [it](std::pair<std::string_view, bool> opt_p) { return opt_p.first == *it; };
-
-      if (auto opt_it = std::find_if(_options.cbegin(), _options.cend(), is_defined); opt_it != std::end(_options)) {
-        // Check if it is an option that should have a value
-        if ((*opt_it).second) {
-          // Then check for the value in the arguments
-          if ((it + 1 == end) || (*(it + 1)).starts_with("-")) {
-            ++errors;
-            spdlog::error("Option passed with missing value");
-          } else {
-            // Increment as we already validated the option value and we don't want to parse it as an option in the
-            // next iteration
-            ++it;
-          }
-        }
-      } else {
-        ++errors;
-        spdlog::error("Unknown option: {}", *it);
-      }
-    }
-    return errors;
-  }
-
+  // Options/command set from the command-line (generated from parsing the command-line arguments)
+  std::optional<std::vector<std::pair<clap::Option, std::optional<std::string_view>>>> set_options_;
+  std::optional<clap::Command> set_cmd_;// only single command allowed (TODO: support subcommands)
 
 public:
-  template<std::convertible_to<std::string_view>... Options>
-  [[nodiscard]] constexpr explicit Clap(std::pair<Options, bool>... opts) noexcept
-  {
-    static_assert(sizeof...(Options) == N_options);
+  [[nodiscard]] constexpr explicit Clap(clap::OptionArray<N_opts> opts_arr,
+    clap::CommandArray<N_cmds> cmds_arr) noexcept
+    : options_{ opts_arr }, commands_{ cmds_arr }, set_options_{ std::nullopt }, set_cmd_{ std::nullopt }
+  {}
 
-    _options = { opts... };
+  [[nodiscard]] constexpr explicit Clap(std::optional<clap::OptionArray<N_opts>> opts_arr = std::nullopt,
+    std::optional<clap::CommandArray<N_cmds>> cmds_arr = std::nullopt) noexcept
+    : options_{ opts_arr }, commands_{ cmds_arr }, set_options_{ std::nullopt }, set_cmd_{ std::nullopt }
+  {}
+
+  [[nodiscard]] constexpr std::size_t option_count() const
+  {
+    if constexpr (N_opts == 0) {
+      return 0;
+    } else {
+      return options_.value().size();
+    }
+  }
+
+  [[nodiscard]] constexpr std::size_t command_count() const
+  {
+    if constexpr (N_cmds == 0) {
+      return 0;
+    } else {
+      return commands_.value().size();
+    }
+  }
+
+  void PrintOptions() const
+  {
+    if constexpr (N_opts == 0) {
+      fmt::print("No options defined\n");
+    } else {
+      options_.value().print();
+    }
+  }
+
+  void PrintCommands() const
+  {
+    if constexpr (N_cmds == 0) {
+      fmt::print("No commands defined\n");
+    } else {
+      commands_.value().print();
+    }
   }
 
   // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
   [[nodiscard]] auto Parse(int argc, char *argv[]) noexcept -> size_t
   {
-    _args = std::vector<std::string_view>(argv + 1, argv + argc);
-    return validate_args();
+    size_t errors = 0;
+
+    auto tmp_args = std::vector<std::string_view>(argv + 1, argv + argc);
+    for (auto it = tmp_args.cbegin(), end = tmp_args.cend(); it != end; ++it) {
+      if ((*it)[0] == '-') {
+        // Find in option array
+        if constexpr (N_opts == 0) {
+          ++errors;
+          spdlog::error("Got option '{}' but no options have been defined", *it);
+        } else {
+          if (std::optional<clap::Option> found_opt = this->options_.value().find(*it)) {
+            // Check if it is not a flag, then the next argument should be the attached value
+            std::optional<std::string_view> opt_value = std::nullopt;
+            if (!found_opt.value().is_flag_) {
+              // Then check for the value in the arguments
+              if ((it + 1 == end) || (*(it + 1)).starts_with("-")) {
+                ++errors;
+                spdlog::error("Option {} passed with missing value", *it);
+              } else {
+                opt_value = *(it + 1);
+                // Increment as we already validated the option value and we don't want to parse it as an option in
+                // the next iteration
+                ++it;
+              }
+            }
+            if (!this->set_options_.has_value()) {
+              this->set_options_ = std::vector<std::pair<clap::Option, std::optional<std::string_view>>>{
+                std::make_pair(std::move(found_opt.value()), std::move(opt_value))
+              };
+            } else {
+              this->set_options_.value().emplace_back(
+                std::make_pair(std::move(found_opt.value()), std::move(opt_value)));
+            }
+          } else {
+            // Provided option not found
+            ++errors;
+            spdlog::error("Unknown option '{}'", *it);
+          }
+        }
+
+      } else {
+        // Find in command array
+        if constexpr (N_cmds == 0) {
+          ++errors;
+          spdlog::error("Got command '{}' but no commands have been defined", *it);
+        } else {
+          if (auto found_cmd = this->commands_.value().find(*it)) {
+            if (!this->set_cmd_.has_value()) {
+              this->set_cmd_ = std::move(found_cmd);
+            } else {
+              ++errors;
+              spdlog::error(
+                "Attempted setting command: '{}' when a command was already set: '{}'. Only one command is allowed",
+                *it,
+                this->set_cmd_.value().name_);
+            }
+          }
+        }
+      }
+    }
+
+    return errors;
   }
 
-  void PrintOptions() const
-  {
-    for (const auto &opt : _options) { fmt::print("{}\n", opt.first); }
-  }
 
   void PrintArgs() const
   {
-    if (_args.has_value()) {
-      for (const auto &arg : _args.value()) { fmt::print("{}\n", arg); }
+    if (this->set_cmd_.has_value()) {
+      fmt::print("Set command: {}", this->set_cmd_.value().name_);
     } else {
-      spdlog::warn("No arguments found - did you remember to parse them first?");
+      fmt::print("No command set\n");
+    }
+    if (this->set_options_.has_value()) {
+      fmt::print("{} options set:\n", this->set_options_.value().size());
+      for (const auto &opt : this->set_options_.value()) { fmt::print("\t{}\n", opt.first.name_); }
+    } else {
+      fmt::print("No options set\n");
     }
   }
 
-  template<std::convertible_to<std::string_view>... Flags> [[nodiscard]] auto FlagSet(Flags... flags) -> bool
+  [[nodiscard]] constexpr auto FlagSet(std::string_view flag_name) const -> bool
   {
-    if (!_args.has_value()) {
-      spdlog::warn("Attempted to check if a CL flag was set before parsing CL arguments");
+    if constexpr (N_opts == 0) {
       return false;
+    } else if (!this->set_options_.has_value()) {
+      return false;
+    } else {
+      auto res = std::find_if(
+        this->set_options_.value().begin(), this->set_options_.value().end(), [flag_name](const auto &opt) {
+          return opt.first.name_ == flag_name
+                 || (opt.first.has_alias()
+                     && std::any_of(opt.first.aliases_.value().begin(),
+                       opt.first.aliases_.value().end(),
+                       [flag_name](const auto &a) { return a.has_value() && a.value() == flag_name; }));
+        });
+
+      if (res != this->set_options_.value().end()) {
+        return true;
+      } else {
+        return false;
+      }
     }
-    return has_option(_args.value(), flags...);
   }
 
-  template<std::convertible_to<std::string_view>... Options>
-  [[nodiscard]] auto OptionValue(Options... opts) -> std::optional<std::string_view>
+
+  [[nodiscard]] auto OptionValue(std::string_view opt_name) const -> std::optional<std::string_view>
   {
-    if (!_args.has_value()) {
-      spdlog::warn("Attempted to retrieve an CL option value before parsing CL arguments");
+    if constexpr (N_opts == 0) {
       return std::nullopt;
+    } else if (!this->set_options_.has_value()) {
+      return std::nullopt;
+    } else {
+
+      auto res =
+        std::find_if(this->set_options_.value().begin(), this->set_options_.value().end(), [opt_name](const auto &opt) {
+          return opt.first.name_ == opt_name
+                 || (opt.first.has_alias()
+                     && std::any_of(opt.first.aliases_.value().begin(),
+                       opt.first.aliases_.value().end(),
+                       [opt_name](const auto &a) { return a.has_value() && a.value() == opt_name; }));
+        });
+
+      if (res != this->set_options_.value().end()) {
+        if (!(*res).second.has_value()) {
+          spdlog::warn("No value found for option: {}", (*res).first.name_);
+          return std::nullopt;
+        } else {
+          return (*res).second.value();
+        }
+      } else {
+        return std::nullopt;
+      }
     }
-    return has_option_arg(_args.value(), opts...);
+  }
+  [[nodiscard]] constexpr auto CmdSet(std::string_view cmd_name) const -> bool
+  {
+    if constexpr (N_cmds == 0) {
+      return false;
+    } else {
+      return (this->set_cmd_.has_value() && this->set_cmd_.value().name_ == cmd_name);
+    }
   }
 };
-
-namespace new_clap {
-
-  // The command-line argument parser class
-  template<size_t N_opts, size_t N_cmds> class Clap
-  {
-    // User-defined options and commands
-    std::optional<clap::OptionArray<N_opts>> options_;
-    std::optional<clap::CommandArray<N_cmds>> commands_;
-
-    // Options/command set from the command-line (generated from parsing the command-line arguments)
-    std::optional<std::vector<std::pair<clap::Option, std::optional<std::string_view>>>> set_options_;
-    std::optional<clap::Command> set_cmd_;// only single command allowed (TODO: support subcommands)
-
-  public:
-    [[nodiscard]] constexpr explicit Clap(clap::OptionArray<N_opts> opts_arr,
-      clap::CommandArray<N_cmds> cmds_arr) noexcept
-      : options_{ opts_arr }, commands_{ cmds_arr }, set_options_{ std::nullopt }, set_cmd_{ std::nullopt }
-    {}
-
-    [[nodiscard]] constexpr explicit Clap(std::optional<clap::OptionArray<N_opts>> opts_arr = std::nullopt,
-      std::optional<clap::CommandArray<N_cmds>> cmds_arr = std::nullopt) noexcept
-      : options_{ opts_arr }, commands_{ cmds_arr }, set_options_{ std::nullopt }, set_cmd_{ std::nullopt }
-    {}
-
-    [[nodiscard]] constexpr std::size_t option_count() const
-    {
-      if constexpr (N_opts == 0) {
-        return 0;
-      } else {
-        return options_.value().size();
-      }
-    }
-
-    [[nodiscard]] constexpr std::size_t command_count() const
-    {
-      if constexpr (N_cmds == 0) {
-        return 0;
-      } else {
-        return commands_.value().size();
-      }
-    }
-
-    void PrintOptions() const
-    {
-      if constexpr (N_opts == 0) {
-        fmt::print("No options defined\n");
-      } else {
-        options_.value().print();
-      }
-    }
-
-    void PrintCommands() const
-    {
-      if constexpr (N_cmds == 0) {
-        fmt::print("No commands defined\n");
-      } else {
-        commands_.value().print();
-      }
-    }
-
-    // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
-    [[nodiscard]] auto Parse(int argc, char *argv[]) noexcept -> size_t
-    {
-      size_t errors = 0;
-
-      auto tmp_args = std::vector<std::string_view>(argv + 1, argv + argc);
-      for (auto it = tmp_args.cbegin(), end = tmp_args.cend(); it != end; ++it) {
-        if ((*it)[0] == '-') {
-          // Find in option array
-          if constexpr (N_opts == 0) {
-            ++errors;
-            spdlog::error("Got option '{}' but no options have been defined", *it);
-          } else {
-            if (std::optional<clap::Option> found_opt = this->options_.value().find(*it)) {
-              // Check if it is not a flag, then the next argument should be the attached value
-              std::optional<std::string_view> opt_value = std::nullopt;
-              if (!found_opt.value().is_flag_) {
-                // Then check for the value in the arguments
-                if ((it + 1 == end) || (*(it + 1)).starts_with("-")) {
-                  ++errors;
-                  spdlog::error("Option {} passed with missing value", *it);
-                } else {
-                  opt_value = *(it + 1);
-                  // Increment as we already validated the option value and we don't want to parse it as an option in
-                  // the next iteration
-                  ++it;
-                }
-              }
-              if (!this->set_options_.has_value()) {
-                this->set_options_ = std::vector<std::pair<clap::Option, std::optional<std::string_view>>>{
-                  std::make_pair(std::move(found_opt.value()), std::move(opt_value))
-                };
-              } else {
-                this->set_options_.value().emplace_back(
-                  std::make_pair(std::move(found_opt.value()), std::move(opt_value)));
-              }
-            } else {
-              // Provided option not found
-              ++errors;
-              spdlog::error("Unknown option '{}'", *it);
-            }
-          }
-
-        } else {
-          // Find in command array
-          if constexpr (N_cmds == 0) {
-            ++errors;
-            spdlog::error("Got command '{}' but no commands have been defined", *it);
-          } else {
-            if (auto found_cmd = this->commands_.value().find(*it)) {
-              if (!this->set_cmd_.has_value()) {
-                this->set_cmd_ = std::move(found_cmd);
-              } else {
-                ++errors;
-                spdlog::error(
-                  "Attempted setting command: '{}' when a command was already set: '{}'. Only one command is allowed",
-                  *it,
-                  this->set_cmd_.value().name_);
-              }
-            }
-          }
-        }
-      }
-
-      return errors;
-    }
-
-
-    void PrintArgs() const
-    {
-      if (this->set_cmd_.has_value()) {
-        fmt::print("Set command: {}", this->set_cmd_.value().name_);
-      } else {
-        fmt::print("No command set\n");
-      }
-      if (this->set_options_.has_value()) {
-        fmt::print("{} options set:\n", this->set_options_.value().size());
-        for (const auto &opt : this->set_options_.value()) { fmt::print("\t{}\n", opt.first.name_); }
-      } else {
-        fmt::print("No options set\n");
-      }
-    }
-
-    [[nodiscard]] constexpr auto FlagSet(std::string_view flag_name) const -> bool
-    {
-      if constexpr (N_opts == 0) {
-        return false;
-      } else if (!this->set_options_.has_value()) {
-        return false;
-      } else {
-        auto res = std::find_if(
-          this->set_options_.value().begin(), this->set_options_.value().end(), [flag_name](const auto &opt) {
-            return opt.first.name_ == flag_name
-                   || (opt.first.has_alias()
-                       && std::any_of(opt.first.aliases_.value().begin(),
-                         opt.first.aliases_.value().end(),
-                         [flag_name](const auto &a) { return a.has_value() && a.value() == flag_name; }));
-          });
-
-        if (res != this->set_options_.value().end()) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }
-
-
-    [[nodiscard]] auto OptionValue(std::string_view opt_name) const -> std::optional<std::string_view>
-    {
-      if constexpr (N_opts == 0) {
-        return std::nullopt;
-      } else if (!this->set_options_.has_value()) {
-        return std::nullopt;
-      } else {
-
-        auto res = std::find_if(
-          this->set_options_.value().begin(), this->set_options_.value().end(), [opt_name](const auto &opt) {
-            return opt.first.name_ == opt_name
-                   || (opt.first.has_alias()
-                       && std::any_of(opt.first.aliases_.value().begin(),
-                         opt.first.aliases_.value().end(),
-                         [opt_name](const auto &a) { return a.has_value() && a.value() == opt_name; }));
-          });
-
-        if (res != this->set_options_.value().end()) {
-          if (!(*res).second.has_value()) {
-            spdlog::warn("No value found for option: {}", (*res).first.name_);
-            return std::nullopt;
-          } else {
-            return (*res).second.value();
-          }
-        } else {
-          return std::nullopt;
-        }
-      }
-    }
-    [[nodiscard]] constexpr auto CmdSet(std::string_view cmd_name) const -> bool
-    {
-      if constexpr (N_cmds == 0) {
-        return false;
-      } else {
-        return (this->set_cmd_.has_value() && this->set_cmd_.value().name_ == cmd_name);
-      }
-    }
-  };
-
-
-}// namespace new_clap
 
 }// namespace clap

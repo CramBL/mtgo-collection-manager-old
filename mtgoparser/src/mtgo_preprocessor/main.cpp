@@ -42,7 +42,7 @@ constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
 #define COMMAND_COUNT 1
 constexpr clap::CommandArray cmd_array = clap::CommandArray<COMMAND_COUNT>{ clap::Command("run", true) };
 
-constinit auto config = clap::new_clap::Clap{ opt_array, cmd_array };
+constinit auto config = clap::Clap{ opt_array, cmd_array };
 
 namespace example {
 using goatbots::card_defs_map_t;
