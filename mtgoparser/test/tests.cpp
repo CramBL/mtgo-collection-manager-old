@@ -4,7 +4,9 @@
 #include <mtgoparser/mtgo/card.hpp>
 #include <utility>
 
-constinit auto static_clap = clap::Clap<1>(std::make_pair("--version", false));
+
+constinit auto static_clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
+
 
 TEST_CASE("Test basic CLAP")
 {
@@ -17,7 +19,7 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Dynamically initialized - Show version")
   {
-    auto clap = clap::Clap<1>(std::make_pair("--version", false));
+    auto clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
     fmt::print("Options are:\n");
     clap.PrintOptions();
 
@@ -36,15 +38,16 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Alias version cmd - Show version")
   {
-    auto clap_alias_version = clap::Clap<2>(std::make_pair("--version", false), std::make_pair("-V", false));
+
+    auto clap_alias_version = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true, "-V")));
+
     CHECK(clap_alias_version.Parse(argc, argv) == 0);
 
     fmt::print("Arguments are:\n");
     clap_alias_version.PrintArgs();
 
     CHECK(clap_alias_version.FlagSet("--version"));
-    CHECK(clap_alias_version.FlagSet("--version", "-V"));
-    CHECK(!clap_alias_version.FlagSet("-V"));
+    CHECK(clap_alias_version.FlagSet("-V"));
   }
 }
 
@@ -61,26 +64,27 @@ TEST_CASE("Test CLAP with options and values")
     char *argv[] = { argv0, arg_save_as, arg_save_as_val };
     int argc = 3;
 
-    auto clap = clap::Clap<4>(std::make_pair("--version", false),
-      std::make_pair("-V", false),
-      std::make_pair("--save-as", true),
-      std::make_pair("-s", true));
+    auto clap = clap::Clap<2, 0>(
+      clap::OptionArray<2>(clap::Option("--version", true, "-V"), clap::Option("--save-as", false, "-s")));
+
 
     CHECK(clap.Parse(argc, argv) == 0);
     fmt::print("Got args:\n");
     clap.PrintArgs();
 
-    CHECK(clap.OptionValue("--save-as", "-s").value() == arg_save_as_val);
-    CHECK(clap.FlagSet("--version", "-V") == false);
+    CHECK(clap.OptionValue("--save-as").value() == arg_save_as_val);
+    CHECK(clap.OptionValue("-s").value() == arg_save_as_val);
+    CHECK(clap.FlagSet("--version") == false);
+    CHECK(clap.FlagSet("-V") == false);
   }
 
   SECTION("Argument validation catches errors")
   {
+    constexpr auto version_option = clap::Option("--version", true, "-V");
+    constexpr auto save_as_option = clap::Option("--save-as", false, "-s");
+    constexpr auto opt_arr = clap::OptionArray<2>(version_option, save_as_option);
+    auto clap = clap::Clap<2, 0>(opt_arr);
 
-    auto clap = clap::Clap<4>(std::make_pair("--version", false),
-      std::make_pair("-V", false),
-      std::make_pair("--save-as", true),
-      std::make_pair("-s", true));
 
     SECTION("Missing option value - end of args")
     {
@@ -177,6 +181,63 @@ TEST_CASE("MTGO card - Initialize and use of")
     // Check that mtgo_card_tmp is now invalid (commented out as it triggered warning in CI)
     // CHECK(mtgo_card_tmp.id_ == ""); // Access of moved value (compiler warning)
   }
+}
+
+TEST_CASE("Command struct")
+{
+  // Command with no aliases
+  constexpr clap::Command cmd0{ "my-cmd", false };
+  CHECK(cmd0.name_ == "my-cmd");
+  CHECK(cmd0.is_flag_ == false);
+
+  // with alias
+  constexpr clap::Command cmd1{ "my-cmd1", false };
+  CHECK(cmd1.name_ == "my-cmd1");
+  CHECK(cmd1.is_flag_ == false);
+
+  // With multiple aliases
+  constexpr clap::Command cmd2{ "my-cmd2", true };
+  CHECK(cmd2.name_ == "my-cmd2");
+  CHECK(cmd2.is_flag_ == true);
+
+  // They can fit in same cmd array
+  constexpr std::array<clap::Command, 3> cmd_arr = { cmd0, cmd1, cmd2 };
+  REQUIRE(cmd_arr.at(0).name_ == cmd0.name_);
+  CHECK(cmd0.is_flag_ == false);
+
+  REQUIRE(cmd_arr.at(2).name_ == "my-cmd2");
+  REQUIRE(cmd_arr.at(2).is_flag_ == true);
+
+  constexpr clap::CommandArray<3> my_cmd_arr{ cmd0, cmd1, cmd2 };
+  constexpr auto arr_sz = my_cmd_arr.size();// Circumvent CPP check warning: [knownConditionTrueFalse]
+  REQUIRE(arr_sz == 3);
+  CHECK(my_cmd_arr.find("my-cmd2").has_value());
+  CHECK(my_cmd_arr.find("my-cmd1").value().name_ == "my-cmd1");
+  CHECK(my_cmd_arr.find("my-cmd1").value().is_flag_ == false);
+}
+
+TEST_CASE("Option struct")
+{
+  constexpr clap::Option opt{ "--my-option", true };
+  constexpr clap::Option opt_w_alias("--my-option", true, "--my-alias");
+
+  constexpr bool opt_has_alias = opt.has_alias();
+  REQUIRE(opt_has_alias == false);
+
+  constexpr bool opt_w_alias_has_alias = opt_w_alias.has_alias();
+  REQUIRE(opt_w_alias_has_alias == true);
+
+  constexpr clap::OptionArray<2> opt_arr{ opt, opt_w_alias };
+
+  constexpr auto arr_sz = opt_arr.size();
+  CHECK(arr_sz == 2);
+
+  CHECK(opt_arr.find("--my-option").has_value() == true);
+  CHECK(opt_arr.find("--my-alias").has_value() == true);
+
+  auto found_opt = opt_arr.find("--my-alias");
+  REQUIRE(found_opt.has_value() == true);
+  CHECK(found_opt.value().name_ == "--my-option");
 }
 
 // NOLINTEND

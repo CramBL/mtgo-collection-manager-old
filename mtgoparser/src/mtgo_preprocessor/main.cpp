@@ -28,21 +28,24 @@ const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5ca
 const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
 
 
-constinit auto config = clap::Clap<15>(std::make_pair("--version", false),
-  std::make_pair("-V", false),
-  std::make_pair("--verbose", false),
-  std::make_pair("--echo", false),
-  std::make_pair("--caller", true),
-  std::make_pair("--calling", true),
-  std::make_pair("--test-dir", true),
-  std::make_pair("--data-dir", true),
-  std::make_pair("--example", false),
-  std::make_pair("--run-example", false),
-  std::make_pair("--run", false),
-  std::make_pair("--example-json-formats", false),
-  std::make_pair("--example-json", false),
-  std::make_pair("--run-example-json", false),
-  std::make_pair("--run-example-scryfall", false));
+#define OPTION_COUNT 9
+
+constexpr clap::Option help_opt{ "-h", true };
+constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
+  clap::Option("--version", true, "-V"),
+  help_opt,
+  clap::Option("--verbose", true),
+  clap::Option("--echo", true),
+  clap::Option("--caller", false, "--calling"),
+  clap::Option("--test-dir", false, "--data-dir"),
+  clap::Option("--example-json", true),
+  clap::Option("--example-json-formats", true),
+  clap::Option("--example-scryfall", true),
+};
+#define COMMAND_COUNT 1
+constexpr clap::CommandArray cmd_array = clap::CommandArray<COMMAND_COUNT>{ clap::Command("run", true) };
+
+constinit auto config = clap::Clap{ opt_array, cmd_array };
 
 namespace example {
 using goatbots::card_defs_map_t;
@@ -250,35 +253,42 @@ int main(int argc, char *argv[])
     return 1;
   };
 
-  if (auto option_arg = config.OptionValue("--caller", "calling")) {
+  if (config.FlagSet(help_opt)) {
+    config.PrintShortHelp();
+    return 0;
+  }
+
+
+  if (auto option_arg = config.OptionValue("--caller")) {
     spdlog::info("Called from: {}", option_arg.value());
     if (option_arg.value() == "mtgoupdater") {
       test_data_dir.assign("../mtgoparser/test/test-data");
       spdlog::info("Setting test directory to: {}\n", test_data_dir);
     }
-  } else if (auto option_test_dir_arg = config.OptionValue("--test-dir", "--data-dir")) {
+  } else if (auto option_test_dir_arg = config.OptionValue("--test-dir")) {
     test_data_dir.assign(option_test_dir_arg.value());
     spdlog::info("Setting test directory to: {}\n", option_test_dir_arg.value());
   }
 
   if (config.FlagSet("--echo")) { config.PrintArgs(); }
 
-  if (config.FlagSet("--version", "-V")) { fmt::print("v{}\n", mtgoparser::cmake::project_version); }
+  if (config.FlagSet("--version")) { fmt::print("v{}\n", mtgoparser::cmake::project_version); }
 
+  if (config.CmdSet("run")) {
+    spdlog::info("MTGO Preprocessor run mode");
+    if (config.FlagSet("--example-json")) {
+      example::collection_parse(test_data_dir);
+      spdlog::info("Example complete!");
+    }
 
-  if (config.FlagSet("--example", "--run-example", "--run")) {
-    example::collection_parse(test_data_dir);
-    spdlog::info("Example complete!");
+    if (config.FlagSet("--example-json-formats")) { example::json_format_prints(); }
+
+    if (config.FlagSet("--example-scryfall")) {
+      auto scryfall_cards = example::scryfall_cards_parse();
+      spdlog::info("got {} scryfall cards", scryfall_cards.size());
+    }
   }
 
-  if (config.FlagSet("--example-json-formats", "--example-json", "--run-example-json")) {
-    example::json_format_prints();
-  }
-
-  if (config.FlagSet("--run-example-scryfall")) {
-    auto scryfall_cards = example::scryfall_cards_parse();
-    spdlog::info("got {} scryfall cards", scryfall_cards.size());
-  }
 
   return 0;
 }

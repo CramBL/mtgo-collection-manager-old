@@ -6,7 +6,9 @@ pub fn run_mtgo_preprocessor_example() -> Result<std::process::Output, Box<dyn s
     let pre_processor_exec_out = Command::new(mtgoparser_bin())
         .arg("--caller")
         .arg("mtgoupdater")
-        .arg("--run-example")
+        .arg("--example-json")
+        .arg("--example-scryfall")
+        .arg("run")
         .output()?;
 
     Ok(pre_processor_exec_out)
@@ -15,9 +17,10 @@ pub fn run_mtgo_preprocessor_example() -> Result<std::process::Output, Box<dyn s
 pub fn run_mtgo_preprocessor_json_example(
 ) -> Result<std::process::Output, Box<dyn std::error::Error>> {
     let pre_processor_exec_out = Command::new(mtgoparser_bin())
+        .arg("run")
+        .arg("--example-json-formats")
         .arg("--caller")
         .arg("mtgoupdater")
-        .arg("--run-example-json")
         .output()?;
 
     Ok(pre_processor_exec_out)

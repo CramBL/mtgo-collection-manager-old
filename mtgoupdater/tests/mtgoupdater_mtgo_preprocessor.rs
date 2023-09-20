@@ -19,11 +19,10 @@ fn test_call_mtgo_preprocessor() {
         "mtgo_preprocessor binary ({mtgoparser_bin}) does not exist, build mtgoparser before running this test", mtgoparser_bin = internal_only::DEV_MTGOPARSER_BIN
     );
 
-    let test_out = mtgoupdater::run_mtgo_preprocessor_exaple();
+    let test_out = mtgoupdater::run_mtgo_preprocessor_example();
     match test_out {
         Ok(output) => {
             println!("Status:\n{status}", status = output.status,);
-
             println!(
                 "stdout:\n{stdout}",
                 stdout = String::from_utf8_lossy(&output.stdout),
@@ -31,6 +30,11 @@ fn test_call_mtgo_preprocessor() {
             println!(
                 "stderr:\n{stderr}",
                 stderr = String::from_utf8_lossy(&output.stderr),
+            );
+            assert!(
+                output.status.success(),
+                "Process failed with non-zero exit code: {}",
+                output.status.code().unwrap_or(123)
             );
         }
         Err(e) => panic!("Unexpected error: {e}"),
@@ -40,7 +44,7 @@ fn test_call_mtgo_preprocessor() {
 #[test]
 fn test_call_mtgo_preprocessor_json_example() {
     internal_only::dev_try_init_mtgoparser_bin();
-    match mtgoupdater::run_mtgo_preprocessor_exaple() {
+    match mtgoupdater::run_mtgo_preprocessor_example() {
         Ok(output) => {
             println!("Status:\n{status}", status = output.status,);
 
@@ -51,6 +55,11 @@ fn test_call_mtgo_preprocessor_json_example() {
             println!(
                 "stderr:\n{stderr}",
                 stderr = String::from_utf8_lossy(&output.stderr),
+            );
+            assert!(
+                output.status.success(),
+                "Process failed with non-zero exit code: {}",
+                output.status.code().unwrap_or(123)
             );
         }
         Err(e) => panic!("Unexpected error: {e}"),
