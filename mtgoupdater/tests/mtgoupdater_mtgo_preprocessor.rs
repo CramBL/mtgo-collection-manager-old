@@ -23,7 +23,6 @@ fn test_call_mtgo_preprocessor() {
     match test_out {
         Ok(output) => {
             println!("Status:\n{status}", status = output.status,);
-
             println!(
                 "stdout:\n{stdout}",
                 stdout = String::from_utf8_lossy(&output.stdout),
@@ -31,6 +30,11 @@ fn test_call_mtgo_preprocessor() {
             println!(
                 "stderr:\n{stderr}",
                 stderr = String::from_utf8_lossy(&output.stderr),
+            );
+            assert!(
+                output.status.success(),
+                "Process failed with non-zero exit code: {}",
+                output.status.code().unwrap_or(123)
             );
         }
         Err(e) => panic!("Unexpected error: {e}"),
@@ -51,6 +55,11 @@ fn test_call_mtgo_preprocessor_json_example() {
             println!(
                 "stderr:\n{stderr}",
                 stderr = String::from_utf8_lossy(&output.stderr),
+            );
+            assert!(
+                output.status.success(),
+                "Process failed with non-zero exit code: {}",
+                output.status.code().unwrap_or(123)
             );
         }
         Err(e) => panic!("Unexpected error: {e}"),
