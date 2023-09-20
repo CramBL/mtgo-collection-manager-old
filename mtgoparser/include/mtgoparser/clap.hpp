@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <concepts>
+#include <fmt/color.h>
 #include <optional>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -232,10 +233,21 @@ public:
   {
     spdlog::warn("TODO: Add description fields to Options and Commands");
     spdlog::warn("TODO: PrintAbout");
-    spdlog::warn("TODO: Print Commands header");
-    this->PrintCommands();
-    spdlog::warn("TODO: Print Options header");
-    this->PrintOptions();
+    spdlog::warn("TODO: PrintUsage");
+
+    // Commands section
+    fmt::print(fmt::emphasis::bold | fmt::emphasis::underline | fg(fmt::color::light_cyan), "Commands:\n");
+    for (const clap::Command &cmd : this->commands_.value().cmds_) {
+      fmt::print(fg(fmt::color::white), "  {}\n", cmd.name_);
+    }
+    fmt::print("\n");
+
+    // Options section
+    fmt::print(fmt::emphasis::bold | fmt::emphasis::underline | fg(fmt::color::light_yellow), "Options:\n");
+    for (const clap::Option &opt : this->options_.value().opts_) {
+      fmt::print(fg(fmt::color::white), "  {}\n", opt.name_);
+    }
+    fmt::print("\n");
   }
 
   // TODO: Long help
