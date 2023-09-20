@@ -28,9 +28,12 @@ const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5ca
 const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
 
 
-#define OPTION_COUNT 8
+#define OPTION_COUNT 9
+
+constexpr clap::Option help_opt{ "-h", true };
 constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
   clap::Option("--version", true, "-V"),
+  help_opt,
   clap::Option("--verbose", true),
   clap::Option("--echo", true),
   clap::Option("--caller", false, "--calling"),
@@ -249,6 +252,11 @@ int main(int argc, char *argv[])
     spdlog::error("{} arguments failed to validate", errors);
     return 1;
   };
+
+  if (config.FlagSet(help_opt)) {
+    config.PrintShortHelp();
+    return 0;
+  }
 
 
   if (auto option_arg = config.OptionValue("--caller")) {
