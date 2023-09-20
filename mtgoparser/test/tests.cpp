@@ -209,7 +209,8 @@ TEST_CASE("Command struct")
   REQUIRE(cmd_arr.at(2).is_flag_ == true);
 
   constexpr clap::CommandArray<3> my_cmd_arr{ cmd0, cmd1, cmd2 };
-  REQUIRE(my_cmd_arr.size() == 3);
+  constexpr auto arr_sz = my_cmd_arr.size();// Circumvent CPP check warning: [knownConditionTrueFalse]
+  REQUIRE(arr_sz == 3);
   CHECK(my_cmd_arr.find("my-cmd2").has_value());
   CHECK(my_cmd_arr.find("my-cmd1").value().name_ == "my-cmd1");
   CHECK(my_cmd_arr.find("my-cmd1").value().is_flag_ == false);
