@@ -203,8 +203,10 @@ function Build-Clean {
     Write-Host "mtgoparser cleaned"
     Set-Location mtgoupdater
     cargo clean
+    Write-Host "mtgoupdater cleaned"
     Set-Location ..\mtgogetter
     go clean
+    Write-Host "mtgogetter cleaned"
     Set-Location -Path $PSScriptRoot
 }
 
