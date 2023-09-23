@@ -19,7 +19,7 @@ project(
    LANGUAGES CXX C
 )
 
-
+message(STATUS "Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 include(cmake/PreventInSourceBuilds.cmake)
 include(ProjectOptions.cmake)
 
