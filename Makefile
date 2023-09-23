@@ -23,11 +23,15 @@ endif
 RUST_MIN_VERSION := 1.70.0
 GO_MIN_VERSION := 1.20
 CMAKE_MIN_VERSION := 3.20
+GCC_MIN_VERSION := 13.0.0
+LLVM_MIN_VERSION := 15.0.3
 
 # Get version from a unix-like terminal
 RUST_VERSION := $(shell rustc --version | cut -d' ' -f2)
 GO_VERSION := $(shell go version | cut -d' ' -f3 | sed 's/go//')
 CMAKE_VERSION := $(shell cmake --version | cut -d' ' -f3 | head -n 1)
+CLANG_VERSION := $(shell clang --version | cut -d' ' -f4 | grep -o '[0-9]*\.[0-9]*\.[0-9]*')
+GCC_VERSION := $(shell gcc --version | cut -d' ' -f4 | grep -o '[0-9]*\.[0-9]*\.[0-9]*')
 
 .PHONY: all
 all:\
@@ -55,6 +59,9 @@ show-versions:
 	@echo "Operating System: $(OS_TYPE)"
 	@echo "Rust : $(RUST_VERSION) (min. $(RUST_MIN_VERSION))"
 	@echo "Go   : $(GO_VERSION) (min. $(GO_MIN_VERSION))"
+	@echo "C++"
+	@echo "  - LLVM: ${CLANG_VERSION} (min. ${LLVM_MIN_VERSION})"
+	@echo "  - GCC : ${GCC_VERSION} (min. ${GCC_MIN_VERSION})"
 	@echo "CMake: $(CMAKE_VERSION) (min. $(CMAKE_MIN_VERSION))"
 	@echo "CMake generator: $(MTGOPARSER_GENERATOR)"
 
