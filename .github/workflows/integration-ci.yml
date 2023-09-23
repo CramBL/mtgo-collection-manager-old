@@ -35,11 +35,10 @@ jobs:
             packaging_maintainer_mode: OFF
             build_shared: OFF
 
-          # TODO: Implement for windows (alsowith make?)
-          #- os: windows-2022
-            #compiler: msvc
-            #generator: "Visual Studio 17 2022"
-            #enable_ipo: On
+          - os: windows-2022
+            compiler: msvc
+            generator: "Visual Studio 17 2022"
+            enable_ipo: On
 
     name: Test
     steps:
@@ -55,8 +54,14 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: 📝 Build & Run tests
+      - name: 📝 Build & Run tests - Unix 🐧🍎
+        if: runner.os != 'Windows'
         run: |
           make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }}
           make test
 
+      - name: 📝 Build & Run tests - Windows 💻
+        if: runner.os == 'Windows'
+        run: |
+          .\wmake.ps1 build-integration -MTGOPARSER_IPO=${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR="${{matrix.generator}}"
+          .\wmake.ps1 test

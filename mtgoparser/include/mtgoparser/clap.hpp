@@ -160,9 +160,9 @@ template<size_t N_opts> struct OptionArray
     };
 
 
-    if (auto it = std::find_if(opts_.begin(), opts_.end(), match_option_name); it != opts_.end()) {
+    if (auto it = std::find_if(opts_.begin(), opts_.end(), match_option_name); it != opts_.end()) [[likely]] {
       return *it;
-    } else {
+    } else [[unlikely]] {
       return std::nullopt;
     }
   }
@@ -270,7 +270,7 @@ public:
             std::optional<std::string_view> opt_value = std::nullopt;
             if (!found_opt.value().is_flag_) {
               // Then check for the value in the arguments
-              if ((it + 1 == end) || (*(it + 1)).starts_with("-")) {
+              if ((it + 1 == end) || (*(it + 1)).starts_with("-")) [[unlikely]] {
                 ++errors;
                 spdlog::error("Option {} passed with missing value", *it);
               } else {
@@ -288,7 +288,7 @@ public:
               this->set_options_.value().emplace_back(
                 std::make_pair(std::move(found_opt.value()), std::move(opt_value)));
             }
-          } else {
+          } else [[unlikely]] {
             // Provided option not found
             ++errors;
             spdlog::error("Unknown option '{}'", *it);
@@ -304,7 +304,7 @@ public:
           if (auto found_cmd = this->commands_.value().find(*it)) {
             if (!this->set_cmd_.has_value()) {
               this->set_cmd_ = std::move(found_cmd);
-            } else {
+            } else [[unlikely]] {
               ++errors;
               spdlog::error(
                 "Attempted setting command: '{}' when a command was already set: '{}'. Only one command is allowed",

@@ -9,11 +9,11 @@ function(mtgoparser_setup_dependencies)
   # already been provided to us by a parent project
 
   if(NOT TARGET glaze::glaze)
-    cpmaddpackage("https://github.com/stephenberry/glaze.git#main")
+    cpmaddpackage("gh:stephenberry/glaze@1.4.2")
   endif()
 
   if(NOT TARGET fmtlib::fmtlib)
-    cpmaddpackage("gh:fmtlib/fmt#10.1.0")
+    cpmaddpackage("gh:fmtlib/fmt#10.1.1")
   endif()
 
   if(NOT TARGET spdlog::spdlog)
