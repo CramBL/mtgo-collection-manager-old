@@ -9,7 +9,7 @@ function(mtgoparser_setup_dependencies)
   # already been provided to us by a parent project
 
   if(NOT TARGET glaze::glaze)
-    cpmaddpackage("gh:stephenberry/glaze@1.4.3")
+    cpmaddpackage("gh:stephenberry/glaze@1.4.2")
   endif()
 
   if(NOT TARGET fmtlib::fmtlib)
