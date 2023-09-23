@@ -212,18 +212,19 @@ function Build-Clean {
 
 # Define ordered targets
 $targets = [ordered]@{
-    "all"     = { Build-All }
-    "test"    = { Test-All }
-    "build-integration"     = { Build-AllIntegration }
-    "show-versions" = { Show-Versions }
-    "clean"   = { Build-Clean }
-    "build-mtgogetter" = { Build-Mtgogetter }
-    "test-mtgogetter" = { Test-Mtgogetter }
-    "build-mtgoparser" = { Build-Mtgoparser }
-    "test-mtgoparser" = { Test-Mtgoparser }
-    "bench-mtgoparser" = { Test-MtgoparserBenchmark }
+    "all"               = { Build-All }
+    "test"              = { Test-All }
+    "build-integration" = { Build-AllIntegration }
+    "show-versions"     = { Show-Versions }
+    "clean"             = { Build-Clean }
+    "build-mtgogetter"  = { Build-Mtgogetter }
+    "test-mtgogetter"   = { Test-Mtgogetter }
+    "build-mtgoparser"  = { Build-Mtgoparser }
+    "build-mtgoparser-integration" = { Build-MtgoparserIntegration }
+    "test-mtgoparser"   = { Test-Mtgoparser }
+    "bench-mtgoparser"  = { Test-MtgoparserBenchmark }
     "build-mtgoupdater" = { Build-Mtgoupdater }
-    "test-mtgoupdater" = { Test-Mtgoupdater }
+    "test-mtgoupdater"  = { Test-Mtgoupdater }
 }
 
 # Check if the specified target exists, and if not, show a list of available targets
