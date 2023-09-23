@@ -133,6 +133,7 @@ function Test-Mtgoparser {
     Write-Host "==> Testing MTGO Parser..."
     Set-Location mtgoparser\build
     ctest
+    Set-Location -Path $PSScriptRoot
     Write-Host "=== Done testing MTGO Parser ==="
 }
 
@@ -188,14 +189,14 @@ function Build-Clean {
     cargo clean
     Set-Location ..\mtgogetter
     go clean
-    Set-Location ..
+    Set-Location -Path $PSScriptRoot
 }
 
 # Define ordered targets
 $targets = [ordered]@{
     "all"     = { Build-All }
     "test"    = { Test-All }
-    "all-integration"     = { Build-AllIntegration }
+    "build-integration"     = { Build-AllIntegration }
     "show-versions" = { Show-Versions }
     "clean"   = { Build-Clean }
     "build-mtgogetter" = { Build-Mtgogetter }
