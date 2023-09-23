@@ -1,4 +1,10 @@
 // NOLINTBEGIN
+#if _MSC_VER && !__INTEL_COMPILER
+// On MSVC: Disable warning C4702: unreachable code
+//  This warning is generated for glaze@1.4.3 glaze\json\read.hpp l. 1574, 1577, 1580 & 1584
+#pragma warning(disable : 4702)
+#endif
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 using Catch::Matchers::ContainsSubstring;
