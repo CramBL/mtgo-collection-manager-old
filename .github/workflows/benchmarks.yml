@@ -1,0 +1,111 @@
+name: benchmarks
+
+on:
+  workflow_dispatch:
+
+
+env:
+  VERBOSE: 1
+
+jobs:
+  Benchmark-mtgoparser:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            compiler: gcc-13
+            generator: "Ninja Multi-Config"
+            enable_ipo: On
+            packaging_maintainer_mode: OFF
+            build_shared: OFF
+
+          - os: macos-12
+            compiler: llvm-15.0.3
+            generator: "Ninja Multi-Config"
+            enable_ipo: Off
+            packaging_maintainer_mode: OFF
+            build_shared: OFF
+
+          - os: windows-2022
+            compiler: msvc
+            generator: "Visual Studio 17 2022"
+            enable_ipo: On
+
+
+    name: MTGO-Parser-benchmark
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aminya/setup-cpp@v1
+        with:
+          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+          compiler: ${{ matrix.compiler }}
+          cmake: true
+          ninja: true
+
+      - name: 📝 Build & Run benchmarks - Unix 🐧🍎
+        if: runner.os != 'Windows'
+        run: |
+          make build-mtgoparser-integration MTGOPARSER_IPO=${{matrix.enable_ipo }}
+          make bench-mtgoparser
+
+      - name: 📝 Build & Run benchmarks - Windows 💻
+        if: runner.os == 'Windows'
+        run: |
+          .\wmake.ps1 build-mtgoparser-integration -MTGOPARSER_IPO=${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR="${{matrix.generator}}"
+          .\wmake.ps1 bench-mtgoparser
+
+
+  Benchmark-mtgogetter:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+          - os: macos-12
+          - os: windows-2022
+    name: MTGO-Getter-benchmark
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - name: 📝 Build & Run benchmarks - Unix 🐧🍎
+        if: runner.os != 'Windows'
+        run: |
+          echo placeholder
+        #  make bench-mtgogetter
+
+      - name: 📝 Build & Run benchmarks - Windows 💻
+        if: runner.os == 'Windows'
+        run: |
+          echo placeholder
+        # .\wmake.ps1 bench-mtgogetter
+
+  # Benchmark-mtgoupdater:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: ubuntu-22.04
+  #         - os: macos-12
+  #         - os: windows-2022
+  #   name: MTGO-Updater-benchmark
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: moonrepo/setup-rust@v1
+
+  #     - name: 📝 Build & Run benchmarks - Unix 🐧🍎
+  #       if: runner.os != 'Windows'
+  #       run: |
+  #         echo placeholder
+  #       #  make bench-mtgoupdater
+
+  #     - name: 📝 Build & Run benchmarks - Windows 💻
+  #       if: runner.os == 'Windows'
+  #       run: |
+  #         echo placeholder
+  #       # .\wmake.ps1 bench-mtgoupdater
