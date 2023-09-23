@@ -23,7 +23,7 @@ endif
 RUST_MIN_VERSION := 1.70.0
 GO_MIN_VERSION := 1.20
 CMAKE_MIN_VERSION := 3.20
-GCC_MIN_VERSION := 13.0.0
+GCC_MIN_VERSION := 12.0.0
 LLVM_MIN_VERSION := 15.0.3
 
 # Get version from a unix-like terminal
