@@ -63,5 +63,5 @@ jobs:
       - name: 📝 Build & Run tests - Windows 💻
         if: runner.os == 'Windows'
         run: |
-          .\wmake.ps1 build-integration -MTGOPARSER_IPO=${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR=${{matrix.generator}}
+          .\wmake.ps1 build-integration -MTGOPARSER_IPO=${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR="${{matrix.generator}}"
           .\wmake.ps1 test
