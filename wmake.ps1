@@ -1,18 +1,18 @@
 param (
-    [string]$target = "default"
+    [string]$target = "default",
+    [string]$MTGOPARSER_IPO = "On",
+    [string]$MTGOPARSER_GENERATOR = "Ninja Multi-Config"
 )
 
 # Default flags
-$MTGOPARSER_IPO = "On"
 $MTGOPARSER_BUILD_MODE = "Release"
 $MTGOPARSER_ENABLE_COV = $false
-$MTGOPARSER_GENERATOR = "Ninja Multi-Config"
 
 # Minimum supported versions
 $RUST_MIN_VERSION = "1.70.0"
-$GO_MIN_VERSION = "1.20"
+$GO_MIN_VERSION = "1.21"
 $CMAKE_MIN_VERSION = "3.20"
-$GCC_MIN_VERSION = "13.0.0"
+$GCC_MIN_VERSION = "12.0.0"
 $LLVM_MIN_VERSION = "15.0.3"
 
 # Get version information from the shell
@@ -41,6 +41,13 @@ try {
 } catch {
     $GCC_VERSION = "NOT FOUND"
 }
+try {
+    $OS_INFO = Get-CimInstance Win32_OperatingSystem
+    $OS_TYPE = $OS_INFO.Caption
+} catch {
+    $OS_TYPE = "UNKNOWN"
+}
+
 
 function Test-GoInstallation {
     if ($GO_VERSION -eq "NOT FOUND") {
@@ -112,10 +119,19 @@ function Build-Mtgoparser {
     Show-Versions
     Write-Host "==> Building MTGO Parser..."
     Set-Location mtgoparser
-    cmake -S . -B build -G "${MTGOPARSER_GENERATOR}" -Dmtgoparser_ENABLE_IPO="${MTGOPARSER_IPO}" -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE} -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV}
-    cmake --build build --config ${MTGOPARSER_BUILD_MODE}
+    cmake -S . -B build -G "${MTGOPARSER_GENERATOR}" -Dmtgoparser_ENABLE_IPO="${MTGOPARSER_IPO}" -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE} -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV} 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "!!! ERROR while setting up build files for MTGO Parser: code ${LASTEXITCODE}"
+    } else {
+        cmake --build build --config ${MTGOPARSER_BUILD_MODE}
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "!!! ERROR while building MTGO Parser: code ${LASTEXITCODE}"
+        } else {
+            Write-Host "=== Done building MTGO Parser ==="
+        }
+    }
     Set-Location ..
-    Write-Host "=== Done building MTGO Parser ==="
+
 }
 
 function Build-MtgoparserIntegration {
