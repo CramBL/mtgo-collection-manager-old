@@ -1,97 +1,126 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use fltk::enums::Event;
+use std::path::PathBuf;
+
+use fltk::enums::{Event, Font, FrameType, Shortcut};
+use fltk::text::TextAttr;
 use fltk::{app, button, enums::Color, prelude::*, window::Window};
 use fltk::{prelude::*, *};
 use fltk_flex::{Flex, FlexType};
 use fltk_grid::Grid;
 use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 
+mod menubar;
+mod util;
+
+use menubar::McmMenuBar;
 use mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_version;
 use mtgoupdater::mtgogetter_api::mtgogetter_version;
 
-#[derive(Default)]
-struct MyButton {
-    btn: button::Button,
+use crate::util::center;
+
+const WIDGET_WIDTH: i32 = 1400;
+const WIDGET_HEIGHT: i32 = 800;
+const WIDGET_PADDING: i32 = 0;
+
+#[derive(Debug, Clone, Copy)]
+enum Message {
+    Quit,
+    MenuBar(menubar::MbMessage),
 }
 
-impl MyButton {
-    pub fn new(x: i32, y: i32, w: i32, h: i32, label: &str) -> Self {
-        let mut btn = button::Button::new(x, y, w, h, None).with_label(label);
-        btn.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
-        btn.handle(|b, ev| match ev {
-            Event::Enter => {
-                b.set_frame(widget_themes::OS_BUTTON_UP_BOX);
-                b.redraw();
-                true
-            }
-            Event::Leave => {
-                b.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
-                b.redraw();
-                true
-            }
-            _ => false,
-        });
-        Self { btn }
+impl From<menubar::MbMessage> for Message {
+    fn from(mb_msg: menubar::MbMessage) -> Self {
+        Message::MenuBar(mb_msg)
     }
 }
 
-fltk::widget_extends!(MyButton, button::Button, btn);
+pub struct MtgoGui {
+    app: app::App,
+    full_tradelist: Option<PathBuf>,
+    rcv: app::Receiver<Message>,
+    main_win: window::Window,
+    menu: McmMenuBar,
+}
+
+impl MtgoGui {
+    pub fn new() -> Self {
+        let app = app::App::default();
+        let theme = WidgetTheme::new(ThemeType::Dark);
+        theme.apply();
+        let (ev_send, ev_rcv) = app::channel();
+        let mut main_win = Window::default()
+            .with_size(WIDGET_WIDTH, WIDGET_HEIGHT)
+            .center_screen()
+            .with_label("MTGO Collection Manager");
+        main_win.make_resizable(true);
+        main_win.set_color(Color::Black);
+        let menu = McmMenuBar::new(WIDGET_WIDTH, 30, &ev_send);
+        let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
+        flx_left_col.set_align(enums::Align::LeftTop);
+        main_win.end();
+        main_win.show();
+        main_win.set_callback(move |_| {
+            if app::event() == Event::Close {
+                ev_send.send(Message::Quit);
+            }
+        });
+        Self {
+            app,
+            full_tradelist: None,
+            rcv: ev_rcv,
+            main_win,
+            menu,
+        }
+    }
+
+    fn run(&mut self) {
+        while self.app.wait() {
+            if let Some(msg) = self.rcv.recv() {
+                match msg {
+                    Message::Quit => {
+                        eprintln!("Quit");
+                        self.app.quit();
+                    }
+                    Message::MenuBar(mb_msg) => self.menu.handle_ev(mb_msg),
+                }
+            }
+        }
+    }
+}
+
+impl Default for MtgoGui {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 fn main() {
     mtgoupdater::internal_only::dev_try_init_mtgogetter_bin();
     mtgoupdater::internal_only::dev_try_init_mtgoparser_bin();
 
-    let a = app::App::default();
+    let mut gui = MtgoGui::default();
+    gui.run();
 
-    let theme = WidgetTheme::new(ThemeType::Dark);
-    theme.apply();
+    // btn_getter.set_callback({
+    //     move |b| {
+    //         let mtgogetter_version = mtgogetter_version().unwrap();
+    //         let version_str = String::from_utf8_lossy(&mtgogetter_version.stdout);
+    //         eprintln!("{version_str}");
+    //         b.set_label(&version_str);
+    //         eprintln!("Got Getter");
+    //     }
+    // });
 
-    let mut win = Window::default()
-        .with_size(1000, 600)
-        .with_label("MTGO Collection Manager");
-
-    win.set_color(Color::White);
-
-    let f_width = 400;
-    let f_height = 500;
-    let mut flex = Flex::default().with_size(f_width, f_height).column();
-
-    let mut btn_getter =
-        button::Button::new(0, 0, 100, 100, None).with_label("MTGO Getter version");
-    let mut btn_preproc =
-        button::Button::new(0, 0, 100, 100, None).with_label("MTGO Preprocessor version");
-
-    btn_getter.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
-
-    flex.end();
-    Flex::debug(true);
-
-    win.end();
-    win.show();
-
-    btn_getter.set_callback({
-        let mut win = win.clone();
-        move |b| {
-            let mtgogetter_version = mtgogetter_version().unwrap();
-            let version_str = String::from_utf8_lossy(&mtgogetter_version.stdout);
-            eprintln!("{version_str}");
-            b.set_label(&version_str);
-            win.set_label("Got Getter");
-        }
-    });
-
-    btn_preproc.set_callback(move |b| {
-        let mtgo_preproc_version = run_mtgo_preprocessor_version().unwrap();
-        let version_str = String::from_utf8_lossy(&mtgo_preproc_version.stdout)
-            .trim()
-            .to_string();
-        let preprocess_version_str = format!("Preprocessor {}", version_str);
-        eprintln!("{preprocess_version_str}");
-        b.set_label(&preprocess_version_str);
-        win.set_label("Got Preprocessor");
-    });
-
-    a.run().unwrap();
+    // btn_preproc.set_callback(move |b| {
+    //     let mtgo_preproc_version = run_mtgo_preprocessor_version().unwrap();
+    //     let version_str = String::from_utf8_lossy(&mtgo_preproc_version.stdout)
+    //         .trim()
+    //         .to_string();
+    //     let preprocess_version_str = format!("Preprocessor {}", version_str);
+    //     eprintln!("{preprocess_version_str}");
+    //     b.set_label(&preprocess_version_str);
+    //     eprintln!("Got Preprocessor");
+    // });
 }
