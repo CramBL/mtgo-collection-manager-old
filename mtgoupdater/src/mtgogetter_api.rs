@@ -2,6 +2,12 @@ use std::process::Command;
 
 use crate::mtgogetter_bin;
 
+pub fn mtgogetter_version() -> Result<std::process::Output, Box<dyn std::error::Error>> {
+    let go_exec_out = Command::new(mtgogetter_bin()).arg("--version").output()?;
+
+    Ok(go_exec_out)
+}
+
 pub fn download_goatbots_price_history() -> Result<std::process::Output, Box<dyn std::error::Error>>
 {
     let go_exec_out = Command::new(mtgogetter_bin())
