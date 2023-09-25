@@ -67,7 +67,7 @@ impl MtgoGui {
         main_win.size_range(MIN_APP_WIDTH, MIN_APP_HEIGHT, 0, 0);
 
         main_win.set_color(Color::Black);
-        let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 30, &ev_send);
+        let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 25, &ev_send);
         let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
         flx_left_col.set_align(enums::Align::LeftTop);
         main_win.end();

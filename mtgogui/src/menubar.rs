@@ -89,16 +89,9 @@ impl McmMenuBar {
         dlg.show();
         let filename = dlg.filename();
         if !filename.to_string_lossy().to_string().is_empty() {
-            if filename.exists() {
-                let mut buf = text::TextBuffer::default();
-                match buf.load_file(&filename) {
-                    Ok(_) => eprintln!("Loaded file: {filename:?}"),
-                    Err(e) => dialog::alert(
-                        center().0 - 200,
-                        center().1 - 100,
-                        &format!("An issue occured while loading the file: {e}"),
-                    ),
-                }
+            if filename.is_file() {
+                self.full_trade_list = Some(filename);
+                eprintln!("Full trade list: {:?}", self.full_trade_list);
             } else {
                 dialog::alert(center().0 - 200, center().1 - 100, "File does not exist!")
             }
