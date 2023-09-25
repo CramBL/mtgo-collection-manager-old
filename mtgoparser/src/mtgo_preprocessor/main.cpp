@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
 
   if (config.FlagSet("--echo")) { config.PrintArgs(); }
 
-  if (config.FlagSet("--version")) { fmt::print("v{}\n", mtgoparser::cmake::project_version); }
+  if (config.FlagSet("--version")) { fmt::println("v{}", mtgoparser::cmake::project_version); }
 
   if (config.CmdSet("run")) {
     spdlog::info("MTGO Preprocessor run mode");
