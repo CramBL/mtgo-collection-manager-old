@@ -15,6 +15,10 @@ pub use mtgo_preprocessor_api::run_mtgo_preprocessor_json_example as run_process
 static MTGOGETTER_BIN: OnceLock<String> = OnceLock::new();
 static MTGOPARSER_BIN: OnceLock<String> = OnceLock::new();
 
+pub fn mtgo_updater_version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
+}
+
 pub fn set_mtgogetter_bin(bin_path: &str) -> Result<(), String> {
     MTGOGETTER_BIN.set(bin_path.to_string())
 }
