@@ -1,0 +1,19 @@
+[package]
+name = "mtgogui"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+fltk = { version = "1.4", features = ["fltk-bundled"] }
+fltk-flex = "0.2"
+fltk-grid = "0.3"
+fltk-theme = "0.7"
+mtgoupdater = { version = "0.1.0", path = "../mtgoupdater"}
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"

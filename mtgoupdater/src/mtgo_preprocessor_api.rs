@@ -25,3 +25,9 @@ pub fn run_mtgo_preprocessor_json_example(
 
     Ok(pre_processor_exec_out)
 }
+
+pub fn run_mtgo_preprocessor_version() -> Result<std::process::Output, Box<dyn std::error::Error>> {
+    let pre_processor_exec_out = Command::new(mtgoparser_bin()).arg("--version").output()?;
+
+    Ok(pre_processor_exec_out)
+}

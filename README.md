@@ -1,10 +1,15 @@
-# MTGO Collection Manager
+
+<p align="center">
+<img src="mtgogui/assets/logo-card-pile.png" alt="logo" width="150"/>
+</p>
+<h1 align="center">
+MTGO Collection Manager
+</h1>
+
 ## Purpose
 To automate some tasks regarding effective management of [MTGO](https://www.mtgo.com/en/mtgo) collection, that are too cumbersome for anyone to actually do them manually.
 
 # Table of contents
-- [MTGO Collection Manager](#mtgo-collection-manager)
-  - [Purpose](#purpose)
 - [Table of contents](#table-of-contents)
   - [Features? Who knows, we'll see what I come up with, and how much time I have.](#features-who-knows-well-see-what-i-come-up-with-and-how-much-time-i-have)
     - [Feature Ideas:](#feature-ideas)

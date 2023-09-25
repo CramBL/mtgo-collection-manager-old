@@ -1,12 +1,25 @@
 # Build directories and binary files
 rust-processing/target
+
+## MTGO Getter
 mtgogetter/mtgogetter.exe
-mtgoupdater/Cargo.lock
-mtgoupdater/target
+mtgogetter/state_log.toml
+mtgogetter/mtgogetter
+
+## MTGO Parser
 mtgoparser/build/
 mtgoparser/out/
 mtgoparser/cmake-build-*/
 mtgoparser/conan-cache/
+
+## MTGO Updater
+mtgoupdater/state_log.toml
+mtgoupdater/Cargo.lock
+mtgoupdater/target
+
+## MTGO GUI
+mtgogui/target
+
 
 # User spesific settings
 mtgoparser/CMakeUserPresets.json
@@ -23,6 +36,3 @@ mtgoparser/CMakeUserPresets.json
 *~
 _ReSharper*
 *.log
-mtgogetter/state_log.toml
-mtgoupdater/state_log.toml
-mtgogetter/mtgogetter
