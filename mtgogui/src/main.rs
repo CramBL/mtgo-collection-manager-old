@@ -1,10 +1,14 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
 use std::path::PathBuf;
+use std::sync::OnceLock;
 
 use fltk::enums::{Event, Font, FrameType, Shortcut};
+use fltk::image::PngImage;
 use fltk::text::TextAttr;
+use fltk::window::DoubleWindow;
 use fltk::{app, button, enums::Color, prelude::*, window::Window};
 use fltk::{prelude::*, *};
 use fltk_flex::{Flex, FlexType};
@@ -35,6 +39,13 @@ impl From<menubar::MbMessage> for Message {
         Message::MenuBar(mb_msg)
     }
 }
+const MCM_LOGO_RAW: &[u8; 3542] = include_bytes!("../assets/35x35-logo-card-pile.png");
+pub static MCM_LOGO: OnceLock<PngImage> = OnceLock::new();
+pub fn get_logo() -> PngImage {
+    MCM_LOGO
+        .get_or_init(|| PngImage::from_data(MCM_LOGO_RAW).unwrap())
+        .clone()
+}
 
 pub struct MtgoGui {
     app: app::App,
@@ -49,11 +60,15 @@ impl MtgoGui {
         let app = app::App::default();
         let theme = WidgetTheme::new(ThemeType::Dark);
         theme.apply();
+
         let (ev_send, ev_rcv) = app::channel();
-        let mut main_win = Window::default()
+        let mut main_win: DoubleWindow = Window::default()
             .with_size(WIDGET_WIDTH, WIDGET_HEIGHT)
             .center_screen()
             .with_label("MTGO Collection Manager");
+
+        main_win.set_icon(Some(get_logo()));
+
         main_win.make_resizable(true);
         main_win.set_color(Color::Black);
         let menu = McmMenuBar::new(WIDGET_WIDTH, 30, &ev_send);

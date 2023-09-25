@@ -1,4 +1,4 @@
-use crate::{util::center, Message};
+use crate::{util::center, Message, MCM_LOGO};
 use fltk::{
     app, dialog,
     enums::{self, Color, Font, FrameType, Shortcut},
@@ -99,12 +99,35 @@ impl McmMenuBar {
 }
 
 pub(super) fn show_about() {
-    let mtgogetter_version = mtgogetter_version().unwrap();
+    // Start by getting the versions from MTGO Getter and MTGO Preprocessor
+    let mtgogetter_version = match mtgogetter_version() {
+        Ok(v) => v,
+        Err(e) => {
+            eprintln!("Error getting mtgogetter version: {e}");
+            dialog::alert(
+                center().0 - 200,
+                center().1 - 100,
+                &format!("Could not find MTGO Getter binary!\n{e}"),
+            );
+            return;
+        }
+    };
+    let mtgo_preproc_version = match run_mtgo_preprocessor_version() {
+        Ok(v) => v,
+        Err(e) => {
+            eprintln!("Error getting mtgo preprocessor version: {e}");
+            dialog::alert(
+                center().0 - 200,
+                center().1 - 100,
+                &format!("Could not find MTGO Preprocessor binary!\n{e}"),
+            );
+            return;
+        }
+    };
+
     let mtgogetter_version_str = String::from_utf8_lossy(&mtgogetter_version.stdout);
     let version_pos = mtgogetter_version_str.trim().find("version ").unwrap();
     let just_v = &mtgogetter_version_str[version_pos + 8..];
-
-    let mtgo_preproc_version = run_mtgo_preprocessor_version().unwrap();
     let preproc_version_str = String::from_utf8_lossy(&mtgo_preproc_version.stdout)
         .trim()
         .to_string();
@@ -174,6 +197,7 @@ pub(super) fn show_about() {
             "About MTGO Collection Manager v{}",
             mtgo_gui_version
         ));
+    win.set_icon(Some(crate::get_logo()));
     let flex_about = Flex::default()
         .with_pos(0, 0)
         .with_align(enums::Align::Center)
