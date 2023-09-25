@@ -24,8 +24,10 @@ use mtgoupdater::mtgogetter_api::mtgogetter_version;
 
 use crate::util::center;
 
-const WIDGET_WIDTH: i32 = 1400;
-const WIDGET_HEIGHT: i32 = 800;
+const MIN_APP_WIDTH: i32 = 400;
+const MIN_APP_HEIGHT: i32 = 400;
+const DEFAULT_APP_WIDTH: i32 = 1400;
+const DEFAULT_APP_HEIGHT: i32 = 800;
 const WIDGET_PADDING: i32 = 0;
 
 #[derive(Debug, Clone, Copy)]
@@ -63,15 +65,16 @@ impl MtgoGui {
 
         let (ev_send, ev_rcv) = app::channel();
         let mut main_win: DoubleWindow = Window::default()
-            .with_size(WIDGET_WIDTH, WIDGET_HEIGHT)
+            .with_size(DEFAULT_APP_WIDTH, DEFAULT_APP_HEIGHT)
             .center_screen()
             .with_label("MTGO Collection Manager");
 
         main_win.set_icon(Some(get_logo()));
-
         main_win.make_resizable(true);
+        main_win.size_range(MIN_APP_WIDTH, MIN_APP_HEIGHT, 0, 0);
+
         main_win.set_color(Color::Black);
-        let menu = McmMenuBar::new(WIDGET_WIDTH, 30, &ev_send);
+        let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 30, &ev_send);
         let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
         flx_left_col.set_align(enums::Align::LeftTop);
         main_win.end();
