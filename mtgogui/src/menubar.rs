@@ -1,4 +1,6 @@
-use crate::{util::center, Message, MCM_LOGO};
+use std::path::PathBuf;
+
+use crate::{util::center, Message};
 use fltk::{
     app, dialog,
     enums::{self, Color, Font, FrameType, Shortcut},
@@ -12,6 +14,7 @@ use mtgoupdater::{
     mtgo_preprocessor_api::run_mtgo_preprocessor_version, mtgogetter_api::mtgogetter_version,
 };
 
+/// Messages that can be received by the menubar
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum MbMessage {
     Open,
@@ -20,6 +23,7 @@ pub(crate) enum MbMessage {
     Example,
 }
 
+// Styling for the about window text
 const TEXT_ABOUT_STYLES: &[text::StyleTableEntryExt] = &[
     text::StyleTableEntryExt {
         color: Color::White,
@@ -56,13 +60,17 @@ const TEXT_ABOUT_STYLES: &[text::StyleTableEntryExt] = &[
 
 pub(super) struct McmMenuBar {
     pub(super) menu: menu::SysMenuBar,
+    pub(super) full_trade_list: Option<PathBuf>,
 }
 
 impl McmMenuBar {
     pub fn new(w: i32, h: i32, s: &app::Sender<Message>) -> Self {
         let mut mb = menu::SysMenuBar::default().with_size(w, h);
         init_menu_bar(&mut mb, s);
-        Self { menu: mb }
+        Self {
+            menu: mb,
+            full_trade_list: None,
+        }
     }
 
     pub fn handle_ev(&mut self, ev: MbMessage) {
@@ -197,7 +205,7 @@ pub(super) fn show_about() {
             "About MTGO Collection Manager v{}",
             mtgo_gui_version
         ));
-    win.set_icon(Some(crate::get_logo()));
+    win.set_icon(Some(crate::util::get_logo()));
     let flex_about = Flex::default()
         .with_pos(0, 0)
         .with_align(enums::Align::Center)

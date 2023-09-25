@@ -41,13 +41,6 @@ impl From<menubar::MbMessage> for Message {
         Message::MenuBar(mb_msg)
     }
 }
-const MCM_LOGO_RAW: &[u8; 3542] = include_bytes!("../assets/35x35-logo-card-pile.png");
-pub static MCM_LOGO: OnceLock<PngImage> = OnceLock::new();
-pub fn get_logo() -> PngImage {
-    MCM_LOGO
-        .get_or_init(|| PngImage::from_data(MCM_LOGO_RAW).unwrap())
-        .clone()
-}
 
 pub struct MtgoGui {
     app: app::App,
@@ -69,7 +62,7 @@ impl MtgoGui {
             .center_screen()
             .with_label("MTGO Collection Manager");
 
-        main_win.set_icon(Some(get_logo()));
+        main_win.set_icon(Some(util::get_logo()));
         main_win.make_resizable(true);
         main_win.size_range(MIN_APP_WIDTH, MIN_APP_HEIGHT, 0, 0);
 
