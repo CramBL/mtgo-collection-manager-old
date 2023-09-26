@@ -24,3 +24,14 @@ pub const DEV_MTGOPARSER_BIN: &str = if cfg!(windows) {
 } else {
     "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser"
 };
+
+pub fn run_mtgo_preprocessor_gui_example() -> Result<std::process::Output, std::io::Error> {
+    let pre_processor_exec_out = std::process::Command::new(crate::mtgoparser_bin())
+        .arg("run")
+        .arg("--gui-example")
+        .arg("--caller")
+        .arg("mtgoupdater")
+        .output()?;
+
+    Ok(pre_processor_exec_out)
+}
