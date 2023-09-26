@@ -32,6 +32,7 @@ const WIDGET_PADDING: i32 = 0;
 #[derive(Debug, Clone, Copy)]
 enum Message {
     Quit,
+    Example,
     MenuBar(menubar::MbMessage),
 }
 
@@ -47,6 +48,7 @@ pub struct MtgoGui {
     rcv: app::Receiver<Message>,
     main_win: window::Window,
     menu: McmMenuBar,
+    collection_example: text::TextDisplay,
 }
 
 impl MtgoGui {
@@ -69,6 +71,25 @@ impl MtgoGui {
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 25, &ev_send);
         let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
         flx_left_col.set_align(enums::Align::LeftTop);
+        let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
+        btn_example.set_callback({
+            let ev_send = ev_send;
+            move |b| {
+                ev_send.send(Message::Example);
+
+                b.set_label("Getting example...");
+            }
+        });
+        flx_left_col.end();
+        let mut flex_right_col = Flex::default()
+            .with_pos(400, 35)
+            .with_size(1000, 600)
+            .column();
+        flex_right_col.set_align(enums::Align::LeftTop);
+        let mut txt_disp = text::TextDisplay::default();
+        txt_disp.align();
+        txt_disp.set_label("Collection example");
+
         main_win.end();
         main_win.show();
         main_win.set_callback(move |_| {
@@ -82,6 +103,7 @@ impl MtgoGui {
             rcv: ev_rcv,
             main_win,
             menu,
+            collection_example: txt_disp,
         }
     }
 
@@ -97,6 +119,19 @@ impl MtgoGui {
                         self.app.quit();
                     }
                     Message::MenuBar(mb_msg) => self.menu.handle_ev(mb_msg),
+                    Message::Example => {
+                        let collection_print_out =
+                            mtgoupdater::internal_only::run_mtgo_preprocessor_gui_example()
+                                .unwrap();
+                        let collection_print_str =
+                            unsafe { String::from_utf8_unchecked(collection_print_out.stdout) };
+                        // Remove carriage return characters
+                        //let collection_print_str = collection_print_str.replace('\r', "");
+                        eprintln!("{collection_print_str}");
+                        let mut buffer = text::TextBuffer::default();
+                        buffer.set_text(&collection_print_str);
+                        self.collection_example.set_buffer(buffer)
+                    }
                 }
             }
         }
@@ -119,25 +154,4 @@ fn main() {
     let mut gui = MtgoGui::default();
 
     gui.run();
-
-    // btn_getter.set_callback({
-    //     move |b| {
-    //         let mtgogetter_version = mtgogetter_version().unwrap();
-    //         let version_str = String::from_utf8_lossy(&mtgogetter_version.stdout);
-    //         eprintln!("{version_str}");
-    //         b.set_label(&version_str);
-    //         eprintln!("Got Getter");
-    //     }
-    // });
-
-    // btn_preproc.set_callback(move |b| {
-    //     let mtgo_preproc_version = run_mtgo_preprocessor_version().unwrap();
-    //     let version_str = String::from_utf8_lossy(&mtgo_preproc_version.stdout)
-    //         .trim()
-    //         .to_string();
-    //     let preprocess_version_str = format!("Preprocessor {}", version_str);
-    //     eprintln!("{preprocess_version_str}");
-    //     b.set_label(&preprocess_version_str);
-    //     eprintln!("Got Preprocessor");
-    // });
 }
