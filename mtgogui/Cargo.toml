@@ -2,6 +2,10 @@
 name = "mtgogui"
 version = "0.1.0"
 edition = "2021"
+authors = ["Marc Beck König <mbkj@tutamail.com>"]
+
+[badges]
+maintenance = { status = "actively-developed" }
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,6 +15,7 @@ fltk-flex = "0.2"
 fltk-grid = "0.3"
 fltk-theme = "0.7"
 mtgoupdater = { version = "0.1.0", path = "../mtgoupdater"}
+winapi = {version = "0.3.9", features = ["wincon", "winuser"]}
 
 [profile.release]
 strip = true
