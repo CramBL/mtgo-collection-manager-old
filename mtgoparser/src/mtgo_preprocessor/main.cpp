@@ -28,7 +28,7 @@ const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5ca
 const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
 
 
-#define OPTION_COUNT 9
+#define OPTION_COUNT 10
 
 constexpr clap::Option help_opt{ "-h", true };
 constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
@@ -41,6 +41,7 @@ constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
   clap::Option("--example-json", true),
   clap::Option("--example-json-formats", true),
   clap::Option("--example-scryfall", true),
+  clap::Option("--gui-example", true),
 };
 #define COMMAND_COUNT 1
 constexpr clap::CommandArray cmd_array = clap::CommandArray<COMMAND_COUNT>{ clap::Command("run", true) };
@@ -155,6 +156,17 @@ void collection_parse(const std::string &test_data_dir)
   auto new_collection = mtgo::Collection(collection_json);
   spdlog::info("==> new collection print...");
   new_collection.Print();
+}
+
+void collection_parse_to_gui(const std::string &test_data_dir)
+{
+  auto card_defs = goatbots_card_definitions_parse(test_data_dir);
+  price_hist_map_t prices = goatbots_price_history_parse(test_data_dir);
+  auto cards = mtgo::xml::parse_dek_xml(test_data_dir + test_path_trade_list_small_5cards);
+  auto collection = mtgo::Collection(std::move(cards));
+  auto scryfall_cards = scryfall_cards_parse();
+  collection.ExtractGoatbotsInfo(card_defs.value(), prices);
+  collection.PrettyPrint();
 }
 
 void json_format_prints()
@@ -287,6 +299,8 @@ int main(int argc, char *argv[])
       auto scryfall_cards = example::scryfall_cards_parse();
       spdlog::info("got {} scryfall cards", scryfall_cards.size());
     }
+
+    if (config.FlagSet("--gui-example")) { example::collection_parse_to_gui(test_data_dir); }
   }
 
 
