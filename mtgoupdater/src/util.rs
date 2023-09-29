@@ -1,9 +1,11 @@
 use std::{
-    ffi::OsStr,
-    os::windows::process::CommandExt,
+    ffi::OsStr,    
     process::{Command, Output, Stdio},
 };
 
+#[cfg(target_os = "windows")]
+use os::windows::process::CommandExt;
+#[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 pub(super) fn run_with_args<I, S>(bin: S, args: I) -> Result<Output, std::io::Error>
@@ -13,9 +15,9 @@ where
 {
     let mut cmd = Command::new(bin);
 
-    if cfg!(target_os = "windows") {
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
+    #[cfg(target_os = "windows")]
+    cmd.creation_flags(CREATE_NO_WINDOW);
+    
 
     cmd.stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -31,9 +33,9 @@ where
 {
     let mut cmd = Command::new(bin);
 
-    if cfg!(target_os = "windows") {
+    #[cfg(target_os = "windows")]
         cmd.creation_flags(CREATE_NO_WINDOW);
-    }
+    
 
     cmd.stdout(Stdio::piped())
         .stderr(Stdio::piped())
