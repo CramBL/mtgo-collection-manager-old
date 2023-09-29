@@ -1,3 +1,4 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
@@ -108,9 +109,6 @@ impl MtgoGui {
     }
 
     fn run(&mut self) {
-        if cfg!(windows) && !cfg!(debug_assertions) {
-            util::hide_console_window();
-        }
         while self.app.wait() {
             if let Some(msg) = self.rcv.recv() {
                 match msg {
