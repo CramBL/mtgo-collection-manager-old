@@ -45,6 +45,7 @@ public:
   [[nodiscard]] auto ToJson() const -> std::string;
   [[nodiscard]] auto ToJsonPretty() const -> std::string;
   void Print() const;
+  void PrettyPrint() const;
   void FromJson(const std::string &json_str);
 
 
@@ -117,14 +118,37 @@ void Collection::FromJson(const std::string &json_str)
 void Collection::Print() const
 {
   for (const auto &c : cards_) {
-    spdlog::info("{} {}: price={}, quantity={}, set={}, foil={}, rarity={}",
+    fmt::println("{} {}: Goatbots price={}, Scryfall price={}, quantity={}, set={}, foil={}, rarity={}",
       c.id_,
       c.name_,
       c.goatbots_price_,
+      c.scryfall_price_,
       c.quantity_,
       c.set_,
       c.foil_,
       c.rarity_);
+  }
+}
+
+void Collection::PrettyPrint() const
+{
+  fmt::println("{: <25}{: <23}{: <23}{: <11}{: <8}{: <10}{: <6}\n",
+    "Name",
+    "Goatbots price [tix]",
+    "Scryfall price [tix]",
+    "Quantity",
+    "Foil",
+    "Rarity",
+    "Set");
+  for (const auto &c : cards_) {
+    fmt::println("{: <25}{: <23}{: <23}{: <11}{: <8}{: <10}{: <6}",
+      c.name_,
+      c.goatbots_price_,
+      c.scryfall_price_,
+      c.quantity_,
+      c.foil_,
+      c.rarity_,
+      c.set_);
   }
 }
 

@@ -1,6 +1,5 @@
 # Default flags
 # MTGOPARSER_GENERATOR := "Ninja Multi-Config"
-MTGOPARSER_IPO := Off
 MTGOPARSER_BUILD_MODE := Release
 MTGOPARSER_ENABLE_COV := false
 
@@ -8,15 +7,18 @@ MTGOPARSER_ENABLE_COV := false
 ifeq ($(shell uname -s),Linux)
     OS_TYPE := Linux
 	MTGOPARSER_GENERATOR := "Ninja Multi-Config"
+	MTGOPARSER_IPO := On
 
 else ifeq ($(shell uname -s),Darwin)
     OS_TYPE := macOS
 	MTGOPARSER_GENERATOR := "Ninja Multi-Config"
+	MTGOPARSER_IPO := Off
 else ifeq ($(shell uname -o),Msys)
     $(error Operating System is detected as Windows (Msys). This Makefile is not intended for Windows systems. Use the powershell script wmake.ps1 instead)
 else
     OS_TYPE := Unknown
 	MTGOPARSER_GENERATOR := "Ninja Multi-Config"
+	MTGOPARSER_IPO := On
 endif
 
 # Minimum supported versions
