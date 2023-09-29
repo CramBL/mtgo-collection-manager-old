@@ -164,7 +164,8 @@ void collection_parse_to_gui(const std::string &test_data_dir)
   price_hist_map_t prices = goatbots_price_history_parse(test_data_dir);
   auto cards = mtgo::xml::parse_dek_xml(test_data_dir + test_path_trade_list_small_5cards);
   auto collection = mtgo::Collection(std::move(cards));
-  auto scryfall_cards = scryfall_cards_parse();
+  // TODO: Add function for collection to extract scryfall into
+  // auto scryfall_cards = scryfall_cards_parse();
   collection.ExtractGoatbotsInfo(card_defs.value(), prices);
   collection.PrettyPrint();
 }
