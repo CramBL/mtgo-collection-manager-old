@@ -26,12 +26,8 @@ pub const DEV_MTGOPARSER_BIN: &str = if cfg!(windows) {
 };
 
 pub fn run_mtgo_preprocessor_gui_example() -> Result<std::process::Output, std::io::Error> {
-    let pre_processor_exec_out = std::process::Command::new(crate::mtgoparser_bin())
-        .arg("run")
-        .arg("--gui-example")
-        .arg("--caller")
-        .arg("mtgoupdater")
-        .output()?;
-
-    Ok(pre_processor_exec_out)
+    crate::util::run_with_args(
+        crate::mtgoparser_bin(),
+        ["run", "--gui-example", "--caller", "mtgoupdater"],
+    )
 }

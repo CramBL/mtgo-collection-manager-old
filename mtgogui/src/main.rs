@@ -122,10 +122,7 @@ impl MtgoGui {
                             mtgoupdater::internal_only::run_mtgo_preprocessor_gui_example()
                                 .unwrap();
                         let collection_print_str =
-                            unsafe { String::from_utf8_unchecked(collection_print_out.stdout) };
-                        // Remove carriage return characters
-                        //let collection_print_str = collection_print_str.replace('\r', "");
-                        eprintln!("{collection_print_str}");
+                            String::from_utf8_lossy(&collection_print_out.stdout);
                         let mut buffer = text::TextBuffer::default();
                         buffer.set_text(&collection_print_str);
                         self.collection_example.set_buffer(buffer)
