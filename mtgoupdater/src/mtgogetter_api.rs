@@ -1,30 +1,24 @@
-use crate::util;
-use std::process::Command;
-
 use crate::mtgogetter_bin;
+use crate::util;
+
+// Convenience functions for calling mtgogetter
+fn run_mtgogetter<'a, I>(args: I) -> Result<std::process::Output, std::io::Error>
+where
+    I: IntoIterator<Item = &'a str>,
+{
+    util::run_with_args(mtgogetter_bin(), args)
+}
 
 pub fn mtgogetter_version() -> Result<std::process::Output, std::io::Error> {
-    let out = util::run_with_arg(mtgogetter_bin(), "--version")?;
-
-    Ok(out)
+    run_mtgogetter(["--version"])
 }
 
 pub fn download_goatbots_price_history() -> Result<std::process::Output, std::io::Error> {
-    let go_exec_out = Command::new(mtgogetter_bin())
-        .arg("download")
-        .arg("goatbots-price-history")
-        .output()?;
-
-    Ok(go_exec_out)
+    run_mtgogetter(["download", "goatbots-price-history"])
 }
 
 pub fn download_goatbots_card_definitions() -> Result<std::process::Output, std::io::Error> {
-    let go_exec_out = Command::new(mtgogetter_bin())
-        .arg("download")
-        .arg("goatbots-card-definitions")
-        .output()?;
-
-    Ok(go_exec_out)
+    run_mtgogetter(["download", "goatbots-card-definitions"])
 }
 
 pub fn download_custom_url(
@@ -40,7 +34,5 @@ pub fn download_custom_url(
         custom_args.push("--save-as");
         custom_args.push(save_as);
     }
-    let go_exec_out = Command::new(mtgogetter_bin()).args(custom_args).output()?;
-
-    Ok(go_exec_out)
+    run_mtgogetter(custom_args)
 }

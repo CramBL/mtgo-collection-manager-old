@@ -1,32 +1,27 @@
-use std::process::Command;
-
 use crate::{mtgoparser_bin, util};
 
-pub fn run_mtgo_preprocessor_version() -> Result<std::process::Output, std::io::Error> {
-    let pre_processor_exec_out = util::run_with_arg(mtgoparser_bin(), "--version")?;
+// Convenience functions for calling mtgoparser
+fn run_mtgo_preprocessor<'a, I>(args: I) -> Result<std::process::Output, std::io::Error>
+where
+    I: IntoIterator<Item = &'a str>,
+{
+    util::run_with_args(mtgoparser_bin(), args)
+}
 
-    Ok(pre_processor_exec_out)
+pub fn run_mtgo_preprocessor_version() -> Result<std::process::Output, std::io::Error> {
+    run_mtgo_preprocessor(["--version"])
 }
 
 pub fn run_mtgo_preprocessor_example() -> Result<std::process::Output, std::io::Error> {
-    let pre_processor_exec_out = Command::new(mtgoparser_bin())
-        .arg("--caller")
-        .arg("mtgoupdater")
-        .arg("--example-json")
-        .arg("--example-scryfall")
-        .arg("run")
-        .output()?;
-
-    Ok(pre_processor_exec_out)
+    run_mtgo_preprocessor([
+        "run",
+        "--example-json-formats",
+        "--example-scryfall",
+        "--caller",
+        "mtgoupdater",
+    ])
 }
 
 pub fn run_mtgo_preprocessor_json_example() -> Result<std::process::Output, std::io::Error> {
-    let pre_processor_exec_out = Command::new(mtgoparser_bin())
-        .arg("run")
-        .arg("--example-json-formats")
-        .arg("--caller")
-        .arg("mtgoupdater")
-        .output()?;
-
-    Ok(pre_processor_exec_out)
+    run_mtgo_preprocessor(["run", "--example-json-formats", "--caller", "mtgoupdater"])
 }
