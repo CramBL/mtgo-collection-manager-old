@@ -1,11 +1,12 @@
+use crate::util;
 use std::process::Command;
 
 use crate::mtgogetter_bin;
 
 pub fn mtgogetter_version() -> Result<std::process::Output, std::io::Error> {
-    let go_exec_out = Command::new(mtgogetter_bin()).arg("--version").output()?;
+    let out = util::run_with_arg(mtgogetter_bin(), "--version")?;
 
-    Ok(go_exec_out)
+    Ok(out)
 }
 
 pub fn download_goatbots_price_history() -> Result<std::process::Output, std::io::Error> {
