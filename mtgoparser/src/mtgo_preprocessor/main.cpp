@@ -29,11 +29,10 @@ const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5ca
 const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
 
 
-#define OPTION_COUNT 10
-
+#define OPTION_COUNT 11
+constexpr clap::Option mtgoupdater_json_out{ "--collection-json-out", true };
 constexpr clap::Option help_opt{ "-h", true };
-constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
-  clap::Option("--version", true, "-V"),
+constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{ clap::Option("--version", true, "-V"),
   help_opt,
   clap::Option("--verbose", true),
   clap::Option("--echo", true),
@@ -43,7 +42,7 @@ constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
   clap::Option("--example-json-formats", true),
   clap::Option("--example-scryfall", true),
   clap::Option("--gui-example", true),
-};
+  mtgoupdater_json_out };
 #define COMMAND_COUNT 1
 constexpr clap::CommandArray cmd_array = clap::CommandArray<COMMAND_COUNT>{ clap::Command("run", true) };
 
@@ -303,6 +302,15 @@ int main(int argc, char *argv[])
     }
 
     if (config.FlagSet("--gui-example")) { example::collection_parse_to_gui(test_data_dir); }
+
+    if (config.FlagSet(mtgoupdater_json_out.name_)) {
+      auto card_defs = example::goatbots_card_definitions_parse(test_data_dir);
+      auto prices = example::goatbots_price_history_parse(test_data_dir);
+      auto cards = mtgo::xml::parse_dek_xml(test_data_dir + test_path_trade_list_small_5cards);
+      auto collection = mtgo::Collection(std::move(cards));
+      collection.ExtractGoatbotsInfo(card_defs.value(), prices);
+      fmt::print("{}", collection.ToJsonPretty());
+    }
   }
 
 
