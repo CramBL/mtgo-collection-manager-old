@@ -64,7 +64,7 @@ struct Card
 
   // Templated constructor
   template<typename T>
-    requires std::convertible_to<T, std::string>
+  requires std::convertible_to<T, std::string>
   explicit Card(T id,
     T quantity,
     T name,
