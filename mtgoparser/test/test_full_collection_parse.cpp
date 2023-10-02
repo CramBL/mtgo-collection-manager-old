@@ -21,8 +21,8 @@ const auto path_goatbots_card_defs_small_5cards = "../../../test/test-data/goatb
 const auto path_goatbots_price_hist_small_5cards = "../../../test/test-data/goatbots/price-hist-small-5cards.json";
 const auto path_mtgogetter_out_scryfall_small_5cards =
   "../../../test/test-data/mtgogetter-out/scryfall-small-5cards.json";
-const auto path_mtgogetter_out_scryfall_small_100cards =
-  "../../../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
+// const auto path_mtgogetter_out_scryfall_small_100cards =
+// "../../../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
 const auto path_trade_list_small_5cards = "../../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
 
 
