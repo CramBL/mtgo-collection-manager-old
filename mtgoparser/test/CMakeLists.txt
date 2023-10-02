@@ -138,3 +138,25 @@ catch_discover_tests(
   "tests."
   OUTPUT_SUFFIX
   .xml)
+
+
+# Full mtgoparser tests (i.e. all data for a whole collection)
+add_executable(test_full_collection_parse test_full_collection_parse.cpp)
+target_link_libraries(test_full_collection_parse PRIVATE
+                                     mtgoparser::mtgoparser_warnings
+                                     mtgoparser::mtgoparser_options
+                                     mtgoparser)
+target_link_system_library(test_full_collection_parse PRIVATE Catch2::Catch2WithMain)
+
+catch_discover_tests(
+  test_full_collection_parse
+  TEST_PREFIX
+  "test_full_collection_parse."
+  REPORTER
+  XML
+  OUTPUT_DIR
+  .
+  OUTPUT_PREFIX
+  "test_full_collection_parse."
+  OUTPUT_SUFFIX
+  .xml)
