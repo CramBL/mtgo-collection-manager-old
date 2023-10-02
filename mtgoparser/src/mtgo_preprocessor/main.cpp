@@ -20,10 +20,11 @@
 // TODO: VERY TEMPORARY NOLINT - AS SOON AS MAIN DOES SOMETHING USEFUL REMOVE THIS!!
 // NOLINTBEGIN
 
+// Paths relative to ROOT=test/test-data
 const auto test_path_trade_list_small_5cards = "/mtgo/Full Trade List-small-5cards.dek";
 const auto test_path_goatbots_card_defs_small = "/goatbots/card-defs-small-5cards.json";
 const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5cards.json";
-// Relative to a project subfolder such as mtgoparser/mtgogetter/mtgoupdater
+// Relative to project root
 // const auto top_test_dir_path = "../test/test-data";
 const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
 
@@ -258,7 +259,7 @@ int main(int argc, char *argv[])
   spdlog::set_default_logger(spdlog::stderr_color_st("rename_default_logger_to_keep_format"));
   spdlog::set_default_logger(spdlog::stderr_color_st(""));
 
-  std::string test_data_dir{ "./test/test-data" };
+  std::string test_data_dir{ "./../test/test-data" };
 
   // Parse (and validate) command-line arguments
   if (auto errors = config.Parse(argc, argv)) {
@@ -275,7 +276,7 @@ int main(int argc, char *argv[])
   if (auto option_arg = config.OptionValue("--caller")) {
     spdlog::info("Called from: {}", option_arg.value());
     if (option_arg.value() == "mtgoupdater") {
-      test_data_dir.assign("../mtgoparser/test/test-data");
+      test_data_dir.assign("../test/test-data");
       spdlog::info("Setting test directory to: {}\n", test_data_dir);
     }
   } else if (auto option_test_dir_arg = config.OptionValue("--test-dir")) {
