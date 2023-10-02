@@ -153,11 +153,14 @@ void Collection::FromJson(const std::string &json_str)
 void Collection::Print() const
 {
   for (const auto &c : cards_) {
+    std::string scryfall_price{ "N/A" };
+    if (c.scryfall_price_.has_value()) { scryfall_price.assign(fmt::format("{0:g}", c.scryfall_price_.value())); }
+
     fmt::println("{} {}: Goatbots price={}, Scryfall price={}, quantity={}, set={}, foil={}, rarity={}",
       c.id_,
       c.name_,
       c.goatbots_price_,
-      c.scryfall_price_,
+      scryfall_price,
       c.quantity_,
       c.set_,
       c.foil_,
@@ -176,10 +179,12 @@ void Collection::PrettyPrint() const
     "Rarity",
     "Set");
   for (const auto &c : cards_) {
+    std::string scryfall_price{ "N/A" };
+    if (c.scryfall_price_.has_value()) { scryfall_price.assign(fmt::format("{0:g}", c.scryfall_price_.value())); }
     fmt::println("{: <25}{: <23}{: <23}{: <11}{: <8}{: <10}{: <6}",
       c.name_,
       c.goatbots_price_,
-      c.scryfall_price_,
+      scryfall_price,
       c.quantity_,
       c.foil_,
       c.rarity_,
