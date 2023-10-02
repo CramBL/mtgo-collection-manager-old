@@ -121,7 +121,8 @@ TEST_CASE("MTGO card - Initialize and use of")
     CHECK(mtgo_card.rarity_ == "rarity");
     CHECK(mtgo_card.foil_ == false);
     CHECK(mtgo_card.goatbots_price_ == 0);
-    REQUIRE(mtgo_card.scryfall_price_ == 0);
+    REQUIRE(mtgo_card.scryfall_price_.has_value() == false);
+    REQUIRE(mtgo_card.scryfall_price_ == std::nullopt);
 
     mtgo::Card mtgo_card2 = mtgo::Card("1", "1", "name", "set", "rarity", true, 1.0, 2.0);
     CHECK(mtgo_card2.id_ == "1");
@@ -131,7 +132,8 @@ TEST_CASE("MTGO card - Initialize and use of")
     CHECK(mtgo_card2.rarity_ == "rarity");
     CHECK(mtgo_card2.foil_ == true);
     CHECK(mtgo_card2.goatbots_price_ == 1.0);
-    REQUIRE(mtgo_card2.scryfall_price_ == 2.0);
+    REQUIRE(mtgo_card2.scryfall_price_.has_value());
+    REQUIRE(mtgo_card2.scryfall_price_.value() == 2.0);
 
     CHECK(mtgo_card != mtgo_card2);
 
