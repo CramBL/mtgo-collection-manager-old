@@ -31,3 +31,8 @@ pub fn run_mtgo_preprocessor_gui_example() -> Result<std::process::Output, std::
         ["run", "--gui-example", "--caller", "mtgoupdater"],
     )
 }
+
+pub fn run_mtgo_preprocessor_example_collection_json_stdout(
+) -> Result<std::process::Output, std::io::Error> {
+    crate::util::run_with_args(crate::mtgoparser_bin(), ["run", "--collection-json-out"])
+}

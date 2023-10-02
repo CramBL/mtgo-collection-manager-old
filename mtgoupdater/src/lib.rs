@@ -3,6 +3,7 @@
 use std::sync::OnceLock;
 
 pub mod internal_only;
+pub mod mtgo_card;
 pub mod mtgo_preprocessor_api;
 pub mod mtgogetter_api;
 mod util;

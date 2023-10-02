@@ -17,22 +17,22 @@
 #include <string_view>
 #include <type_traits>
 
-// TODO: VERY TEMPORARY NOLINT - AS SOON AS MAIN DOES SOMETHING USEFUL REMOVE THIS!!
+// TODO: TEMPORARY NOLINT - remove when all examples are gone and it's out of early development.
 // NOLINTBEGIN
 
+// Paths relative to ROOT=test/test-data
 const auto test_path_trade_list_small_5cards = "/mtgo/Full Trade List-small-5cards.dek";
 const auto test_path_goatbots_card_defs_small = "/goatbots/card-defs-small-5cards.json";
 const auto test_path_goatbots_price_hist_small = "/goatbots/price-hist-small-5cards.json";
-// Relative to a project subfolder such as mtgoparser/mtgogetter/mtgoupdater
+// Relative to project root
 // const auto top_test_dir_path = "../test/test-data";
 const auto top_path_scryfall_default_small_500cards = "../test/test-data/mtgogetter-out/scryfall-small-100cards.json";
 
 
-#define OPTION_COUNT 10
-
+#define OPTION_COUNT 11
+constexpr clap::Option mtgoupdater_json_out{ "--collection-json-out", true };
 constexpr clap::Option help_opt{ "-h", true };
-constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
-  clap::Option("--version", true, "-V"),
+constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{ clap::Option("--version", true, "-V"),
   help_opt,
   clap::Option("--verbose", true),
   clap::Option("--echo", true),
@@ -42,7 +42,7 @@ constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{
   clap::Option("--example-json-formats", true),
   clap::Option("--example-scryfall", true),
   clap::Option("--gui-example", true),
-};
+  mtgoupdater_json_out };
 #define COMMAND_COUNT 1
 constexpr clap::CommandArray cmd_array = clap::CommandArray<COMMAND_COUNT>{ clap::Command("run", true) };
 
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
   spdlog::set_default_logger(spdlog::stderr_color_st("rename_default_logger_to_keep_format"));
   spdlog::set_default_logger(spdlog::stderr_color_st(""));
 
-  std::string test_data_dir{ "./test/test-data" };
+  std::string test_data_dir{ "./../test/test-data" };
 
   // Parse (and validate) command-line arguments
   if (auto errors = config.Parse(argc, argv)) {
@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
   if (auto option_arg = config.OptionValue("--caller")) {
     spdlog::info("Called from: {}", option_arg.value());
     if (option_arg.value() == "mtgoupdater") {
-      test_data_dir.assign("../mtgoparser/test/test-data");
+      test_data_dir.assign("../test/test-data");
       spdlog::info("Setting test directory to: {}\n", test_data_dir);
     }
   } else if (auto option_test_dir_arg = config.OptionValue("--test-dir")) {
@@ -302,6 +302,15 @@ int main(int argc, char *argv[])
     }
 
     if (config.FlagSet("--gui-example")) { example::collection_parse_to_gui(test_data_dir); }
+
+    if (config.FlagSet(mtgoupdater_json_out.name_)) {
+      auto card_defs = example::goatbots_card_definitions_parse(test_data_dir);
+      auto prices = example::goatbots_price_history_parse(test_data_dir);
+      auto cards = mtgo::xml::parse_dek_xml(test_data_dir + test_path_trade_list_small_5cards);
+      auto collection = mtgo::Collection(std::move(cards));
+      collection.ExtractGoatbotsInfo(card_defs.value(), prices);
+      fmt::print("{}", collection.ToJsonPretty());
+    }
   }
 
 

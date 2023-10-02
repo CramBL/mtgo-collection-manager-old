@@ -3,8 +3,10 @@
 #include <compare>
 #include <concepts>
 #include <glaze/glaze.hpp>
+#include <optional>
 #include <string>
 #include <string_view>
+
 namespace mtgo {
 
 struct Card
@@ -16,7 +18,7 @@ struct Card
   std::string rarity_;
   bool foil_;
   double goatbots_price_;
-  double scryfall_price_;
+  std::optional<double> scryfall_price_;
 
 
   // Default constructor
@@ -28,7 +30,7 @@ struct Card
     std::string rarity = "",
     bool foil = false,
     double goatbots_price = 0,
-    double scryfall_price = 0) noexcept
+    std::optional<double> scryfall_price = {}) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil },
       goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
   {}
@@ -41,7 +43,7 @@ struct Card
     const char *rarity = "",
     bool foil = false,
     double goatbots_price = 0,
-    double scryfall_price = 0) noexcept
+    std::optional<double> scryfall_price = {}) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil },
       goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
   {}
@@ -55,7 +57,7 @@ struct Card
     std::string_view rarity,
     bool foil = false,
     double goatbots_price = 0,
-    double scryfall_price = 0) noexcept
+    std::optional<double> scryfall_price = {}) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil },
       goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
   {}
@@ -70,7 +72,7 @@ struct Card
     T rarity,
     bool foil = false,
     double goatbots_price = 0,
-    double scryfall_price = 0) noexcept
+    std::optional<double> scryfall_price = {}) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ rarity }, foil_{ foil },
       goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
   {}

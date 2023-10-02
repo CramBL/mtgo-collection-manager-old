@@ -3,9 +3,9 @@
 #include "mtgoparser/mtgo.hpp"
 #include <spdlog/spdlog.h>
 
-const auto path_trade_list_small_5cards = "../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
-const auto path_goatbots_card_defs_small = "./test/test-data/goatbots/card-defs-small-5cards.json";
-const auto path_goatbots_price_hist_small = "./test/test-data/goatbots/price-hist-small-5cards.json";
+const auto path_trade_list_small_5cards = "../../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
+const auto path_goatbots_card_defs_small = "./../test/test-data/goatbots/card-defs-small-5cards.json";
+const auto path_goatbots_price_hist_small = "./../test/test-data/goatbots/price-hist-small-5cards.json";
 
 void example_goatbots_json_parse()
 {

@@ -148,7 +148,29 @@ function Test-Mtgoparser {
     Show-Versions
     Write-Host "==> Testing MTGO Parser..."
     Set-Location mtgoparser\build
-    ctest
+    ctest --output-on-failure
+
+    if (${LASTEXITCODE} -ne 0) {
+        Write-Host "MTGO Parser test failed!"
+        Write-Host "Rerunning each test suite with more details until one fails"
+        Set-Location test
+
+        $testSuites = @(
+            "test_json_parse.exe",
+            "test_xml_parse.exe",
+            "test_full_collection_parse.exe",
+            "tests.exe"
+        )
+
+        foreach ($testSuite in $testSuites) {
+            & .\Release\$testSuite
+            if (${LASTEXITCODE} -ne 0) {
+                Write-Host "!!! $testSuite failed"
+                break
+            }
+        }
+    }
+
     Set-Location -Path $PSScriptRoot
     Write-Host "=== Done testing MTGO Parser ==="
 }

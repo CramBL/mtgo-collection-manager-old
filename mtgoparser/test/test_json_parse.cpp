@@ -15,9 +15,9 @@ using Catch::Matchers::ContainsSubstring;
 #include <string>
 #include <utility>
 
-
-const auto path_goatbots_card_defs_small_5cards = "../../test/test-data/goatbots/card-defs-small-5cards.json";
-const auto path_goatbots_price_hist_small_5cards = "../../test/test-data/goatbots/price-hist-small-5cards.json";
+// Goes to top of project and into the shared 'test/test-data' directory
+const auto path_goatbots_card_defs_small_5cards = "../../../test/test-data/goatbots/card-defs-small-5cards.json";
+const auto path_goatbots_price_hist_small_5cards = "../../../test/test-data/goatbots/price-hist-small-5cards.json";
 
 TEST_CASE("CardDefinition structs are correctly deserialized from Goatbots JSON", "[card_defs_from_goatbots_json]")
 {

@@ -9,10 +9,11 @@
 #include <mtgoparser/mtgo.hpp>
 #include <utility>
 
-const auto path_trade_list_small_5cards = "../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
-const auto path_trade_list_small_50cards = "../../test/test-data/mtgo/Full Trade List-small-50cards.dek";
-const auto path_trade_list_small_500cards = "../../test/test-data/mtgo/Full Trade List-small-500cards.dek";
-const auto path_trade_list_medium_3000cards = "../../test/test-data/mtgo/Full Trade List-medium-3000cards.dek";
+// Goes to top of project and into the shared 'test/test-data' directory
+const auto path_trade_list_small_5cards = "../../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
+const auto path_trade_list_small_50cards = "../../../test/test-data/mtgo/Full Trade List-small-50cards.dek";
+const auto path_trade_list_small_500cards = "../../../test/test-data/mtgo/Full Trade List-small-500cards.dek";
+const auto path_trade_list_medium_3000cards = "../../../test/test-data/mtgo/Full Trade List-medium-3000cards.dek";
 
 TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
 {

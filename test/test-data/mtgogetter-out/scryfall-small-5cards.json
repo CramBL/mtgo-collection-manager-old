@@ -1,0 +1,67 @@
+[
+    {
+        "mtgo_id": 31745,
+        "name": "Noble Hierarch",
+        "released_at": "2009-02-06",
+        "rarity": "rare",
+        "prices": {
+        "usd": "9.57",
+        "usd_foil": "27.98",
+        "eur": "10.98",
+        "eur_foil": "22.90",
+        "tix": "0.39"
+        }
+    },
+    {
+        "mtgo_id": 110464,
+        "name": "Tranquil Cove",
+        "released_at": "2023-04-21",
+        "rarity": "common",
+        "prices": {
+        "usd": "0.07",
+        "usd_foil": "0.06",
+        "eur": "0.11",
+        "eur_foil": "0.18",
+        "tix": "0.03"
+        }
+    },
+    {
+        "mtgo_id": 53155,
+        "name": "Black Lotus",
+        "released_at": "2014-06-16",
+        "rarity": "bonus",
+        "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "28.46"
+        }
+    },
+    {
+        "mtgo_id": 235,
+        "name": "Swamp",
+        "released_at": "2003-12-31",
+        "rarity": "common",
+        "prices": {
+        "usd": "",
+        "usd_foil": "",
+        "eur": "",
+        "eur_foil": "",
+        "tix": "0.05"
+        }
+    },
+    {
+        "mtgo_id": 88143,
+        "name": "Tranquil Cove",
+        "released_at": "2021-02-05",
+        "rarity": "common",
+        "prices": {
+        "usd": "0.06",
+        "usd_foil": "",
+        "eur": "0.03",
+        "eur_foil": "",
+        "tix": "0.04"
+        }
+    }
+]
