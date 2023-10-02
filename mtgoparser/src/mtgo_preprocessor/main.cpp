@@ -17,8 +17,6 @@
 #include <string_view>
 #include <type_traits>
 
-// TODO: VERY TEMPORARY NOLINT - AS SOON AS MAIN DOES SOMETHING USEFUL REMOVE THIS!!
-// NOLINTBEGIN
 
 // Paths relative to ROOT=test/test-data
 const auto test_path_trade_list_small_5cards = "/mtgo/Full Trade List-small-5cards.dek";
@@ -308,5 +306,3 @@ int main(int argc, char *argv[])
 
   return 0;
 }
-
-// NOLINTEND
