@@ -43,13 +43,21 @@ public:
 
   void ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
     const goatbots::price_hist_map_t &price_hist) noexcept;
+
   void ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfall_cards) noexcept;
+
   [[nodiscard]] auto ToJson() const -> std::string;
+
   [[nodiscard]] auto ToJsonPretty() const -> std::string;
+
   void Print() const;
+
   void PrettyPrint() const;
+
   void FromJson(const std::string &json_str);
 
+  [[nodiscard]] inline constexpr bool operator==(const Collection &other) const { return this->cards_ == other.cards_; }
+  [[nodiscard]] inline constexpr bool operator!=(const Collection &other) const { return !(*this == other); }
 
 private:
   // Helpers
