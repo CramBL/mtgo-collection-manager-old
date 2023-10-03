@@ -54,6 +54,9 @@ TEST_CASE("Parse small collection")
     mtgo_collection.PrettyPrint();
 
     CHECK(mtgo_collection.TotalCards() == 457);
+
+    auto pretty_json_str = mtgo_collection.ToJsonPretty();
+    CHECK(mtgo_collection == mtgo::Collection(pretty_json_str));
   }
 }
 
