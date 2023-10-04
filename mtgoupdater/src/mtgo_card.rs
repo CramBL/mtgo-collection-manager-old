@@ -4,11 +4,11 @@ use serde_derive::{Deserialize, Serialize};
 ///
 /// It is not the same as a paper card which can have additional fields such as released_at and prices in USD and EUR.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
-pub struct MtgoCard<'s> {
+pub struct MtgoCard {
     pub id: u32,
-    pub name: &'s str,
-    pub set: &'s str,
-    pub rarity: &'s str, // TODO: make enum
+    pub name: Box<str>,
+    pub set: Box<str>,
+    pub rarity: Box<str>, // TODO: make enum
     pub quantity: u32,
     pub goatbots_price: f32,
     pub scryfall_price: Option<f32>,
@@ -58,9 +58,9 @@ mod tests {
         assert_eq!(deserialized.len(), 2);
         assert_eq!(deserialized[0].id, 1);
         assert_eq!(deserialized[0].quantity, 391);
-        assert_eq!(deserialized[0].name, "Event Ticket");
-        assert_eq!(deserialized[0].set, "");
-        assert_eq!(deserialized[0].rarity, "");
+        assert_eq!(deserialized[0].name, "Event Ticket".into());
+        assert_eq!(deserialized[0].set, "".into());
+        assert_eq!(deserialized[0].rarity, "".into());
         assert_eq!(deserialized[0].goatbots_price, 0.0);
         assert_eq!(deserialized[0].scryfall_price, None);
     }

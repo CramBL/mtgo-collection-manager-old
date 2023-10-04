@@ -115,7 +115,7 @@ fn test_call_mtgo_preprocessor_example_collection_json_stdout() {
             assert_eq!(deserialized.len(), 3000);
             assert_eq!(deserialized[0].id, 1);
             assert_eq!(deserialized[0].quantity, 391);
-            assert_eq!(deserialized[0].name, "Event Ticket");
+            assert_eq!(deserialized[0].name, "Event Ticket".into());
         }
         Err(e) => panic!("Unexpected error: {e}"),
     }
