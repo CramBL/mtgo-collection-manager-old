@@ -12,15 +12,12 @@ template<typename T> [[nodiscard]] inline constexpr auto as_sv(T t) -> std::stri
 }
 
 template<typename SA, typename SB>
-  requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
-[[nodiscard]] inline constexpr auto is_sv_same(SA a, SB b) -> bool
-{
-  return as_sv(a) == as_sv(b);
-}
+requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
+[[nodiscard]] inline constexpr auto is_sv_same(SA a, SB b) -> bool { return as_sv(a) == as_sv(b); }
 
 template<typename SA, typename... Ss>
-  requires std::convertible_to<SA, std::string_view> && (std::convertible_to<Ss, std::string_view> || ...)
-[[nodiscard]] inline constexpr auto is_sv_any_of(SA a, Ss... bs) -> bool
+requires std::convertible_to<SA, std::string_view> &&(std::convertible_to<Ss, std::string_view> || ...)
+  [[nodiscard]] inline constexpr auto is_sv_any_of(SA a, Ss... bs) -> bool
 {
   return ((as_sv(a) == as_sv(bs)) || ...);
 }
