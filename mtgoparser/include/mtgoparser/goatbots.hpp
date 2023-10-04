@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include <concepts>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -24,8 +25,8 @@ struct CardDefinition
   [[nodiscard]] inline constexpr bool operator!=(const CardDefinition &other) const { return !(*this == other); }
 };
 
-using price_hist_map_t = std::unordered_map<std::string, double>;
-using card_defs_map_t = std::unordered_map<std::string, CardDefinition>;
+using price_hist_map_t = std::unordered_map<uint32_t, double>;
+using card_defs_map_t = std::unordered_map<uint32_t, CardDefinition>;
 
 template<class T>
 concept goatbots_json = std::disjunction<std::is_same<T, price_hist_map_t>, std::is_same<T, card_defs_map_t>>::value;
