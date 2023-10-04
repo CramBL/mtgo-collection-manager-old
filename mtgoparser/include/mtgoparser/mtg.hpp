@@ -60,5 +60,5 @@ namespace util {
 template<> struct glz::meta<mtg::Rarity>
 {
   using enum mtg::Rarity;
-  static constexpr auto value = enumerate("C", Common, "U", Uncommon, "R", Rare, "M", Mythic);
+  static constexpr auto value = enumerate("C", Common, "U", Uncommon, "R", Rare, "M", Mythic, "B", Booster);
 };
