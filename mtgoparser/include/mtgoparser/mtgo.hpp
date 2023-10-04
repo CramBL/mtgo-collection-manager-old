@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mtgoparser/goatbots.hpp"
+#include "mtgoparser/mtg.hpp"
 #include "mtgoparser/mtgo/card.hpp"
 #include "mtgoparser/mtgo/xml.hpp"
 #include "mtgoparser/scryfall.hpp"
@@ -75,7 +76,7 @@ void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
     // Extract set, rarity, and foil from goatbots card definitions
     if (auto res = card_defs.find(c.id_); res != card_defs.end()) {
       c.set_ = res->second.cardset;
-      c.rarity_ = res->second.rarity;
+      c.rarity_ = mtg::util::rarity_from_t(res->second.rarity);
       c.foil_ = res->second.foil == 1;
     } else {
       spdlog::warn("Card definition key not found: ID={}", c.id_);
@@ -147,7 +148,7 @@ void Collection::Print() const
       c.quantity_,
       c.set_,
       c.foil_,
-      c.rarity_);
+      mtg::util::rarity_as_string(c.rarity_));
   }
 }
 
@@ -170,7 +171,7 @@ void Collection::PrettyPrint() const
       scryfall_price,
       c.quantity_,
       c.foil_,
-      c.rarity_,
+      mtg::util::rarity_as_string(c.rarity_),
       c.set_);
   }
 }

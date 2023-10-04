@@ -1,6 +1,7 @@
 // NOLINTBEGIN
 #include <catch2/catch_test_macros.hpp>
 #include <mtgoparser/clap.hpp>
+#include <mtgoparser/mtg.hpp>
 #include <mtgoparser/mtgo/card.hpp>
 #include <mtgoparser/util.hpp>
 #include <utility>
@@ -114,24 +115,24 @@ TEST_CASE("MTGO card - Initialize and use of")
   SECTION("Initialize")
   {
     // Test constructors, assignments, initializations with different types
-    mtgo::Card mtgo_card = mtgo::Card(1, util::sv_to_uint<uint16_t>("1").value_or(123), "name", "set", "rarity");
+    mtgo::Card mtgo_card = mtgo::Card(1, util::sv_to_uint<uint16_t>("1").value_or(123), "name", "set", "Common");
     CHECK(mtgo_card.id_ == 1);
     CHECK(mtgo_card.quantity_ == 1);
     CHECK(mtgo_card.name_ == "name");
     CHECK(mtgo_card.set_ == "set");
-    CHECK(mtgo_card.rarity_ == "rarity");
+    CHECK(mtgo_card.rarity_ == mtg::Rarity::Common);
     CHECK(mtgo_card.foil_ == false);
     CHECK(mtgo_card.goatbots_price_ == 0);
     REQUIRE(mtgo_card.scryfall_price_.has_value() == false);
     REQUIRE(mtgo_card.scryfall_price_ == std::nullopt);
 
     mtgo::Card mtgo_card2 =
-      mtgo::Card(1, util::sv_to_uint<uint16_t>("1").value_or(9), "name", "set", "rarity", true, 1.0, 2.0);
+      mtgo::Card(1, util::sv_to_uint<uint16_t>("1").value_or(9), "name", "set", "C", true, 1.0, 2.0);
     CHECK(mtgo_card2.id_ == 1);
     CHECK(mtgo_card2.quantity_ == 1);
     CHECK(mtgo_card2.name_ == "name");
     CHECK(mtgo_card2.set_ == "set");
-    CHECK(mtgo_card2.rarity_ == "rarity");
+    CHECK(mtgo_card2.rarity_ == mtg::Rarity::Common);
     CHECK(mtgo_card2.foil_ == true);
     CHECK(mtgo_card2.goatbots_price_ == 1.0);
     REQUIRE(mtgo_card2.scryfall_price_.has_value());
@@ -144,7 +145,7 @@ TEST_CASE("MTGO card - Initialize and use of")
     std::string_view quantity = "1";
     std::string_view name = "name";
     std::string_view set = "set";
-    std::string_view rarity = "rarity";
+    std::string_view rarity = "common";
     mtgo::Card mtgo_card3 = mtgo::Card(id, util::sv_to_uint<uint16_t>(quantity).value_or(0), name, set, rarity);
 
     // check equality with mtgo_card2
@@ -156,7 +157,7 @@ TEST_CASE("MTGO card - Initialize and use of")
     std::string quantity_str = "1";
     std::string name_str = "name";
     std::string set_str = "set";
-    std::string rarity_str = "rarity";
+    std::string rarity_str = "COMMON";
     mtgo::Card mtgo_card4 = mtgo::Card(util::sv_to_uint<uint32_t>(id_str).value_or(0),
       util::sv_to_uint<uint16_t>(quantity_str).value_or(123),
       name_str,
@@ -173,8 +174,8 @@ TEST_CASE("MTGO card - Initialize and use of")
   {
     // Test move constructors and move assignment
 
-    mtgo::Card mtgo_card = mtgo::Card(1, 1, "name", "set", "rarity", true, 1.0, 2.0);
-    mtgo::Card mtgo_card2 = mtgo::Card(1, 1, "name", "set", "rarity", true, 1.0, 2.0);
+    mtgo::Card mtgo_card = mtgo::Card(1, 1, "name", "set", "common", true, 1.0, 2.0);
+    mtgo::Card mtgo_card2 = mtgo::Card(1, 1, "name", "set", "common", true, 1.0, 2.0);
 
     // Move constructor
     mtgo::Card mtgo_card3(std::move(mtgo_card));
@@ -183,7 +184,7 @@ TEST_CASE("MTGO card - Initialize and use of")
     // CHECK(mtgo_card.id_ == "");// Access of moved value
 
     // Move assignment
-    auto mtgo_card_tmp = mtgo::Card(2, 1, "name", "set", "rarity", true, 1.0, 2.0);
+    auto mtgo_card_tmp = mtgo::Card(2, 1, "name", "set", "common", true, 1.0, 2.0);
     mtgo_card3 = std::move(mtgo_card_tmp);
     CHECK(mtgo_card3 != mtgo_card2);// ID should differ
     // Check that mtgo_card_tmp is now invalid (commented out as it triggered warning in CI)
