@@ -16,7 +16,8 @@ namespace clap {
 namespace {// Utility used by the Clap class
 
   // Helper function to check if a value equals any element in a parameter pack
-  template<typename T, typename... Args> constexpr auto equals_any(const T &value, Args... args) -> bool
+  template<typename T, typename... Args>
+  [[nodiscard]] inline constexpr auto equals_any(const T &value, Args... args) -> bool
   {
     return ((value == args) || ...);
   }

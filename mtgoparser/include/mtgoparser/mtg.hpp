@@ -1,6 +1,8 @@
 #pragma once
 // For general Magic: The Gathering info/utility
 
+#include "mtgoparser/util.hpp"
+
 #include <glaze/glaze.hpp>
 
 #include <cassert>
@@ -11,18 +13,15 @@ namespace mtg {
 enum class Rarity : uint8_t { Common, Uncommon, Rare, Mythic, Booster };
 
 namespace util {
+
   template<typename T> constexpr auto rarity_from_t(T val) -> mtg::Rarity
   {
     if constexpr (std::convertible_to<T, std::string_view>) {
-      if (val == "C" || val == "Common" || val == "common" || val == "COMMON") [[likely]] { return Rarity::Common; }
-      if (val == "U" || val == "Uncommon" || val == "uncommon" || val == "UNCOMMON") [[likely]] {
-        return Rarity::Uncommon;
-      }
-      if (val == "R" || val == "Rare" || val == "rare" || val == "RARE") { return Rarity::Rare; }
-      if (val == "M" || val == "Mythic" || val == "mythic" || val == "MYTHIC") [[unlikely]] { return Rarity::Mythic; }
-      if (val == "B" || val == "Booster" || val == "booster" || val == "BOOSTER") [[unlikely]] {
-        return Rarity::Booster;
-      }
+      if (::util::is_sv_any_of(val, "C", "Common", "common", "COMMON")) [[likely]] { return Rarity::Common; }
+      if (::util::is_sv_any_of(val, "U", "Uncommon", "uncommon", "UNCOMMON")) [[likely]] { return Rarity::Uncommon; }
+      if (::util::is_sv_any_of(val, "R", "Rare", "rare", "RARE")) { return Rarity::Rare; }
+      if (::util::is_sv_any_of(val, "M", "Mythic", "mythic", "MYTHIC")) [[unlikely]] { return Rarity::Mythic; }
+      if (::util::is_sv_any_of(val, "B", "Booster", "booster", "BOOSTER")) [[unlikely]] { return Rarity::Booster; }
 
     } else if constexpr (std::is_same_v<T, uint8_t>) {
       if (val >= 0 && val <= 4) { return static_cast<Rarity>(val); }
@@ -30,6 +29,8 @@ namespace util {
       static_assert(std::is_integral<T>::value || std::convertible_to<T, std::string_view>,
         "T must either be an integral type or string-like");
     }
+    assert(false);
+    // If/when C++23 use: std::unreachable();
     return Rarity::Booster;
   }
 
