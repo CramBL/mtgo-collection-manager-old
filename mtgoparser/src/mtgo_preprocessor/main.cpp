@@ -237,7 +237,7 @@ void json_format_prints()
 
   spdlog::info("With values");
   std::string_view id = "123";
-  std::string_view quantity = "1";
+  uint16_t quantity = 1;
   std::string_view name = "Godzilla";
   std::string_view set = "Best Set";
   std::string_view rarity = "Mythic";

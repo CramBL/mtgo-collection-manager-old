@@ -24,23 +24,23 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
     REQUIRE(cards.size() == 5);
     CHECK(cards.at(0).name_ == "Event Ticket");
     CHECK(cards[0].id_ == "1");
-    CHECK(cards.at(0).quantity_ == "453");
+    CHECK(cards.at(0).quantity_ == 453);
 
     CHECK(cards.at(1).name_ == "Swamp");
     CHECK(cards.at(1).id_ == "235");
-    CHECK(cards.at(1).quantity_ == "1");
+    CHECK(cards.at(1).quantity_ == 1);
 
     CHECK(cards.at(2).name_ == "Noble Hierarch");
     CHECK(cards.at(2).id_ == "31745");
-    CHECK(cards.at(2).quantity_ == "1");
+    CHECK(cards.at(2).quantity_ == 1);
 
     CHECK(cards.at(3).name_ == "Black Lotus");
     CHECK(cards.at(3).id_ == "53155");
-    CHECK(cards.at(3).quantity_ == "1");
+    CHECK(cards.at(3).quantity_ == 1);
 
     CHECK(cards.at(4).name_ == "Tranquil Cove");
     CHECK(cards.at(4).id_ == "110465");
-    CHECK(cards.at(4).quantity_ == "1");
+    CHECK(cards.at(4).quantity_ == 1);
   }
 
   SECTION("Sanity checks on all full trade list files")
