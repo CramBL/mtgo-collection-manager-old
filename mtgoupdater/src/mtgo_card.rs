@@ -6,10 +6,11 @@ use serde_derive::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 pub struct MtgoCard {
     pub id: u32,
+    pub quantity: u32,
     pub name: Box<str>,
     pub set: Box<str>,
     pub rarity: Box<str>, // TODO: make enum
-    pub quantity: u32,
+    pub foil: bool,
     pub goatbots_price: f32,
     pub scryfall_price: Option<f32>,
 }
