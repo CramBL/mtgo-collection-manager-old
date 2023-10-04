@@ -68,7 +68,7 @@ TEST_CASE("Parse small collection")
   {
     auto scryfall_vec = scryfall::ReadJsonVector(path_mtgogetter_out_scryfall_full);
     REQUIRE(scryfall_vec.has_value());
-    CHECK(scryfall_vec.value().size() == 100);
+    CHECK(scryfall_vec.value().size() == 43705);
 
     auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(path_goatbots_card_defs_full);
     REQUIRE(card_defs.has_value());
