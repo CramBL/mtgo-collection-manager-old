@@ -7,15 +7,15 @@
 namespace util {
 
 template<typename SA, typename SB>
-  requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
+requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
 [[nodiscard]] inline constexpr auto is_sv_same(SA a, SB b) -> bool
 {
   return static_cast<std::string_view>(a) == static_cast<std::string_view>(b);
 }
 
 template<typename SA, typename... Ss>
-  requires std::convertible_to<SA, std::string_view> && (std::convertible_to<Ss, std::string_view> || ...)
-[[nodiscard]] inline constexpr auto is_sv_any_of(SA a, Ss... bs) -> bool
+requires std::convertible_to<SA, std::string_view> &&(std::convertible_to<Ss, std::string_view> || ...)
+  [[nodiscard]] inline constexpr auto is_sv_any_of(SA a, Ss... bs) -> bool
 {
   return (is_sv_same(a, bs) || ...);
 }
