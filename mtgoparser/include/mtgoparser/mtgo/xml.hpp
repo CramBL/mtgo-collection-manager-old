@@ -2,11 +2,13 @@
 
 #include "mtgoparser/io.hpp"
 #include "mtgoparser/mtgo/card.hpp"
+#include "mtgoparser/util.hpp"
 
 #include <rapidxml/rapidxml.hpp>
 #include <rapidxml/rapidxml_utils.hpp>
 #include <spdlog/spdlog.h>
 
+#include <cstdint>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -28,7 +30,8 @@ namespace xml {
     // 2nd attribute
     auto second_attr = first_attr->next_attribute();
     if (!second_attr) { return std::nullopt; }
-    auto quantity = second_attr->value();
+    auto quantity = util::sv_to_uint<uint16_t>(second_attr->value());
+    if (!quantity.has_value()) { return std::nullopt; }
     // 3rd attribute
     auto third_attr = second_attr->next_attribute();
     if (!third_attr) { return std::nullopt; }
@@ -40,7 +43,7 @@ namespace xml {
     // 5th attribute (seems useless)
     // auto annotation = first_attr->next_attribute()->next_attribute()->next_attribute()->next_attribute()->value();
 
-    return Card{ id, quantity, name };
+    return Card{ id, quantity.value(), name };
   }
 
   [[nodiscard]] auto parse_dek_xml(std::filesystem::path path_xml) noexcept -> std::vector<Card>
