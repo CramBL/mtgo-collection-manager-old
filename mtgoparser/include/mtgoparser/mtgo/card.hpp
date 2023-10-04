@@ -74,8 +74,8 @@ struct Card
     bool foil = false,
     double goatbots_price = 0,
     std::optional<double> scryfall_price = {}) noexcept
-    : id_{ id }, quantity_{ static_cast<uint16_t>(quantity) }, name_{ name }, set_{ set }, rarity_{ rarity },
-      foil_{ foil }, goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
+    : id_{ static_cast<uint32_t>(id) }, quantity_{ static_cast<uint16_t>(quantity) }, name_{ name }, set_{ set },
+      rarity_{ rarity }, foil_{ foil }, goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
   {}
 
   // Move constructor
