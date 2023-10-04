@@ -18,7 +18,7 @@ namespace util {
       if (val == "U" || val == "Uncommon" || val == "uncommon" || val == "UNCOMMON") [[likely]] {
         return Rarity::Uncommon;
       }
-      if (val == "R" || val == "Rare" || val == "rare" || val == "RARE") [[unlikely]] { return Rarity::Rare; }
+      if (val == "R" || val == "Rare" || val == "rare" || val == "RARE") { return Rarity::Rare; }
       if (val == "M" || val == "Mythic" || val == "mythic" || val == "MYTHIC") [[unlikely]] { return Rarity::Mythic; }
       if (val == "B" || val == "Booster" || val == "booster" || val == "BOOSTER") [[unlikely]] {
         return Rarity::Booster;
@@ -30,10 +30,10 @@ namespace util {
       static_assert(std::is_integral<T>::value || std::convertible_to<T, std::string_view>,
         "T must either be an integral type or string-like");
     }
-    throw std::invalid_argument("Invalid value for Rarity");
+    return Rarity::Booster;
   }
 
-  constexpr auto rarity_as_string(Rarity r) -> std::string
+  auto rarity_as_string(Rarity r) -> std::string
   {
     switch (r) {
     case Rarity::Common:
@@ -41,7 +41,7 @@ namespace util {
     case Rarity::Uncommon:
       [[likely]] return "Uncommon";
     case Rarity::Rare:
-      [[unlikely]] return "Rare";
+      return "Rare";
     case Rarity::Mythic:
       [[unlikely]] return "Mythic";
     case Rarity::Booster:
