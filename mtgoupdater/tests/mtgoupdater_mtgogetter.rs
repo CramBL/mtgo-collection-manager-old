@@ -1,4 +1,5 @@
 use mtgoupdater::internal_only;
+use pretty_assertions::assert_eq;
 
 #[ignore]
 #[test]
