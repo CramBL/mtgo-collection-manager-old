@@ -153,14 +153,10 @@ TEST_CASE("MTGO card - Initialize and use of")
     CHECK(mtgo_card3 == mtgo_card);
 
     // Check initialization from string
-    std::string id_str = "1";
-    auto id_num = util::sv_to_uint<uint32_t>(id_str).value_or(0);
-    std::string quantity_str = "1";
-    auto quant_num = util::sv_to_uint<uint16_t>(quantity_str).value_or(123);
     std::string name_str = "name";
     std::string set_str = "set";
     std::string rarity_str = "COMMON";
-    mtgo::Card mtgo_card4 = mtgo::Card(id_num, quant_num, name_str, set_str, rarity_str);
+    mtgo::Card mtgo_card4 = mtgo::Card(1, 1, name_str, set_str, rarity_str);
 
     // check equality with mtgo_card
     CHECK(mtgo_card4 == mtgo_card);
