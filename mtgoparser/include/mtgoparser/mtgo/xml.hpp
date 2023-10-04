@@ -25,7 +25,8 @@ namespace xml {
 
     decltype(auto) first_attr = card_node->first_attribute();
     // 1st attribute
-    auto id = first_attr->value();
+    auto id = util::sv_to_uint<uint32_t>(first_attr->value());
+    if (!id.has_value()) { return std::nullopt; }
 
     // 2nd attribute
     auto second_attr = first_attr->next_attribute();
@@ -43,7 +44,7 @@ namespace xml {
     // 5th attribute (seems useless)
     // auto annotation = first_attr->next_attribute()->next_attribute()->next_attribute()->next_attribute()->value();
 
-    return Card{ id, quantity.value(), name };
+    return Card{ id.value(), quantity.value(), name };
   }
 
   [[nodiscard]] auto parse_dek_xml(std::filesystem::path path_xml) noexcept -> std::vector<Card>

@@ -5,7 +5,7 @@ use serde_derive::{Deserialize, Serialize};
 /// It is not the same as a paper card which can have additional fields such as released_at and prices in USD and EUR.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 pub struct MtgoCard<'s> {
-    id: &'s str,
+    id: u32,
     name: &'s str,
     set: &'s str,
     rarity: &'s str, // TODO: make enum
@@ -33,7 +33,7 @@ mod tests {
     fn test_deserialize_json_string_vector() {
         let json_vec_str = r#"[
          {
-            "id": "1",
+            "id": 1,
             "quantity": 391,
             "name": "Event Ticket",
             "set": "",
@@ -42,7 +42,7 @@ mod tests {
             "goatbots_price": 0
          },
          {
-            "id": "235",
+            "id": 235,
             "quantity": 1,
             "name": "Swamp",
             "set": "PRM",
@@ -55,7 +55,7 @@ mod tests {
 
         let deserialized: Vec<MtgoCard> = serde_json::from_str(json_vec_str).unwrap();
         assert_eq!(deserialized.len(), 2);
-        assert_eq!(deserialized[0].id, "1");
+        assert_eq!(deserialized[0].id, 1);
         assert_eq!(deserialized[0].quantity, 391);
         assert_eq!(deserialized[0].name, "Event Ticket");
         assert_eq!(deserialized[0].set, "");

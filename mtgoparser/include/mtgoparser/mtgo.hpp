@@ -107,13 +107,11 @@ void Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfall_card
   // If mtgo card id is lower than scryfall id -> check next mtgo card id
   // Loop until one of the collections is exhausted.
   for (auto &c : cards_) {
-    // Get the ID as a uint32_t
-    auto c_id = static_cast<uint32_t>(std::stoul(c.id_));
     // Skip if it is foil as scryfall API doesn't have foil prices
     if (c.foil_) { continue; }
 
-    while (scry_it != scry_end && (*scry_it).mtgo_id <= c_id) {
-      if ((*scry_it).mtgo_id == c_id && (*scry_it).prices.tix.has_value() && ((*scry_it).prices.tix.value() != "")) {
+    while (scry_it != scry_end && (*scry_it).mtgo_id <= c.id_) {
+      if ((*scry_it).mtgo_id == c.id_ && (*scry_it).prices.tix.has_value() && ((*scry_it).prices.tix.value() != "")) {
         c.scryfall_price_ = std::stod((*scry_it).prices.tix.value());
       }
       ++scry_it;

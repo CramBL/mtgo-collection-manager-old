@@ -114,8 +114,8 @@ TEST_CASE("MTGO card - Initialize and use of")
   SECTION("Initialize")
   {
     // Test constructors, assignments, initializations with different types
-    mtgo::Card mtgo_card = mtgo::Card("1", util::sv_to_uint<uint16_t>("1").value_or(123), "name", "set", "rarity");
-    CHECK(mtgo_card.id_ == "1");
+    mtgo::Card mtgo_card = mtgo::Card(1, util::sv_to_uint<uint16_t>("1").value_or(123), "name", "set", "rarity");
+    CHECK(mtgo_card.id_ == 1);
     CHECK(mtgo_card.quantity_ == 1);
     CHECK(mtgo_card.name_ == "name");
     CHECK(mtgo_card.set_ == "set");
@@ -126,8 +126,8 @@ TEST_CASE("MTGO card - Initialize and use of")
     REQUIRE(mtgo_card.scryfall_price_ == std::nullopt);
 
     mtgo::Card mtgo_card2 =
-      mtgo::Card("1", util::sv_to_uint<uint16_t>("1").value_or(9), "name", "set", "rarity", true, 1.0, 2.0);
-    CHECK(mtgo_card2.id_ == "1");
+      mtgo::Card(1, util::sv_to_uint<uint16_t>("1").value_or(9), "name", "set", "rarity", true, 1.0, 2.0);
+    CHECK(mtgo_card2.id_ == 1);
     CHECK(mtgo_card2.quantity_ == 1);
     CHECK(mtgo_card2.name_ == "name");
     CHECK(mtgo_card2.set_ == "set");
@@ -140,7 +140,7 @@ TEST_CASE("MTGO card - Initialize and use of")
     CHECK(mtgo_card != mtgo_card2);
 
     // Check initialization from string_view
-    std::string_view id = "1";
+    uint32_t id = 1;
     std::string_view quantity = "1";
     std::string_view name = "name";
     std::string_view set = "set";
@@ -157,8 +157,11 @@ TEST_CASE("MTGO card - Initialize and use of")
     std::string name_str = "name";
     std::string set_str = "set";
     std::string rarity_str = "rarity";
-    mtgo::Card mtgo_card4 =
-      mtgo::Card(id_str, util::sv_to_uint<uint16_t>(quantity_str).value_or(123), name_str, set_str, rarity_str);
+    mtgo::Card mtgo_card4 = mtgo::Card(util::sv_to_uint<uint32_t>(id_str).value_or(0),
+      util::sv_to_uint<uint16_t>(quantity_str).value_or(123),
+      name_str,
+      set_str,
+      rarity_str);
 
     // check equality with mtgo_card
     CHECK(mtgo_card4 == mtgo_card);
@@ -170,8 +173,8 @@ TEST_CASE("MTGO card - Initialize and use of")
   {
     // Test move constructors and move assignment
 
-    mtgo::Card mtgo_card = mtgo::Card("1", 1, "name", "set", "rarity", true, 1.0, 2.0);
-    mtgo::Card mtgo_card2 = mtgo::Card("1", 1, "name", "set", "rarity", true, 1.0, 2.0);
+    mtgo::Card mtgo_card = mtgo::Card(1, 1, "name", "set", "rarity", true, 1.0, 2.0);
+    mtgo::Card mtgo_card2 = mtgo::Card(1, 1, "name", "set", "rarity", true, 1.0, 2.0);
 
     // Move constructor
     mtgo::Card mtgo_card3(std::move(mtgo_card));
@@ -180,7 +183,7 @@ TEST_CASE("MTGO card - Initialize and use of")
     // CHECK(mtgo_card.id_ == "");// Access of moved value
 
     // Move assignment
-    auto mtgo_card_tmp = mtgo::Card("2", 1, "name", "set", "rarity", true, 1.0, 2.0);
+    auto mtgo_card_tmp = mtgo::Card(2, 1, "name", "set", "rarity", true, 1.0, 2.0);
     mtgo_card3 = std::move(mtgo_card_tmp);
     CHECK(mtgo_card3 != mtgo_card2);// ID should differ
     // Check that mtgo_card_tmp is now invalid (commented out as it triggered warning in CI)
