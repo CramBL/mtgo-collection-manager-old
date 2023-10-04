@@ -13,6 +13,7 @@ use fltk::{app, button, enums::Color, prelude::*, window::Window};
 use fltk::{prelude::*, *};
 use fltk_flex::{Flex, FlexType};
 use fltk_grid::Grid;
+use fltk_table::{SmartTable, TableOpts};
 use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 
 mod menubar;
@@ -49,7 +50,7 @@ pub struct MtgoGui {
     rcv: app::Receiver<Message>,
     main_win: window::Window,
     menu: McmMenuBar,
-    collection_example: text::TextDisplay,
+    collection_example: SmartTable,
 }
 
 impl MtgoGui {
@@ -87,9 +88,29 @@ impl MtgoGui {
             .with_size(1000, 600)
             .column();
         flex_right_col.set_align(enums::Align::LeftTop);
-        let mut txt_disp = text::TextDisplay::default();
-        txt_disp.align();
-        txt_disp.set_label("Collection example");
+        let mut collection_table = SmartTable::default()
+            .with_size(790, 590)
+            .center_of_parent()
+            .with_opts(TableOpts {
+                rows: 0,
+                cols: 7,
+                editable: false,
+                cell_font_color: Color::White,
+
+                ..Default::default()
+            });
+        collection_table.set_col_header_value(0, "NAME");
+        collection_table.set_col_width(0, 300);
+        collection_table.set_col_header_value(1, "QUANTITY");
+        collection_table.set_col_header_value(2, "FOIL");
+        collection_table.set_col_width(2, 45);
+        collection_table.set_col_header_value(3, "GOATBOTS");
+        collection_table.set_col_width(3, 100);
+        collection_table.set_col_header_value(4, "SCRYFALL");
+        collection_table.set_col_width(4, 100);
+        collection_table.set_col_header_value(5, "SET");
+        collection_table.set_col_width(5, 45);
+        collection_table.set_col_header_value(6, "RARITY");
 
         main_win.end();
         main_win.show();
@@ -104,7 +125,7 @@ impl MtgoGui {
             rcv: ev_rcv,
             main_win,
             menu,
-            collection_example: txt_disp,
+            collection_example: collection_table,
         }
     }
 
@@ -118,14 +139,28 @@ impl MtgoGui {
                     }
                     Message::MenuBar(mb_msg) => self.menu.handle_ev(mb_msg),
                     Message::Example => {
-                        let collection_print_out =
-                            mtgoupdater::internal_only::run_mtgo_preprocessor_gui_example()
-                                .unwrap();
-                        let collection_print_str =
-                            String::from_utf8_lossy(&collection_print_out.stdout);
-                        let mut buffer = text::TextBuffer::default();
-                        buffer.set_text(&collection_print_str);
-                        self.collection_example.set_buffer(buffer)
+                        let cards: Vec<mtgoupdater::mtgo_card::MtgoCard> =
+                            mtgoupdater::internal_only::get_example_card_collection();
+                        cards.into_iter().for_each(|c| {
+                            self.collection_example.append_row(
+                                "",
+                                &[
+                                    &c.name,
+                                    &c.quantity.to_string(),
+                                    if c.foil { "Yes" } else { "No" },
+                                    &format!("{:8.3}", c.goatbots_price),
+                                    &{
+                                        if let Some(p) = c.scryfall_price {
+                                            p.to_string()
+                                        } else {
+                                            "N/A".into()
+                                        }
+                                    },
+                                    &c.set,
+                                    &c.rarity,
+                                ],
+                            );
+                        });
                     }
                 }
             }

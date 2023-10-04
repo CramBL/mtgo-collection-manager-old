@@ -13,6 +13,7 @@ maintenance = { status = "actively-developed" }
 fltk = { version = "1.4", features = ["fltk-bundled"] }
 fltk-flex = "0.2"
 fltk-grid = "0.3"
+fltk-table = "0.3.1"
 fltk-theme = "0.7"
 mtgoupdater = { version = "0.1.0", path = "../mtgoupdater"}
 
