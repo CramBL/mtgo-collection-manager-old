@@ -34,10 +34,10 @@ const auto path_trade_list_medium_3000cards = "../test/test-data/mtgo/Full Trade
 const auto path_goatbots_card_defs_full = "../test/test-data/goatbots/card-definitions-2023-10-02-full.json";
 const auto path_goatbots_price_hist_full = "../test/test-data/goatbots/price-history-2023-10-02-full.json";
 
-#define OPTION_COUNT 11
+
 constexpr clap::Option mtgoupdater_json_out{ "--collection-json-out", true };
 constexpr clap::Option help_opt{ "-h", true };
-constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{ clap::Option("--version", true, "-V"),
+constexpr clap::OptionArray opt_array = clap::def_options(clap::Option("--version", true, "-V"),
   help_opt,
   clap::Option("--verbose", true),
   clap::Option("--echo", true),
@@ -47,11 +47,9 @@ constexpr clap::OptionArray opt_array = clap::OptionArray<OPTION_COUNT>{ clap::O
   clap::Option("--example-json-formats", true),
   clap::Option("--example-scryfall", true),
   clap::Option("--gui-example", true),
-  mtgoupdater_json_out };
-#define COMMAND_COUNT 1
-constexpr clap::CommandArray cmd_array = clap::CommandArray<COMMAND_COUNT>{ clap::Command("run", true) };
+  mtgoupdater_json_out);
 
-constinit auto config = clap::Clap{ opt_array, cmd_array };
+constinit auto config = clap::init_clap(opt_array, clap::def_cmds(clap::Command("run", true)));
 
 namespace example {
 using goatbots::card_defs_map_t;
