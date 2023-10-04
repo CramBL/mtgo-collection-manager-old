@@ -1,24 +1,17 @@
 use serde_derive::{Deserialize, Serialize};
 
+/// This is the struct that represents a card in the MTGO collection.
+///
+/// It is not the same as a paper card which can have additional fields such as released_at and prices in USD and EUR.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
-pub struct Card {
-    mtgo_id: u32,
-    name: Box<str>,
-    set: Box<str>,
-    rarity: Box<str>,      // TODO: make enum
-    released_at: Box<str>, // TODO: make refactored date type?
+pub struct MtgoCard<'s> {
+    id: &'s str,
+    name: &'s str,
+    set: &'s str,
+    rarity: &'s str, // TODO: make enum
     quantity: u32,
     goatbots_price: f32,
-    scryfall_prices: ScryfallPrices,
-}
-
-#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
-struct ScryfallPrices {
-    tix: f32,
-    usd: f32,
-    usd_foil: f32,
-    eur: f32,
-    eur_foil: f32,
+    scryfall_price: Option<f32>,
 }
 
 #[cfg(test)]
@@ -27,68 +20,47 @@ mod tests {
 
     #[test]
     fn test_serialize() {
-        let c = Card::default();
+        let c = MtgoCard::default();
 
         let serialized = serde_json::to_string_pretty(&c).unwrap();
         println!("serialized = {serialized}");
 
-        let deserialized: Card = serde_json::from_str(&serialized).unwrap();
+        let deserialized: MtgoCard = serde_json::from_str(&serialized).unwrap();
         assert_eq!(c, deserialized);
     }
 
     #[test]
     fn test_deserialize_json_string_vector() {
         let json_vec_str = r#"[
-            {
-               "id": "1",
-               "quantity": "453",
-               "name": "Event Ticket",
-               "set": "",
-               "rarity": "",
-               "foil": false,
-               "goatbots_price": 0,
-               "scryfall_price": 0
-            },
-            {
-               "id": "235",
-               "quantity": "1",
-               "name": "Swamp",
-               "set": "",
-               "rarity": "",
-               "foil": false,
-               "goatbots_price": 0,
-               "scryfall_price": 0
-            },
-            {
-               "id": "31745",
-               "quantity": "1",
-               "name": "Noble Hierarch",
-               "set": "CON",
-               "rarity": "Rare",
-               "foil": false,
-               "goatbots_price": 0.37,
-               "scryfall_price": 0
-            },
-            {
-               "id": "53155",
-               "quantity": "1",
-               "name": "Black Lotus",
-               "set": "",
-               "rarity": "",
-               "foil": false,
-               "goatbots_price": 0,
-               "scryfall_price": 0
-            },
-            {
-               "id": "110465",
-               "quantity": "1",
-               "name": "Tranquil Cove",
-               "set": "",
-               "rarity": "",
-               "foil": false,
-               "goatbots_price": 0,
-               "scryfall_price": 0
-            }
-         ]"#;
+         {
+            "id": "1",
+            "quantity": 391,
+            "name": "Event Ticket",
+            "set": "",
+            "rarity": "",
+            "foil": false,
+            "goatbots_price": 0
+         },
+         {
+            "id": "235",
+            "quantity": 1,
+            "name": "Swamp",
+            "set": "PRM",
+            "rarity": "Common",
+            "foil": false,
+            "goatbots_price": 0.002,
+            "scryfall_price": 0.05
+         }
+      ]"#;
+
+        let deserialized: Vec<MtgoCard> = serde_json::from_str(json_vec_str).unwrap();
+        assert_eq!(deserialized.len(), 2);
+        assert_eq!(deserialized[0].id, "1");
+        assert_eq!(deserialized[0].quantity, 391);
+        assert_eq!(deserialized[0].name, "Event Ticket");
+        assert_eq!(deserialized[0].set, "");
+        assert_eq!(deserialized[0].rarity, "");
+        assert_eq!(deserialized[0].goatbots_price, 0.0);
+        assert_eq!(deserialized[0].scryfall_price, None);
     }
 }
