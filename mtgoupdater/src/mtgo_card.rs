@@ -18,10 +18,15 @@ pub struct MtgoCard {
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, PartialOrd, Ord, Eq)]
 pub enum Rarity {
     #[default]
+    #[serde(alias = "C")]
     Common,
+    #[serde(alias = "U")]
     Uncommon,
+    #[serde(alias = "R")]
     Rare,
+    #[serde(alias = "M")]
     Mythic,
+    #[serde(alias = "B")]
     Booster,
     #[serde(other)]
     None,
@@ -43,11 +48,17 @@ impl ToString for Rarity {
 impl From<&str> for Rarity {
     fn from(s: &str) -> Self {
         match s {
-            "Common" => Rarity::Common,
+            // Single letter matches first for speed
+            "C" => Rarity::Common,
+            "U" => Rarity::Uncommon,
+            "R" => Rarity::Rare,
+            "M" => Rarity::Mythic,
+            "B" => Rarity::Booster,
             "Uncommon" => Rarity::Uncommon,
             "Rare" => Rarity::Rare,
             "Mythic" => Rarity::Mythic,
             "Booster" => Rarity::Booster,
+            "Common" => Rarity::Common,
             _ => Rarity::None, // e.g. Event tickets
         }
     }
