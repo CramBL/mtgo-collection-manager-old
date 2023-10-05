@@ -15,7 +15,7 @@ pub struct MtgoCard {
     pub scryfall_price: Option<f32>,
 }
 
-#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, PartialOrd, Ord, Eq)]
 pub enum Rarity {
     #[default]
     Common,
@@ -25,6 +25,19 @@ pub enum Rarity {
     Booster,
     #[serde(other)]
     None,
+}
+
+impl ToString for Rarity {
+    fn to_string(&self) -> String {
+        match self {
+            Rarity::Common => "Common".into(),
+            Rarity::Uncommon => "Uncommon".into(),
+            Rarity::Rare => "Rare".into(),
+            Rarity::Mythic => "Mythic".into(),
+            Rarity::Booster => "Booster".into(),
+            Rarity::None => "None".into(),
+        }
+    }
 }
 
 impl From<&str> for Rarity {

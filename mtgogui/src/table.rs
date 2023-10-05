@@ -195,7 +195,7 @@ impl CollectionTable {
                 }
             });
             self.table.set_cell_value(row_idx, 5, &c.set);
-            self.table.set_cell_value(row_idx, 6, &c.rarity);
+            self.table.set_cell_value(row_idx, 6, &c.rarity.to_string());
         }
     }
 }
