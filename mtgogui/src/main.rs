@@ -175,10 +175,9 @@ impl Default for MtgoGui {
 }
 
 fn main() {
-    mtgoupdater::internal_only::dev_try_init_mtgogetter_bin();
-    mtgoupdater::internal_only::dev_try_init_mtgoparser_bin();
-
     if cfg!(debug_assertions) {
+        mtgoupdater::internal_only::dev_try_init_mtgogetter_bin();
+        mtgoupdater::internal_only::dev_try_init_mtgoparser_bin();
         Flex::debug(true);
     }
     let mut gui = MtgoGui::default();
