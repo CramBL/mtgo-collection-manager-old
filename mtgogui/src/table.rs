@@ -1,8 +1,26 @@
 use fltk::enums::Color;
 use fltk_table::{SmartTable, TableOpts};
+use mtgoupdater::mtgo_card::MtgoCard;
+
+#[derive(Debug, Clone, Copy)]
+pub enum CtMessage {
+    SortBy(Category),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Category {
+    Name,
+    Quantity,
+    Foil,
+    Goatbots,
+    Scryfall,
+    Set,
+    Rarity,
+}
 
 pub(super) struct CollectionTable {
     pub(super) table: SmartTable,
+    pub(super) cards: Vec<MtgoCard>,
 }
 
 impl CollectionTable {
@@ -31,7 +49,52 @@ impl CollectionTable {
         table.set_col_header_value(5, "SET");
         table.set_col_width(5, 45);
         table.set_col_header_value(6, "RARITY");
-        Self { table }
+
+        Self {
+            table,
+            cards: vec![],
+        }
+    }
+
+    pub fn handle_ev(&mut self, ev: CtMessage) {
+        match ev {
+            CtMessage::SortBy(cat) => {
+                println!("sort by {:?}", cat);
+                match cat {
+                    Category::Name => todo!(),
+                    Category::Quantity => todo!(),
+                    Category::Foil => todo!(),
+                    Category::Goatbots => todo!(),
+                    Category::Scryfall => todo!(),
+                    Category::Set => todo!(),
+                    Category::Rarity => todo!(),
+                }
+            }
+        }
+    }
+
+    pub fn set_cards(&mut self, cards: Vec<MtgoCard>) {
+        self.cards = cards;
+        self.cards.iter().for_each(|c| {
+            self.table.append_row(
+                "",
+                &[
+                    &c.name,
+                    &c.quantity.to_string(),
+                    if c.foil { "Yes" } else { "No" },
+                    &format!("{:8.3}", c.goatbots_price),
+                    &{
+                        if let Some(p) = c.scryfall_price {
+                            p.to_string()
+                        } else {
+                            "N/A".into()
+                        }
+                    },
+                    &c.set,
+                    &c.rarity,
+                ],
+            );
+        });
     }
 }
 
