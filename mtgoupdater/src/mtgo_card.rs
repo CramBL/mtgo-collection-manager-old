@@ -9,10 +9,35 @@ pub struct MtgoCard {
     pub quantity: u32,
     pub name: Box<str>,
     pub set: Box<str>,
-    pub rarity: Box<str>, // TODO: make enum
+    pub rarity: Rarity,
     pub foil: bool,
     pub goatbots_price: f32,
     pub scryfall_price: Option<f32>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+pub enum Rarity {
+    #[default]
+    Common,
+    Uncommon,
+    Rare,
+    Mythic,
+    Booster,
+    #[serde(other)]
+    None,
+}
+
+impl From<&str> for Rarity {
+    fn from(s: &str) -> Self {
+        match s {
+            "Common" => Rarity::Common,
+            "Uncommon" => Rarity::Uncommon,
+            "Rare" => Rarity::Rare,
+            "Mythic" => Rarity::Mythic,
+            "Booster" => Rarity::Booster,
+            _ => Rarity::None, // e.g. Event tickets
+        }
+    }
 }
 
 #[cfg(test)]
@@ -61,8 +86,16 @@ mod tests {
         assert_eq!(deserialized[0].quantity, 391);
         assert_eq!(deserialized[0].name, "Event Ticket".into());
         assert_eq!(deserialized[0].set, "".into());
-        assert_eq!(deserialized[0].rarity, "".into());
+        assert_eq!(deserialized[0].rarity, Rarity::None);
         assert_eq!(deserialized[0].goatbots_price, 0.0);
         assert_eq!(deserialized[0].scryfall_price, None);
+
+        assert_eq!(deserialized[1].id, 235);
+        assert_eq!(deserialized[1].quantity, 1);
+        assert_eq!(deserialized[1].name, "Swamp".into());
+        assert_eq!(deserialized[1].set, "PRM".into());
+        assert_eq!(deserialized[1].rarity, Rarity::Common);
+        assert_eq!(deserialized[1].goatbots_price, 0.002);
+        assert_eq!(deserialized[1].scryfall_price, Some(0.05));
     }
 }
