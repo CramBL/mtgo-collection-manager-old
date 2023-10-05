@@ -1,4 +1,5 @@
 use mtgoupdater::internal_only;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn test_call_mtgo_preprocessor() {
@@ -97,11 +98,6 @@ fn test_call_mtgo_preprocessor_example_collection_json_stdout() {
     match mtgoupdater::internal_only::run_mtgo_preprocessor_example_collection_json_stdout() {
         Ok(output) => {
             println!("Status:\n{status}", status = output.status,);
-
-            println!(
-                "stdout:\n{stdout}",
-                stdout = String::from_utf8_lossy(&output.stdout),
-            );
             println!(
                 "stderr:\n{stderr}",
                 stderr = String::from_utf8_lossy(&output.stderr),
@@ -111,6 +107,15 @@ fn test_call_mtgo_preprocessor_example_collection_json_stdout() {
                 "Process failed with non-zero exit code: {}",
                 output.status.code().unwrap_or(123)
             );
+
+            let stdout_json = String::from_utf8_lossy(&output.stdout);
+            let deserialized: Vec<mtgoupdater::mtgo_card::MtgoCard> =
+                serde_json::from_str(&stdout_json).unwrap();
+            println!("Got {len} cards as JSON", len = deserialized.len());
+            assert_eq!(deserialized.len(), 3000);
+            assert_eq!(deserialized[0].id, 1);
+            assert_eq!(deserialized[0].quantity, 391);
+            assert_eq!(deserialized[0].name, "Event Ticket".into());
         }
         Err(e) => panic!("Unexpected error: {e}"),
     }

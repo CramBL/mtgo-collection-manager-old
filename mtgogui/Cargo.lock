@@ -92,6 +92,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "fltk-table"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9f8be6e136c21caed84c848d05a10ffeddee611150f9ba6ed55aae2e766f14a"
+dependencies = [
+ "fltk",
+]
+
+[[package]]
 name = "fltk-theme"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -119,6 +128,7 @@ dependencies = [
  "fltk",
  "fltk-flex",
  "fltk-grid",
+ "fltk-table",
  "fltk-theme",
  "mtgoupdater",
 ]

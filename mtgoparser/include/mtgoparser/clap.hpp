@@ -16,7 +16,8 @@ namespace clap {
 namespace {// Utility used by the Clap class
 
   // Helper function to check if a value equals any element in a parameter pack
-  template<typename T, typename... Args> constexpr auto equals_any(const T &value, Args... args) -> bool
+  template<typename T, typename... Args>
+  [[nodiscard]] inline constexpr auto equals_any(const T &value, Args... args) -> bool
   {
     return ((value == args) || ...);
   }
@@ -28,7 +29,7 @@ namespace {// Utility used by the Clap class
   };
 
   // Helper function to check if all types in a parameter pack are convertible to std::string_view
-  template<typename... Args> constexpr bool all_convertible_to_string_view()
+  template<typename... Args> [[nodiscard]] inline constexpr auto all_convertible_to_string_view() -> bool
   {
     return (is_convertible_to_string_view<Args>::value && ...);
   }
@@ -414,5 +415,27 @@ public:
     }
   }
 };
+
+// Helpers to make it easy to instantiate a CLAP
+
+// Define options
+template<class... Opts> constexpr auto def_options(Opts... opts) -> decltype(auto)
+{
+  return clap::OptionArray<sizeof...(opts)>{ opts... };
+}
+
+// Define commands
+template<class... Cs> constexpr auto def_cmds(Cs... cmds) -> decltype(auto)
+{
+  return clap::CommandArray<sizeof...(cmds)>{ cmds... };
+}
+
+// instantiate the CLAP
+template<size_t N, size_t M>
+[[nodiscard]] constexpr auto init_clap(clap::OptionArray<N> options_arr, clap::CommandArray<M> cmd_arr)
+  -> clap::Clap<N, M>
+{
+  return clap::Clap<N, M>{ options_arr, cmd_arr };
+}
 
 }// namespace clap
