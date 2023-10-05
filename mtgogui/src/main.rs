@@ -109,6 +109,9 @@ impl MtgoGui {
         let mut btn_sort_name = button::Button::new(0, 0, 0, 0, "Sort Name");
         btn_sort_name.emit(ev_send, Message::Table(CtMessage::SortBy(Category::Name)));
 
+        let mut btn_sort_rarity = button::Button::new(0, 0, 0, 0, "Sort Rarity");
+        btn_sort_rarity.emit(ev_send, Message::Table(CtMessage::SortBy(Category::Rarity)));
+
         flx_top_table.fixed(&btn_sort_quantity, 100);
         flx_top_table.fixed(&btn_sort_name, 100);
         flx_top_table.end();
