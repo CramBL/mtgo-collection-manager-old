@@ -3,13 +3,13 @@ use crate::{set_mtgogetter_bin, set_mtgoparser_bin, MTGOGETTER_BIN, MTGOPARSER_B
 // Safe to call multiple times from different threads (for tests)
 pub fn dev_try_init_mtgogetter_bin() {
     if MTGOGETTER_BIN.get().is_none() {
-        _ = set_mtgogetter_bin(DEV_MTGOGETTER_BIN);
+        _ = set_mtgogetter_bin(DEV_MTGOGETTER_BIN.into());
     }
 }
 // Safe to call multiple times from different threads (for tests)
 pub fn dev_try_init_mtgoparser_bin() {
     if MTGOPARSER_BIN.get().is_none() {
-        _ = set_mtgoparser_bin(DEV_MTGOPARSER_BIN);
+        _ = set_mtgoparser_bin(DEV_MTGOPARSER_BIN.into());
     }
 }
 
