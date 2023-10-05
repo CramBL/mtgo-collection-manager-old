@@ -21,9 +21,29 @@ pub enum Category {
     Rarity,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+
+enum CurrentSortedBy {
+    None,
+    Name(Direction),
+    Quantity(Direction),
+    Foil(Direction),
+    Goatbots(Direction),
+    Scryfall(Direction),
+    Set(Direction),
+    Rarity(Direction),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum Direction {
+    Ascending,
+    Descending,
+}
+
 pub(super) struct CollectionTable {
     pub(super) table: SmartTable,
     pub(super) cards: Vec<MtgoCard>,
+    sorted_by: CurrentSortedBy,
 }
 
 impl CollectionTable {
@@ -56,6 +76,7 @@ impl CollectionTable {
         Self {
             table,
             cards: vec![],
+            sorted_by: CurrentSortedBy::None,
         }
     }
 
@@ -65,8 +86,13 @@ impl CollectionTable {
                 println!("sort by {:?}", cat);
                 match cat {
                     Category::Name => {
-                        self.cards.sort_by(|a, b| a.name.cmp(&b.name));
-                        self.draw_cards();
+                        if self.sorted_by == CurrentSortedBy::Name(Direction::Ascending) {
+                            self.cards.sort_by(|a, b| b.name.cmp(&a.name));
+                            self.sorted_by = CurrentSortedBy::Name(Direction::Descending);
+                        } else {
+                            self.cards.sort_by(|a, b| a.name.cmp(&b.name));
+                            self.sorted_by = CurrentSortedBy::Name(Direction::Ascending);
+                        }
                     }
                     Category::Quantity => todo!(),
                     Category::Foil => todo!(),
@@ -75,6 +101,7 @@ impl CollectionTable {
                     Category::Set => todo!(),
                     Category::Rarity => todo!(),
                 }
+                self.draw_cards();
             }
         }
     }
