@@ -40,7 +40,7 @@ enum Direction {
     Descending,
 }
 
-pub(super) struct CollectionTable {
+pub struct CollectionTable {
     pub(super) table: SmartTable,
     pub(super) cards: Vec<MtgoCard>,
     sorted_by: CurrentSortedBy,

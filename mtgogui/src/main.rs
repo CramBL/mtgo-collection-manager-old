@@ -16,6 +16,7 @@ use fltk_grid::Grid;
 use fltk_table::{SmartTable, TableOpts};
 use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 
+mod collection_view;
 mod menubar;
 mod table;
 mod util;
@@ -33,10 +34,8 @@ const DEFAULT_APP_WIDTH: i32 = 1400;
 const DEFAULT_APP_HEIGHT: i32 = 800;
 const WIDGET_PADDING: i32 = 0;
 
-const TABLE_WIDTH: i32 = 790;
-
 #[derive(Debug, Clone, Copy)]
-enum Message {
+pub enum Message {
     Quit,
     Example,
     MenuBar(menubar::MbMessage),
@@ -46,6 +45,12 @@ enum Message {
 impl From<menubar::MbMessage> for Message {
     fn from(mb_msg: menubar::MbMessage) -> Self {
         Message::MenuBar(mb_msg)
+    }
+}
+
+impl From<table::CtMessage> for Message {
+    fn from(ct_msg: table::CtMessage) -> Self {
+        Message::Table(ct_msg)
     }
 }
 
@@ -73,52 +78,11 @@ impl MtgoGui {
         main_win.set_icon(Some(util::get_logo()));
         main_win.make_resizable(true);
         main_win.size_range(MIN_APP_WIDTH, MIN_APP_HEIGHT, 0, 0);
-
         main_win.set_color(Color::Black);
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 25, &ev_send);
 
-        let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
-        flx_left_col.set_align(enums::Align::LeftTop);
-        let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
-        btn_example.set_callback({
-            let ev_send = ev_send;
-            move |b| {
-                ev_send.send(Message::Example);
-
-                b.set_label("Getting example...");
-            }
-        });
-
-        flx_left_col.end();
-        let mut flex_right_col = Flex::default()
-            .with_pos(400, 35)
-            .with_size(1000, 600)
-            .column();
-        flex_right_col.set_align(enums::Align::LeftTop);
-
-        let mut flx_top_table = Flex::default()
-            .with_pos(0, 0)
-            .with_size(TABLE_WIDTH, 0)
-            .row();
-        flx_top_table.set_align(enums::Align::RightTop);
-        let mut btn_sort_quantity = button::Button::new(0, 0, 0, 0, "Sort Quantity");
-        btn_sort_quantity.emit(
-            ev_send,
-            Message::Table(CtMessage::SortBy(Category::Quantity)),
-        );
-        let mut btn_sort_name = button::Button::new(0, 0, 0, 0, "Sort Name");
-        btn_sort_name.emit(ev_send, Message::Table(CtMessage::SortBy(Category::Name)));
-
-        let mut btn_sort_rarity = button::Button::new(0, 0, 0, 0, "Sort Rarity");
-        btn_sort_rarity.emit(ev_send, Message::Table(CtMessage::SortBy(Category::Rarity)));
-
-        flx_top_table.fixed(&btn_sort_quantity, 100);
-        flx_top_table.fixed(&btn_sort_name, 100);
-        flx_top_table.end();
-
-        flex_right_col.fixed(&flx_top_table, 50);
-        let collection_table = table::CollectionTable::new(TABLE_WIDTH, 720);
-        flex_right_col.end();
+        set_left_col_box(ev_send);
+        let collection_table = collection_view::set_collection_main_box(ev_send);
 
         main_win.end();
         main_win.show();
@@ -165,6 +129,21 @@ impl Default for MtgoGui {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn set_left_col_box(ev_send: app::Sender<Message>) {
+    let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
+    flx_left_col.set_align(enums::Align::LeftTop);
+    let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
+    btn_example.set_callback({
+        let ev_send = ev_send;
+        move |b| {
+            ev_send.send(Message::Example);
+
+            b.set_label("Getting example...");
+        }
+    });
+    flx_left_col.end();
 }
 
 fn main() {
