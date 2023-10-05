@@ -9,10 +9,59 @@ pub struct MtgoCard {
     pub quantity: u32,
     pub name: Box<str>,
     pub set: Box<str>,
-    pub rarity: Box<str>, // TODO: make enum
+    pub rarity: Rarity,
     pub foil: bool,
     pub goatbots_price: f32,
     pub scryfall_price: Option<f32>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, PartialOrd, Ord, Eq)]
+pub enum Rarity {
+    #[default]
+    #[serde(alias = "C")]
+    Common,
+    #[serde(alias = "U")]
+    Uncommon,
+    #[serde(alias = "R")]
+    Rare,
+    #[serde(alias = "M")]
+    Mythic,
+    #[serde(alias = "B")]
+    Booster,
+    #[serde(other)]
+    None,
+}
+
+impl ToString for Rarity {
+    fn to_string(&self) -> String {
+        match self {
+            Rarity::Common => "Common".into(),
+            Rarity::Uncommon => "Uncommon".into(),
+            Rarity::Rare => "Rare".into(),
+            Rarity::Mythic => "Mythic".into(),
+            Rarity::Booster => "Booster".into(),
+            Rarity::None => "None".into(),
+        }
+    }
+}
+
+impl From<&str> for Rarity {
+    fn from(s: &str) -> Self {
+        match s {
+            // Single letter matches first for speed
+            "C" => Rarity::Common,
+            "U" => Rarity::Uncommon,
+            "R" => Rarity::Rare,
+            "M" => Rarity::Mythic,
+            "B" => Rarity::Booster,
+            "Uncommon" => Rarity::Uncommon,
+            "Rare" => Rarity::Rare,
+            "Mythic" => Rarity::Mythic,
+            "Booster" => Rarity::Booster,
+            "Common" => Rarity::Common,
+            _ => Rarity::None, // e.g. Event tickets
+        }
+    }
 }
 
 #[cfg(test)]
@@ -61,8 +110,16 @@ mod tests {
         assert_eq!(deserialized[0].quantity, 391);
         assert_eq!(deserialized[0].name, "Event Ticket".into());
         assert_eq!(deserialized[0].set, "".into());
-        assert_eq!(deserialized[0].rarity, "".into());
+        assert_eq!(deserialized[0].rarity, Rarity::None);
         assert_eq!(deserialized[0].goatbots_price, 0.0);
         assert_eq!(deserialized[0].scryfall_price, None);
+
+        assert_eq!(deserialized[1].id, 235);
+        assert_eq!(deserialized[1].quantity, 1);
+        assert_eq!(deserialized[1].name, "Swamp".into());
+        assert_eq!(deserialized[1].set, "PRM".into());
+        assert_eq!(deserialized[1].rarity, Rarity::Common);
+        assert_eq!(deserialized[1].goatbots_price, 0.002);
+        assert_eq!(deserialized[1].scryfall_price, Some(0.05));
     }
 }

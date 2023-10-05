@@ -16,7 +16,7 @@ use mtgoupdater::{
 
 /// Messages that can be received by the menubar
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum MbMessage {
+pub enum MbMessage {
     Open,
     Quit,
     About,
