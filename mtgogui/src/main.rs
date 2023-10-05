@@ -148,7 +148,10 @@ impl MtgoGui {
                             mtgoupdater::internal_only::get_example_card_collection();
                         self.collection.set_cards(cards);
                     }
-                    Message::Table(t_m) => self.collection.handle_ev(t_m),
+                    Message::Table(t_m) => {
+                        self.collection.handle_ev(t_m);
+                        self.app.redraw();
+                    }
                 }
             }
         }
