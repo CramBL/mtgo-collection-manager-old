@@ -94,12 +94,68 @@ impl CollectionTable {
                             self.sorted_by = CurrentSortedBy::Name(Direction::Ascending);
                         }
                     }
-                    Category::Quantity => todo!(),
-                    Category::Foil => todo!(),
-                    Category::Goatbots => todo!(),
-                    Category::Scryfall => todo!(),
-                    Category::Set => todo!(),
-                    Category::Rarity => todo!(),
+                    Category::Quantity => {
+                        if self.sorted_by == CurrentSortedBy::Quantity(Direction::Ascending) {
+                            self.cards.sort_by(|a, b| b.quantity.cmp(&a.quantity));
+                            self.sorted_by = CurrentSortedBy::Quantity(Direction::Descending);
+                        } else {
+                            self.cards.sort_by(|a, b| a.quantity.cmp(&b.quantity));
+                            self.sorted_by = CurrentSortedBy::Quantity(Direction::Ascending);
+                        }
+                    }
+                    Category::Foil => {
+                        if self.sorted_by == CurrentSortedBy::Foil(Direction::Ascending) {
+                            self.cards.sort_by(|a, b| b.foil.cmp(&a.foil));
+                            self.sorted_by = CurrentSortedBy::Foil(Direction::Descending);
+                        } else {
+                            self.cards.sort_by(|a, b| a.foil.cmp(&b.foil));
+                            self.sorted_by = CurrentSortedBy::Foil(Direction::Ascending);
+                        }
+                    }
+                    Category::Goatbots => {
+                        if self.sorted_by == CurrentSortedBy::Goatbots(Direction::Ascending) {
+                            self.cards.sort_by(|a, b| {
+                                b.goatbots_price.partial_cmp(&a.goatbots_price).unwrap()
+                            });
+                            self.sorted_by = CurrentSortedBy::Goatbots(Direction::Descending);
+                        } else {
+                            self.cards.sort_by(|a, b| {
+                                a.goatbots_price.partial_cmp(&b.goatbots_price).unwrap()
+                            });
+                            self.sorted_by = CurrentSortedBy::Goatbots(Direction::Ascending);
+                        }
+                    }
+                    Category::Scryfall => {
+                        if self.sorted_by == CurrentSortedBy::Scryfall(Direction::Ascending) {
+                            self.cards.sort_by(|a, b| {
+                                b.scryfall_price.partial_cmp(&a.scryfall_price).unwrap()
+                            });
+                            self.sorted_by = CurrentSortedBy::Scryfall(Direction::Descending);
+                        } else {
+                            self.cards.sort_by(|a, b| {
+                                a.scryfall_price.partial_cmp(&b.scryfall_price).unwrap()
+                            });
+                            self.sorted_by = CurrentSortedBy::Scryfall(Direction::Ascending);
+                        }
+                    }
+                    Category::Set => {
+                        if self.sorted_by == CurrentSortedBy::Set(Direction::Ascending) {
+                            self.cards.sort_by(|a, b| b.set.cmp(&a.set));
+                            self.sorted_by = CurrentSortedBy::Set(Direction::Descending);
+                        } else {
+                            self.cards.sort_by(|a, b| a.set.cmp(&b.set));
+                            self.sorted_by = CurrentSortedBy::Set(Direction::Ascending);
+                        }
+                    }
+                    Category::Rarity => {
+                        if self.sorted_by == CurrentSortedBy::Rarity(Direction::Ascending) {
+                            self.cards.sort_by(|a, b| b.rarity.cmp(&a.rarity));
+                            self.sorted_by = CurrentSortedBy::Rarity(Direction::Descending);
+                        } else {
+                            self.cards.sort_by(|a, b| a.rarity.cmp(&b.rarity));
+                            self.sorted_by = CurrentSortedBy::Rarity(Direction::Ascending);
+                        }
+                    }
                 }
                 self.draw_cards();
             }
