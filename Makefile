@@ -57,6 +57,7 @@ all:\
 	build-mtgogetter \
 	build-mtgoparser \
 	build-mtgoupdater \
+	build-mtgogui \
 
 .PHONY: build-integration
 build-integration:\
@@ -155,7 +156,11 @@ endif
 .PHONY: test-mtgogui
 test-mtgogui:
 	@echo "==> Testing MTGO GUI..."
+ifeq ($(shell uname -s),Darwin)
+	@echo "WARNING CARGO TEST FOR FLTK ARE CURRENTLY NOT WORKING ON MACOS"
+else
 	cd mtgogui && cargo test -- --nocapture
+endif
 	@echo "=== Done testing MTGO GUI ==="
 
 
