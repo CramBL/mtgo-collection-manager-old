@@ -17,3 +17,45 @@ pub fn center() -> (i32, i32) {
         (fltk::app::screen_size().1 / 2.0) as i32,
     )
 }
+
+pub fn first_file_match_from_dir(
+    f_name: &str,
+    path: &std::path::Path,
+    max_file_age_secs: Option<u64>,
+) -> Option<std::path::PathBuf> {
+    let mut matching_entries: Vec<std::path::PathBuf> = Vec::new();
+
+    for entry in path.read_dir().unwrap() {
+        let dir_entry = entry.unwrap();
+
+        let metadata = std::fs::metadata(&dir_entry.path()).unwrap();
+        let last_modified = metadata.modified().unwrap().elapsed().unwrap().as_secs();
+        if metadata.is_file() {
+            if let Some(max_file_age) = max_file_age_secs {
+                if last_modified > max_file_age {
+                    continue;
+                }
+            }
+            eprintln!(
+                "Name: {}, Path:{}",
+                dir_entry.path().file_name().unwrap().to_str().unwrap(),
+                dir_entry.path().display()
+            );
+
+            if dir_entry
+                .file_name()
+                .to_owned()
+                .to_str()
+                .unwrap()
+                .contains(f_name)
+            {
+                matching_entries.push(dir_entry.path());
+            }
+        }
+    }
+    if !matching_entries.is_empty() {
+        Some(matching_entries[0].clone())
+    } else {
+        None
+    }
+}
