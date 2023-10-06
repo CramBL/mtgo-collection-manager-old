@@ -45,6 +45,11 @@ jobs:
             generator: "Ninja Multi-Config"
             enable_ipo: On
 
+          - os: windows-2022
+            compiler: llvm-15.0.3
+            generator: "Ninja Multi-Config"
+            enable_ipo: On
+
     name: Test
     steps:
       - uses: actions/checkout@v3
@@ -111,10 +116,10 @@ jobs:
       - name: 📦 Pack - Windows 💻
         if: runner.os == 'Windows'
         run: |
-          .\wmake.ps1 pack -PACKAGE_NAME ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm
+          .\wmake.ps1 pack -PACKAGE_NAME windows-2022-${{ matrix.compiler }}-mtgo-cm
       - uses: actions/upload-artifact@v3
         with:
           name: windows-mtgo-collection-manager
-          path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
+          path: windows-2022-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
