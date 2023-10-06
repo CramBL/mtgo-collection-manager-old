@@ -57,7 +57,7 @@ jobs:
       - name: 📝 Build & Run tests - Unix 🐧🍎
         if: runner.os != 'Windows'
         run: |
-          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} -BUILD_MODE=Release
+          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} BUILD_MODE=Release
           make test
 
       - name: 📝 Build & Run tests - Windows 💻
