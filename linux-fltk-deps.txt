@@ -1,7 +1,7 @@
-Xinerama
-Xcursor
-Xfixes
-Xft
-pango-1.0
-pangoxft-1.0
-pangocairo-1.0
+libxinerama-dev
+libxcursor-dev
+libxfixes-dev
+libxft-dev
+libpango-1.0-0
+libpangoxft-1.0-0
+libpangocairo-1.0-0
