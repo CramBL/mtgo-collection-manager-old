@@ -36,8 +36,8 @@ func (g *goatbots) IsPriceUpdated() bool {
 // Method for the goatbots struct to generate a new timestamp for the price data
 // This should be called after the price data is downloaded
 // It will then load the state log from disk and update the timestamp
-func (g *goatbots) UpdatePriceTimestamp() error {
-	state_log_accesor, err := GetStateLogAccessor()
+func (g *goatbots) UpdatePriceTimestamp(stateLogPath string) error {
+	state_log_accesor, err := GetStateLogAccessor(stateLogPath)
 	if err != nil {
 		return err
 	}
@@ -59,8 +59,8 @@ func (g *goatbots) IsCardDefinitionsUpdated() bool {
 }
 
 // Method for the goatbots struct to generate a new timestamp for the card definitions
-func (g *goatbots) UpdateCardDefinitionsTimestamp() error {
-	state_log_accesor, err := GetStateLogAccessor()
+func (g *goatbots) UpdateCardDefinitionsTimestamp(stateLogPath string) error {
+	state_log_accesor, err := GetStateLogAccessor(stateLogPath)
 	if err != nil {
 		return err
 	}
@@ -90,9 +90,9 @@ func (s *scryfall) IsBulkDataUpdated(api_timestamp time.Time) bool {
 // Method for the scryfall struct to generate a new timestamp for the price data
 // This should be called after the bulk data is downloaded
 // It will then load the state log from disk and update the timestamp
-func (s *scryfall) UpdateBulkDataTimestamp() error {
+func (s *scryfall) UpdateBulkDataTimestamp(stateLogPath string) error {
 
-	state_log_accesor, err := GetStateLogAccessor()
+	state_log_accesor, err := GetStateLogAccessor(stateLogPath)
 	if err != nil {
 		return err
 	}

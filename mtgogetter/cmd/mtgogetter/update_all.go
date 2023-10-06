@@ -32,7 +32,8 @@ var UpdateAllCmd = &cobra.Command{
 		download.DownloadGoatbotsCardDefinitionsCmd.Flag("save-as").Changed = true
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		log.Println("Updating all downloaded data")
+		target_dir := cmd.Flag("save-to-dir").Value.String()
+		log.Println("Updating all downloaded data and saving updates to", target_dir)
 
 		var go_routine_count int = 3
 		var work_group sync.WaitGroup
@@ -42,20 +43,22 @@ var UpdateAllCmd = &cobra.Command{
 
 		log.Println("Updating goatbots price history")
 		dl_gb_price_history := func() error {
-			return download.DownloadGoatbotsPriceHistoryCmd.RunE(cmd, args)
+			return download.DownloadGoatbotsPriceHistoryCmd.RunE(cmd, []string{"--save-to-dir", target_dir, "--save-as", "price-history.json"})
 		}
 		work_group.Add(1)
 		go do_work(dl_gb_price_history, &work_group, error_channel)
 
 		log.Println("Updating goatbots card definitions")
 		dl_gb_card_definitions := func() error {
-			return download.DownloadGoatbotsCardDefinitionsCmd.RunE(cmd, args)
+			return download.DownloadGoatbotsCardDefinitionsCmd.RunE(cmd, []string{"--save-to-dir", target_dir, "--save-as", "card-definitions.json"})
 		}
 		work_group.Add(1)
 		go do_work(dl_gb_card_definitions, &work_group, error_channel)
 
 		log.Println("Updating scryfall bulk data")
-		dl_scryfall_bulk := func() error { return download.DownloadScryfallBulkCmd.RunE(cmd, args) }
+		dl_scryfall_bulk := func() error {
+			return download.DownloadScryfallBulkCmd.RunE(cmd, []string{"--save-to-dir", target_dir, "--save-as", "scryfall-bulk.json"})
+		}
 		work_group.Add(1)
 		go do_work(dl_scryfall_bulk, &work_group, error_channel)
 
@@ -79,6 +82,8 @@ func init() {
 	var save_as_file_name string
 	UpdateAllCmd.PersistentFlags().StringVarP(&save_as_file_name, "save-as", "s", "stdout", "Write downloaded content to specified filename")
 	UpdateAllCmd.Flag("save-as").Hidden = true
+	var save_to_dir string
+	UpdateAllCmd.Flags().StringVarP(&save_to_dir, "save-to-dir", "d", "", "Write downloaded content to specified directory")
 	download.DownloadGoatbotsPriceHistoryCmd.Hidden = true
 	UpdateAllCmd.AddCommand(download.DownloadGoatbotsPriceHistoryCmd)
 	download.DownloadGoatbotsCardDefinitionsCmd.Hidden = true

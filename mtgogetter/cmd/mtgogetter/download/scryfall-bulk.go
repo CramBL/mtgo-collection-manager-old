@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -32,6 +34,19 @@ var DownloadScryfallBulkCmd = &cobra.Command{
 The data comes as a JSON file containing every card object on Scryfall in English or the printed language if the card is only available in one language.`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var working_dir string = "default" // default is the current working directory
+		var fname string = "default"       // default filename is "default-cards-<timestamp>.json"
+		// If we're being called from update all, we need to check the args
+		if len(args) > 1 && args[0] == "--save-to-dir" {
+			working_dir = args[1]
+			// If args contains a filename
+			if len(args) > 3 && args[2] == "--save-as" {
+				fname = filepath.Join(working_dir, args[3])
+			} else {
+				fname = filepath.Join(working_dir, fname) // default filename
+			}
+		}
+
 		// 1. get the bulk data info from the Scryfall API.
 		// 	  It contains the download uri and updated_at timestamp
 		// 2. Check if the bulk data has been updated since we last downloaded it.
@@ -63,7 +78,7 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 
 		// Check if the bulk data has been updated since we last downloaded it.
 		// If it hasn't been updated, there's no need to download it again
-		state_log_accesor, err := mtgogetter.GetStateLogAccessor()
+		state_log_accesor, err := mtgogetter.GetStateLogAccessor(working_dir)
 		if err != nil {
 			return fmt.Errorf("error getting state log accessor: %s", err)
 		}
@@ -88,7 +103,7 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 		}
 
 		// Update the timestamp in the state log after downloading the bulk data
-		defer state_log.Scryfall.UpdateBulkDataTimestamp()
+		defer state_log.Scryfall.UpdateBulkDataTimestamp(working_dir)
 
 		var split_msg = strings.SplitAfter(msg.Download_uri, "default-cards-")
 		// Concatenate the end (timestamp + .json) of the received download_uri with what we know the prefix URL should be
@@ -106,7 +121,9 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 		}
 
 		// Name is default-cards-<timestamp>.json
-		fname := "default-cards-" + split_msg[1]
+		if fname == "default" {
+			fname = "default-cards-" + split_msg[1]
+		}
 
 		log.Println("Deserializing raw scryfall JSON from stream")
 		stream_decoder := json.NewDecoder(resp_bulk_data.Body)
@@ -118,10 +135,22 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 			return fmt.Errorf("error when deserializing JSON stream: %s", err)
 		}
 
-		log.Println("Serializing scryfall card array to JSON and writing to disk as:", fname)
-		// Serialize to JSON string and write to disk
-		if err := mtgogetter.ScryfallCardsToDisk(scryfall_cards, fname); err != nil {
-			return fmt.Errorf("error when serializing scryfall cards to disk: %s", err)
+		if working_dir != "default" {
+			dir := filepath.Dir(fname)
+			err := os.MkdirAll(dir, 0777)
+			if err != nil {
+				return fmt.Errorf("error when creating directory: %s", err)
+			}
+			err = mtgogetter.ScryfallCardsToDisk(scryfall_cards, fname)
+			if err != nil {
+				return fmt.Errorf("error writing file to disk: %s", err)
+			}
+		} else {
+			// Serialize to JSON string and write to disk
+			log.Println("Serializing scryfall card array to JSON and writing to disk as:", fname)
+			if err := mtgogetter.ScryfallCardsToDisk(scryfall_cards, fname); err != nil {
+				return fmt.Errorf("error when serializing scryfall cards to disk: %s", err)
+			}
 		}
 		return nil
 	},

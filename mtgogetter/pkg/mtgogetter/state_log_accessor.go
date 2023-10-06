@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/BurntSushi/toml"
@@ -11,27 +12,36 @@ import (
 
 type StateLogAccesor struct {
 	mut       sync.Mutex
+	Path      string
 	state_log *StateLog
 }
 
-var instance *StateLogAccesor = nil
+var stateLogAcessorInstance *StateLogAccesor = nil
 
-const stateLogPath string = "state_log.toml"
+var stateLogWithDefault string = "state_log.toml"
 
 // Get the state log accessor singleton
-func GetStateLogAccessor() (*StateLogAccesor, error) {
-	state_log, err := getStateLog()
+func GetStateLogAccessor(log_dir string) (*StateLogAccesor, error) {
+	var logPath string
+	if log_dir != "default" {
+		logPath = filepath.Join(log_dir, stateLogWithDefault)
+	} else {
+		logPath = stateLogWithDefault
+	}
+
+	state_log, err := getStateLog(logPath)
 	if err != nil {
 		return nil, err
 	}
 
-	if instance == nil {
-		instance = &StateLogAccesor{
+	if stateLogAcessorInstance == nil {
+		stateLogAcessorInstance = &StateLogAccesor{
 			mut:       sync.Mutex{},
+			Path:      logPath,
 			state_log: state_log,
 		}
 	}
-	return instance, nil
+	return stateLogAcessorInstance, nil
 }
 
 // Get the state log.
@@ -54,7 +64,7 @@ func (s *StateLogAccesor) UpdateStateLog(update_action func(*StateLog)) error {
 	update_action(s.state_log)
 
 	// Write the state log to disk
-	err := writeStateLogToFile(s.state_log)
+	err := writeStateLogToFile(s.state_log, s.Path)
 	if err != nil {
 		return err
 	}
@@ -68,7 +78,7 @@ func (s *StateLogAccesor) UpdateAndUnlockStateLog(update_action func(*StateLog))
 	defer s.mut.Unlock()
 
 	// Write the state log to disk
-	err := writeStateLogToFile(s.state_log)
+	err := writeStateLogToFile(s.state_log, s.Path)
 	if err != nil {
 		return err
 	}
@@ -78,15 +88,16 @@ func (s *StateLogAccesor) UpdateAndUnlockStateLog(update_action func(*StateLog))
 // Below are private helper functions for the state log accessor
 
 // Get the state log from disk if it exists, otherwise create a new one
-func getStateLog() (*StateLog, error) {
+func getStateLog(path_to_log string) (*StateLog, error) {
 	var stateLog *StateLog
-	if stateLogExists() {
-		if _, err := toml.DecodeFile(stateLogPath, &stateLog); err != nil {
+
+	if stateLogExists(path_to_log) {
+		if _, err := toml.DecodeFile(path_to_log, &stateLog); err != nil {
 			return nil, err
 		}
 	} else {
 		stateLog = NewStateLog()
-		if err := writeStateLogToFile(stateLog); err != nil {
+		if err := writeStateLogToFile(stateLog, path_to_log); err != nil {
 			return nil, err
 		}
 	}
@@ -94,8 +105,15 @@ func getStateLog() (*StateLog, error) {
 	return stateLog, nil
 }
 
-func writeStateLogToFile(stateLog *StateLog) error {
-	f, err := os.Create(stateLogPath)
+func writeStateLogToFile(stateLog *StateLog, logPath string) error {
+	dir := filepath.Dir(logPath)
+	err := os.MkdirAll(dir, 0777)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(logPath)
+
 	if err != nil {
 		return err
 	}
@@ -108,8 +126,8 @@ func writeStateLogToFile(stateLog *StateLog) error {
 	return nil
 }
 
-func stateLogExists() bool {
-	if _, err := os.Stat(stateLogPath); err == nil {
+func stateLogExists(path_to_log string) bool {
+	if _, err := os.Stat(path_to_log); err == nil {
 		return true
 	} else if errors.Is(err, os.ErrNotExist) {
 		// Doesn't exist should be created

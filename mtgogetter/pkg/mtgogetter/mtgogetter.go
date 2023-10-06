@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"path/filepath"
 	"time"
 
 	"log"
@@ -115,6 +116,25 @@ func ReadCloserToStdout(read_closer io.ReadCloser) (int64, error) {
 
 func ReadCloserToDisk(read_closer io.ReadCloser, fname string) (int64, error) {
 	fd, err := os.OpenFile(fname, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		return 0, err
+	}
+	defer fd.Close()
+
+	written_bytes, err := io.Copy(fd, read_closer)
+	if err != nil {
+		return written_bytes, err
+	}
+	return written_bytes, nil
+}
+
+func ReadCloserToPath(read_closer io.ReadCloser, path string) (int64, error) {
+	dir := filepath.Dir(path)
+	err := os.MkdirAll(dir, 0777)
+	if err != nil {
+		return 0, err
+	}
+	fd, err := os.Create(path)
 	if err != nil {
 		return 0, err
 	}

@@ -60,7 +60,7 @@ const TEXT_ABOUT_STYLES: &[text::StyleTableEntryExt] = &[
 
 pub(super) struct McmMenuBar {
     pub(super) menu: menu::SysMenuBar,
-    pub(super) full_trade_list: Option<PathBuf>,
+    ev_emitter: app::Sender<Message>,
 }
 
 impl McmMenuBar {
@@ -69,7 +69,7 @@ impl McmMenuBar {
         init_menu_bar(&mut mb, s);
         Self {
             menu: mb,
-            full_trade_list: None,
+            ev_emitter: s.clone(),
         }
     }
 
@@ -90,8 +90,10 @@ impl McmMenuBar {
         let filename = dlg.filename();
         if !filename.to_string_lossy().to_string().is_empty() {
             if filename.is_file() {
-                self.full_trade_list = Some(filename);
-                eprintln!("Full trade list: {:?}", self.full_trade_list);
+                eprintln!("Full trade list: {:?}", filename);
+                self.ev_emitter.send(Message::GotFullTradeList(
+                    filename.to_str().expect("Path is invalid unicode").into(),
+                ));
             } else {
                 dialog::alert(center().0 - 200, center().1 - 100, "File does not exist!")
             }
@@ -225,7 +227,7 @@ fn init_menu_bar(menu: &mut menu::SysMenuBar, s: &fltk::app::Sender<Message>) {
         "&File/Open Full Trade list...\t",
         Shortcut::Ctrl | 'o',
         menu::MenuFlag::Normal,
-        *s,
+        s.clone(),
         MbMessage::Open.into(),
     );
 
@@ -233,7 +235,7 @@ fn init_menu_bar(menu: &mut menu::SysMenuBar, s: &fltk::app::Sender<Message>) {
         "&File/Quit\t",
         Shortcut::Ctrl | 'q',
         menu::MenuFlag::Normal,
-        *s,
+        s.clone(),
         Message::Quit,
     );
 
@@ -241,7 +243,7 @@ fn init_menu_bar(menu: &mut menu::SysMenuBar, s: &fltk::app::Sender<Message>) {
         "&Help/About\t",
         Shortcut::None,
         menu::MenuFlag::Normal,
-        *s,
+        s.clone(),
         MbMessage::About.into(),
     );
 

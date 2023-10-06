@@ -37,8 +37,20 @@ const auto path_goatbots_price_hist_full = "../test/test-data/goatbots/price-his
 
 constexpr clap::Option mtgoupdater_json_out{ "--collection-json-out", true };
 constexpr clap::Option help_opt{ "-h", true };
+constexpr clap::Option debug_opt{ "-d", true, "--debug" };
+constexpr clap::Option update_opt{ "-u", true, "--update", "--update-all" };
+constexpr clap::Option scryfall_path_opt{ "--scryfall-path", false };
+constexpr clap::Option fulltradelist_path_opt{ "--full-trade-list", false };
+constexpr clap::Option card_defs_path_opt{ "--card-definitions", false };
+constexpr clap::Option price_hist_path_opt{ "--price-history", false };
 constexpr clap::OptionArray opt_array = clap::def_options(clap::Option("--version", true, "-V"),
   help_opt,
+  debug_opt,
+  update_opt,
+  scryfall_path_opt,
+  fulltradelist_path_opt,
+  card_defs_path_opt,
+  price_hist_path_opt,
   clap::Option("--verbose", true),
   clap::Option("--echo", true),
   clap::Option("--caller", false, "--calling"),
@@ -291,6 +303,55 @@ int main(int argc, char *argv[])
   if (config.FlagSet("--version")) { fmt::println("v{}", mtgoparser::cmake::project_version); }
 
   if (config.CmdSet("run")) {
+
+    if (config.FlagSet(update_opt)) {
+      // Parse collection
+      if (!config.FlagSet(scryfall_path_opt)) {
+        spdlog::error("Update all needs a path to a scryfall json-data file");
+        return -1;
+      }
+      if (!config.FlagSet(fulltradelist_path_opt)) {
+        spdlog::error("Update all needs a path to a full trade list file");
+        return -1;
+      }
+      if (!config.FlagSet(card_defs_path_opt)) {
+        spdlog::error("Update all needs a path to a card definition file");
+        return -1;
+      }
+      if (!config.FlagSet(price_hist_path_opt)) {
+        spdlog::error("Update all needs a path to a price history file");
+        return -1;
+      }
+
+      auto scryfall_path = config.OptionValue(scryfall_path_opt);
+      assert(scryfall_path.has_value());
+      auto scryfall_vec = scryfall::ReadJsonVector(scryfall_path.value());
+      assert(scryfall_vec.has_value());
+
+      auto card_defs_path = config.OptionValue(card_defs_path_opt);
+      assert(card_defs_path.has_value());
+      auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(card_defs_path.value());
+      assert(card_defs.has_value());
+
+      auto price_hist_path = config.OptionValue(price_hist_path_opt);
+      assert(price_hist_path.has_value());
+      auto price_hist = goatbots::ReadJsonMap<goatbots::price_hist_map_t>(price_hist_path.value());
+      assert(price_hist.has_value());
+
+      auto fulltradelist_path = config.OptionValue(fulltradelist_path_opt);
+      assert(fulltradelist_path.has_value());
+      auto mtgo_cards = mtgo::xml::parse_dek_xml(fulltradelist_path.value());
+      auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
+      mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
+      spdlog::info("extracted Goatbots info");
+      mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
+      spdlog::info("extracted Scryfall info");
+      auto json = mtgo_collection.ToJson();
+      fmt::print("{}", json);
+      return 0;
+    }
+
+
     spdlog::info("MTGO Preprocessor run mode");
     if (config.FlagSet("--example-json")) {
       example::collection_parse(test_data_dir);

@@ -5,6 +5,7 @@ rust-processing/target
 mtgogetter/mtgogetter.exe
 mtgogetter/state_log.toml
 mtgogetter/mtgogetter
+mtgogetter/*.json
 
 ## MTGO Parser
 mtgoparser/build/
@@ -19,6 +20,8 @@ mtgoupdater/target
 
 ## MTGO GUI
 mtgogui/target
+mtgogui/*.json
+mtgogui/state_log.toml
 
 
 # User spesific settings
