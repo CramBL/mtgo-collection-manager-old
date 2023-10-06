@@ -87,11 +87,12 @@ jobs:
       - name: 📦 Pack - Unix 🐧🍎
         if: runner.os != 'Windows'
         run: |
-          mkdir -p bin
-          cp mtgogetter/mtgogetter bin
-          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser bin
-          cp mtgogui/target/release/mtgogui mtgo-collection-manager
-          gzip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager bin
+          sudo apt-get -y install zip
+          mkdir -p mtgo-collection-manager/bin
+          cp mtgogetter/mtgogetter mtgo-collection-manager/bin
+          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser mtgo-collection-manager/bin
+          cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
+          zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
       - uses: actions/upload-artifact@v3
         with:
           name: packaged-mtgoparser
