@@ -77,11 +77,7 @@ jobs:
       - name: 📦 Pack - Windows 💻
         if: runner.os == 'Windows'
         run: |
-          mkdir -p bin
-          cp mtgogetter/mtgogetter.exe bin
-          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser.exe bin
-          cp mtgogui/target/release/mtgogui.exe mtgo-collection-manager.exe
-          gzip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager.exe bin
+         .\wmake.ps1 pack -PACKAGE_NAME ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm
       - uses: actions/upload-artifact@v3
         with:
           name: packaged-mtgoparser
