@@ -19,6 +19,18 @@ var DownloadGoatbotsCardDefinitionsCmd = &cobra.Command{
 Card definitions includes a unique card ID with associated name, cardset, rarity, and foil (0/1)`,
 	Args: cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var working_dir string = "default"         // default is the current working directory
+		var fname string = "card-definitions.json" // default filename
+		// If we're being called from update all, we need to check the args
+		if len(args) > 1 && args[0] == "--save-to-dir" {
+			working_dir = args[1]
+			// If args contains a filename
+			if len(args) > 3 && args[2] == "--save-as" {
+				fname = filepath.Join(working_dir, args[3])
+			} else {
+				fname = filepath.Join(working_dir, fname) // default filename
+			}
+		}
 
 		dl_bytes, err := mtgogetter.DownloadBodyToBytes(GoatbotsCardDefinitionsUrl)
 		if err != nil {
@@ -34,15 +46,8 @@ Card definitions includes a unique card ID with associated name, cardset, rarity
 			return fmt.Errorf("error getting first file from zip: %s", err)
 		}
 
-		if len(args) > 1 && args[0] == "--save-to-dir" {
-			// If args contains a filename, write to that file
-			var path string
-			if len(args) > 3 && args[2] == "--save-as" {
-				path = filepath.Join(args[1], args[3])
-			} else {
-				path = filepath.Join(args[1], "card-definitions.json") // default filename
-			}
-			_, err := mtgogetter.ReadCloserToPath(first_file_from_zip, path)
+		if working_dir != "default" {
+			_, err := mtgogetter.ReadCloserToPath(first_file_from_zip, fname)
 			if err != nil {
 				return fmt.Errorf("error writing file to disk: %s", err)
 			}

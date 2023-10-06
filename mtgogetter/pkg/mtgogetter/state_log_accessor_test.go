@@ -28,7 +28,7 @@ func TestConcurrentAccess(t *testing.T) {
 	// Finally, the test will check that the state log was updated as expected
 
 	// Get the state log accessor
-	state_log_accessor, err := GetStateLogAccessor()
+	state_log_accessor, err := GetStateLogAccessor("default")
 	if err != nil {
 		t.Fatal(err)
 	}
