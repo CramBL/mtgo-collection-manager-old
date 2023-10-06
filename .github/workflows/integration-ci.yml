@@ -73,7 +73,7 @@ jobs:
           cp mtgogetter/mtgogetter.exe bin
           cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser.exe bin
           cp mtgogui/target/release/mtgogui.exe mtgo-collection-manager.exe
-          zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager.exe bin
+          gzip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager.exe bin
       - uses: actions/upload-artifact@v3
         with:
           name: packaged-mtgoparser
@@ -87,7 +87,7 @@ jobs:
           cp mtgogetter/mtgogetter bin
           cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser bin
           cp mtgogui/target/release/mtgogui mtgo-collection-manager
-          zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager bin
+          gzip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager bin
       - uses: actions/upload-artifact@v3
         with:
           name: packaged-mtgoparser
