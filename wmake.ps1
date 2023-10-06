@@ -246,10 +246,9 @@ function Test-Mtgogui {
     Test-RustInstallation
     Write-Host "==> Building MTGO GUI..."
     Set-Location mtgogui
-    Write-Warning "GUI TESTING NOT YET IMPLEMENTED!"
-    #cargo test
+    cargo test -- --nocapture
     Set-Location ..
-    #Write-Host "=== Done testing MTGO GUI ==="
+    Write-Host "=== Done testing MTGO GUI ==="
 }
 
 function Build-Clean {

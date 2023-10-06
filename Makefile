@@ -1,4 +1,5 @@
 # Default flags
+BUILD_MODE := Debug
 # MTGOPARSER_GENERATOR := "Ninja Multi-Config"
 MTGOPARSER_BUILD_MODE := Release
 MTGOPARSER_ENABLE_COV := false
@@ -63,6 +64,7 @@ build-integration:\
 	build-mtgogetter \
 	build-mtgoparser-integration \
 	build-mtgoupdater \
+	build-mtgogui \
 
 .PHONY: test
 test:\
@@ -70,6 +72,7 @@ test:\
 	test-mtgogetter \
 	test-mtgoparser \
 	test-mtgoupdater \
+	test-mtgogui \
 
 .PHONY: show-versions
 show-versions:
@@ -125,14 +128,36 @@ test-mtgoparser:
 .PHONY: build-mtgoupdater
 build-mtgoupdater:
 	@echo "==> Building MTGO Updater..."
+ifeq ($(BUILD_MODE),Release)
+	cd mtgoupdater && cargo build --release
+else
 	cd mtgoupdater && cargo build
+endif
 	@echo "=== Done building MTGO Updater ==="
 
-.PHONY: build-mtgoupdater
+.PHONY: test-mtgoupdater
 test-mtgoupdater:
 	@echo "==> Testing MTGO Updater..."
 	cd mtgoupdater && cargo test -- --nocapture
 	@echo "=== Done testing MTGO updater ==="
+
+.PHONY: build-mtgogui
+build-mtgogui:
+	@echo "==> Building MTGO GUI..."
+ifeq ($(BUILD_MODE),Release)
+	cd mtgogui && cargo build --release
+else
+	cd mtgogui && cargo build
+endif
+	@echo "=== Done building MTGO GUI ==="
+
+
+.PHONY: test-mtgogui
+test-mtgogui:
+	@echo "==> Testing MTGO GUI..."
+	cd mtgogui && cargo test -- --nocapture
+	@echo "=== Done testing MTGO GUI ==="
+
 
 .PHONY: clean
 clean:
@@ -140,3 +165,4 @@ clean:
 	@echo "mtgoparser cleaned"
 	cd mtgoupdater && cargo clean
 	cd mtgogetter && go clean
+	cd mtgogui && cargo clean
