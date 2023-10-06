@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -118,10 +120,29 @@ The data comes as a JSON file containing every card object on Scryfall in Englis
 			return fmt.Errorf("error when deserializing JSON stream: %s", err)
 		}
 
-		log.Println("Serializing scryfall card array to JSON and writing to disk as:", fname)
-		// Serialize to JSON string and write to disk
-		if err := mtgogetter.ScryfallCardsToDisk(scryfall_cards, fname); err != nil {
-			return fmt.Errorf("error when serializing scryfall cards to disk: %s", err)
+		if len(args) > 1 && args[0] == "--save-to-dir" {
+			// If args contains a filename, write to that file
+			var path string
+			if len(args) > 3 && args[2] == "--save-as" {
+				path = filepath.Join(args[1], args[3])
+			} else {
+				path = filepath.Join(args[1], "scryfall-bulk.json") // default filename
+			}
+			dir := filepath.Dir(path)
+			err := os.MkdirAll(dir, 0777)
+			if err != nil {
+				return fmt.Errorf("error when creating directory: %s", err)
+			}
+			err = mtgogetter.ScryfallCardsToDisk(scryfall_cards, path)
+			if err != nil {
+				return fmt.Errorf("error writing file to disk: %s", err)
+			}
+		} else {
+			// Serialize to JSON string and write to disk
+			log.Println("Serializing scryfall card array to JSON and writing to disk as:", fname)
+			if err := mtgogetter.ScryfallCardsToDisk(scryfall_cards, fname); err != nil {
+				return fmt.Errorf("error when serializing scryfall cards to disk: %s", err)
+			}
 		}
 		return nil
 	},

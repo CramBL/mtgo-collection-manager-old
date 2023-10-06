@@ -3,6 +3,7 @@ package download
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 
 	"github.com/CramBL/mtgo-collection-manager/mtgogetter/pkg/mtgogetter"
 	"github.com/spf13/cobra"
@@ -59,8 +60,20 @@ The price history appears as a JSON map of unique card IDs and associated tix pr
 			return fmt.Errorf("error getting first file from zip: %s", err)
 		}
 
-		// If the --save-as flag was not set (or is set to stdout), print to stdout
-		if mtgogetter.OutputIsStdout(cmd) {
+		if len(args) > 1 && args[0] == "--save-to-dir" {
+			// If args contains a filename, write to that file
+			var path string
+			if len(args) > 3 && args[2] == "--save-as" {
+				path = filepath.Join(args[1], args[3])
+			} else {
+				path = filepath.Join(args[1], "price-history.json") // default filename
+			}
+			_, err := mtgogetter.ReadCloserToPath(first_file_from_zip, path)
+			if err != nil {
+				return fmt.Errorf("error writing file to disk: %s", err)
+			}
+		} else if mtgogetter.OutputIsStdout(cmd) {
+			// If the --save-as flag was not set (or is set to stdout), print to stdout
 			_, err := mtgogetter.ReadCloserToStdout(first_file_from_zip)
 			if err != nil {
 				return fmt.Errorf("error writing file to stdout: %s", err)
