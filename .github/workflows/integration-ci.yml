@@ -84,7 +84,7 @@ jobs:
           zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
       - uses: actions/upload-artifact@v3
         with:
-          name: packaged-mtgoparser
+          name: macos-mtgo-collection-manager
           path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
@@ -99,7 +99,7 @@ jobs:
           zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
       - uses: actions/upload-artifact@v3
         with:
-          name: packaged-mtgoparser
+          name: linux-mtgo-collection-manager
           path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
@@ -109,7 +109,7 @@ jobs:
           .\wmake.ps1 pack -PACKAGE_NAME ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm
       - uses: actions/upload-artifact@v3
         with:
-          name: packaged-mtgoparser
+          name: windows-mtgo-collection-manager
           path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
