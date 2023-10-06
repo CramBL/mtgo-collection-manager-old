@@ -280,11 +280,14 @@ function Build-AndPack {
 }
 
 function Compress-MCM {
-    New-Item -Path .\bin -ItemType Directory
-    Copy-Item -Path .\mtgogetter\mtgogetter.exe -Destination .\bin
-    Copy-Item -Path .\mtgoparser\build\src\mtgo_preprocessor\Release\mtgo_preprocesser.exe -Destination .\bin
-    Compress-Archive -Path .\mtgogui\target\release\mtgogui.exe, .\bin -DestinationPath ".\${PACKAGE_NAME}.zip"
-    Remove-Item -Path .\bin -Recurse
+    New-Item -Path .\mtgo-collection-manager -ItemType Directory
+    New-Item -Path .\mtgo-collection-manager\bin -ItemType Directory
+    Copy-Item -Path .\mtgogetter\mtgogetter.exe -Destination .\mtgo-collection-manager\bin
+    Copy-Item -Path .\mtgoparser\build\src\mtgo_preprocessor\Release\mtgo_preprocesser.exe -Destination .\mtgo-collection-manager\bin
+    Copy-Item -Path .\mtgogui\target\release\mtgogui.exe -Destination .\mtgo-collection-manager
+    Rename-Item -Path .\mtgo-collection-manager\mtgogui.exe -NewName mtgo-collection-manager.exe
+    Compress-Archive -Path .\mtgo-collection-manager -DestinationPath ".\${PACKAGE_NAME}.zip"
+    Remove-Item -Path .\mtgo-collection-manager -Recurse
 }
 
 # Define ordered targets
