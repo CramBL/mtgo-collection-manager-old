@@ -2,7 +2,8 @@ param (
     [string]$target = "default",
     [string]$MTGOPARSER_IPO = "On",
     [string]$MTGOPARSER_GENERATOR = "Ninja Multi-Config",
-    [string]$BUILD_MODE = "Debug"
+    [string]$BUILD_MODE = "Debug",
+    [string]$PACKAGE_NAME = "mtgo-collection-manager"
 )
 
 # Default flags
@@ -265,6 +266,27 @@ function Build-Clean {
     Set-Location -Path $PSScriptRoot
 }
 
+function Build-AndPack {
+
+    Write-Host "-------------------------------------"
+    Write-Host "==> Building and packing all binaries"
+    Write-Host "-------------------------------------"
+    Build-AllIntegration
+    Compress-MCM
+    Write-Host "============================================== "
+    Write-Host "=== Done building and packing all binaries === "
+    Write-Host "===>   ${PACKAGE_NAME}.zip"
+    Write-Host "============================================== "
+}
+
+function Compress-MCM {
+    New-Item -Path .\bin -ItemType Directory
+    Copy-Item -Path .\mtgogetter\mtgogetter.exe -Destination .\bin
+    Copy-Item -Path .\mtgoparser\build\src\mtgo_preprocessor\Release\mtgo_preprocesser.exe -Destination .\bin
+    Compress-Archive -Path .\mtgogui\target\release\mtgogui.exe, .\bin -DestinationPath ".\${PACKAGE_NAME}.zip"
+    Remove-Item -Path .\bin -Recurse
+}
+
 # Define ordered targets
 $targets = [ordered]@{
     "all"               = { Build-All }
@@ -282,6 +304,8 @@ $targets = [ordered]@{
     "test-mtgoupdater"  = { Test-Mtgoupdater }
     "build-mtgogui"     = { Build-Mtgogui }
     "test-mtgogui"      = { Test-Mtgogui }
+    "pack"              = { Build-AndPack }
+    "zip-bins"          = { Compress-MCM }
 }
 
 # Check if the specified target exists, and if not, show a list of available targets
