@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use crate::mtgogetter_bin;
 use crate::util;
 
@@ -11,6 +13,16 @@ where
 
 pub fn mtgogetter_version() -> Result<std::process::Output, std::io::Error> {
     run_mtgogetter(["--version"])
+}
+
+pub fn mtgogetter_update_all(save_to_dir: &OsStr) -> Result<std::process::Output, std::io::Error> {
+    run_mtgogetter([
+        "update",
+        "--save-to-dir",
+        save_to_dir
+            .to_str()
+            .unwrap_or_else(|| panic!("{save_to_dir:?} is not valid unicode")),
+    ])
 }
 
 pub fn download_goatbots_price_history() -> Result<std::process::Output, std::io::Error> {
