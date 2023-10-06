@@ -34,12 +34,13 @@ const DEFAULT_APP_WIDTH: i32 = 1400;
 const DEFAULT_APP_HEIGHT: i32 = 800;
 const WIDGET_PADDING: i32 = 0;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum Message {
     Quit,
     Example,
     MenuBar(menubar::MbMessage),
     Table(table::CtMessage),
+    GotFullTradeList(Box<str>),
 }
 
 impl From<menubar::MbMessage> for Message {
@@ -81,8 +82,8 @@ impl MtgoGui {
         main_win.set_color(Color::Black);
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 25, &ev_send);
 
-        set_left_col_box(ev_send);
-        let collection_table = collection_view::set_collection_main_box(ev_send);
+        set_left_col_box(ev_send.clone());
+        let collection_table = collection_view::set_collection_main_box(ev_send.clone());
 
         main_win.end();
         main_win.show();
@@ -118,6 +119,16 @@ impl MtgoGui {
                     Message::Table(t_m) => {
                         self.collection.handle_ev(t_m);
                         self.app.redraw();
+                    }
+                    Message::GotFullTradeList(path) => {
+                        // Invoke MTGO getter
+                        // Fill the progress bar as appropriate
+                        // Give the full trade list to the parser
+                        // self.menu.full_trade_list
+                        // Invoke MTGO preprocessor
+                        // Fill the progress bar as appropriate
+                        // Give all the data to the collection table
+                        todo!("Got full trade list {path}")
                     }
                 }
             }
