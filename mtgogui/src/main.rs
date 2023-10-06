@@ -2,6 +2,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
+use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
@@ -27,6 +28,9 @@ use mtgoupdater::mtgogetter_api::mtgogetter_version;
 use table::{Category, CtMessage};
 
 use crate::util::center;
+
+// Directory that stores all collection data
+const APP_DATA_DIR: &str = "appdata";
 
 const MIN_APP_WIDTH: i32 = 400;
 const MIN_APP_HEIGHT: i32 = 400;
@@ -120,15 +124,46 @@ impl MtgoGui {
                         self.collection.handle_ev(t_m);
                         self.app.redraw();
                     }
-                    Message::GotFullTradeList(path) => {
+                    Message::GotFullTradeList(full_trade_list_path) => {
                         // Invoke MTGO getter
-                        // Fill the progress bar as appropriate
+                        match mtgoupdater::mtgogetter_api::mtgogetter_update_all(OsStr::new(
+                            APP_DATA_DIR,
+                        )) {
+                            Ok(output) => {
+                                eprintln!("MTGO Getter output: {}", output.status);
+                            }
+                            Err(e) => {
+                                eprintln!("MTGO Getter error: {}", e);
+                            }
+                        }
+                        // TOOD: Fill the progress bar as appropriate
                         // Give the full trade list to the parser
-                        // self.menu.full_trade_list
+                        // Find all the most recent files in the appdata directory
+                        let appdata_dir = std::path::Path::new(APP_DATA_DIR);
+                        let scryfall_path =
+                            util::first_file_match_from_dir("scryfall", appdata_dir, None).unwrap();
+                        let card_definitions_path =
+                            util::first_file_match_from_dir("card-def", appdata_dir, None).unwrap();
+                        let price_history_path =
+                            util::first_file_match_from_dir("price-his", appdata_dir, None)
+                                .unwrap();
                         // Invoke MTGO preprocessor
-                        // Fill the progress bar as appropriate
-                        // Give all the data to the collection table
-                        todo!("Got full trade list {path}")
+                        match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
+                            scryfall_path.as_os_str(),
+                            OsStr::new(full_trade_list_path.as_ref()),
+                            card_definitions_path.as_os_str(),
+                            price_history_path.as_os_str(),
+                        ) {
+                            Ok(cards) => {
+                                eprintln!("MTGO Preprocessor output: {} cards", cards.len());
+                                // Fill the progress bar as appropriate
+                                // Give all the data to the collection table
+                                self.collection.set_cards(cards);
+                            }
+                            Err(e) => {
+                                eprintln!("MTGO Preprocessor error: {e}");
+                            }
+                        }
                     }
                 }
             }
