@@ -2,6 +2,4 @@ libxinerama-dev
 libxcursor-dev
 libxfixes-dev
 libxft-dev
-libpango-1.0-0
-libpangoxft-1.0-0
-libpangocairo-1.0-0
+libpango1.0-dev
