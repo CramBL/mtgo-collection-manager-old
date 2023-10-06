@@ -2,10 +2,13 @@ use std::fmt::Alignment;
 
 use fltk::{
     app::{self, App},
-    enums::{Align, Color, FrameType},
+    enums::{Align, Color, Event, FrameType},
+    prelude::WidgetBase,
 };
 use fltk_table::{SmartTable, TableOpts};
 use mtgoupdater::mtgo_card::MtgoCard;
+
+use crate::Message;
 
 #[derive(Debug, Clone, Copy)]
 pub enum CtMessage {
@@ -49,7 +52,7 @@ pub struct CollectionTable {
 }
 
 impl CollectionTable {
-    pub fn new(w: i32, h: i32) -> Self {
+    pub fn new(w: i32, h: i32, ev_sender: app::Sender<Message>) -> Self {
         let mut table = SmartTable::default()
             .with_size(w, h)
             .center_of_parent()
@@ -75,6 +78,40 @@ impl CollectionTable {
         table.set_col_header_value(5, "SET");
         table.set_col_width(5, 45);
         table.set_col_header_value(6, "RARITY");
+
+        table.handle({
+            let mut dnd = false;
+            let mut released = false;
+            move |_, ev| match ev {
+                Event::DndEnter => {
+                    dnd = true;
+                    true
+                }
+                Event::DndDrag => true,
+                Event::DndRelease => {
+                    released = true;
+                    true
+                }
+                Event::Paste => {
+                    if dnd && released {
+                        let path = app::event_text();
+                        eprintln!("path: {}", path);
+                        ev_sender.send(Message::GotFullTradeList(path.into()));
+                        dnd = false;
+                        released = false;
+                        true
+                    } else {
+                        false
+                    }
+                }
+                Event::DndLeave => {
+                    dnd = false;
+                    released = false;
+                    true
+                }
+                _ => false,
+            }
+        });
 
         Self {
             table,
@@ -200,11 +237,5 @@ impl CollectionTable {
             self.table.set_cell_value(row_idx, 5, &c.set);
             self.table.set_cell_value(row_idx, 6, &c.rarity.to_string());
         }
-    }
-}
-
-impl Default for CollectionTable {
-    fn default() -> Self {
-        Self::new(790, 590)
     }
 }

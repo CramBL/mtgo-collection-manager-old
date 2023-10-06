@@ -25,9 +25,14 @@ pub fn set_collection_main_box(ev_send: app::Sender<Message>) -> table::Collecti
     flx_header.set_align(enums::Align::RightTop);
 
     use Category::*;
-    let btn_sort_quantity = btn_with_emit(ev_send, "Quantity", CtMessage::SortBy(Quantity).into());
-    let btn_srt_name = btn_with_emit(ev_send, "Name", CtMessage::SortBy(Name).into());
-    let btn_sort_rarity = btn_with_emit(ev_send, "Rarity", CtMessage::SortBy(Rarity).into());
+    let btn_sort_quantity = btn_with_emit(
+        ev_send.clone(),
+        "Quantity",
+        CtMessage::SortBy(Quantity).into(),
+    );
+    let btn_srt_name = btn_with_emit(ev_send.clone(), "Name", CtMessage::SortBy(Name).into());
+    let btn_sort_rarity =
+        btn_with_emit(ev_send.clone(), "Rarity", CtMessage::SortBy(Rarity).into());
 
     flx_header.fixed(&btn_sort_quantity, 100);
     flx_header.fixed(&btn_srt_name, 100);
@@ -35,7 +40,7 @@ pub fn set_collection_main_box(ev_send: app::Sender<Message>) -> table::Collecti
     flx_header.end();
 
     flx_table.fixed(&flx_header, 50);
-    let collection_table = table::CollectionTable::new(TABLE_WIDTH, 720);
+    let collection_table = table::CollectionTable::new(TABLE_WIDTH, 720, ev_send);
     flx_table.end();
 
     collection_table
