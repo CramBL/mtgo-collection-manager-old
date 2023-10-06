@@ -267,10 +267,10 @@ function Build-Clean {
 }
 
 function Build-AndPack {
-
     Write-Host "-------------------------------------"
     Write-Host "==> Building and packing all binaries"
     Write-Host "-------------------------------------"
+    $BUILD_MODE = "Release"
     Build-AllIntegration
     Compress-MCM
     Write-Host "============================================== "
