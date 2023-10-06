@@ -1,0 +1,7 @@
+Xinerama
+Xcursor
+Xfixes
+Xft
+pango-1.0
+pangoxft-1.0
+pangocairo-1.0
