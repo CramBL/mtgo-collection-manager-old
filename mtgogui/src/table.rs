@@ -1,6 +1,8 @@
+use std::fmt::Alignment;
+
 use fltk::{
     app::{self, App},
-    enums::Color,
+    enums::{Align, Color, FrameType},
 };
 use fltk_table::{SmartTable, TableOpts};
 use mtgoupdater::mtgo_card::MtgoCard;
@@ -56,7 +58,8 @@ impl CollectionTable {
                 cols: 7,
                 editable: false,
                 cell_font_color: Color::White,
-
+                header_frame: FrameType::NoBox,
+                header_font_color: Color::White,
                 ..Default::default()
             });
 
