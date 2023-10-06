@@ -40,6 +40,11 @@ jobs:
             generator: "Visual Studio 17 2022"
             enable_ipo: On
 
+          - os: windows-2022
+            compiler: gcc-13
+            generator: "Ninja Multi-Config"
+            enable_ipo: On
+
     name: Test
     steps:
       - uses: actions/checkout@v3
