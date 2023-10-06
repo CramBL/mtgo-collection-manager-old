@@ -283,11 +283,28 @@ function Compress-MCM {
     New-Item -Path .\mtgo-collection-manager -ItemType Directory
     New-Item -Path .\mtgo-collection-manager\bin -ItemType Directory
     Copy-Item -Path .\mtgogetter\mtgogetter.exe -Destination .\mtgo-collection-manager\bin
-    Get-ChildItem -Path .\mtgoparser\build\src\mtgo_preprocessor\Release -Recurse |
-        Copy-Item -Destination .\mtgo-collection-manager\bin
+    # Pack and extract mtgo_preprocessor files
+    Set-Location mtgoparser\build
+    cpack -G ZIP
+    $packedZip = Get-ChildItem -Path $folderPath -Filter "mtgoparser-*.zip" | Select-Object -First 1
+    $tempFolder = Join-Path -Path $env:TEMP -ChildPath "ExtractedZip"
+    Expand-Archive -Path $packedZip.FullName -DestinationPath $tempFolder -Force
+    # Find the first folder within the extracted content
+    $firstFolder = Get-ChildItem -Path $tempFolder | Where-Object { $_.PSIsContainer } | Select-Object -First 1
+    # Define the source folder within the extracted content
+    $sourceFolder = Join-Path -Path $firstFolder.FullName -ChildPath "bin"
+    # Copy the contents of the "bin" folder to the destination folder where we'll make the final zip
+    Copy-Item -Path $sourceFolder\* -Destination ..\..\mtgo-collection-manager\bin -Recurse -Force
+    # Clean up the temporary extraction folder
+    Remove-Item -Path $tempFolder -Recurse -Force
+    # Back to root
+    Set-Location ..\..
+    # Copy and rename
     Copy-Item -Path .\mtgogui\target\release\mtgogui.exe -Destination .\mtgo-collection-manager
     Rename-Item -Path .\mtgo-collection-manager\mtgogui.exe -NewName mtgo-collection-manager.exe
+    # Make final archive
     Compress-Archive -Path .\mtgo-collection-manager -DestinationPath ".\${PACKAGE_NAME}.zip"
+    # Cleanup
     Remove-Item -Path .\mtgo-collection-manager -Recurse
 }
 
