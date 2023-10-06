@@ -74,18 +74,22 @@ jobs:
           .\wmake.ps1 build-integration -MTGOPARSER_IPO ${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR "${{matrix.generator}}" -BUILD_MODE Release
           .\wmake.ps1 test
 
-      - name: 📦 Pack - Windows 💻
-        if: runner.os == 'Windows'
+      - name: 📦 Pack - MacOS 🍎
+        if: runner.os == 'macOS'
         run: |
-         .\wmake.ps1 pack -PACKAGE_NAME ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm
+          mkdir -p mtgo-collection-manager/bin
+          cp mtgogetter/mtgogetter mtgo-collection-manager/bin
+          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser mtgo-collection-manager/bin
+          cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
+          zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
       - uses: actions/upload-artifact@v3
         with:
           name: packaged-mtgoparser
           path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
-      - name: 📦 Pack - Unix 🐧🍎
-        if: runner.os != 'Windows'
+      - name: 📦 Pack - Linux 🐧
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get -y install zip
           mkdir -p mtgo-collection-manager/bin
@@ -98,3 +102,14 @@ jobs:
           name: packaged-mtgoparser
           path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
+
+      - name: 📦 Pack - Windows 💻
+        if: runner.os == 'Windows'
+        run: |
+          .\wmake.ps1 pack -PACKAGE_NAME ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packaged-mtgoparser
+          path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
+          retention-days: 14
+
