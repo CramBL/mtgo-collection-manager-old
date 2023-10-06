@@ -1,7 +1,8 @@
 param (
     [string]$target = "default",
     [string]$MTGOPARSER_IPO = "On",
-    [string]$MTGOPARSER_GENERATOR = "Ninja Multi-Config"
+    [string]$MTGOPARSER_GENERATOR = "Ninja Multi-Config",
+    [string]$BUILD_MODE = "Debug"
 )
 
 # Default flags
@@ -51,14 +52,14 @@ try {
 
 function Test-GoInstallation {
     if ($GO_VERSION -eq "NOT FOUND") {
-        Write-Host "Error: Go is not installed. Please install Go and try again."
+        Write-Error "Error: Go is not installed. Please install Go and try again."
         exit 1
     }
 }
 
 function Test-RustInstallation {
     if ($RUST_VERSION -eq "NOT FOUND") {
-        Write-Host "Error: Rust is not installed. Please install Rust and try again."
+        Write-Error "Error: Rust is not installed. Please install Rust and try again."
         exit 1
     }
 }
@@ -91,6 +92,7 @@ function Build-All {
     Build-Mtgogetter
     Build-Mtgoparser
     Build-Mtgoupdater
+    Build-Mtgogui
     Write-Host "================================= "
     Write-Host "=== Done building all targets === "
     Write-Host "================================= "
@@ -101,6 +103,7 @@ function Build-AllIntegration {
     Build-Mtgogetter
     Build-MtgoparserIntegration
     Build-Mtgoupdater
+    Build-Mtgogui
 }
 
 function Test-All {
@@ -121,11 +124,11 @@ function Build-Mtgoparser {
     Set-Location mtgoparser
     cmake -S . -B build -G "${MTGOPARSER_GENERATOR}" -Dmtgoparser_ENABLE_IPO="${MTGOPARSER_IPO}" -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE} -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV} 2>&1
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "!!! ERROR while setting up build files for MTGO Parser: code ${LASTEXITCODE}"
+        Write-Error "!!! ERROR while setting up build files for MTGO Parser: code ${LASTEXITCODE}"
     } else {
         cmake --build build --config ${MTGOPARSER_BUILD_MODE}
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "!!! ERROR while building MTGO Parser: code ${LASTEXITCODE}"
+            Write-Error "!!! ERROR while building MTGO Parser: code ${LASTEXITCODE}"
         } else {
             Write-Host "=== Done building MTGO Parser ==="
         }
@@ -151,7 +154,7 @@ function Test-Mtgoparser {
     ctest --output-on-failure
 
     if (${LASTEXITCODE} -ne 0) {
-        Write-Host "MTGO Parser test failed!"
+        Write-Error "MTGO Parser test failed!"
         Write-Host "Rerunning each test suite with more details until one fails"
         Set-Location test
 
@@ -165,7 +168,7 @@ function Test-Mtgoparser {
         foreach ($testSuite in $testSuites) {
             & .\Release\$testSuite
             if (${LASTEXITCODE} -ne 0) {
-                Write-Host "!!! $testSuite failed"
+                Write-Error "!!! $testSuite failed"
                 break
             }
         }
@@ -205,7 +208,11 @@ function Build-Mtgoupdater {
     Test-RustInstallation
     Write-Host "==> Building MTGO Updater..."
     Set-Location mtgoupdater
-    cargo build
+    if ($BUILD_MODE -icontains "release") {
+        cargo build -r
+    } else {
+        cargo build
+    }
     Set-Location ..
     Write-Host "=== Done building MTGO Updater ==="
 }
@@ -220,6 +227,31 @@ function Test-Mtgoupdater {
     Write-Host "=== Done testing MTGO Updater ==="
 }
 
+function Build-Mtgogui {
+    Show-Versions
+    Test-RustInstallation
+    Write-Host "==> Building MTGO GUI..."
+    Set-Location mtgogui
+    if ($BUILD_MODE -icontains "release") {
+        cargo build -r
+    } else {
+        cargo build
+    }
+    Set-Location ..
+    Write-Host "=== Done testing MTGO GUI ==="
+}
+
+function Test-Mtgogui {
+    Show-Versions
+    Test-RustInstallation
+    Write-Host "==> Building MTGO GUI..."
+    Set-Location mtgogui
+    Write-Warning "GUI TESTING NOT YET IMPLEMENTED!"
+    #cargo test
+    Set-Location ..
+    #Write-Host "=== Done testing MTGO GUI ==="
+}
+
 function Build-Clean {
     Remove-Item -Path "mtgoparser/build" -Force -Recurse
     Write-Host "mtgoparser cleaned"
@@ -229,6 +261,8 @@ function Build-Clean {
     Set-Location ..\mtgogetter
     go clean
     Write-Host "mtgogetter cleaned"
+    Set-Location ..\mtgogui
+    cargo clean
     Set-Location -Path $PSScriptRoot
 }
 
@@ -247,6 +281,8 @@ $targets = [ordered]@{
     "bench-mtgoparser"  = { Test-MtgoparserBenchmark }
     "build-mtgoupdater" = { Build-Mtgoupdater }
     "test-mtgoupdater"  = { Test-Mtgoupdater }
+    "build-mtgogui"     = { Build-Mtgogui }
+    "test-mtgogui"      = { Test-Mtgogui }
 }
 
 # Check if the specified target exists, and if not, show a list of available targets
