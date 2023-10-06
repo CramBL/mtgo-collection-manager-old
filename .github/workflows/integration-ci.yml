@@ -57,11 +57,39 @@ jobs:
       - name: 📝 Build & Run tests - Unix 🐧🍎
         if: runner.os != 'Windows'
         run: |
-          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }}
+          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} -BUILD_MODE=Release
           make test
 
       - name: 📝 Build & Run tests - Windows 💻
         if: runner.os == 'Windows'
         run: |
-          .\wmake.ps1 build-integration -MTGOPARSER_IPO=${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR="${{matrix.generator}}"
+          .\wmake.ps1 build-integration -MTGOPARSER_IPO ${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR "${{matrix.generator}}" -BUILD_MODE Release
           .\wmake.ps1 test
+
+      - name: 📦 Pack - Windows 💻
+        if: runner.os == 'Windows'
+        run: |
+          mkdir -p bin
+          cp mtgogetter/mtgogetter.exe bin
+          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser.exe bin
+          cp mtgogui/target/release/mtgogui.exe mtgo-collection-manager.exe
+          zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager.exe bin
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packaged-mtgoparser
+          path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
+          retention-days: 14
+
+      - name: 📦 Pack - Unix 🐧🍎
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p bin
+          cp mtgogetter/mtgogetter bin
+          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser bin
+          cp mtgogui/target/release/mtgogui mtgo-collection-manager
+          zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager bin
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packaged-mtgoparser
+          path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
+          retention-days: 14
