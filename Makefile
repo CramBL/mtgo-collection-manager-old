@@ -1,4 +1,5 @@
 # Default flags
+BUILD_MODE := Debug
 # MTGOPARSER_GENERATOR := "Ninja Multi-Config"
 MTGOPARSER_BUILD_MODE := Release
 MTGOPARSER_ENABLE_COV := false
@@ -56,6 +57,7 @@ all:\
 	build-mtgogetter \
 	build-mtgoparser \
 	build-mtgoupdater \
+	build-mtgogui \
 
 .PHONY: build-integration
 build-integration:\
@@ -63,6 +65,7 @@ build-integration:\
 	build-mtgogetter \
 	build-mtgoparser-integration \
 	build-mtgoupdater \
+	build-mtgogui \
 
 .PHONY: test
 test:\
@@ -70,6 +73,7 @@ test:\
 	test-mtgogetter \
 	test-mtgoparser \
 	test-mtgoupdater \
+	test-mtgogui \
 
 .PHONY: show-versions
 show-versions:
@@ -105,7 +109,7 @@ build-mtgoparser:
 .PHONY: build-mtgoparser-integration
 build-mtgoparser-integration:
 	@echo "==> Building MTGO Parser..."
-	cd mtgoparser && cmake -S . -B build -G $(MTGOPARSER_GENERATOR) -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
+	cd mtgoparser && cmake -S . -B build -G $(MTGOPARSER_GENERATOR) -Dmtgoparser_DEPLOYING_BINARY=On -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
 	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
 	@echo "=== Done building MTGO Parser ==="
 
@@ -125,14 +129,40 @@ test-mtgoparser:
 .PHONY: build-mtgoupdater
 build-mtgoupdater:
 	@echo "==> Building MTGO Updater..."
+ifeq ($(BUILD_MODE),Release)
+	cd mtgoupdater && cargo build --release
+else
 	cd mtgoupdater && cargo build
+endif
 	@echo "=== Done building MTGO Updater ==="
 
-.PHONY: build-mtgoupdater
+.PHONY: test-mtgoupdater
 test-mtgoupdater:
 	@echo "==> Testing MTGO Updater..."
 	cd mtgoupdater && cargo test -- --nocapture
 	@echo "=== Done testing MTGO updater ==="
+
+.PHONY: build-mtgogui
+build-mtgogui:
+	@echo "==> Building MTGO GUI..."
+ifeq ($(BUILD_MODE),Release)
+	cd mtgogui && cargo build --release
+else
+	cd mtgogui && cargo build
+endif
+	@echo "=== Done building MTGO GUI ==="
+
+
+.PHONY: test-mtgogui
+test-mtgogui:
+	@echo "==> Testing MTGO GUI..."
+ifeq ($(shell uname -s),Darwin)
+	@echo "WARNING CARGO TEST FOR FLTK ARE CURRENTLY NOT WORKING ON MACOS"
+else
+	cd mtgogui && cargo test -- --nocapture
+endif
+	@echo "=== Done testing MTGO GUI ==="
+
 
 .PHONY: clean
 clean:
@@ -140,3 +170,4 @@ clean:
 	@echo "mtgoparser cleaned"
 	cd mtgoupdater && cargo clean
 	cd mtgogetter && go clean
+	cd mtgogui && cargo clean

@@ -18,3 +18,5 @@ target_link_system_libraries(
           )
 
 target_include_directories(mtgo_preprocesser PRIVATE "${CMAKE_BINARY_DIR}/configured_files/include")
+include(../../cmake/Utilities.cmake)
+copy_runtime_dlls(mtgo_preprocesser)

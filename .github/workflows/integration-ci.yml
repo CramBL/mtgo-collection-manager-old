@@ -25,24 +25,35 @@ jobs:
             compiler: gcc-13
             generator: "Ninja Multi-Config"
             enable_ipo: On
-            packaging_maintainer_mode: OFF
-            build_shared: OFF
+
+          - os: ubuntu-22.04
+            compiler: llvm-15.0.3
+            generator: "Ninja Multi-Config"
+            enable_ipo: On
 
           - os: macos-12
             compiler: llvm-15.0.3
             generator: "Ninja Multi-Config"
             enable_ipo: Off
-            packaging_maintainer_mode: OFF
-            build_shared: OFF
 
           - os: windows-2022
             compiler: msvc
             generator: "Visual Studio 17 2022"
             enable_ipo: On
 
+          - os: windows-2022
+            compiler: llvm-15.0.3
+            generator: "Ninja Multi-Config"
+            enable_ipo: On
+
+
     name: Test
     steps:
       - uses: actions/checkout@v3
+      - name: 🗻 Export constants as environment variables 🏝️
+        uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.github/constants.env'
       - uses: moonrepo/setup-rust@v1
       - uses: aminya/setup-cpp@v1
         with:
@@ -53,15 +64,81 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-
-      - name: 📝 Build & Run tests - Unix 🐧🍎
-        if: runner.os != 'Windows'
+####                                              ####
+#🍎 MacOS 🍎 build -> test -> pack -> upload   🍎🍎#
+####                                              ####
+      - name: 📝 Build & Run tests - MacOS🍎
+        if: runner.os == 'macOS'
         run: |
-          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }}
+          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} BUILD_MODE=Release
           make test
+
+      - name: 📦 Pack - MacOS 🍎
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p mtgo-collection-manager/bin
+          cp mtgogetter/mtgogetter mtgo-collection-manager/bin
+          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser mtgo-collection-manager/bin
+          cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
+          zip -r macos-12-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
+
+      - name: 📩 Upload - MacOS 🍎
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-mtgo-collection-manager
+          path: macos-12-${{ matrix.compiler }}-mtgo-cm.zip
+          retention-days: 14
+
+####                                              ####
+#🐧 Linux 🐧 build -> test -> pack -> upload   🐧🐧#
+####                                              ####
+
+      - name: 📝 Build & Run tests - Linux 🐧
+        if: runner.os == 'Linux'
+        run: |
+          cat linux-fltk-deps.txt | xargs sudo apt-get -y install
+          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} BUILD_MODE=Release
+          make test
+
+      - name: 📦 Pack - Linux 🐧
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get -y install zip
+          mkdir -p mtgo-collection-manager/bin
+          cp mtgogetter/mtgogetter mtgo-collection-manager/bin
+          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser mtgo-collection-manager/bin
+          cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
+          zip -r ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
+
+      - name: 📩 Upload - Linux 🐧
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-mtgo-collection-manager
+          path: ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
+          retention-days: 14
+
+####                                              ####
+#💻 Windows 💻  build -> test -> pack -> upload 💻💻
+####                                              ####
 
       - name: 📝 Build & Run tests - Windows 💻
         if: runner.os == 'Windows'
         run: |
-          .\wmake.ps1 build-integration -MTGOPARSER_IPO=${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR="${{matrix.generator}}"
+          .\wmake.ps1 build-integration -MTGOPARSER_IPO ${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR "${{matrix.generator}}" -BUILD_MODE Release
           .\wmake.ps1 test
+
+      - name: 📦 Pack - Windows 💻
+        if: runner.os == 'Windows'
+        run: |
+          .\wmake.ps1 pack -PACKAGE_NAME windows-2022-${{ matrix.compiler }}-mtgo-cm
+
+      - name: 📩 Upload - Windows 💻
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-mtgo-collection-manager
+          path: windows-2022-${{ matrix.compiler }}-mtgo-cm.zip
+          retention-days: 14
+

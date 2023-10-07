@@ -83,7 +83,7 @@ function(
       endif()
     endif()
   endif()
-
+  message(STATUS "List of sanitizers: ${LIST_OF_SANITIZERS}")
 endfunction()
 
 
