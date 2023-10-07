@@ -32,13 +32,8 @@ macro(
 
     check_cxx_compiler_flag(-fstack-protector-strong STACK_PROTECTOR)
     if(STACK_PROTECTOR)
-
-      if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND mtgoparser_DEPLOYING_BINARY)
-        message(STATUS "NOT including stack smash protector on deploying binary on Windows with GCC")
-      else()
-        set(NEW_COMPILE_OPTIONS "${NEW_COMPILE_OPTIONS} -fstack-protector-strong")
-        message(STATUS "*** g++/clang -fstack-protector-strong enabled")
-      endif()
+      set(NEW_COMPILE_OPTIONS "${NEW_COMPILE_OPTIONS} -fstack-protector-strong")
+      message(STATUS "*** g++/clang -fstack-protector-strong enabled")
     else()
       message(STATUS "*** g++/clang -fstack-protector-strong NOT enabled (not supported)")
     endif()
