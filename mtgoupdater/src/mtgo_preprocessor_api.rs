@@ -43,17 +43,3 @@ pub fn run_mtgo_preprocessor_parse_full(
     let stdout_json = String::from_utf8_lossy(&out.stdout);
     Ok(serde_json::from_str(&stdout_json).unwrap())
 }
-
-pub fn run_mtgo_preprocessor_example() -> Result<std::process::Output, std::io::Error> {
-    run_mtgo_preprocessor([
-        "run",
-        "--example-json-formats",
-        "--example-scryfall",
-        "--caller",
-        "mtgoupdater",
-    ])
-}
-
-pub fn run_mtgo_preprocessor_json_example() -> Result<std::process::Output, std::io::Error> {
-    run_mtgo_preprocessor(["run", "--example-json-formats", "--caller", "mtgoupdater"])
-}
