@@ -92,11 +92,11 @@ jobs:
           cp mtgogetter/mtgogetter mtgo-collection-manager/bin
           cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser mtgo-collection-manager/bin
           cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
-          zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
+          zip -r macos-12-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
       - uses: actions/upload-artifact@v3
         with:
           name: macos-mtgo-collection-manager
-          path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
+          path: macos-12-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
       - name: 📦 Pack - Linux 🐧
@@ -107,11 +107,11 @@ jobs:
           cp mtgogetter/mtgogetter mtgo-collection-manager/bin
           cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser mtgo-collection-manager/bin
           cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
-          zip -r ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
+          zip -r ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
       - uses: actions/upload-artifact@v3
         with:
           name: linux-mtgo-collection-manager
-          path: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm.zip
+          path: ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
       - name: 📦 Pack - Windows 💻
