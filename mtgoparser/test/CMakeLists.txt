@@ -1,4 +1,9 @@
-cmake_minimum_required(VERSION 3.26)
+if(WIN32)
+  # Because of the `-t` option when including runtime dlls
+  cmake_minimum_required(VERSION 3.26) # LLVM 16.0.0 requires >= 3.20.0
+else()
+  cmake_minimum_required(VERSION 3.21)
+endif()
 
 project(mtgoparserTests LANGUAGES CXX)
 

@@ -25,13 +25,6 @@ pub const DEV_MTGOPARSER_BIN: &str = if cfg!(windows) {
     "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser"
 };
 
-pub fn run_mtgo_preprocessor_gui_example() -> Result<std::process::Output, std::io::Error> {
-    crate::util::run_with_args(
-        crate::mtgoparser_bin(),
-        ["run", "--gui-example", "--caller", "mtgoupdater"],
-    )
-}
-
 pub fn run_mtgo_preprocessor_example_collection_json_stdout(
 ) -> Result<std::process::Output, std::io::Error> {
     crate::util::run_with_args(crate::mtgoparser_bin(), ["run", "--collection-json-out"])
