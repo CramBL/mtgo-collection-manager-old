@@ -56,8 +56,6 @@ int main(int argc, char *argv[])
   spdlog::set_default_logger(spdlog::stderr_color_st("rename_default_logger_to_keep_format"));
   spdlog::set_default_logger(spdlog::stderr_color_st(""));
 
-  std::string test_data_dir{ "./../test/test-data" };
-
   // Parse (and validate) command-line arguments
   if (auto errors = config.Parse(argc, argv)) {
     spdlog::error("{} arguments failed to validate", errors);

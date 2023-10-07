@@ -125,6 +125,8 @@ impl MtgoGui {
                         self.app.redraw();
                     }
                     Message::GotFullTradeList(full_trade_list_path) => {
+                        // TODO: Some basic verification that we actually got a trade list and not some random non-sense.
+
                         // Invoke MTGO getter
                         match mtgoupdater::mtgogetter_api::mtgogetter_update_all(OsStr::new(
                             APP_DATA_DIR,
