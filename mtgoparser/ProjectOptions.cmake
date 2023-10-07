@@ -1,5 +1,4 @@
 include(cmake/SystemLink.cmake)
-include(cmake/LibFuzzer.cmake)
 include(CMakeDependentOption)
 include(CheckCXXCompilerFlag)
 
@@ -91,16 +90,6 @@ macro(mtgoparser_setup_options)
       mtgoparser_ENABLE_PCH
       mtgoparser_ENABLE_CACHE)
   endif()
-
-  mtgoparser_check_libfuzzer_support(LIBFUZZER_SUPPORTED)
-  if(LIBFUZZER_SUPPORTED AND (mtgoparser_ENABLE_SANITIZER_ADDRESS OR mtgoparser_ENABLE_SANITIZER_THREAD OR mtgoparser_ENABLE_SANITIZER_UNDEFINED))
-    set(DEFAULT_FUZZER ON)
-  else()
-    set(DEFAULT_FUZZER OFF)
-  endif()
-
-  option(mtgoparser_BUILD_FUZZ_TESTS "Enable fuzz testing executable" ${DEFAULT_FUZZER})
-
 endmacro()
 
 macro(mtgoparser_global_options)
