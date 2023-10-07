@@ -29,6 +29,15 @@ macro(mtgoparser_setup_options)
     OFF)
 
   mtgoparser_supports_sanitizers()
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # So that the binary is still portable when stack protection is enabled
+    message(STATUS "GCC -> statically linking libgcc and libstdc++")
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # So that the binary is still portable because something is making us depend on clang_rt.asan_dynamic-x86_64.dll when compiling with MSVC
+    message(STATUS "MSVC -> statically linking CRT")
+    set(CMAKE_EXE_LINKER_FLAGS "/MT")
+  endif()
 
   if(NOT PROJECT_IS_TOP_LEVEL OR mtgoparser_PACKAGING_MAINTAINER_MODE)
     option(mtgoparser_ENABLE_IPO "Enable IPO/LTO" OFF)
