@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.26)
-
 project(mtgoparserTests LANGUAGES CXX)
 
 # ---- Test as standalone project the exported config package ----
