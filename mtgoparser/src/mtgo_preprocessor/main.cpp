@@ -53,8 +53,6 @@ constexpr clap::OptionArray opt_array = clap::def_options(clap::Option("--versio
   price_hist_path_opt,
   clap::Option("--verbose", true),
   clap::Option("--echo", true),
-  clap::Option("--caller", false, "--calling"),
-  clap::Option("--test-dir", false, "--data-dir"),
   clap::Option("--example-json", true),
   clap::Option("--example-json-formats", true),
   clap::Option("--example-scryfall", true),
@@ -284,18 +282,6 @@ int main(int argc, char *argv[])
   if (config.FlagSet(help_opt)) {
     config.PrintShortHelp();
     return 0;
-  }
-
-
-  if (auto option_arg = config.OptionValue("--caller")) {
-    spdlog::info("Called from: {}", option_arg.value());
-    if (option_arg.value() == "mtgoupdater") {
-      test_data_dir.assign("../test/test-data");
-      spdlog::info("Setting test directory to: {}\n", test_data_dir);
-    }
-  } else if (auto option_test_dir_arg = config.OptionValue("--test-dir")) {
-    test_data_dir.assign(option_test_dir_arg.value());
-    spdlog::info("Setting test directory to: {}\n", option_test_dir_arg.value());
   }
 
   if (config.FlagSet("--echo")) { config.PrintArgs(); }
