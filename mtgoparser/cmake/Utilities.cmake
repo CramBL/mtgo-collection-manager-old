@@ -137,3 +137,20 @@ function(is_verbose var)
         PARENT_SCOPE)
   endif()
 endfunction()
+
+# https://stackoverflow.com/a/73550650
+function(copy_runtime_dlls TARGET)
+  get_property(already_applied TARGET "${TARGET}" PROPERTY _copy_runtime_dlls_applied)
+
+  if (CMAKE_IMPORT_LIBRARY_SUFFIX AND NOT already_applied)
+    add_custom_command(
+      TARGET "${TARGET}" POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -E copy
+      -t "$<TARGET_FILE_DIR:${TARGET}>"
+      "$<TARGET_RUNTIME_DLLS:${TARGET}>"
+      COMMAND_EXPAND_LISTS
+    )
+
+    set_property(TARGET "${TARGET}" PROPERTY _copy_runtime_dlls_applied 1)
+  endif ()
+endfunction()
