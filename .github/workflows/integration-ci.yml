@@ -25,15 +25,16 @@ jobs:
             compiler: gcc-13
             generator: "Ninja Multi-Config"
             enable_ipo: On
-            packaging_maintainer_mode: OFF
-            build_shared: OFF
+
+          - os: ubuntu-22.04
+            compiler: llvm-15.0.3
+            generator: "Ninja Multi-Config"
+            enable_ipo: On
 
           - os: macos-12
             compiler: llvm-15.0.3
             generator: "Ninja Multi-Config"
             enable_ipo: Off
-            packaging_maintainer_mode: OFF
-            build_shared: OFF
 
           - os: windows-2022
             compiler: msvc
