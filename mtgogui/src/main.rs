@@ -183,15 +183,18 @@ impl Default for MtgoGui {
 fn set_left_col_box(ev_send: app::Sender<Message>) {
     let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
     flx_left_col.set_align(enums::Align::LeftTop);
-    let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
-    btn_example.set_callback({
-        let ev_send = ev_send;
-        move |b| {
-            ev_send.send(Message::Example);
 
-            b.set_label("Getting example...");
-        }
-    });
+    if cfg!(debug_assertions) {
+        let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
+        btn_example.set_callback({
+            let ev_send = ev_send;
+            move |b| {
+                ev_send.send(Message::Example);
+
+                b.set_label("Getting example...");
+            }
+        });
+    }
     flx_left_col.end();
 }
 
