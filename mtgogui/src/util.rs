@@ -60,15 +60,17 @@ mod tests {
     }
 
     #[test]
-    fn test_find_first_match_cargo_dot() {
-        // Searching for "Cargo." finds Cargo.lock first because it searches alphabetically
+    fn test_find_first_match_cargo() {
+        // Searching for "Cargo" can find either Cargo.lock or Cargo.toml
 
         let cwd = std::env::current_dir().unwrap();
-        let first_match = first_file_match_from_dir("Cargo.", &cwd, None);
+        let first_match = first_file_match_from_dir("Cargo", &cwd, None);
 
-        assert_eq!(
-            PathBuf::from("Cargo.lock"),
-            first_match.unwrap().file_name().unwrap()
-        );
+        let path = first_match.unwrap();
+        let name = path.file_name().unwrap();
+
+        if name != PathBuf::from("Cargo.lock") && name != PathBuf::from("Cargo.toml") {
+            panic!("Did not get Cargo.lock or Cargo.toml, got: {name:?}")
+        }
     }
 }
