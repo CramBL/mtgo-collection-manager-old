@@ -61,39 +61,7 @@ impl CollectionTable {
         table.set_col_width(Self::COL_RARITY.idx, Self::COL_RARITY.width);
 
         // Support drag-and-drop a full trade list file
-        table.handle({
-            let mut dnd = false;
-            let mut released = false;
-            move |_, ev| match ev {
-                Event::DndEnter => {
-                    dnd = true;
-                    true
-                }
-                Event::DndDrag => true,
-                Event::DndRelease => {
-                    released = true;
-                    true
-                }
-                Event::Paste => {
-                    if dnd && released {
-                        let path = app::event_text();
-                        eprintln!("path: {}", path);
-                        ev_sender.send(Message::GotFullTradeList(path.into()));
-                        dnd = false;
-                        released = false;
-                        true
-                    } else {
-                        false
-                    }
-                }
-                Event::DndLeave => {
-                    dnd = false;
-                    released = false;
-                    true
-                }
-                _ => false,
-            }
-        });
+        util::set_drag_and_drop_callback(&mut table, ev_sender);
 
         Self {
             table,

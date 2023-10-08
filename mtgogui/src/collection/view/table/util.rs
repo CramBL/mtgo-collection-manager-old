@@ -1,6 +1,15 @@
+use fltk::{
+    app::{self, Sender},
+    enums::Event,
+    prelude::WidgetBase,
+};
+use fltk_table::SmartTable;
 use mtgoupdater::mtgo_card::MtgoCard;
 
-use crate::collection::{Category, CurrentSortedBy, Direction};
+use crate::{
+    collection::{Category, CurrentSortedBy, Direction},
+    Message,
+};
 
 pub struct ColumnStyle {
     pub name: &'static str,
@@ -84,4 +93,43 @@ pub fn sort_cards(
             }
         }
     }
+}
+
+/// Drag and drop a file onto the table invokes this callback
+///
+/// Takes the path to the file and forwards it with the event: [Message::GotFullTradeList]
+pub fn set_drag_and_drop_callback(table: &mut SmartTable, ev_sender: Sender<Message>) {
+    table.handle({
+        let mut dnd = false;
+        let mut released = false;
+        move |_, ev| match ev {
+            Event::DndEnter => {
+                dnd = true;
+                true
+            }
+            Event::DndDrag => true,
+            Event::DndRelease => {
+                released = true;
+                true
+            }
+            Event::Paste => {
+                if dnd && released {
+                    let path = app::event_text();
+                    eprintln!("path: {}", path);
+                    ev_sender.send(Message::GotFullTradeList(path.into()));
+                    dnd = false;
+                    released = false;
+                    true
+                } else {
+                    false
+                }
+            }
+            Event::DndLeave => {
+                dnd = false;
+                released = false;
+                true
+            }
+            _ => false,
+        }
+    });
 }
