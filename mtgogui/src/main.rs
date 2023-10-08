@@ -22,7 +22,8 @@ mod menubar;
 mod util;
 
 use collection::view::table;
-use collection::{Category, CtMessage};
+use collection::view::table::column;
+use collection::TableMessage;
 use menubar::McmMenuBar;
 use mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_version;
 use mtgoupdater::mtgogetter_api::mtgogetter_version;
@@ -43,7 +44,7 @@ pub enum Message {
     Quit,
     Example,
     MenuBar(menubar::MbMessage),
-    Table(collection::CtMessage),
+    Table(collection::TableMessage),
     GotFullTradeList(Box<str>),
 }
 
@@ -53,8 +54,8 @@ impl From<menubar::MbMessage> for Message {
     }
 }
 
-impl From<collection::CtMessage> for Message {
-    fn from(ct_msg: collection::CtMessage) -> Self {
+impl From<collection::TableMessage> for Message {
+    fn from(ct_msg: collection::TableMessage) -> Self {
         Message::Table(ct_msg)
     }
 }

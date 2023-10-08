@@ -1,7 +1,4 @@
-use crate::{
-    collection::{Category, CurrentSortedBy, Direction, SortStates},
-    Message,
-};
+use crate::Message;
 use fltk::{app, button, group::Column};
 use fltk::{
     app::App,
@@ -17,8 +14,11 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use super::CtMessage;
+use self::column::{SortStates, SortedBy};
 
+use super::TableMessage;
+
+pub mod column;
 mod util;
 use util::ColumnStyle;
 
@@ -27,7 +27,7 @@ pub struct SortToggle {
 }
 
 impl SortToggle {
-    pub fn new(label: &str, ord: Arc<Mutex<CurrentSortedBy>>) -> Self {
+    pub fn new(label: &str, ord: Arc<Mutex<SortedBy>>) -> Self {
         let mut b = button::Button::default()
             .with_size(70, 0)
             .with_label(label)
@@ -111,9 +111,9 @@ impl CollectionTable {
         }
     }
 
-    pub fn handle_ev(&mut self, ev: CtMessage) {
+    pub fn handle_ev(&mut self, ev: TableMessage) {
         match ev {
-            CtMessage::SortBy(cat) => {
+            TableMessage::SortBy(cat) => {
                 println!("sort by {:?}", cat);
                 util::sort_cards(&mut self.cards, &mut self.sort_states, cat);
                 self.draw_cards();

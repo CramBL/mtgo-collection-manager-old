@@ -7,11 +7,14 @@ use fltk_table::SmartTable;
 use mtgoupdater::mtgo_card::MtgoCard;
 
 use crate::{
-    collection::{Category, CurrentSortedBy, Direction, SortStates},
+    collection::view::table::{SortStates, SortedBy},
     Message,
 };
 
-use super::CollectionTable;
+use super::{
+    column::{Column, Ordering},
+    CollectionTable,
+};
 
 pub struct ColumnStyle {
     pub name: &'static str,
@@ -31,69 +34,69 @@ impl ColumnStyle {
     }
 }
 
-pub fn sort_cards(cards: &mut Vec<MtgoCard>, sort_states: &mut SortStates, category: Category) {
+pub fn sort_cards(cards: &mut Vec<MtgoCard>, sort_states: &mut SortStates, category: Column) {
     match category {
-        Category::Name => {
+        Column::Name => {
             if sort_states.name_ord().is_descending() {
                 cards.sort_by(|a, b| b.name.cmp(&a.name));
-                sort_states.set_name_ord(CurrentSortedBy::Name(Direction::Ascending));
+                sort_states.set_name_ord(SortedBy::Name(Ordering::Ascending));
             } else {
                 cards.sort_by(|a, b| a.name.cmp(&b.name));
-                sort_states.set_name_ord(CurrentSortedBy::Name(Direction::Descending));
+                sort_states.set_name_ord(SortedBy::Name(Ordering::Descending));
             }
         }
-        Category::Quantity => {
+        Column::Quantity => {
             if sort_states.quantity_ord().is_descending() {
                 cards.sort_by(|a, b| a.quantity.cmp(&b.quantity));
-                sort_states.set_quantity_ord(CurrentSortedBy::Quantity(Direction::Ascending));
+                sort_states.set_quantity_ord(SortedBy::Quantity(Ordering::Ascending));
             } else {
                 cards.sort_by(|a, b| b.quantity.cmp(&a.quantity));
-                sort_states.set_quantity_ord(CurrentSortedBy::Quantity(Direction::Descending));
+                sort_states.set_quantity_ord(SortedBy::Quantity(Ordering::Descending));
             }
         }
-        Category::Foil => {
+        Column::Foil => {
             if sort_states.foil_ord().is_descending() {
                 cards.sort_by(|a, b| a.foil.cmp(&b.foil));
-                sort_states.set_foil_ord(CurrentSortedBy::Foil(Direction::Ascending));
+                sort_states.set_foil_ord(SortedBy::Foil(Ordering::Ascending));
             } else {
                 cards.sort_by(|a, b| b.foil.cmp(&a.foil));
-                sort_states.set_foil_ord(CurrentSortedBy::Foil(Direction::Descending));
+                sort_states.set_foil_ord(SortedBy::Foil(Ordering::Descending));
             }
         }
-        Category::Goatbots => {
+        Column::Goatbots => {
             if sort_states.goatbots_ord().is_descending() {
                 cards.sort_by(|a, b| a.goatbots_price.partial_cmp(&b.goatbots_price).unwrap());
-                sort_states.set_goatbots_ord(CurrentSortedBy::Goatbots(Direction::Ascending));
+                sort_states.set_goatbots_ord(SortedBy::Goatbots(Ordering::Ascending));
             } else {
                 cards.sort_by(|a, b| b.goatbots_price.partial_cmp(&a.goatbots_price).unwrap());
-                sort_states.set_goatbots_ord(CurrentSortedBy::Goatbots(Direction::Descending));
+                sort_states.set_goatbots_ord(SortedBy::Goatbots(Ordering::Descending));
             }
         }
-        Category::Scryfall => {
+        Column::Scryfall => {
             if sort_states.cardhoarder_ord().is_descending() {
                 cards.sort_by(|a, b| a.scryfall_price.partial_cmp(&b.scryfall_price).unwrap());
-                sort_states.set_cardhoarder_ord(CurrentSortedBy::Scryfall(Direction::Ascending));
+                sort_states.set_cardhoarder_ord(SortedBy::Scryfall(Ordering::Ascending));
             } else {
                 cards.sort_by(|a, b| b.scryfall_price.partial_cmp(&a.scryfall_price).unwrap());
-                sort_states.set_cardhoarder_ord(CurrentSortedBy::Scryfall(Direction::Descending));
+                sort_states.set_cardhoarder_ord(SortedBy::Scryfall(Ordering::Descending));
             }
         }
-        Category::Set => {
+        Column::Set => {
             if sort_states.set_ord().is_descending() {
                 cards.sort_by(|a, b| b.set.cmp(&a.set));
-                sort_states.set_set_ord(CurrentSortedBy::Set(Direction::Ascending));
+                sort_states.set_set_ord(SortedBy::Set(Ordering::Ascending));
             } else {
                 cards.sort_by(|a, b| a.set.cmp(&b.set));
-                sort_states.set_set_ord(CurrentSortedBy::Set(Direction::Descending));
+                sort_states.set_set_ord(SortedBy::Set(Ordering::Descending));
             }
         }
-        Category::Rarity => {
+        Column::Rarity => {
             if sort_states.rarity_ord().is_descending() {
                 cards.sort_by(|a, b| a.rarity.cmp(&b.rarity));
-                sort_states.set_rarity_ord(CurrentSortedBy::Rarity(Direction::Ascending));
+                sort_states.set_rarity_ord(SortedBy::Rarity(Ordering::Ascending));
             } else {
                 cards.sort_by(|a, b| b.rarity.cmp(&a.rarity));
-                sort_states.set_rarity_ord(CurrentSortedBy::Rarity(Direction::Descending));
+                sort_states.set_rarity_ord(SortedBy::Rarity(Ordering::Descending));
             }
         }
     }
