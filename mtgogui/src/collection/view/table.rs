@@ -32,26 +32,25 @@ impl SortToggle {
             .with_size(70, 0)
             .with_label(label)
             .with_align(Align::Center | Align::Inside);
-        b.set_down_frame(FrameType::FlatBox);
         b.set_selection_color(Color::color_average(b.color(), Color::Foreground, 0.9));
         b.clear_visible_focus();
         b.set_label_size(app::font_size() + 2);
         b.draw(move |b| {
-            if b.value() {
-                // When a button is clicked, it will show this SVG
-                // so it should show what order it's being toggled to
-                let mut image = if ord.lock().unwrap().is_descending() {
-                    // Toggling to sort by ascending order
-                    crate::util::get_asc_svg().clone()
-                } else {
-                    // Toggling to sort by descending order
-                    crate::util::get_desc_svg().clone()
-                };
-                image.scale(15, 15, true, true);
-                image.draw(b.x() + (b.w() - 30) + 5, b.y() + 30, b.w(), b.h());
+            let ordering = ord.lock().unwrap();
+
+            if !ordering.is_sorted() {
+                // Do nothing if not sorted yet
+                return;
             }
+
+            let mut image = if ordering.is_descending() {
+                crate::util::get_desc_svg().clone()
+            } else {
+                crate::util::get_asc_svg().clone()
+            };
+            image.scale(15, 15, true, true);
+            image.draw(b.x() + (b.w() - 20) + 5, b.y() + 30, b.w(), b.h());
         });
-        b.set_frame(FrameType::FlatBox);
         Self { b }
     }
 }
@@ -68,8 +67,8 @@ impl CollectionTable {
     pub const COL_NAME: ColumnStyle = ColumnStyle::new(0, "NAME", 300);
     pub const COL_QUANTITY: ColumnStyle = ColumnStyle::new(1, "Quantity", 60);
     pub const COL_FOIL: ColumnStyle = ColumnStyle::new(2, "FOIL", 60);
-    pub const COL_GOATBOTS: ColumnStyle = ColumnStyle::new(3, "GOATBOTS", 100);
-    pub const COL_CARDHOARDER: ColumnStyle = ColumnStyle::new(4, "CARDHOARDER", 100);
+    pub const COL_GOATBOTS: ColumnStyle = ColumnStyle::new(3, "GOATBOTS", 120);
+    pub const COL_CARDHOARDER: ColumnStyle = ColumnStyle::new(4, "CARDHOARDER", 120);
     pub const COL_SET: ColumnStyle = ColumnStyle::new(5, "SET", 60);
     pub const COL_RARITY: ColumnStyle = ColumnStyle::new(6, "RARITY", 100);
 

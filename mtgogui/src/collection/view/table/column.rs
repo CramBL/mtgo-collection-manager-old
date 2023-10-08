@@ -32,9 +32,6 @@ pub enum Ordering {
 
 impl SortedBy {
     pub fn is_descending(&self) -> bool {
-        if let SortedBy::None = self {
-            return false;
-        }
         match self {
             SortedBy::Name(d)
             | SortedBy::Quantity(d)
@@ -48,6 +45,13 @@ impl SortedBy {
                 true
             }
             _ => false,
+        }
+    }
+
+    pub fn is_sorted(&self) -> bool {
+        match self {
+            SortedBy::None => false,
+            _ => true,
         }
     }
 }
@@ -66,13 +70,13 @@ impl SortStates {
     pub fn new() -> Self {
         // Set all as sorted by ascending as default, as they are not sorted and then the first toggle will sort descending
         Self {
-            name: Arc::new(Mutex::new(SortedBy::Foil(Ordering::Ascending))),
-            quantity: Arc::new(Mutex::new(SortedBy::Quantity(Ordering::Ascending))),
-            foil: Arc::new(Mutex::new(SortedBy::Foil(Ordering::Ascending))),
-            goatbots: Arc::new(Mutex::new(SortedBy::Goatbots(Ordering::Ascending))),
-            cardhoarder: Arc::new(Mutex::new(SortedBy::Scryfall(Ordering::Ascending))),
-            set: Arc::new(Mutex::new(SortedBy::Set(Ordering::Ascending))),
-            rarity: Arc::new(Mutex::new(SortedBy::Rarity(Ordering::Ascending))),
+            name: Arc::new(Mutex::new(SortedBy::None)),
+            quantity: Arc::new(Mutex::new(SortedBy::None)),
+            foil: Arc::new(Mutex::new(SortedBy::None)),
+            goatbots: Arc::new(Mutex::new(SortedBy::None)),
+            cardhoarder: Arc::new(Mutex::new(SortedBy::None)),
+            set: Arc::new(Mutex::new(SortedBy::None)),
+            rarity: Arc::new(Mutex::new(SortedBy::None)),
         }
     }
 
