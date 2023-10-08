@@ -31,20 +31,24 @@ impl SortToggle {
         let mut b = button::Button::default()
             .with_size(70, 0)
             .with_label(label)
-            .with_align(Align::Left | Align::Inside);
-        //b.set_down_frame(FrameType::FlatBox);
+            .with_align(Align::Center | Align::Inside);
+        b.set_down_frame(FrameType::FlatBox);
         b.set_selection_color(Color::color_average(b.color(), Color::Foreground, 0.9));
         b.clear_visible_focus();
-        b.set_label_size(app::font_size() - 2);
+        b.set_label_size(app::font_size() + 2);
         b.draw(move |b| {
             if b.value() {
+                // When a button is clicked, it will show this SVG
+                // so it should show what order it's being toggled to
                 let mut image = if ord.lock().unwrap().is_descending() {
-                    crate::util::get_desc_svg().clone()
-                } else {
+                    // Toggling to sort by ascending order
                     crate::util::get_asc_svg().clone()
+                } else {
+                    // Toggling to sort by descending order
+                    crate::util::get_desc_svg().clone()
                 };
                 image.scale(15, 15, true, true);
-                image.draw(b.x() + (b.w() * 2 / 3) + 5, b.y() + 10, b.w() / 3, b.h());
+                image.draw(b.x() + (b.w() * 2 / 3) + 5, b.y() + 30, b.w() / 3, b.h());
             }
         });
         b.set_frame(FrameType::FlatBox);
@@ -61,13 +65,13 @@ pub struct CollectionTable {
 }
 
 impl CollectionTable {
-    const COL_NAME: ColumnStyle = ColumnStyle::new(0, "NAME", 300);
-    const COL_QUANTITY: ColumnStyle = ColumnStyle::new(1, "Quantity", 45);
-    const COL_FOIL: ColumnStyle = ColumnStyle::new(2, "FOIL", 45);
-    const COL_GOATBOTS: ColumnStyle = ColumnStyle::new(3, "GOATBOTS", 100);
-    const COL_CARDHOARDER: ColumnStyle = ColumnStyle::new(4, "CARDHOARDER", 100);
-    const COL_SET: ColumnStyle = ColumnStyle::new(5, "SET", 45);
-    const COL_RARITY: ColumnStyle = ColumnStyle::new(6, "RARITY", 95);
+    pub const COL_NAME: ColumnStyle = ColumnStyle::new(0, "NAME", 300);
+    pub const COL_QUANTITY: ColumnStyle = ColumnStyle::new(1, "Quantity", 60);
+    pub const COL_FOIL: ColumnStyle = ColumnStyle::new(2, "FOIL", 60);
+    pub const COL_GOATBOTS: ColumnStyle = ColumnStyle::new(3, "GOATBOTS", 100);
+    pub const COL_CARDHOARDER: ColumnStyle = ColumnStyle::new(4, "CARDHOARDER", 100);
+    pub const COL_SET: ColumnStyle = ColumnStyle::new(5, "SET", 60);
+    pub const COL_RARITY: ColumnStyle = ColumnStyle::new(6, "RARITY", 100);
 
     pub fn new(
         w: i32,

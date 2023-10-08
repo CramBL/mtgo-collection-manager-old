@@ -9,7 +9,10 @@ use fltk::{
 use fltk_flex::Flex;
 
 use crate::{
-    collection::{view::table::SortToggle, Category, CtMessage, CurrentSortedBy},
+    collection::{
+        view::table::{CollectionTable, SortToggle},
+        Category, CtMessage, CurrentSortedBy,
+    },
     Message,
 };
 
@@ -30,23 +33,55 @@ pub fn set_collection_main_box(ev_send: app::Sender<Message>) -> table::Collecti
         .row();
     flx_header.set_align(enums::Align::RightTop);
 
+    const BTN_SORT_PADDING: i32 = 1;
+    flx_header.set_pad(BTN_SORT_PADDING);
+
     use Category::*;
     let ord: Arc<Mutex<CurrentSortedBy>> = Arc::new(Mutex::new(CurrentSortedBy::None));
-    let mut b_sort_set = SortToggle::new("Set", ord.clone());
-    b_sort_set.emit(ev_send.clone(), CtMessage::SortBy(Set).into());
 
-    let btn_sort_quantity = btn_with_emit(
-        ev_send.clone(),
-        "Quantity",
-        CtMessage::SortBy(Quantity).into(),
+    let mut btn_sort_name = SortToggle::new("Name", ord.clone());
+    btn_sort_name.emit(ev_send.clone(), CtMessage::SortBy(Name).into());
+    let mut btn_sort_quant = SortToggle::new("#", ord.clone());
+    btn_sort_quant.emit(ev_send.clone(), CtMessage::SortBy(Quantity).into());
+    let mut btn_sort_foil = SortToggle::new("Foil", ord.clone());
+    btn_sort_foil.emit(ev_send.clone(), CtMessage::SortBy(Foil).into());
+    let mut btn_sort_goatbots = SortToggle::new("Goatbots", ord.clone());
+    btn_sort_goatbots.emit(ev_send.clone(), CtMessage::SortBy(Goatbots).into());
+    let mut btn_sort_cardhoarder = SortToggle::new("Cardhoarder", ord.clone());
+    btn_sort_cardhoarder.emit(ev_send.clone(), CtMessage::SortBy(Scryfall).into());
+    let mut btn_sort_set = SortToggle::new("Set", ord.clone());
+    btn_sort_set.emit(ev_send.clone(), CtMessage::SortBy(Set).into());
+    let mut btn_sort_rarity = SortToggle::new("Rarity", ord.clone());
+    btn_sort_rarity.emit(ev_send.clone(), CtMessage::SortBy(Rarity).into());
+
+    flx_header.fixed(
+        &*btn_sort_name,
+        CollectionTable::COL_NAME.width - BTN_SORT_PADDING,
     );
-    let btn_srt_name = btn_with_emit(ev_send.clone(), "Name", CtMessage::SortBy(Name).into());
-    let btn_sort_rarity =
-        btn_with_emit(ev_send.clone(), "Rarity", CtMessage::SortBy(Rarity).into());
-
-    flx_header.fixed(&btn_sort_quantity, 100);
-    flx_header.fixed(&btn_srt_name, 100);
-    flx_header.fixed(&btn_sort_rarity, 100);
+    flx_header.fixed(
+        &*btn_sort_quant,
+        CollectionTable::COL_QUANTITY.width - BTN_SORT_PADDING,
+    );
+    flx_header.fixed(
+        &*btn_sort_foil,
+        CollectionTable::COL_FOIL.width - BTN_SORT_PADDING,
+    );
+    flx_header.fixed(
+        &*btn_sort_goatbots,
+        CollectionTable::COL_GOATBOTS.width - BTN_SORT_PADDING,
+    );
+    flx_header.fixed(
+        &*btn_sort_cardhoarder,
+        CollectionTable::COL_CARDHOARDER.width - BTN_SORT_PADDING,
+    );
+    flx_header.fixed(
+        &*btn_sort_set,
+        CollectionTable::COL_SET.width - BTN_SORT_PADDING,
+    );
+    flx_header.fixed(
+        &*btn_sort_rarity,
+        CollectionTable::COL_RARITY.width - BTN_SORT_PADDING,
+    );
     flx_header.end();
 
     flx_table.fixed(&flx_header, 50);

@@ -38,66 +38,66 @@ pub fn sort_cards(
 ) -> CurrentSortedBy {
     match category {
         Category::Name => {
-            if current_sorted == CurrentSortedBy::Name(Direction::Ascending) {
-                cards.sort_by(|a, b| b.name.cmp(&a.name));
-                CurrentSortedBy::Name(Direction::Descending)
-            } else {
+            if current_sorted == CurrentSortedBy::Name(Direction::Descending) {
                 cards.sort_by(|a, b| a.name.cmp(&b.name));
                 CurrentSortedBy::Name(Direction::Ascending)
+            } else {
+                cards.sort_by(|a, b| b.name.cmp(&a.name));
+                CurrentSortedBy::Name(Direction::Descending)
             }
         }
         Category::Quantity => {
-            if current_sorted == CurrentSortedBy::Quantity(Direction::Ascending) {
-                cards.sort_by(|a, b| b.quantity.cmp(&a.quantity));
-                CurrentSortedBy::Quantity(Direction::Descending)
-            } else {
+            if current_sorted == CurrentSortedBy::Quantity(Direction::Descending) {
                 cards.sort_by(|a, b| a.quantity.cmp(&b.quantity));
                 CurrentSortedBy::Quantity(Direction::Ascending)
+            } else {
+                cards.sort_by(|a, b| b.quantity.cmp(&a.quantity));
+                CurrentSortedBy::Quantity(Direction::Descending)
             }
         }
         Category::Foil => {
-            if current_sorted == CurrentSortedBy::Foil(Direction::Ascending) {
-                cards.sort_by(|a, b| b.foil.cmp(&a.foil));
-                CurrentSortedBy::Foil(Direction::Descending)
-            } else {
+            if current_sorted == CurrentSortedBy::Foil(Direction::Descending) {
                 cards.sort_by(|a, b| a.foil.cmp(&b.foil));
                 CurrentSortedBy::Foil(Direction::Ascending)
+            } else {
+                cards.sort_by(|a, b| b.foil.cmp(&a.foil));
+                CurrentSortedBy::Foil(Direction::Descending)
             }
         }
         Category::Goatbots => {
-            if current_sorted == CurrentSortedBy::Goatbots(Direction::Ascending) {
-                cards.sort_by(|a, b| b.goatbots_price.partial_cmp(&a.goatbots_price).unwrap());
-                CurrentSortedBy::Goatbots(Direction::Descending)
-            } else {
+            if current_sorted == CurrentSortedBy::Goatbots(Direction::Descending) {
                 cards.sort_by(|a, b| a.goatbots_price.partial_cmp(&b.goatbots_price).unwrap());
                 CurrentSortedBy::Goatbots(Direction::Ascending)
+            } else {
+                cards.sort_by(|a, b| b.goatbots_price.partial_cmp(&a.goatbots_price).unwrap());
+                CurrentSortedBy::Goatbots(Direction::Descending)
             }
         }
         Category::Scryfall => {
-            if current_sorted == CurrentSortedBy::Scryfall(Direction::Ascending) {
-                cards.sort_by(|a, b| b.scryfall_price.partial_cmp(&a.scryfall_price).unwrap());
-                CurrentSortedBy::Scryfall(Direction::Descending)
-            } else {
+            if current_sorted == CurrentSortedBy::Scryfall(Direction::Descending) {
                 cards.sort_by(|a, b| a.scryfall_price.partial_cmp(&b.scryfall_price).unwrap());
                 CurrentSortedBy::Scryfall(Direction::Ascending)
+            } else {
+                cards.sort_by(|a, b| b.scryfall_price.partial_cmp(&a.scryfall_price).unwrap());
+                CurrentSortedBy::Scryfall(Direction::Descending)
             }
         }
         Category::Set => {
-            if current_sorted == CurrentSortedBy::Set(Direction::Ascending) {
-                cards.sort_by(|a, b| b.set.cmp(&a.set));
-                CurrentSortedBy::Set(Direction::Descending)
-            } else {
+            if current_sorted == CurrentSortedBy::Set(Direction::Descending) {
                 cards.sort_by(|a, b| a.set.cmp(&b.set));
                 CurrentSortedBy::Set(Direction::Ascending)
+            } else {
+                cards.sort_by(|a, b| b.set.cmp(&a.set));
+                CurrentSortedBy::Set(Direction::Descending)
             }
         }
         Category::Rarity => {
-            if current_sorted == CurrentSortedBy::Rarity(Direction::Ascending) {
-                cards.sort_by(|a, b| b.rarity.cmp(&a.rarity));
-                CurrentSortedBy::Rarity(Direction::Descending)
-            } else {
+            if current_sorted == CurrentSortedBy::Rarity(Direction::Descending) {
                 cards.sort_by(|a, b| a.rarity.cmp(&b.rarity));
                 CurrentSortedBy::Rarity(Direction::Ascending)
+            } else {
+                cards.sort_by(|a, b| b.rarity.cmp(&a.rarity));
+                CurrentSortedBy::Rarity(Direction::Descending)
             }
         }
     }
