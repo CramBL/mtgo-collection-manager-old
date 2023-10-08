@@ -101,6 +101,7 @@ impl McmMenuBar {
     }
 }
 
+/// Get version information from all components and display in a pop-up window
 pub(super) fn show_about() {
     // Start by getting the versions from MTGO Getter and MTGO Preprocessor
     let mtgogetter_version = match mtgogetter_version() {
@@ -200,7 +201,7 @@ pub(super) fn show_about() {
             "About MTGO Collection Manager v{}",
             mtgo_gui_version
         ));
-    win.set_icon(Some(crate::util::get_logo()));
+    win.set_icon(Some(crate::assets::get_logo()));
     let flex_about = Flex::default()
         .with_pos(0, 0)
         .with_align(enums::Align::Center)

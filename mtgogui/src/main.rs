@@ -17,15 +17,17 @@ use fltk_grid::Grid;
 use fltk_table::{SmartTable, TableOpts};
 use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 
-mod collection_view;
+mod assets;
+mod collection;
 mod menubar;
-mod table;
 mod util;
 
+use collection::view::table;
+use collection::view::table::column;
+use collection::TableMessage;
 use menubar::McmMenuBar;
 use mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_version;
 use mtgoupdater::mtgogetter_api::mtgogetter_version;
-use table::{Category, CtMessage};
 
 use crate::util::center;
 
@@ -43,7 +45,7 @@ pub enum Message {
     Quit,
     Example,
     MenuBar(menubar::MbMessage),
-    Table(table::CtMessage),
+    Table(collection::TableMessage),
     GotFullTradeList(Box<str>),
 }
 
@@ -53,8 +55,8 @@ impl From<menubar::MbMessage> for Message {
     }
 }
 
-impl From<table::CtMessage> for Message {
-    fn from(ct_msg: table::CtMessage) -> Self {
+impl From<collection::TableMessage> for Message {
+    fn from(ct_msg: collection::TableMessage) -> Self {
         Message::Table(ct_msg)
     }
 }
@@ -80,14 +82,14 @@ impl MtgoGui {
             .center_screen()
             .with_label("MTGO Collection Manager");
 
-        main_win.set_icon(Some(util::get_logo()));
+        main_win.set_icon(Some(assets::get_logo()));
         main_win.make_resizable(true);
         main_win.size_range(MIN_APP_WIDTH, MIN_APP_HEIGHT, 0, 0);
         main_win.set_color(Color::Black);
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 25, &ev_send);
 
         set_left_col_box(ev_send.clone());
-        let collection_table = collection_view::set_collection_main_box(ev_send.clone());
+        let collection = collection::view::set_collection_main_box(ev_send.clone());
 
         main_win.end();
         main_win.show();
@@ -102,7 +104,7 @@ impl MtgoGui {
             rcv: ev_rcv,
             main_win,
             menu,
-            collection: collection_table,
+            collection,
         }
     }
 
@@ -182,15 +184,18 @@ impl Default for MtgoGui {
 fn set_left_col_box(ev_send: app::Sender<Message>) {
     let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
     flx_left_col.set_align(enums::Align::LeftTop);
-    let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
-    btn_example.set_callback({
-        let ev_send = ev_send;
-        move |b| {
-            ev_send.send(Message::Example);
 
-            b.set_label("Getting example...");
-        }
-    });
+    if cfg!(debug_assertions) {
+        let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
+        btn_example.set_callback({
+            let ev_send = ev_send;
+            move |b| {
+                ev_send.send(Message::Example);
+
+                b.set_label("Getting example...");
+            }
+        });
+    }
     flx_left_col.end();
 }
 
