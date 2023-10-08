@@ -43,8 +43,6 @@ pub fn first_file_match_from_dir(
     path: &std::path::Path,
     max_file_age_secs: Option<u64>,
 ) -> Option<std::path::PathBuf> {
-    let mut matching_entries: Vec<std::path::PathBuf> = Vec::new();
-
     for entry in path.read_dir().unwrap() {
         let dir_entry = entry.unwrap();
 
@@ -56,26 +54,54 @@ pub fn first_file_match_from_dir(
                     continue;
                 }
             }
-            eprintln!(
-                "Name: {}, Path:{}",
-                dir_entry.path().file_name().unwrap().to_str().unwrap(),
-                dir_entry.path().display()
-            );
 
-            if dir_entry
-                .file_name()
-                .to_owned()
-                .to_str()
-                .unwrap()
-                .contains(f_name)
-            {
-                matching_entries.push(dir_entry.path());
+            if dir_entry.file_name().to_string_lossy().contains(f_name) {
+                return Some(dir_entry.path());
             }
         }
     }
-    if !matching_entries.is_empty() {
-        Some(matching_entries[0].clone())
-    } else {
-        None
+
+    None
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_find_first_match_cargolock() {
+        let cwd = std::env::current_dir().unwrap();
+        let first_match = first_file_match_from_dir("Cargo.lock", &cwd, None);
+
+        assert_eq!(
+            PathBuf::from("Cargo.lock"),
+            first_match.unwrap().file_name().unwrap()
+        );
+    }
+
+    #[test]
+    fn test_find_first_match_cargotoml() {
+        let cwd = std::env::current_dir().unwrap();
+        let first_match = first_file_match_from_dir("Cargo.toml", &cwd, None);
+
+        assert_eq!(
+            PathBuf::from("Cargo.toml"),
+            first_match.unwrap().file_name().unwrap()
+        );
+    }
+
+    #[test]
+    fn test_find_first_match_cargo_dot() {
+        // Searching for "Cargo." finds Cargo.lock first because it searches alphabetically
+
+        let cwd = std::env::current_dir().unwrap();
+        let first_match = first_file_match_from_dir("Cargo.", &cwd, None);
+
+        assert_eq!(
+            PathBuf::from("Cargo.lock"),
+            first_match.unwrap().file_name().unwrap()
+        );
     }
 }
