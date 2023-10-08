@@ -24,6 +24,7 @@ mtgoupdater/target
 mtgogui/target
 mtgogui/*.json
 mtgogui/state_log.toml
+mtgogui/appdata
 
 
 # User spesific settings
