@@ -12,9 +12,6 @@ use fltk::{
 use fltk_table::{SmartTable, TableOpts};
 use mtgoupdater::mtgo_card::MtgoCard;
 
-const ASC_SVG: &str = include_str!("../assets/sortASC.svg");
-const DESC_SVG: &str = include_str!("../assets/sortDESC.svg");
-
 use crate::Message;
 
 #[derive(Debug, Clone, Copy)]
@@ -50,4 +47,19 @@ pub enum CurrentSortedBy {
 pub enum Direction {
     Ascending,
     Descending,
+}
+
+impl CurrentSortedBy {
+    pub fn is_descending(&self) -> bool {
+        if let CurrentSortedBy::None = self {
+            return false;
+        }
+        matches!(self, CurrentSortedBy::Name(d)
+                     | CurrentSortedBy::Quantity(d)
+                     | CurrentSortedBy::Foil(d)
+                     | CurrentSortedBy::Goatbots(d)
+                     | CurrentSortedBy::Scryfall(d)
+                     | CurrentSortedBy::Set(d)
+                     | CurrentSortedBy::Rarity(d) if *d == Direction::Descending)
+    }
 }
