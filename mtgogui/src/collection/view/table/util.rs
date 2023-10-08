@@ -1,7 +1,7 @@
 use fltk::{
     app::{self, Sender},
     enums::Event,
-    prelude::WidgetBase,
+    prelude::{TableExt, WidgetBase},
 };
 use fltk_table::SmartTable;
 use mtgoupdater::mtgo_card::MtgoCard;
@@ -11,6 +11,8 @@ use crate::{
     Message,
 };
 
+use super::CollectionTable;
+
 pub struct ColumnStyle {
     pub name: &'static str,
     pub width: i32,
@@ -18,8 +20,14 @@ pub struct ColumnStyle {
 }
 
 impl ColumnStyle {
+    /// Declare a new column with an associated index, name, and width
     pub const fn new(idx: i32, name: &'static str, width: i32) -> Self {
         Self { idx, name, width }
+    }
+
+    /// Assign `val` to a cell in the column at `row_idx`
+    pub fn fill(&self, table: &mut SmartTable, row_idx: i32, val: &str) {
+        table.set_cell_value(row_idx, self.idx, val);
     }
 }
 
@@ -132,4 +140,42 @@ pub fn set_drag_and_drop_callback(table: &mut SmartTable, ev_sender: Sender<Mess
             _ => false,
         }
     });
+}
+
+/// Iterates over the [SmartTable] and the [MtgoCard]s filling out all the cells of the table.
+pub fn draw_cards(table: &mut SmartTable, cards: &[MtgoCard]) {
+    if cards.is_empty() {
+        return;
+    }
+
+    // Extend the table with rows matching the amount of cards
+    if cards.len() > table.row_count() as usize {
+        let cards_minus_rows = cards.len() - table.row_count() as usize;
+        for _ in 0..(cards_minus_rows) {
+            table.append_empty_row("");
+        }
+    }
+
+    // Iterate over the rows and filling each column of a row with values from cards
+    for (idx, card) in cards.iter().enumerate() {
+        let row_idx = idx as i32;
+        fill_card_row(table, row_idx, card);
+    }
+}
+
+/// Helper to fill a single row with [MtgoCard] data
+fn fill_card_row(table: &mut SmartTable, row_idx: i32, card: &MtgoCard) {
+    CollectionTable::COL_NAME.fill(table, row_idx, &card.name);
+    CollectionTable::COL_QUANTITY.fill(table, row_idx, &card.quantity.to_string());
+    CollectionTable::COL_FOIL.fill(table, row_idx, if card.foil { "Yes" } else { "No" });
+    CollectionTable::COL_GOATBOTS.fill(table, row_idx, &format!("{:8.3}", card.goatbots_price));
+    CollectionTable::COL_CARDHOARDER.fill(table, row_idx, &{
+        if let Some(p) = card.scryfall_price {
+            p.to_string()
+        } else {
+            "N/A".into()
+        }
+    });
+    CollectionTable::COL_SET.fill(table, row_idx, &card.set);
+    CollectionTable::COL_RARITY.fill(table, row_idx, &card.rarity.to_string());
 }

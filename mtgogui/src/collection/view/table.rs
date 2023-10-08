@@ -86,34 +86,6 @@ impl CollectionTable {
     }
 
     fn draw_cards(&mut self) {
-        if self.cards.is_empty() {
-            return;
-        }
-        // Don't run this gui on some platform with usize < u32 if you're gonna make a huge table
-        if self.cards.len() > self.table.row_count() as usize {
-            for _ in 0..(self.cards.len() - self.table.row_count() as usize) {
-                self.table.append_empty_row("");
-            }
-        }
-        // Fill all the rows with cards data
-        for (i, c) in self.cards.iter().enumerate() {
-            let row_idx = i as i32;
-            self.table.set_cell_value(row_idx, 0, &c.name);
-            self.table
-                .set_cell_value(row_idx, 1, &c.quantity.to_string());
-            self.table
-                .set_cell_value(row_idx, 2, if c.foil { "Yes" } else { "No" });
-            self.table
-                .set_cell_value(row_idx, 3, &format!("{:8.3}", c.goatbots_price));
-            self.table.set_cell_value(row_idx, 4, &{
-                if let Some(p) = c.scryfall_price {
-                    p.to_string()
-                } else {
-                    "N/A".into()
-                }
-            });
-            self.table.set_cell_value(row_idx, 5, &c.set);
-            self.table.set_cell_value(row_idx, 6, &c.rarity.to_string());
-        }
+        util::draw_cards(&mut self.table, &self.cards);
     }
 }
