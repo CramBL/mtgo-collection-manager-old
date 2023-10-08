@@ -38,7 +38,7 @@ pub fn sort_cards(
 ) -> CurrentSortedBy {
     match category {
         Category::Name => {
-            if current_sorted == CurrentSortedBy::Name(Direction::Descending) {
+            if current_sorted.is_descending() {
                 cards.sort_by(|a, b| a.name.cmp(&b.name));
                 CurrentSortedBy::Name(Direction::Ascending)
             } else {
@@ -47,7 +47,7 @@ pub fn sort_cards(
             }
         }
         Category::Quantity => {
-            if current_sorted == CurrentSortedBy::Quantity(Direction::Descending) {
+            if current_sorted.is_descending() {
                 cards.sort_by(|a, b| a.quantity.cmp(&b.quantity));
                 CurrentSortedBy::Quantity(Direction::Ascending)
             } else {
@@ -56,7 +56,7 @@ pub fn sort_cards(
             }
         }
         Category::Foil => {
-            if current_sorted == CurrentSortedBy::Foil(Direction::Descending) {
+            if current_sorted.is_descending() {
                 cards.sort_by(|a, b| a.foil.cmp(&b.foil));
                 CurrentSortedBy::Foil(Direction::Ascending)
             } else {
@@ -65,7 +65,7 @@ pub fn sort_cards(
             }
         }
         Category::Goatbots => {
-            if current_sorted == CurrentSortedBy::Goatbots(Direction::Descending) {
+            if current_sorted.is_descending() {
                 cards.sort_by(|a, b| a.goatbots_price.partial_cmp(&b.goatbots_price).unwrap());
                 CurrentSortedBy::Goatbots(Direction::Ascending)
             } else {
@@ -74,7 +74,7 @@ pub fn sort_cards(
             }
         }
         Category::Scryfall => {
-            if current_sorted == CurrentSortedBy::Scryfall(Direction::Descending) {
+            if current_sorted.is_descending() {
                 cards.sort_by(|a, b| a.scryfall_price.partial_cmp(&b.scryfall_price).unwrap());
                 CurrentSortedBy::Scryfall(Direction::Ascending)
             } else {
@@ -83,7 +83,7 @@ pub fn sort_cards(
             }
         }
         Category::Set => {
-            if current_sorted == CurrentSortedBy::Set(Direction::Descending) {
+            if current_sorted.is_descending() {
                 cards.sort_by(|a, b| a.set.cmp(&b.set));
                 CurrentSortedBy::Set(Direction::Ascending)
             } else {
@@ -92,7 +92,7 @@ pub fn sort_cards(
             }
         }
         Category::Rarity => {
-            if current_sorted == CurrentSortedBy::Rarity(Direction::Descending) {
+            if current_sorted.is_descending() {
                 cards.sort_by(|a, b| a.rarity.cmp(&b.rarity));
                 CurrentSortedBy::Rarity(Direction::Ascending)
             } else {

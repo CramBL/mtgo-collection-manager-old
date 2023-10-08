@@ -48,7 +48,7 @@ impl SortToggle {
                     crate::util::get_desc_svg().clone()
                 };
                 image.scale(15, 15, true, true);
-                image.draw(b.x() + (b.w() * 2 / 3) + 5, b.y() + 30, b.w() / 3, b.h());
+                image.draw(b.x() + (b.w() - 30) + 5, b.y() + 30, b.w(), b.h());
             }
         });
         b.set_frame(FrameType::FlatBox);
