@@ -1,5 +1,5 @@
 use crate::{
-    collection::{Category, CurrentSortedBy, Direction},
+    collection::{Category, CurrentSortedBy, Direction, SortStates},
     Message,
 };
 use fltk::{app, button, group::Column};
@@ -61,7 +61,7 @@ fltk::widget_extends!(SortToggle, button::Button, b);
 pub struct CollectionTable {
     pub(super) table: SmartTable,
     pub(super) cards: Vec<MtgoCard>,
-    sorted_by: Arc<Mutex<CurrentSortedBy>>,
+    sort_states: SortStates,
 }
 
 impl CollectionTable {
@@ -73,12 +73,7 @@ impl CollectionTable {
     pub const COL_SET: ColumnStyle = ColumnStyle::new(5, "SET", 60);
     pub const COL_RARITY: ColumnStyle = ColumnStyle::new(6, "RARITY", 100);
 
-    pub fn new(
-        w: i32,
-        h: i32,
-        ev_sender: app::Sender<Message>,
-        sorted_by: Arc<Mutex<CurrentSortedBy>>,
-    ) -> Self {
+    pub fn new(w: i32, h: i32, ev_sender: app::Sender<Message>, sort_states: SortStates) -> Self {
         // Create the row of buttons to sort by columns
 
         // Create the table that displays all cards with their info
@@ -112,7 +107,7 @@ impl CollectionTable {
         Self {
             table,
             cards: vec![],
-            sorted_by,
+            sort_states,
         }
     }
 
@@ -120,9 +115,7 @@ impl CollectionTable {
         match ev {
             CtMessage::SortBy(cat) => {
                 println!("sort by {:?}", cat);
-                let new_order =
-                    util::sort_cards(&mut self.cards, cat, *self.sorted_by.lock().unwrap());
-                *self.sorted_by.lock().unwrap() = new_order;
+                util::sort_cards(&mut self.cards, &mut self.sort_states, cat);
                 self.draw_cards();
             }
         }

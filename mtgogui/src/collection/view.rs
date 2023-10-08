@@ -11,7 +11,7 @@ use fltk_flex::Flex;
 use crate::{
     collection::{
         view::table::{CollectionTable, SortToggle},
-        Category, CtMessage, CurrentSortedBy,
+        Category, CtMessage, CurrentSortedBy, SortStates,
     },
     Message,
 };
@@ -37,21 +37,21 @@ pub fn set_collection_main_box(ev_send: app::Sender<Message>) -> table::Collecti
     flx_header.set_pad(BTN_SORT_PADDING);
 
     use Category::*;
-    let ord: Arc<Mutex<CurrentSortedBy>> = Arc::new(Mutex::new(CurrentSortedBy::None));
+    let sort_states = SortStates::default();
 
-    let mut btn_sort_name = SortToggle::new("Name", ord.clone());
+    let mut btn_sort_name = SortToggle::new("Name", sort_states.name.clone());
     btn_sort_name.emit(ev_send.clone(), CtMessage::SortBy(Name).into());
-    let mut btn_sort_quant = SortToggle::new("#", ord.clone());
+    let mut btn_sort_quant = SortToggle::new("#", sort_states.quantity.clone());
     btn_sort_quant.emit(ev_send.clone(), CtMessage::SortBy(Quantity).into());
-    let mut btn_sort_foil = SortToggle::new("Foil", ord.clone());
+    let mut btn_sort_foil = SortToggle::new("Foil", sort_states.foil.clone());
     btn_sort_foil.emit(ev_send.clone(), CtMessage::SortBy(Foil).into());
-    let mut btn_sort_goatbots = SortToggle::new("Goatbots", ord.clone());
+    let mut btn_sort_goatbots = SortToggle::new("Goatbots", sort_states.goatbots.clone());
     btn_sort_goatbots.emit(ev_send.clone(), CtMessage::SortBy(Goatbots).into());
-    let mut btn_sort_cardhoarder = SortToggle::new("Cardhoarder", ord.clone());
+    let mut btn_sort_cardhoarder = SortToggle::new("Cardhoarder", sort_states.cardhoarder.clone());
     btn_sort_cardhoarder.emit(ev_send.clone(), CtMessage::SortBy(Scryfall).into());
-    let mut btn_sort_set = SortToggle::new("Set", ord.clone());
+    let mut btn_sort_set = SortToggle::new("Set", sort_states.set.clone());
     btn_sort_set.emit(ev_send.clone(), CtMessage::SortBy(Set).into());
-    let mut btn_sort_rarity = SortToggle::new("Rarity", ord.clone());
+    let mut btn_sort_rarity = SortToggle::new("Rarity", sort_states.rarity.clone());
     btn_sort_rarity.emit(ev_send.clone(), CtMessage::SortBy(Rarity).into());
 
     flx_header.fixed(
@@ -85,18 +85,8 @@ pub fn set_collection_main_box(ev_send: app::Sender<Message>) -> table::Collecti
     flx_header.end();
 
     flx_table.fixed(&flx_header, 50);
-    let collection_table = table::CollectionTable::new(TABLE_WIDTH, 720, ev_send, ord);
+    let collection_table = table::CollectionTable::new(TABLE_WIDTH, 720, ev_send, sort_states);
     flx_table.end();
 
     collection_table
-}
-
-fn btn_with_emit<T: Into<Option<&'static str>>>(
-    ev_send: app::Sender<Message>,
-    label: T,
-    msg: Message,
-) -> button::Button {
-    let mut btn = button::Button::new(0, 0, 0, 0, label);
-    btn.emit(ev_send, msg);
-    btn
 }
