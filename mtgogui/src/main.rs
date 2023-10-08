@@ -102,7 +102,7 @@ impl MtgoGui {
             rcv: ev_rcv,
             main_win,
             menu,
-            collection: collection,
+            collection,
         }
     }
 

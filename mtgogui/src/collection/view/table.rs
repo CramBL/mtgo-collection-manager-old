@@ -1,12 +1,8 @@
-use fltk::{app, group::Column};
-use fltk_table::{SmartTable, TableOpts};
-use mtgoupdater::mtgo_card::MtgoCard;
-use std::fmt::Alignment;
-
 use crate::{
     collection::{Category, CurrentSortedBy, Direction},
     Message,
 };
+use fltk::{app, button, group::Column};
 use fltk::{
     app::App,
     enums::{Align, Color, Event, FrameType},
@@ -14,16 +10,54 @@ use fltk::{
     prelude::*,
     prelude::{GroupExt, TableExt, WidgetExt},
 };
+use fltk_table::{SmartTable, TableOpts};
+use mtgoupdater::mtgo_card::MtgoCard;
+use std::{
+    fmt::Alignment,
+    sync::{Arc, Mutex},
+};
 
 use super::CtMessage;
 
 mod util;
 use util::ColumnStyle;
 
+pub struct SortToggle {
+    b: button::Button,
+}
+
+impl SortToggle {
+    pub fn new(label: &str, ord: Arc<Mutex<CurrentSortedBy>>) -> Self {
+        let mut b = button::Button::default()
+            .with_size(70, 0)
+            .with_label(label)
+            .with_align(Align::Left | Align::Inside);
+        //b.set_down_frame(FrameType::FlatBox);
+        b.set_selection_color(Color::color_average(b.color(), Color::Foreground, 0.9));
+        b.clear_visible_focus();
+        b.set_label_size(app::font_size() - 2);
+        b.draw(move |b| {
+            if b.value() {
+                let mut image = if ord.lock().unwrap().is_descending() {
+                    crate::util::get_desc_svg().clone()
+                } else {
+                    crate::util::get_asc_svg().clone()
+                };
+                image.scale(15, 15, true, true);
+                image.draw(b.x() + (b.w() * 2 / 3) + 5, b.y() + 10, b.w() / 3, b.h());
+            }
+        });
+        b.set_frame(FrameType::FlatBox);
+        Self { b }
+    }
+}
+
+fltk::widget_extends!(SortToggle, button::Button, b);
+
 pub struct CollectionTable {
     pub(super) table: SmartTable,
     pub(super) cards: Vec<MtgoCard>,
-    sorted_by: CurrentSortedBy,
+    sorted_by: Arc<Mutex<CurrentSortedBy>>,
 }
 
 impl CollectionTable {
@@ -35,7 +69,15 @@ impl CollectionTable {
     const COL_SET: ColumnStyle = ColumnStyle::new(5, "SET", 45);
     const COL_RARITY: ColumnStyle = ColumnStyle::new(6, "RARITY", 95);
 
-    pub fn new(w: i32, h: i32, ev_sender: app::Sender<Message>) -> Self {
+    pub fn new(
+        w: i32,
+        h: i32,
+        ev_sender: app::Sender<Message>,
+        sorted_by: Arc<Mutex<CurrentSortedBy>>,
+    ) -> Self {
+        // Create the row of buttons to sort by columns
+
+        // Create the table that displays all cards with their info
         let mut table = SmartTable::default()
             .with_size(w, h)
             .center_of_parent()
@@ -66,7 +108,7 @@ impl CollectionTable {
         Self {
             table,
             cards: vec![],
-            sorted_by: CurrentSortedBy::None,
+            sorted_by,
         }
     }
 
@@ -74,7 +116,9 @@ impl CollectionTable {
         match ev {
             CtMessage::SortBy(cat) => {
                 println!("sort by {:?}", cat);
-                self.sorted_by = util::sort_cards(&mut self.cards, cat, self.sorted_by);
+                let new_order =
+                    util::sort_cards(&mut self.cards, cat, *self.sorted_by.lock().unwrap());
+                *self.sorted_by.lock().unwrap() = new_order;
                 self.draw_cards();
             }
         }
