@@ -48,7 +48,7 @@ pub enum Message {
     Example,
     MenuBar(menubar::MbMessage),
     Table(collection::TableMessage),
-    GotFullTradeList(Box<str>),
+    GotFullTradeList(Box<std::path::Path>),
 }
 
 impl From<menubar::MbMessage> for Message {

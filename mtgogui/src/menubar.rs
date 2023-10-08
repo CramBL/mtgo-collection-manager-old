@@ -91,9 +91,8 @@ impl McmMenuBar {
         if !filename.to_string_lossy().to_string().is_empty() {
             if filename.is_file() {
                 eprintln!("Full trade list: {:?}", filename);
-                self.ev_emitter.send(Message::GotFullTradeList(
-                    filename.to_str().expect("Path is invalid unicode").into(),
-                ));
+                self.ev_emitter
+                    .send(Message::GotFullTradeList(filename.into()));
             } else {
                 dialog::alert(center().0 - 200, center().1 - 100, "File does not exist!")
             }
