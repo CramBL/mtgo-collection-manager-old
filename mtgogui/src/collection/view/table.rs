@@ -33,7 +33,7 @@ impl CollectionTable {
     const COL_GOATBOTS: ColumnStyle = ColumnStyle::new(3, "GOATBOTS", 100);
     const COL_CARDHOARDER: ColumnStyle = ColumnStyle::new(4, "CARDHOARDER", 100);
     const COL_SET: ColumnStyle = ColumnStyle::new(5, "SET", 45);
-    const COL_RARITY: ColumnStyle = ColumnStyle::new(6, "RARITY", 45);
+    const COL_RARITY: ColumnStyle = ColumnStyle::new(6, "RARITY", 95);
 
     pub fn new(w: i32, h: i32, ev_sender: app::Sender<Message>) -> Self {
         let mut table = SmartTable::default()
@@ -60,14 +60,7 @@ impl CollectionTable {
         table.set_col_width(Self::COL_SET.idx, Self::COL_SET.width);
         table.set_col_width(Self::COL_RARITY.idx, Self::COL_RARITY.width);
 
-        // table.set_col_header_value(0, "NAME");
-        // table.set_col_header_value(1, "QUANTITY");
-        // table.set_col_header_value(2, "FOIL");
-        // table.set_col_header_value(3, "GOATBOTS");
-        // table.set_col_header_value(4, "SCRYFALL");
-        // table.set_col_header_value(5, "SET");
-        // table.set_col_header_value(6, "RARITY");
-
+        // Support drag-and-drop a full trade list file
         table.handle({
             let mut dnd = false;
             let mut released = false;
@@ -113,79 +106,7 @@ impl CollectionTable {
         match ev {
             CtMessage::SortBy(cat) => {
                 println!("sort by {:?}", cat);
-                match cat {
-                    Category::Name => {
-                        if self.sorted_by == CurrentSortedBy::Name(Direction::Ascending) {
-                            self.cards.sort_by(|a, b| b.name.cmp(&a.name));
-                            self.sorted_by = CurrentSortedBy::Name(Direction::Descending);
-                        } else {
-                            self.cards.sort_by(|a, b| a.name.cmp(&b.name));
-                            self.sorted_by = CurrentSortedBy::Name(Direction::Ascending);
-                        }
-                    }
-                    Category::Quantity => {
-                        if self.sorted_by == CurrentSortedBy::Quantity(Direction::Ascending) {
-                            self.cards.sort_by(|a, b| b.quantity.cmp(&a.quantity));
-                            self.sorted_by = CurrentSortedBy::Quantity(Direction::Descending);
-                        } else {
-                            self.cards.sort_by(|a, b| a.quantity.cmp(&b.quantity));
-                            self.sorted_by = CurrentSortedBy::Quantity(Direction::Ascending);
-                        }
-                    }
-                    Category::Foil => {
-                        if self.sorted_by == CurrentSortedBy::Foil(Direction::Ascending) {
-                            self.cards.sort_by(|a, b| b.foil.cmp(&a.foil));
-                            self.sorted_by = CurrentSortedBy::Foil(Direction::Descending);
-                        } else {
-                            self.cards.sort_by(|a, b| a.foil.cmp(&b.foil));
-                            self.sorted_by = CurrentSortedBy::Foil(Direction::Ascending);
-                        }
-                    }
-                    Category::Goatbots => {
-                        if self.sorted_by == CurrentSortedBy::Goatbots(Direction::Ascending) {
-                            self.cards.sort_by(|a, b| {
-                                b.goatbots_price.partial_cmp(&a.goatbots_price).unwrap()
-                            });
-                            self.sorted_by = CurrentSortedBy::Goatbots(Direction::Descending);
-                        } else {
-                            self.cards.sort_by(|a, b| {
-                                a.goatbots_price.partial_cmp(&b.goatbots_price).unwrap()
-                            });
-                            self.sorted_by = CurrentSortedBy::Goatbots(Direction::Ascending);
-                        }
-                    }
-                    Category::Scryfall => {
-                        if self.sorted_by == CurrentSortedBy::Scryfall(Direction::Ascending) {
-                            self.cards.sort_by(|a, b| {
-                                b.scryfall_price.partial_cmp(&a.scryfall_price).unwrap()
-                            });
-                            self.sorted_by = CurrentSortedBy::Scryfall(Direction::Descending);
-                        } else {
-                            self.cards.sort_by(|a, b| {
-                                a.scryfall_price.partial_cmp(&b.scryfall_price).unwrap()
-                            });
-                            self.sorted_by = CurrentSortedBy::Scryfall(Direction::Ascending);
-                        }
-                    }
-                    Category::Set => {
-                        if self.sorted_by == CurrentSortedBy::Set(Direction::Ascending) {
-                            self.cards.sort_by(|a, b| b.set.cmp(&a.set));
-                            self.sorted_by = CurrentSortedBy::Set(Direction::Descending);
-                        } else {
-                            self.cards.sort_by(|a, b| a.set.cmp(&b.set));
-                            self.sorted_by = CurrentSortedBy::Set(Direction::Ascending);
-                        }
-                    }
-                    Category::Rarity => {
-                        if self.sorted_by == CurrentSortedBy::Rarity(Direction::Ascending) {
-                            self.cards.sort_by(|a, b| b.rarity.cmp(&a.rarity));
-                            self.sorted_by = CurrentSortedBy::Rarity(Direction::Descending);
-                        } else {
-                            self.cards.sort_by(|a, b| a.rarity.cmp(&b.rarity));
-                            self.sorted_by = CurrentSortedBy::Rarity(Direction::Ascending);
-                        }
-                    }
-                }
+                self.sorted_by = util::sort_cards(&mut self.cards, cat, self.sorted_by);
                 self.draw_cards();
             }
         }

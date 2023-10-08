@@ -35,7 +35,7 @@ pub enum Category {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 
-enum CurrentSortedBy {
+pub enum CurrentSortedBy {
     None,
     Name(Direction),
     Quantity(Direction),
@@ -47,7 +47,7 @@ enum CurrentSortedBy {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum Direction {
+pub enum Direction {
     Ascending,
     Descending,
 }
