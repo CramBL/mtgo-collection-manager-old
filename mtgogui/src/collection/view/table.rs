@@ -1,4 +1,4 @@
-use fltk::app;
+use fltk::{app, group::Column};
 use fltk_table::{SmartTable, TableOpts};
 use mtgoupdater::mtgo_card::MtgoCard;
 use std::fmt::Alignment;
@@ -17,6 +17,9 @@ use fltk::{
 
 use super::CtMessage;
 
+mod util;
+use util::ColumnStyle;
+
 pub struct CollectionTable {
     pub(super) table: SmartTable,
     pub(super) cards: Vec<MtgoCard>,
@@ -24,7 +27,13 @@ pub struct CollectionTable {
 }
 
 impl CollectionTable {
-    const NAME_COL_WIDTH: i32 = 300;
+    const COL_NAME: ColumnStyle = ColumnStyle::new(0, "NAME", 300);
+    const COL_QUANTITY: ColumnStyle = ColumnStyle::new(1, "Quantity", 45);
+    const COL_FOIL: ColumnStyle = ColumnStyle::new(2, "FOIL", 45);
+    const COL_GOATBOTS: ColumnStyle = ColumnStyle::new(3, "GOATBOTS", 100);
+    const COL_CARDHOARDER: ColumnStyle = ColumnStyle::new(4, "CARDHOARDER", 100);
+    const COL_SET: ColumnStyle = ColumnStyle::new(5, "SET", 45);
+    const COL_RARITY: ColumnStyle = ColumnStyle::new(6, "RARITY", 45);
 
     pub fn new(w: i32, h: i32, ev_sender: app::Sender<Message>) -> Self {
         let mut table = SmartTable::default()
@@ -43,13 +52,13 @@ impl CollectionTable {
         table.set_row_header(false);
         table.set_col_header(false);
 
-        table.set_col_width(0, Self::NAME_COL_WIDTH);
-        table.set_col_width(1, 45);
-        table.set_col_width(2, 45);
-        table.set_col_width(3, 100);
-        table.set_col_width(4, 100);
-        table.set_col_width(5, 45);
-        table.set_col_width(6, 45);
+        table.set_col_width(Self::COL_NAME.idx, Self::COL_NAME.width);
+        table.set_col_width(Self::COL_QUANTITY.idx, Self::COL_QUANTITY.width);
+        table.set_col_width(Self::COL_FOIL.idx, Self::COL_FOIL.width);
+        table.set_col_width(Self::COL_GOATBOTS.idx, Self::COL_GOATBOTS.width);
+        table.set_col_width(Self::COL_CARDHOARDER.idx, Self::COL_CARDHOARDER.width);
+        table.set_col_width(Self::COL_SET.idx, Self::COL_SET.width);
+        table.set_col_width(Self::COL_RARITY.idx, Self::COL_RARITY.width);
 
         // table.set_col_header_value(0, "NAME");
         // table.set_col_header_value(1, "QUANTITY");
