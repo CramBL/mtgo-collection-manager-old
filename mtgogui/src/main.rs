@@ -17,6 +17,7 @@ use fltk_grid::Grid;
 use fltk_table::{SmartTable, TableOpts};
 use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 
+mod assets;
 mod collection;
 mod menubar;
 mod util;
@@ -81,7 +82,7 @@ impl MtgoGui {
             .center_screen()
             .with_label("MTGO Collection Manager");
 
-        main_win.set_icon(Some(util::get_logo()));
+        main_win.set_icon(Some(assets::get_logo()));
         main_win.make_resizable(true);
         main_win.size_range(MIN_APP_WIDTH, MIN_APP_HEIGHT, 0, 0);
         main_win.set_color(Color::Black);

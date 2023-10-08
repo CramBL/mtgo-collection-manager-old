@@ -44,9 +44,9 @@ impl SortToggle {
             }
 
             let mut image = if ordering.is_descending() {
-                crate::util::get_desc_svg().clone()
+                crate::assets::get_desc_svg().clone()
             } else {
-                crate::util::get_asc_svg().clone()
+                crate::assets::get_asc_svg().clone()
             };
             image.scale(15, 15, true, true);
             image.draw(b.x() + (b.w() - 20) + 5, b.y() + 30, b.w(), b.h());

@@ -201,7 +201,7 @@ pub(super) fn show_about() {
             "About MTGO Collection Manager v{}",
             mtgo_gui_version
         ));
-    win.set_icon(Some(crate::util::get_logo()));
+    win.set_icon(Some(crate::assets::get_logo()));
     let flex_about = Flex::default()
         .with_pos(0, 0)
         .with_align(enums::Align::Center)
