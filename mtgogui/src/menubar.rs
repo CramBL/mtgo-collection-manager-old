@@ -101,6 +101,7 @@ impl McmMenuBar {
     }
 }
 
+/// Get version information from all components and display in a pop-up window
 pub(super) fn show_about() {
     // Start by getting the versions from MTGO Getter and MTGO Preprocessor
     let mtgogetter_version = match mtgogetter_version() {

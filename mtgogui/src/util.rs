@@ -1,6 +1,9 @@
 use std::sync::OnceLock;
 
-use fltk::image::{PngImage, SvgImage};
+use fltk::{
+    image::{PngImage, SvgImage},
+    prelude::ImageExt,
+};
 
 const ASC_SVG: &str = include_str!("../assets/sortASC.svg");
 const DESC_SVG: &str = include_str!("../assets/sortDESC.svg");
@@ -18,12 +21,14 @@ pub fn get_desc_svg() -> &'static SvgImage {
 }
 
 // Logo placed left-most in window labels
-const MCM_LOGO_RAW: &[u8; 3542] = include_bytes!("../assets/35x35-logo-card-pile.png");
-pub static MCM_LOGO: OnceLock<PngImage> = OnceLock::new();
-pub fn get_logo() -> PngImage {
-    MCM_LOGO
-        .get_or_init(|| PngImage::from_data(MCM_LOGO_RAW).unwrap())
-        .clone()
+const MCM_LOGO_SVG: &str = include_str!("../assets/logo-small.svg");
+pub static MCM_LOGO: OnceLock<SvgImage> = OnceLock::new();
+pub fn get_logo() -> SvgImage {
+    let mut logo = MCM_LOGO
+        .get_or_init(|| SvgImage::from_data(MCM_LOGO_SVG).expect("Failed to decode MCM logo SVG"))
+        .clone();
+    logo.scale(15, 15, true, true);
+    logo
 }
 
 pub fn center() -> (i32, i32) {
