@@ -113,9 +113,40 @@ impl CollectionTable {
     pub fn handle_ev(&mut self, ev: TableMessage) {
         match ev {
             TableMessage::SortBy(cat) => {
-                println!("sort by {:?}", cat);
                 util::sort_cards(&mut self.cards, &mut self.sort_states, cat);
                 self.draw_cards();
+            }
+            TableMessage::Search(str) => {
+                if self.cards.is_empty() {
+                    return;
+                }
+                let pattern = str.to_lowercase();
+                let filtered_cards = self.cards.iter().filter_map(|c| {
+                    if c.name.to_lowercase().contains(&pattern) {
+                        eprintln!("{p}={m}", p = pattern, m = c.name);
+                        return Some(c);
+                    } else {
+                        None
+                    }
+                });
+
+                let mut filter_count = 0;
+                filtered_cards.into_iter().enumerate().for_each(|(idx, c)| {
+                    let row_idx = idx as i32;
+                    if row_idx > self.table.row_count() - 1 {
+                        self.table.append_empty_row("");
+                    }
+                    util::fill_card_row(&mut self.table, row_idx, c);
+                    filter_count = row_idx + 1
+                });
+                if filter_count < self.table.row_count() {
+                    let mut table_row_count = self.table.row_count();
+                    let diff = table_row_count - filter_count;
+                    for _ in 0..diff {
+                        table_row_count -= 1;
+                        self.table.remove_row(table_row_count);
+                    }
+                }
             }
         }
     }

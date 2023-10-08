@@ -163,7 +163,7 @@ pub fn draw_cards(table: &mut SmartTable, cards: &[MtgoCard]) {
 }
 
 /// Helper to fill a single row with [MtgoCard] data
-fn fill_card_row(table: &mut SmartTable, row_idx: i32, card: &MtgoCard) {
+pub fn fill_card_row(table: &mut SmartTable, row_idx: i32, card: &MtgoCard) {
     CollectionTable::COL_NAME.fill(table, row_idx, &card.name);
     CollectionTable::COL_QUANTITY.fill(table, row_idx, &card.quantity.to_string());
     CollectionTable::COL_FOIL.fill(table, row_idx, if card.foil { "Yes" } else { "No" });

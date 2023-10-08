@@ -6,8 +6,10 @@ use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
-use fltk::enums::{Event, Font, FrameType, Shortcut};
-use fltk::image::PngImage;
+use assets::{get_asc_svg, get_icon_search, get_logo};
+use fltk::enums::{CallbackTrigger, Event, Font, FrameType, Shortcut};
+use fltk::image::{Image, PngImage, TiledImage};
+use fltk::prelude::WidgetExt;
 use fltk::text::TextAttr;
 use fltk::window::DoubleWindow;
 use fltk::{app, button, enums::Color, prelude::*, window::Window};
@@ -185,6 +187,30 @@ fn set_left_col_box(ev_send: app::Sender<Message>) {
     let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
     flx_left_col.set_align(enums::Align::LeftTop);
 
+    let mut search_box_grid_row = Grid::new(0, 0, 400, 100, "");
+    if cfg!(debug_assertions) {
+        search_box_grid_row.debug(true);
+    }
+    search_box_grid_row.set_layout(1, 4);
+    let mut frame = frame::Frame::new(0, 0, 100, 100, "");
+    frame.draw(|f| {
+        let mut icon = get_icon_search();
+        icon.draw(f.x(), f.y(), f.w(), f.h());
+    });
+    let mut search_input = input::Input::default().with_label("Search name");
+    search_input.set_trigger(CallbackTrigger::Changed);
+    search_input.set_callback({
+        let s = ev_send.clone();
+        move |i| {
+            println!("Got: {}", i.value());
+            s.send(TableMessage::Search(i.value().into()).into());
+        }
+    });
+    search_box_grid_row.insert(&mut frame, 0, 0);
+    search_box_grid_row.insert(&mut search_input, 0, 1..4);
+
+    search_box_grid_row.end();
+
     if cfg!(debug_assertions) {
         let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
         btn_example.set_callback({
@@ -196,6 +222,7 @@ fn set_left_col_box(ev_send: app::Sender<Message>) {
             }
         });
     }
+
     flx_left_col.end();
 }
 
