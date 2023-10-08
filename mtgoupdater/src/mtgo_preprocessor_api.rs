@@ -40,6 +40,16 @@ pub fn run_mtgo_preprocessor_parse_full(
             .to_str()
             .expect("price_history_path is not valid unicode"),
     ])?;
-    let stdout_json = String::from_utf8_lossy(&out.stdout);
-    Ok(serde_json::from_str(&stdout_json).unwrap())
+    if out.status.success() {
+        let stdout_json = String::from_utf8_lossy(&out.stdout);
+        Ok(serde_json::from_str(&stdout_json).unwrap())
+    } else {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!(
+                "MTGO Preprocessor errored: {}",
+                String::from_utf8_lossy(&out.stderr)
+            ),
+        ))
+    }
 }
