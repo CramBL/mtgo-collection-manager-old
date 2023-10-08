@@ -17,15 +17,15 @@ use fltk_grid::Grid;
 use fltk_table::{SmartTable, TableOpts};
 use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 
-mod collection_view;
+mod collection;
 mod menubar;
-mod table;
 mod util;
 
+use collection::view::table;
+use collection::{Category, CtMessage};
 use menubar::McmMenuBar;
 use mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_version;
 use mtgoupdater::mtgogetter_api::mtgogetter_version;
-use table::{Category, CtMessage};
 
 use crate::util::center;
 
@@ -43,7 +43,7 @@ pub enum Message {
     Quit,
     Example,
     MenuBar(menubar::MbMessage),
-    Table(table::CtMessage),
+    Table(collection::CtMessage),
     GotFullTradeList(Box<str>),
 }
 
@@ -53,8 +53,8 @@ impl From<menubar::MbMessage> for Message {
     }
 }
 
-impl From<table::CtMessage> for Message {
-    fn from(ct_msg: table::CtMessage) -> Self {
+impl From<collection::CtMessage> for Message {
+    fn from(ct_msg: collection::CtMessage) -> Self {
         Message::Table(ct_msg)
     }
 }
@@ -87,7 +87,7 @@ impl MtgoGui {
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 25, &ev_send);
 
         set_left_col_box(ev_send.clone());
-        let collection_table = collection_view::set_collection_main_box(ev_send.clone());
+        let collection = collection::view::set_collection_main_box(ev_send.clone());
 
         main_win.end();
         main_win.show();
@@ -102,7 +102,7 @@ impl MtgoGui {
             rcv: ev_rcv,
             main_win,
             menu,
-            collection: collection_table,
+            collection: collection,
         }
     }
 

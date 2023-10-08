@@ -5,9 +5,11 @@ use fltk::{
 use fltk_flex::Flex;
 
 use crate::{
-    table::{self, Category, CtMessage},
+    collection::{Category, CtMessage},
     Message,
 };
+
+pub mod table;
 
 const TABLE_WIDTH: i32 = 790;
 

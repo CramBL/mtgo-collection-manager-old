@@ -1,49 +1,21 @@
-use std::fmt::Alignment;
-
-use fltk::{
-    app::{self, App},
-    enums::{Align, Color, Event, FrameType},
-    prelude::WidgetBase,
-};
+use fltk::app;
 use fltk_table::{SmartTable, TableOpts};
 use mtgoupdater::mtgo_card::MtgoCard;
+use std::fmt::Alignment;
 
-use crate::Message;
+use crate::{
+    collection::{Category, CurrentSortedBy, Direction},
+    Message,
+};
+use fltk::{
+    app::App,
+    enums::{Align, Color, Event, FrameType},
+    image,
+    prelude::*,
+    prelude::{GroupExt, TableExt, WidgetExt},
+};
 
-#[derive(Debug, Clone, Copy)]
-pub enum CtMessage {
-    SortBy(Category),
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum Category {
-    Name,
-    Quantity,
-    Foil,
-    Goatbots,
-    Scryfall,
-    Set,
-    Rarity,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-
-enum CurrentSortedBy {
-    None,
-    Name(Direction),
-    Quantity(Direction),
-    Foil(Direction),
-    Goatbots(Direction),
-    Scryfall(Direction),
-    Set(Direction),
-    Rarity(Direction),
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-enum Direction {
-    Ascending,
-    Descending,
-}
+use super::CtMessage;
 
 pub struct CollectionTable {
     pub(super) table: SmartTable,
@@ -52,6 +24,8 @@ pub struct CollectionTable {
 }
 
 impl CollectionTable {
+    const NAME_COL_WIDTH: i32 = 300;
+
     pub fn new(w: i32, h: i32, ev_sender: app::Sender<Message>) -> Self {
         let mut table = SmartTable::default()
             .with_size(w, h)
@@ -66,18 +40,24 @@ impl CollectionTable {
                 ..Default::default()
             });
 
-        table.set_col_header_value(0, "NAME");
-        table.set_col_width(0, 300);
-        table.set_col_header_value(1, "QUANTITY");
-        table.set_col_header_value(2, "FOIL");
+        table.set_row_header(false);
+        table.set_col_header(false);
+
+        table.set_col_width(0, Self::NAME_COL_WIDTH);
+        table.set_col_width(1, 45);
         table.set_col_width(2, 45);
-        table.set_col_header_value(3, "GOATBOTS");
         table.set_col_width(3, 100);
-        table.set_col_header_value(4, "SCRYFALL");
         table.set_col_width(4, 100);
-        table.set_col_header_value(5, "SET");
         table.set_col_width(5, 45);
-        table.set_col_header_value(6, "RARITY");
+        table.set_col_width(6, 45);
+
+        // table.set_col_header_value(0, "NAME");
+        // table.set_col_header_value(1, "QUANTITY");
+        // table.set_col_header_value(2, "FOIL");
+        // table.set_col_header_value(3, "GOATBOTS");
+        // table.set_col_header_value(4, "SCRYFALL");
+        // table.set_col_header_value(5, "SET");
+        // table.set_col_header_value(6, "RARITY");
 
         table.handle({
             let mut dnd = false;
