@@ -135,12 +135,15 @@ impl MtgoGui {
                             eprintln!("Could not locate price history json");
                             return;
                         };
+                        let appdata_dir_str = format!("{APP_DATA_DIR}/");
+                        let appdata_dir_path = OsStr::new(&appdata_dir_str);
                         // Invoke MTGO preprocessor
                         match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
                             scryfall_path.as_os_str(),
                             OsStr::new(full_trade_list_path.as_ref()),
                             card_definitions_path.as_os_str(),
                             price_history_path.as_os_str(),
+                            Some(appdata_dir_path),
                         ) {
                             Ok(cards) => {
                                 eprintln!("MTGO Preprocessor output: {} cards", cards.len());
