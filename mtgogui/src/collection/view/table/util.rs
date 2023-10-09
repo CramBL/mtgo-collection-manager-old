@@ -123,23 +123,17 @@ pub fn set_drag_and_drop_callback(table: &mut SmartTable, ev_sender: Sender<Mess
             }
             Event::Paste => {
                 if dnd && released {
-                    let path = app::event_text();
-                    eprintln!("path: {}", path);
-                    let p = std::path::PathBuf::from(&path);
-                    if p.exists() {
+                    let path_str = app::event_text();
+                    eprintln!("path: {path_str}");
+                    let path = std::path::PathBuf::from(&path_str);
+                    if path.exists() {
                         // Path exists, ship it.
-                        ev_sender.send(Message::GotFullTradeList(p.into()));
+                        ev_sender.send(Message::GotFullTradeList(path.into()));
                     } else {
                         // Doesn't exist? Try to parse it to a file path
-                        if let Ok(url) = url::Url::parse(&path) {
+                        if let Ok(url) = url::Url::parse(&path_str) {
                             // Extract the path component from the URI
-                            if let Some(path_str) = url
-                                .to_file_path()
-                                .ok()
-                                .and_then(|p| p.into_os_string().into_string().ok())
-                            {
-                                // Convert the path string to a PathBuf
-                                let path_buf = std::path::PathBuf::from(path_str);
+                            if let Ok(path_buf) = url.to_file_path() {
                                 if path_buf.exists() {
                                     eprintln!("All good after URL parsing");
                                     // Ship it
