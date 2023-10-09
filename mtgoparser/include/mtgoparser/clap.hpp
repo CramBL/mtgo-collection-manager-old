@@ -83,11 +83,14 @@ struct Option
   template<std::convertible_to<std::string_view> T_Name,
     std::convertible_to<std::optional<std::string_view>>... T_Alias>
   [[nodiscard]] constexpr explicit Option(T_Name name, bool is_flag, T_Alias... aliases) noexcept
-    : name_{ name }, is_flag_{ is_flag }, aliases_({ aliases... })
+    : name_{ name }, is_flag_{ is_flag }
   {
     // Just to improve compiler error
     static_assert(
       sizeof...(aliases) <= clap::MAX_ALIAS_COUNT, "Too many aliases provided in initialization of struct `Option`");
+
+    // MSVC raises error C2664 if this is initialized in a member initializer
+    aliases_ = { aliases... };
   }
 
   [[nodiscard]] constexpr bool has_alias() const
