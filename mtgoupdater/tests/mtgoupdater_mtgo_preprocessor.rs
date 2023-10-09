@@ -1,3 +1,5 @@
+use std::{ffi::OsStr, path::Path};
+
 use mtgoupdater::internal_only;
 use pretty_assertions::assert_eq;
 
@@ -67,6 +69,7 @@ fn test_full_parse_3000cards_from_pathbuf() {
         full_trade_list_path.as_os_str(),
         card_definitions_path.as_os_str(),
         price_history_path.as_os_str(),
+        None,
     ) {
         Ok(cards) => {
             eprintln!("MTGO Preprocessor output: {} cards", cards.len());
@@ -85,16 +88,14 @@ fn test_full_parse_3000cards_from_pathbuf() {
 fn test_full_parse_3000cards_bad_path() {
     internal_only::dev_try_init_mtgoparser_bin();
 
-    let scryfall_path =
-        std::path::PathBuf::from("../test/test-data/mtgogetter-out/scryfall-20231002-full.json");
-    let card_definitions_path = std::path::PathBuf::from(
-        "../test/test-data/goatbots/card-definitions-2023-10-02-full.json",
-    );
+    let scryfall_path = Path::new("../test/test-data/mtgogetter-out/scryfall-20231002-full.json");
+    let card_definitions_path =
+        Path::new("../test/test-data/goatbots/card-definitions-2023-10-02-full.json");
     let price_history_path =
-        std::path::PathBuf::from("../test/test-data/goatbots/price-history-2023-10-02-full.json");
+        Path::new("../test/test-data/goatbots/price-history-2023-10-02-full.json");
 
     let full_trade_list_path_bad =
-        std::path::PathBuf::from("../test/test-data/mtgo/Full Trade List-medium-3000cards.dekx"); // extra x in the end
+        Path::new("../test/test-data/mtgo/Full Trade List-medium-3000cards.dekx"); // extra x in the end
 
     // Invoke MTGO preprocessor
     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
@@ -102,6 +103,7 @@ fn test_full_parse_3000cards_bad_path() {
         full_trade_list_path_bad.as_os_str(),
         card_definitions_path.as_os_str(),
         price_history_path.as_os_str(),
+        None,
     ) {
         Ok(cards) => {
             eprintln!("MTGO Preprocessor output: {} cards", cards.len());
@@ -112,6 +114,43 @@ fn test_full_parse_3000cards_bad_path() {
         }
         Err(e) => {
             eprintln!("MTGO Preprocessor error: {e}");
+        }
+    }
+}
+
+#[test]
+fn test_full_parse_3000cards_from_path_with_save_to_dir() {
+    internal_only::dev_try_init_mtgoparser_bin();
+
+    let card_definitions_path = std::path::PathBuf::from(
+        "../test/test-data/goatbots/card-definitions-2023-10-02-full.json",
+    );
+    let price_history_path =
+        std::path::PathBuf::from("../test/test-data/goatbots/price-history-2023-10-02-full.json");
+
+    let full_trade_list_path =
+        std::path::PathBuf::from("../test/test-data/mtgo/Full Trade List-medium-3000cards.dek");
+    let save_to_dir = Path::new("target/");
+    // Invoke MTGO preprocessor
+    match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
+        OsStr::new("../test/test-data/mtgogetter-out/scryfall-20231002-full.json"),
+        full_trade_list_path.as_os_str(),
+        card_definitions_path.as_os_str(),
+        price_history_path.as_os_str(),
+        Some(save_to_dir.as_os_str()),
+    ) {
+        Ok(cards) => {
+            eprintln!("MTGO Preprocessor output: {} cards", cards.len());
+            // Fill the progress bar as appropriate
+            // Give all the data to the collection table
+            println!("Got {} cards", cards.len());
+            assert_eq!(3000, cards.len());
+            // Cleanup
+            std::fs::remove_file("target/mtgo-cards.json")
+                .expect("Failed to remove mtgo-cards.json");
+        }
+        Err(e) => {
+            panic!("MTGO Preprocessor error: {e}")
         }
     }
 }
