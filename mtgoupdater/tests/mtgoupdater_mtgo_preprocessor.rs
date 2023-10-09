@@ -46,3 +46,72 @@ fn test_call_mtgo_preprocessor_example_collection_json_stdout() {
         Err(e) => panic!("Unexpected error: {e}"),
     }
 }
+
+#[test]
+fn test_full_parse_3000cards_from_pathbuf() {
+    internal_only::dev_try_init_mtgoparser_bin();
+
+    let scryfall_path =
+        std::path::PathBuf::from("../test/test-data/mtgogetter-out/scryfall-20231002-full.json");
+    let card_definitions_path = std::path::PathBuf::from(
+        "../test/test-data/goatbots/card-definitions-2023-10-02-full.json",
+    );
+    let price_history_path =
+        std::path::PathBuf::from("../test/test-data/goatbots/price-history-2023-10-02-full.json");
+
+    let full_trade_list_path =
+        std::path::PathBuf::from("../test/test-data/mtgo/Full Trade List-medium-3000cards.dek");
+    // Invoke MTGO preprocessor
+    match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
+        scryfall_path.as_os_str(),
+        full_trade_list_path.as_os_str(),
+        card_definitions_path.as_os_str(),
+        price_history_path.as_os_str(),
+    ) {
+        Ok(cards) => {
+            eprintln!("MTGO Preprocessor output: {} cards", cards.len());
+            // Fill the progress bar as appropriate
+            // Give all the data to the collection table
+            println!("Got {} cards", cards.len());
+            assert_eq!(3000, cards.len());
+        }
+        Err(e) => {
+            panic!("MTGO Preprocessor error: {e}")
+        }
+    }
+}
+
+#[test]
+fn test_full_parse_3000cards_bad_path() {
+    internal_only::dev_try_init_mtgoparser_bin();
+
+    let scryfall_path =
+        std::path::PathBuf::from("../test/test-data/mtgogetter-out/scryfall-20231002-full.json");
+    let card_definitions_path = std::path::PathBuf::from(
+        "../test/test-data/goatbots/card-definitions-2023-10-02-full.json",
+    );
+    let price_history_path =
+        std::path::PathBuf::from("../test/test-data/goatbots/price-history-2023-10-02-full.json");
+
+    let full_trade_list_path_bad =
+        std::path::PathBuf::from("../test/test-data/mtgo/Full Trade List-medium-3000cards.dekx"); // extra x in the end
+
+    // Invoke MTGO preprocessor
+    match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
+        scryfall_path.as_os_str(),
+        full_trade_list_path_bad.as_os_str(),
+        card_definitions_path.as_os_str(),
+        price_history_path.as_os_str(),
+    ) {
+        Ok(cards) => {
+            eprintln!("MTGO Preprocessor output: {} cards", cards.len());
+            // Fill the progress bar as appropriate
+            // Give all the data to the collection table
+            println!("Got {} cards", cards.len());
+            panic!("Expected failure with bad path!")
+        }
+        Err(e) => {
+            eprintln!("MTGO Preprocessor error: {e}");
+        }
+    }
+}

@@ -17,7 +17,8 @@ use view::table;
 
 use crate::Message;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum TableMessage {
     SortBy(table::column::Column),
+    Search(Box<str>),
 }

@@ -10,10 +10,13 @@ const MCM_LOGO_SVG: &str = include_str!("../assets/logo-small.svg");
 // Ascending / Descending symbols
 const ASC_SVG: &str = include_str!("../assets/sortASC.svg");
 const DESC_SVG: &str = include_str!("../assets/sortDESC.svg");
+// Icon for search
+const SEARCH_ICON_SVG: &str = include_str!("../assets/icon-search.svg");
 
 static MCM_LOGO: OnceLock<SvgImage> = OnceLock::new();
 static ASC_IMG: OnceLock<SvgImage> = OnceLock::new();
 static DESC_IMG: OnceLock<SvgImage> = OnceLock::new();
+static SEARCH_ICON_IMG: OnceLock<SvgImage> = OnceLock::new();
 
 /// Returns the sort ascending symbol as a borrowed [SvgImage]
 pub fn get_asc_svg() -> &'static SvgImage {
@@ -33,6 +36,12 @@ pub fn get_logo() -> SvgImage {
     let mut logo = MCM_LOGO
         .get_or_init(|| SvgImage::from_data(MCM_LOGO_SVG).expect("Failed to decode MCM logo SVG"))
         .clone();
-    logo.scale(15, 15, true, true);
+    logo.scale(100, 100, true, true);
     logo
+}
+
+pub fn get_icon_search() -> SvgImage {
+    SEARCH_ICON_IMG
+        .get_or_init(|| SvgImage::from_data(SEARCH_ICON_SVG).unwrap())
+        .clone()
 }

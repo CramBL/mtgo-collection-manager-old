@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use fltk::{
     app::{self, Sender},
     enums::Event,
@@ -123,7 +125,34 @@ pub fn set_drag_and_drop_callback(table: &mut SmartTable, ev_sender: Sender<Mess
                 if dnd && released {
                     let path = app::event_text();
                     eprintln!("path: {}", path);
-                    ev_sender.send(Message::GotFullTradeList(path.into()));
+                    let p = std::path::PathBuf::from(&path);
+                    if p.exists() {
+                        // Path exists, ship it.
+                        ev_sender.send(Message::GotFullTradeList(p.into()));
+                    } else {
+                        // Doesn't exist? Try to parse it to a file path
+                        if let Ok(url) = url::Url::parse(&path) {
+                            // Extract the path component from the URI
+                            if let Some(path_str) = url
+                                .to_file_path()
+                                .ok()
+                                .and_then(|p| p.into_os_string().into_string().ok())
+                            {
+                                // Convert the path string to a PathBuf
+                                let path_buf = std::path::PathBuf::from(path_str);
+                                if path_buf.exists() {
+                                    eprintln!("All good after URL parsing");
+                                    // Ship it
+                                    ev_sender.send(Message::GotFullTradeList(path_buf.into()));
+                                }
+                            } else {
+                                eprintln!("Failed to extract the path from the URI.");
+                            }
+                        } else {
+                            eprintln!("Failed to parse URI from drag and drop.");
+                        }
+                    }
+
                     dnd = false;
                     released = false;
                     true
@@ -163,7 +192,7 @@ pub fn draw_cards(table: &mut SmartTable, cards: &[MtgoCard]) {
 }
 
 /// Helper to fill a single row with [MtgoCard] data
-fn fill_card_row(table: &mut SmartTable, row_idx: i32, card: &MtgoCard) {
+pub fn fill_card_row(table: &mut SmartTable, row_idx: i32, card: &MtgoCard) {
     CollectionTable::COL_NAME.fill(table, row_idx, &card.name);
     CollectionTable::COL_QUANTITY.fill(table, row_idx, &card.quantity.to_string());
     CollectionTable::COL_FOIL.fill(table, row_idx, if card.foil { "Yes" } else { "No" });

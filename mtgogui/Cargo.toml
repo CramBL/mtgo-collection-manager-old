@@ -16,6 +16,7 @@ fltk-grid = "0.3"
 fltk-table = "0.3.1"
 fltk-theme = "0.7"
 mtgoupdater = { version = "0.1.0", path = "../mtgoupdater"}
+url = "2.4.1"
 
 [profile.release]
 strip = true
