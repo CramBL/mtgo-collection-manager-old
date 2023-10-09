@@ -6,6 +6,7 @@
 #include "mtgoparser/mtgo/xml.hpp"
 #include "mtgoparser/scryfall.hpp"
 
+#include <fmt/core.h>
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
 
@@ -69,23 +70,23 @@ private:
 
 constexpr auto Collection::Size() const noexcept -> std::size_t { return cards_.size(); }
 
-void Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
+void inline Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
   const goatbots::price_hist_map_t &price_hist) noexcept
 {
-  for (auto &c : cards_) {
+  for (auto &card : this->cards_) {
     // Extract set, rarity, and foil from goatbots card definitions
-    if (auto res = card_defs.find(c.id_); res != card_defs.end()) {
-      c.set_ = res->second.cardset;
-      c.rarity_ = mtg::util::rarity_from_t(res->second.rarity);
-      c.foil_ = res->second.foil == 1;
+    if (auto res = card_defs.find(card.id_); res != card_defs.end()) {
+      card.set_ = res->second.cardset;
+      card.rarity_ = mtg::util::rarity_from_t(res->second.rarity);
+      card.foil_ = res->second.foil == 1;
     } else {
-      spdlog::warn("Card definition key not found: ID={}", c.id_);
+      spdlog::warn("Card definition key not found: ID={}", card.id_);
     }
     // Extract price from goatbots price history
-    if (auto res = price_hist.find(c.id_); res != price_hist.end()) {
-      c.goatbots_price_ = res->second;
+    if (auto res = price_hist.find(card.id_); res != price_hist.end()) {
+      card.goatbots_price_ = res->second;
     } else {
-      spdlog::warn("Price history key not found: ID={}", c.id_);
+      spdlog::warn("Price history key not found: ID={}", card.id_);
     }
   }
 }
@@ -127,6 +128,8 @@ void Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfall_card
   glz::write<glz::opts{ .prettify = true }>(cards_, res);
   return res;
 }
+
+
 void Collection::FromJson(const std::string &json_str)
 {
 
