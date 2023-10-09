@@ -1,3 +1,4 @@
+use crate::assets::{get_asc_svg, get_desc_svg};
 use crate::Message;
 use fltk::{app, button, group::Column};
 use fltk::{
@@ -44,9 +45,9 @@ impl SortToggle {
             }
 
             let mut image = if ordering.is_descending() {
-                crate::assets::get_desc_svg().clone()
+                get_desc_svg().clone()
             } else {
-                crate::assets::get_asc_svg().clone()
+                get_asc_svg().clone()
             };
             image.scale(15, 15, true, true);
             image.draw(b.x() + (b.w() - 20) + 5, b.y() + 30, b.w(), b.h());
