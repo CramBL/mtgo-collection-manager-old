@@ -11,6 +11,10 @@
 #include <unordered_map>
 
 namespace goatbots {
+
+// Try to only allocate once, so reserve more than card count
+const uint32_t RESERVE_APPROX_CARD_COUNT = 80000;
+
 struct CardDefinition
 {
   std::string name{};
@@ -31,11 +35,11 @@ using card_defs_map_t = std::unordered_map<uint32_t, CardDefinition>;
 template<class T>
 concept goatbots_json = std::disjunction<std::is_same<T, price_hist_map_t>, std::is_same<T, card_defs_map_t>>::value;
 
-template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(std::filesystem::path path_json) -> std::optional<T>
+template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(const std::filesystem::path &path_json) -> std::optional<T>
 {
   // Instantiate and pre-allocate map
   T json_map{};
-  json_map.reserve(80000);
+  json_map.reserve(RESERVE_APPROX_CARD_COUNT);
 
   // Read file into buffer and decode to populate map
   if (auto err_code = glz::read_json(json_map, io_util::ReadToStrBuf(path_json))) {

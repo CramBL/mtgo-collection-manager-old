@@ -39,7 +39,7 @@ public:
     // double work
     if (!this->total_quantity_.has_value()) {
       this->total_quantity_ = 0;
-      for (const auto &c : this->cards_) { this->total_quantity_.value() += c.quantity_; }
+      for (const auto &card : this->cards_) { this->total_quantity_.value() += card.quantity_; }
     }
     // Return memoized value
     return this->total_quantity_.value();
@@ -91,11 +91,11 @@ void inline Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &car
   }
 }
 
-void Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfall_cards) noexcept
+void inline Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfall_cards) noexcept
 {
   // Sort scryfall cards by mtgo id
-  std::sort(scryfall_cards.begin(), scryfall_cards.end(), [](const scryfall::Card &a, const scryfall::Card &b) {
-    return a.mtgo_id < b.mtgo_id;
+  std::sort(scryfall_cards.begin(), scryfall_cards.end(), [](const scryfall::Card &cardA, const scryfall::Card &cardB) {
+    return cardA.mtgo_id < cardB.mtgo_id;
   });
   // The cards_ member variable should already be sorted by ID
 
@@ -113,7 +113,8 @@ void Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfall_card
     if (c.foil_) { continue; }
 
     while (scry_it != scry_end && (*scry_it).mtgo_id <= c.id_) {
-      if ((*scry_it).mtgo_id == c.id_ && (*scry_it).prices.tix.has_value() && ((*scry_it).prices.tix.value() != "")) {
+      if ((*scry_it).mtgo_id == c.id_ && (*scry_it).prices.tix.has_value()
+          && (!(*scry_it).prices.tix.value().empty())) {
         c.scryfall_price_ = std::stod((*scry_it).prices.tix.value());
       }
       ++scry_it;
@@ -121,8 +122,8 @@ void Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfall_card
   }
 }
 
-[[nodiscard]] auto Collection::ToJson() const -> std::string { return glz::write_json(cards_); }
-[[nodiscard]] auto Collection::ToJsonPretty() const -> std::string
+[[nodiscard]] auto inline Collection::ToJson() const -> std::string { return glz::write_json(cards_); }
+[[nodiscard]] auto inline Collection::ToJsonPretty() const -> std::string
 {
   std::string res{};
   glz::write<glz::opts{ .prettify = true }>(cards_, res);
@@ -130,32 +131,31 @@ void Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfall_card
 }
 
 
-void Collection::FromJson(const std::string &json_str)
+void inline Collection::FromJson(const std::string &json_str)
 {
-
-  if (auto ec = glz::read_json<std::vector<Card>>(std::ref(cards_), json_str)) {
-    spdlog::error("{}", glz::format_error(ec, std::string{}));
+  if (auto err_code = glz::read_json<std::vector<Card>>(std::ref(cards_), json_str)) {
+    spdlog::error("{}", glz::format_error(err_code, std::string{}));
   }
 }
-void Collection::Print() const
+void inline Collection::Print() const
 {
-  for (const auto &c : cards_) {
+  for (const auto &card : cards_) {
     std::string scryfall_price{ "N/A" };
-    if (c.scryfall_price_.has_value()) { scryfall_price.assign(fmt::format("{0:g}", c.scryfall_price_.value())); }
+    if (card.scryfall_price_.has_value()) { scryfall_price.assign(fmt::format("{0:g}", card.scryfall_price_.value())); }
 
     fmt::println("{} {}: Goatbots price={}, Scryfall price={}, quantity={}, set={}, foil={}, rarity={}",
-      c.id_,
-      c.name_,
-      c.goatbots_price_,
+      card.id_,
+      card.name_,
+      card.goatbots_price_,
       scryfall_price,
-      c.quantity_,
-      c.set_,
-      c.foil_,
-      mtg::util::rarity_as_string(c.rarity_));
+      card.quantity_,
+      card.set_,
+      card.foil_,
+      mtg::util::rarity_as_string(card.rarity_));
   }
 }
 
-void Collection::PrettyPrint() const
+void inline Collection::PrettyPrint() const
 {
   fmt::println("{: <25}{: <23}{: <23}{: <11}{: <8}{: <10}{: <6}\n",
     "Name",
@@ -165,17 +165,17 @@ void Collection::PrettyPrint() const
     "Foil",
     "Rarity",
     "Set");
-  for (const auto &c : cards_) {
+  for (const auto &card : cards_) {
     std::string scryfall_price{ "N/A" };
-    if (c.scryfall_price_.has_value()) { scryfall_price.assign(fmt::format("{0:g}", c.scryfall_price_.value())); }
+    if (card.scryfall_price_.has_value()) { scryfall_price.assign(fmt::format("{0:g}", card.scryfall_price_.value())); }
     fmt::println("{: <25}{: <23}{: <23}{: <11}{: <8}{: <10}{: <6}",
-      c.name_,
-      c.goatbots_price_,
+      card.name_,
+      card.goatbots_price_,
       scryfall_price,
-      c.quantity_,
-      c.foil_,
-      mtg::util::rarity_as_string(c.rarity_),
-      c.set_);
+      card.quantity_,
+      card.foil_,
+      mtg::util::rarity_as_string(card.rarity_),
+      card.set_);
   }
 }
 

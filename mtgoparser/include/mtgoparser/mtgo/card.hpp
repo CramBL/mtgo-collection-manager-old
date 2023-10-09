@@ -9,6 +9,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace mtgo {
 
@@ -34,8 +35,9 @@ struct Card
     bool foil = false,
     double goatbots_price = 0,
     std::optional<double> scryfall_price = {}) noexcept
-    : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ mtg::util::rarity_from_t(rarity) },
-      foil_{ foil }, goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
+    : id_{ id }, quantity_{ quantity }, name_{ std::move(name) }, set_{ std::move(set) },
+      rarity_{ mtg::util::rarity_from_t(std::move(rarity)) }, foil_{ foil }, goatbots_price_{ goatbots_price },
+      scryfall_price_{ scryfall_price }
   {}
 
   // Partially parametrised constructor used to construct a card from MTGO .dek XML
@@ -67,7 +69,7 @@ struct Card
 
   // Templated constructor
   template<typename I, typename Q, typename S>
-  requires std::convertible_to<I, uint32_t> && std::convertible_to<Q, uint16_t> && std::convertible_to<S, std::string>
+    requires std::convertible_to<I, uint32_t> && std::convertible_to<Q, uint16_t> && std::convertible_to<S, std::string>
   explicit Card(I id,
     Q quantity,
     S name,
@@ -77,14 +79,13 @@ struct Card
     double goatbots_price = 0,
     std::optional<double> scryfall_price = {}) noexcept
     : id_{ static_cast<uint32_t>(id) }, quantity_{ static_cast<uint16_t>(quantity) }, name_{ name }, set_{ set },
-      rarity_{ mtg::util::rarity_from_t(rarity) }, foil_{ foil }, goatbots_price_{ goatbots_price }, scryfall_price_{
-        scryfall_price
-      }
+      rarity_{ mtg::util::rarity_from_t(rarity) }, foil_{ foil }, goatbots_price_{ goatbots_price },
+      scryfall_price_{ scryfall_price }
   {}
 
   // Move constructor
   [[nodiscard]] Card(Card &&other) noexcept
-    : id_(other.id_), quantity_(std::move(other.quantity_)), name_(std::move(other.name_)), set_(std::move(other.set_)),
+    : id_(other.id_), quantity_(other.quantity_), name_(std::move(other.name_)), set_(std::move(other.set_)),
       rarity_(other.rarity_), foil_(other.foil_), goatbots_price_(other.goatbots_price_),
       scryfall_price_(other.scryfall_price_)
   {}

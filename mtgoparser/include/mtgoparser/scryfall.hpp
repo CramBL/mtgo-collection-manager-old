@@ -6,6 +6,7 @@
 #include <spdlog/spdlog.h>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace scryfall {
 struct Prices
@@ -17,7 +18,8 @@ struct Prices
     opt_str _eur = std::nullopt,
     opt_str _eur_foil = std::nullopt,
     opt_str _tix = std::nullopt)
-    : usd{ _usd }, usd_foil{ _usd_foil }, eur{ _eur }, eur_foil{ _eur_foil }, tix{ _tix }
+    : usd{ std::move(_usd) }, usd_foil{ std::move(_usd_foil) }, eur{ std::move(_eur) },
+      eur_foil{ std::move(_eur_foil) }, tix{ std::move(_tix) }
   {}
 
 
@@ -48,7 +50,8 @@ struct Card
     std::string _released_at = "",
     std::string _rarity = "",
     Prices _prices = scryfall::Prices{})
-    : mtgo_id{ _mtgo_id }, name{ _name }, released_at{ _released_at }, rarity{ _rarity }, prices{ _prices }
+    : mtgo_id{ _mtgo_id }, name{ std::move(_name) }, released_at{ std::move(_released_at) },
+      rarity{ std::move(_rarity) }, prices{ std::move(_prices) }
   {}
 
   [[nodiscard]] inline constexpr bool operator==(const Card &other) const
@@ -85,13 +88,16 @@ template<> struct glz::meta<scryfall::Card>
 };
 
 namespace scryfall {
+// about 43000 cards as of 2023-09-11
+const uint32_t RESERVE_APPROX_MAX_SCRYFALL_CARDS = 50000;
+
 using scryfall_card_vec = std::vector<scryfall::Card>;
 
-[[nodiscard]] auto ReadJsonVector(std::filesystem::path path_json) -> std::optional<scryfall_card_vec>
+[[nodiscard]] auto inline ReadJsonVector(const std::filesystem::path &path_json) -> std::optional<scryfall_card_vec>
 {
   // Instantiate and pre-allocate map
   scryfall_card_vec scryfall_vec{};
-  scryfall_vec.reserve(50000);// about 43000 cards as of 2023-09-11
+  scryfall_vec.reserve(RESERVE_APPROX_MAX_SCRYFALL_CARDS);
 
   // Read file into buffer and decode to populate map
   if (auto err_code = glz::read_json(scryfall_vec, io_util::ReadToStrBuf(path_json))) {
