@@ -20,7 +20,7 @@ use super::TableMessage;
 
 pub mod column;
 mod util;
-use util::ColumnStyle;
+use util::CollectionColumn;
 
 pub struct SortToggle {
     b: button::Button,
@@ -64,13 +64,13 @@ pub struct CollectionTable {
 }
 
 impl CollectionTable {
-    pub const COL_NAME: ColumnStyle = ColumnStyle::new(0, "NAME", 300);
-    pub const COL_QUANTITY: ColumnStyle = ColumnStyle::new(1, "Quantity", 60);
-    pub const COL_FOIL: ColumnStyle = ColumnStyle::new(2, "FOIL", 60);
-    pub const COL_GOATBOTS: ColumnStyle = ColumnStyle::new(3, "GOATBOTS", 120);
-    pub const COL_CARDHOARDER: ColumnStyle = ColumnStyle::new(4, "CARDHOARDER", 120);
-    pub const COL_SET: ColumnStyle = ColumnStyle::new(5, "SET", 60);
-    pub const COL_RARITY: ColumnStyle = ColumnStyle::new(6, "RARITY", 100);
+    pub const COL_NAME: CollectionColumn = CollectionColumn::new(0, "NAME", 300);
+    pub const COL_QUANTITY: CollectionColumn = CollectionColumn::new(1, "Quantity", 60);
+    pub const COL_FOIL: CollectionColumn = CollectionColumn::new(2, "FOIL", 60);
+    pub const COL_GOATBOTS: CollectionColumn = CollectionColumn::new(3, "GOATBOTS", 120);
+    pub const COL_CARDHOARDER: CollectionColumn = CollectionColumn::new(4, "CARDHOARDER", 120);
+    pub const COL_SET: CollectionColumn = CollectionColumn::new(5, "SET", 60);
+    pub const COL_RARITY: CollectionColumn = CollectionColumn::new(6, "RARITY", 100);
 
     pub fn new(w: i32, h: i32, ev_sender: app::Sender<Message>, sort_states: SortStates) -> Self {
         // Create the row of buttons to sort by columns

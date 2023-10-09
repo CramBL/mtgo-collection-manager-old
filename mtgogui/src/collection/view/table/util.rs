@@ -18,13 +18,13 @@ use super::{
     CollectionTable,
 };
 
-pub struct ColumnStyle {
+pub struct CollectionColumn {
     pub name: &'static str,
     pub width: i32,
     pub idx: i32,
 }
 
-impl ColumnStyle {
+impl CollectionColumn {
     /// Declare a new column with an associated index, name, and width
     pub const fn new(idx: i32, name: &'static str, width: i32) -> Self {
         Self { idx, name, width }
