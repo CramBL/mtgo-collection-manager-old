@@ -13,7 +13,7 @@
 
 // Command-Line Argument Parsing (CLAP) utility
 namespace clap {
-namespace {// Utility used by the Clap class
+namespace util {// Utility used by the Clap class
 
   // Helper function to check if a value equals any element in a parameter pack
   template<typename T, typename... Args>
@@ -42,7 +42,7 @@ namespace {// Utility used by the Clap class
 
     // Cannot use std::ranges because apple clang still does not support it...
     return std::any_of(
-      args.cbegin(), args.cend(), [&](const std::string_view &arg) { return equals_any(arg, option_names...); });
+      args.cbegin(), args.cend(), [&](const std::string_view &arg) { return util::equals_any(arg, option_names...); });
   }
 
   // Returns the argument to an option if the option or any of its aliases exists and it has an argument
@@ -54,7 +54,7 @@ namespace {// Utility used by the Clap class
 
 
     for (auto it = args.cbegin(), end = args.cend(); it != end; ++it) {
-      if (equals_any(*it, option_names...)) {
+      if (util::equals_any(*it, option_names...)) {
         if (it + 1 != end) {
           return *(it + 1);
         } else {
@@ -66,7 +66,7 @@ namespace {// Utility used by the Clap class
     return std::nullopt;
   }
 
-}// namespace
+}// namespace util
 
 
 // More than 3 aliases is just too much
@@ -89,10 +89,14 @@ struct Option
     static_assert(
       sizeof...(aliases) <= clap::MAX_ALIAS_COUNT, "Too many aliases provided in initialization of struct `Option`");
 
+    // MSVC raises error C2664 if this is initialized in a member initializer
     aliases_ = { aliases... };
   }
 
-  constexpr bool has_alias() const { return aliases_.has_value() && aliases_.value().front().has_value(); }
+  [[nodiscard]] constexpr bool has_alias() const
+  {
+    return aliases_.has_value() && aliases_.value().front().has_value();
+  }
 };
 
 // Struct for defining commands
@@ -127,8 +131,8 @@ template<size_t N_cmds> struct CommandArray
     auto match_command_name = [&](const T_cmd &cmd) { return cmd.name_ == cmd_name; };
 
 
-    if (auto it = std::find_if(cmds_.begin(), cmds_.end(), match_command_name); it != cmds_.end()) {
-      return *it;
+    if (auto iter = std::find_if(cmds_.begin(), cmds_.end(), match_command_name); iter != cmds_.end()) {
+      return *iter;
     } else {
       return std::nullopt;
     }
@@ -155,14 +159,14 @@ template<size_t N_opts> struct OptionArray
     auto match_option_name = [&](const T_opt &opt) {
       return opt.name_ == opt_name
              || (opt.has_alias()
-                 && std::any_of(opt.aliases_.value().begin(), opt.aliases_.value().end(), [&](const auto &a) {
-                      return a.has_value() && a.value() == opt_name;
+                 && std::any_of(opt.aliases_.value().begin(), opt.aliases_.value().end(), [&](const auto &name) {
+                      return name.has_value() && name.value() == opt_name;
                     }));
     };
 
 
-    if (auto it = std::find_if(opts_.begin(), opts_.end(), match_option_name); it != opts_.end()) [[likely]] {
-      return *it;
+    if (auto iter = std::find_if(opts_.begin(), opts_.end(), match_option_name); iter != opts_.end()) [[likely]] {
+      return *iter;
     } else [[unlikely]] {
       return std::nullopt;
     }
@@ -353,14 +357,10 @@ public:
                  || (opt.first.has_alias()
                      && std::any_of(opt.first.aliases_.value().begin(),
                        opt.first.aliases_.value().end(),
-                       [flag_name](const auto &a) { return a.has_value() && a.value() == flag_name; }));
+                       [flag_name](const auto &name) { return name.has_value() && name.value() == flag_name; }));
         });
 
-      if (res != this->set_options_.value().end()) {
-        return true;
-      } else {
-        return false;
-      }
+      return static_cast<bool>(res != this->set_options_.value().end());
     }
   }
 
@@ -389,7 +389,7 @@ public:
                  || (opt.first.has_alias()
                      && std::any_of(opt.first.aliases_.value().begin(),
                        opt.first.aliases_.value().end(),
-                       [opt_name](const auto &a) { return a.has_value() && a.value() == opt_name; }));
+                       [opt_name](const auto &name) { return name.has_value() && name.value() == opt_name; }));
         });
 
       if (res != this->set_options_.value().end()) {

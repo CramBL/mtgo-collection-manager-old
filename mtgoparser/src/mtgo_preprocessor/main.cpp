@@ -9,14 +9,19 @@
 #include "mtgoparser/io.hpp"
 #include "mtgoparser/mtgo.hpp"
 #include "mtgoparser/scryfall.hpp"
-#include <algorithm>
-#include <cassert>
+
 #include <internal_use_only/config.hpp>
-#include <optional>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
+
+
+#include <algorithm>
+#include <cassert>
+#include <fstream>
+#include <optional>
 #include <string_view>
 #include <type_traits>
+
 
 // TODO: TEMPORARY NOLINT - remove when all examples are gone and it's out of early development.
 // NOLINTBEGIN
@@ -36,6 +41,7 @@ constexpr clap::Option scryfall_path_opt{ "--scryfall-path", false };
 constexpr clap::Option fulltradelist_path_opt{ "--full-trade-list", false };
 constexpr clap::Option card_defs_path_opt{ "--card-definitions", false };
 constexpr clap::Option price_hist_path_opt{ "--price-history", false };
+constexpr clap::Option app_data_dir{ "--appdata-dir", false };
 constexpr clap::OptionArray opt_array = clap::def_options(clap::Option("--version", true, "-V"),
   help_opt,
   debug_opt,
@@ -45,7 +51,8 @@ constexpr clap::OptionArray opt_array = clap::def_options(clap::Option("--versio
   card_defs_path_opt,
   price_hist_path_opt,
   clap::Option("--echo", true),
-  mtgoupdater_json_out);
+  mtgoupdater_json_out,
+  app_data_dir);
 
 constinit auto config = clap::init_clap(opt_array, clap::def_cmds(clap::Command("run", true)));
 
@@ -59,7 +66,7 @@ int main(int argc, char *argv[])
   // Parse (and validate) command-line arguments
   if (auto errors = config.Parse(argc, argv)) {
     spdlog::error("{} arguments failed to validate", errors);
-    return 1;
+    return -2;
   };
 
   if (config.FlagSet(help_opt)) {
@@ -69,7 +76,10 @@ int main(int argc, char *argv[])
 
   if (config.FlagSet("--echo")) { config.PrintArgs(); }
 
-  if (config.FlagSet("--version")) { fmt::println("v{}", mtgoparser::cmake::project_version); }
+  if (config.FlagSet("--version")) {
+    fmt::println("v{}", mtgoparser::cmake::project_version);
+    return 0;
+  }
 
   if (config.CmdSet("run")) {
 
@@ -116,7 +126,19 @@ int main(int argc, char *argv[])
       mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
       spdlog::info("extracted Scryfall info");
       auto json = mtgo_collection.ToJson();
+      if (auto appdata_dir = config.OptionValue(app_data_dir)) {
+        // Write the json to a file in the appdata directory
+        std::string mtgo_cards_json_fname = "mtgo-cards.json";
+        std::string fullpath = std::string(appdata_dir.value()) + mtgo_cards_json_fname;
+        std::ofstream mtgo_cards_outfile(fullpath);
+        if (mtgo_cards_outfile.is_open()) {
+          mtgo_cards_outfile << json << std::endl;
+          mtgo_cards_outfile.close();
+        }
+      }
+
       fmt::print("{}", json);
+
       return 0;
     }
 

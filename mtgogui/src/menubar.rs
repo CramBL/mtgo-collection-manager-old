@@ -16,7 +16,7 @@ use mtgoupdater::{
 
 /// Messages that can be received by the menubar
 #[derive(Debug, Clone, Copy)]
-pub enum MbMessage {
+pub enum MenubarMessage {
     Open,
     Quit,
     About,
@@ -73,12 +73,12 @@ impl McmMenuBar {
         }
     }
 
-    pub fn handle_ev(&mut self, ev: MbMessage) {
+    pub fn handle_ev(&mut self, ev: MenubarMessage) {
         match ev {
-            MbMessage::Open => self.open_full_tradelist(),
-            MbMessage::Quit => app::quit(),
-            MbMessage::About => show_about(),
-            MbMessage::Example => todo!("example"),
+            MenubarMessage::Open => self.open_full_tradelist(),
+            MenubarMessage::Quit => app::quit(),
+            MenubarMessage::About => show_about(),
+            MenubarMessage::Example => todo!("example"),
         }
     }
 
@@ -228,7 +228,7 @@ fn init_menu_bar(menu: &mut menu::SysMenuBar, s: &fltk::app::Sender<Message>) {
         Shortcut::Ctrl | 'o',
         menu::MenuFlag::Normal,
         s.clone(),
-        MbMessage::Open.into(),
+        MenubarMessage::Open.into(),
     );
 
     menu.add_emit(
@@ -244,7 +244,7 @@ fn init_menu_bar(menu: &mut menu::SysMenuBar, s: &fltk::app::Sender<Message>) {
         Shortcut::None,
         menu::MenuFlag::Normal,
         s.clone(),
-        MbMessage::About.into(),
+        MenubarMessage::About.into(),
     );
 
     if let Some(mut item) = menu.find_item("&File/Quit\t") {

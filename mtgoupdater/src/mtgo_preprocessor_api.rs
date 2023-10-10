@@ -19,8 +19,9 @@ pub fn run_mtgo_preprocessor_parse_full(
     full_trade_list_path: &OsStr,
     card_definitions_path: &OsStr,
     price_history_path: &OsStr,
+    save_json_to_dir: Option<&OsStr>,
 ) -> Result<Vec<crate::mtgo_card::MtgoCard>, std::io::Error> {
-    let out = run_mtgo_preprocessor([
+    let mut args = vec![
         "run",
         "-u",
         "--scryfall-path",
@@ -39,7 +40,17 @@ pub fn run_mtgo_preprocessor_parse_full(
         price_history_path
             .to_str()
             .expect("price_history_path is not valid unicode"),
-    ])?;
+    ];
+
+    if let Some(dir) = save_json_to_dir {
+        args.push("--appdata-dir");
+        args.push(
+            dir.to_str()
+                .expect("save to json directory is not valid unicode"),
+        );
+    }
+
+    let out = run_mtgo_preprocessor(args)?;
     if out.status.success() {
         let stdout_json = String::from_utf8_lossy(&out.stdout);
         Ok(serde_json::from_str(&stdout_json).unwrap())

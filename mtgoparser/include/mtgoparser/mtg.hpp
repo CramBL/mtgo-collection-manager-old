@@ -34,9 +34,9 @@ namespace util {
     return Rarity::Booster;
   }
 
-  auto rarity_as_string(Rarity r) -> std::string
+  auto inline rarity_as_string(Rarity rarity) -> std::string
   {
-    switch (r) {
+    switch (rarity) {
     case Rarity::Common:
       [[likely]] return "Common";
     case Rarity::Uncommon:
