@@ -90,7 +90,9 @@ struct Option
       sizeof...(aliases) <= clap::MAX_ALIAS_COUNT, "Too many aliases provided in initialization of struct `Option`");
 
     // MSVC raises error C2664 if this is initialized in a member initializer
+    // NOLINTBEGIN
     aliases_ = { aliases... };
+    // NOLINTEND
   }
 
   [[nodiscard]] constexpr bool has_alias() const
@@ -107,7 +109,7 @@ struct Command
 
   template<std::convertible_to<std::string_view> T_Name,
     std::convertible_to<std::optional<std::string_view>>... T_Alias>
-  [[nodiscard]] constexpr explicit Command(T_Name name, bool is_flag) : name_{ name }, is_flag_{ is_flag }
+  [[nodiscard]] constexpr explicit Command(T_Name name, bool is_flag) noexcept : name_{ name }, is_flag_{ is_flag }
   {}
 };
 
@@ -117,16 +119,16 @@ template<size_t N_cmds> struct CommandArray
   using T_cmd = clap::Command;
 
   std::array<T_cmd, N_cmds> cmds_;
-  template<class... T> [[nodiscard]] constexpr explicit CommandArray(T... cmds) : cmds_{ cmds... } {}
+  template<class... T> [[nodiscard]] constexpr explicit CommandArray(T... cmds) noexcept : cmds_{ cmds... } {}
 
-  [[nodiscard]] constexpr auto size() const { return cmds_.size(); }
+  [[nodiscard]] constexpr auto size() const noexcept { return cmds_.size(); }
 
-  void print() const
+  void print() const noexcept
   {
     for (const T_cmd &cmd : cmds_) { fmt::print("{}\n", cmd.name_); }
   }
 
-  [[nodiscard]] auto find(std::string_view cmd_name) const -> std::optional<T_cmd>
+  [[nodiscard]] auto find(std::string_view cmd_name) const noexcept -> std::optional<T_cmd>
   {
     auto match_command_name = [&](const T_cmd &cmd) { return cmd.name_ == cmd_name; };
 
@@ -145,16 +147,16 @@ template<size_t N_opts> struct OptionArray
   using T_opt = clap::Option;
 
   std::array<T_opt, N_opts> opts_;
-  template<class... T> [[nodiscard]] constexpr explicit OptionArray(T... opts) : opts_{ opts... } {}
+  template<class... T> [[nodiscard]] constexpr explicit OptionArray(T... opts) noexcept : opts_{ opts... } {}
 
-  [[nodiscard]] constexpr auto size() const { return opts_.size(); }
+  [[nodiscard]] constexpr auto size() const noexcept { return opts_.size(); }
 
-  void print() const
+  void print() const noexcept
   {
     for (const T_opt &opt : opts_) { fmt::print("{}\n", opt.name_); }
   }
 
-  [[nodiscard]] auto find(std::string_view opt_name) const -> std::optional<T_opt>
+  [[nodiscard]] auto find(std::string_view opt_name) const noexcept -> std::optional<T_opt>
   {
     auto match_option_name = [&](const T_opt &opt) {
       return opt.name_ == opt_name
@@ -183,6 +185,8 @@ template<size_t N_opts, size_t N_cmds> class Clap
   // Options/command set from the command-line (generated from parsing the command-line arguments)
   std::optional<std::vector<std::pair<clap::Option, std::optional<std::string_view>>>> set_options_;
   std::optional<clap::Command> set_cmd_;// only single command allowed (TODO: support subcommands)
+  bool is_clap_parsed = false;
+
 
 public:
   [[nodiscard]] constexpr explicit Clap(clap::OptionArray<N_opts> opts_arr,
@@ -261,6 +265,12 @@ public:
   [[nodiscard]] auto Parse(int argc, char *argv[]) noexcept -> size_t
   {
     size_t errors = 0;
+    if (this->is_clap_parsed) {
+      errors = 1;
+      return errors;
+    } else {
+      this->is_clap_parsed = true;
+    }
 
     auto tmp_args = std::vector<std::string_view>(argv + 1, argv + argc);
     for (auto it = tmp_args.cbegin(), end = tmp_args.cend(); it != end; ++it) {
@@ -405,6 +415,9 @@ public:
     }
   }
 
+  // Lookup command by supplying a partial or fully equivelant `Command` struct, and return if it is set.
+  [[nodiscard]] constexpr auto CmdSet(const clap::Command &cmd_inst) const -> bool { return CmdSet(cmd_inst.name_); }
+
   // Lookup command by name, and return if it is set or not
   [[nodiscard]] constexpr auto CmdSet(std::string_view cmd_name) const -> bool
   {
@@ -414,25 +427,27 @@ public:
       return (this->set_cmd_.has_value() && this->set_cmd_.value().name_ == cmd_name);
     }
   }
+
+  [[nodiscard]] auto isClapParsed() const noexcept -> bool { return this->is_clap_parsed; }
 };
 
 // Helpers to make it easy to instantiate a CLAP
 
 // Define options
-template<class... Opts> constexpr auto def_options(Opts... opts) -> decltype(auto)
+template<class... Opts> constexpr auto def_options(Opts... opts) noexcept -> decltype(auto)
 {
   return clap::OptionArray<sizeof...(opts)>{ opts... };
 }
 
 // Define commands
-template<class... Cs> constexpr auto def_cmds(Cs... cmds) -> decltype(auto)
+template<class... Cs> constexpr auto def_cmds(Cs... cmds) noexcept -> decltype(auto)
 {
   return clap::CommandArray<sizeof...(cmds)>{ cmds... };
 }
 
 // instantiate the CLAP
 template<size_t N, size_t M>
-[[nodiscard]] constexpr auto init_clap(clap::OptionArray<N> options_arr, clap::CommandArray<M> cmd_arr)
+[[nodiscard]] constexpr auto init_clap(clap::OptionArray<N> options_arr, clap::CommandArray<M> cmd_arr) noexcept
   -> clap::Clap<N, M>
 {
   return clap::Clap<N, M>{ options_arr, cmd_arr };
