@@ -23,9 +23,6 @@
 #include <type_traits>
 
 
-// TODO: TEMPORARY NOLINT - remove when all examples are gone and it's out of early development.
-// NOLINTBEGIN
-
 // Relative to a subproject
 const auto path_mtgogetter_out_scryfall_full = "../test/test-data/mtgogetter-out/scryfall-20231002-full.json";
 const auto path_trade_list_medium_3000cards = "../test/test-data/mtgo/Full Trade List-medium-3000cards.dek";
@@ -169,5 +166,3 @@ int main(int argc, char *argv[])
 
   return 0;
 }
-
-// NOLINTEND
