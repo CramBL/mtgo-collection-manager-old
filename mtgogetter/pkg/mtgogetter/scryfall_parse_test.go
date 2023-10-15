@@ -198,3 +198,46 @@ func TestScryfallJson_Deserialize_50cards_streamed(t *testing.T) {
 		t.Errorf("Expected 0.03 got %s", third_card.Prices.Tix)
 	}
 }
+
+func TestMostRecentScryfallSetFromJsonBytes(t *testing.T) {
+	var scryfallSetJson = []byte(`
+	{
+	  "object": "list",
+	  "has_more": false,
+	  "data": [
+	    {
+	      "object": "set",
+	      "id": "fed2c8cd-ab92-44f6-808a-41e7809bcfe2",
+	      "code": "rvr",
+	      "tcgplayer_id": 23319,
+	      "name": "Ravnica Remastered",
+	      "uri": "https://api.scryfall.com/sets/fed2c8cd-ab92-44f6-808a-41e7809bcfe2",
+	      "scryfall_uri": "https://scryfall.com/sets/rvr",
+	      "search_uri": "https://api.scryfall.com/cards/search?include_extras=true&include_variations=true&order=set&q=e%3Arvr&unique=prints",
+	      "released_at": "2024-03-01",
+	      "set_type": "masters",
+	      "card_count": 50,
+	      "digital": false,
+	      "nonfoil_only": false,
+	      "foil_only": false,
+	      "icon_svg_uri": "https://svgs.scryfall.io/sets/rvr.svg?1696824000"
+	    }
+	  ]
+	}`)
+
+	mostRecentSet, err := MostRecentScryfallSetFromJsonBytes(scryfallSetJson)
+	if err != nil {
+		t.Errorf("Failed decoding scryfall set json: %s", err)
+	}
+
+	expectSetName := "Ravnica Remastered"
+	if mostRecentSet.Name != expectSetName {
+		t.Errorf("Expected most recent set name to be %s, got: %s", expectSetName, mostRecentSet.Name)
+	}
+
+	expectReleasedAt := "2024-03-01"
+	if mostRecentSet.Released_at != expectReleasedAt {
+		t.Errorf("Expected most recent set to be released at %s, got %s", expectReleasedAt, mostRecentSet.Released_at)
+	}
+
+}

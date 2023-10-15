@@ -2,8 +2,45 @@ package mtgogetter
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
+
+/*
+	{
+	  "object": "list",
+	  "has_more": false,
+	  "data": [
+	    {
+	      "object": "set",
+	      "id": "fed2c8cd-ab92-44f6-808a-41e7809bcfe2",
+	      "code": "rvr",
+	      "tcgplayer_id": 23319,
+	      "name": "Ravnica Remastered",
+	      "uri": "https://api.scryfall.com/sets/fed2c8cd-ab92-44f6-808a-41e7809bcfe2",
+	      "scryfall_uri": "https://scryfall.com/sets/rvr",
+	      "search_uri": "https://api.scryfall.com/cards/search?include_extras=true&include_variations=true&order=set&q=e%3Arvr&unique=prints",
+	      "released_at": "2024-03-01",
+	      "set_type": "masters",
+	      "card_count": 50,
+	      "digital": false,
+	      "nonfoil_only": false,
+	      "foil_only": false,
+	      "icon_svg_uri": "https://svgs.scryfall.io/sets/rvr.svg?1696824000"
+	    },
+		...
+	}
+*/
+type ScryfallSetBlob struct {
+	Object   string        `json:"object"`
+	Has_more bool          `json:"has_more"`
+	Data     []ScryfallSet `json:"data"`
+}
+
+type ScryfallSet struct {
+	Name        string `json:"name"`
+	Released_at string `json:"released_at"`
+}
 
 type ScryfallCard struct {
 	Mtgo_id     int32    `json:"mtgo_id"`
@@ -66,6 +103,19 @@ func ScryfallCardsFromJsonBytes(byteSlice []byte) ([]ScryfallCard, error) {
 	}, prealloc_size)
 
 	return bulk_data_mtgo, nil
+}
+
+func MostRecentScryfallSetFromJsonBytes(byteSlice []byte) (*ScryfallSet, error) {
+	var blob ScryfallSetBlob
+	if err := json.Unmarshal(byteSlice, &blob); err != nil {
+		return nil, err
+	}
+
+	if len(blob.Data) == 0 {
+		return nil, fmt.Errorf("no data found")
+	}
+
+	return &blob.Data[0], nil
 }
 
 //	takes a json.Decoder and returns a slice of ScryfallCard structs
