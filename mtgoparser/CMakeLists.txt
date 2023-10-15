@@ -21,7 +21,7 @@ project(
    VERSION 0.1.0
    DESCRIPTION "Parser library for the MTGO collection manager app"
    HOMEPAGE_URL "https://github.com/CramBL/mtgo-collection-manager/mtgoparser"
-   LANGUAGES CXX C
+   LANGUAGES CXX
 )
 
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
@@ -68,7 +68,7 @@ target_link_system_library(${PROJECT_NAME} INTERFACE glaze::glaze)
 target_link_system_library(${PROJECT_NAME} INTERFACE spdlog::spdlog)
 target_link_system_library(${PROJECT_NAME} INTERFACE rapidxml)
 
-# To build the binary executable that can do a full parse of all card data files
+# To build the binary executable MTGO preprocessor that can do a full parse of all card data files
 add_subdirectory(src)
 
 # Don't even look at tests if we're not top level

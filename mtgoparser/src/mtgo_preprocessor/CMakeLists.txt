@@ -1,12 +1,12 @@
 find_package(fmt)
 
-add_executable(mtgo_preprocesser main.cpp)
-
+add_executable(mtgo_preprocesser main.cpp setup.cpp run.cpp)
 
 target_link_libraries(
   mtgo_preprocesser
   PRIVATE mtgoparser::mtgoparser_options
-          mtgoparser::mtgoparser_warnings)
+          mtgoparser::mtgoparser_warnings
+          )
 
 target_link_system_libraries(
   mtgo_preprocesser
