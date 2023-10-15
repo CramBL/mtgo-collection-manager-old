@@ -1,6 +1,8 @@
 #include "mtgo_preprocessor/setup.hpp"
+#include "mtgo_preprocessor/config.hpp"
+
+
 #include <mtgoparser/clap.hpp>
-#include <mtgoparser/config.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 

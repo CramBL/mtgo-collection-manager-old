@@ -1,7 +1,7 @@
 #include "mtgo_preprocessor/run.hpp"
+#include "mtgo_preprocessor/config.hpp"
 
 #include "mtgoparser/clap.hpp"
-#include "mtgoparser/config.hpp"
 #include "mtgoparser/goatbots.hpp"
 #include "mtgoparser/mtgo.hpp"
 #include "mtgoparser/scryfall.hpp"
