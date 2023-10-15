@@ -90,4 +90,5 @@ func init() {
 	UpdateAllCmd.AddCommand(download.DownloadGoatbotsCardDefinitionsCmd)
 	download.DownloadScryfallBulkCmd.Hidden = true
 	UpdateAllCmd.AddCommand(download.DownloadScryfallBulkCmd)
+	download.DownloadScryfallSetListCmd.Hidden = true
 }
