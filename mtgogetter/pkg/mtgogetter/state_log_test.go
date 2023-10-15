@@ -159,3 +159,38 @@ func TestIsBulkDataUpdated_NotUpdated(t *testing.T) {
 		t.Errorf("Expected PriceUpdateAvailable to return true for: %s", state_log.Scryfall.Bulk_data_updated_at.UTC().String())
 	}
 }
+
+func TestStateLog_Scryfall_IsSetMatch_false(t *testing.T) {
+	// Test that a set doesn't match the default initialized value (so it will always prompt getting set information)
+	state_log := NewStateLog()
+
+	scryfall_set := ScryfallSet{
+		Name:        "Myset",
+		Released_at: "2022-01-01",
+	}
+
+	if state_log.Scryfall.IsSetMatch(&scryfall_set) {
+		t.Errorf("A set matched the default value in the state log")
+	}
+}
+
+func TestStateLog_Scryfall_IsSetMatch_true(t *testing.T) {
+	// Test that a set matches the one in the statelog
+	state_log := NewStateLog()
+
+	scryfall_set := ScryfallSet{
+		Name:        "Myset",
+		Released_at: "2022-01-01",
+	}
+
+	scryfall_set_copy := ScryfallSet{
+		Name:        "Myset",
+		Released_at: "2022-01-01",
+	}
+
+	state_log.Scryfall.Most_recent_set = scryfall_set
+
+	if !state_log.Scryfall.IsSetMatch(&scryfall_set_copy) {
+		t.Errorf("Unexpected mismatch between set and statelog set")
+	}
+}
