@@ -53,7 +53,7 @@ func (g *goatbots) UpdatePriceTimestamp(stateLogPath string) error {
 
 // Method for the goatbots struct to check if the card definitions are up to date.
 // it's outdated if a new set has been released since the last update
-func (g *goatbots) IsCardDefinitionsUpdated() bool {
+func (g *goatbots) IsCardDefinitionsUpdated(mostRecentSetReleasedAt string) bool {
 	log.Fatalln("Not implemented yet")
 	return false
 }
@@ -79,6 +79,7 @@ func (g *goatbots) UpdateCardDefinitionsTimestamp(stateLogPath string) error {
 type scryfall struct {
 	// Bulk data is updated every 12 hours
 	Bulk_data_updated_at time.Time
+	Most_recent_set      ScryfallSet
 }
 
 // Method for the scryfall struct to check if the bulk data is up to date.
@@ -108,6 +109,29 @@ func (s *scryfall) UpdateBulkDataTimestamp(stateLogPath string) error {
 	return nil
 }
 
+// Checks if a set matches the most recent set in the log
+func (s *scryfall) IsSetMatch(set *ScryfallSet) bool {
+	return s.Most_recent_set == *set
+}
+
+func (s *scryfall) UpdateMostRecentSet(set ScryfallSet, stateLogPath string) error {
+
+	state_log_accesor, err := GetStateLogAccessor(stateLogPath)
+	if err != nil {
+		return err
+	}
+
+	update_action := func(state_log *StateLog) {
+		state_log.Scryfall.Most_recent_set = set
+	}
+	err = state_log_accesor.UpdateStateLog(update_action)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type StateLog struct {
 	Title    string
 	Goatbots goatbots `toml:"goatbots"`
@@ -124,6 +148,10 @@ func NewStateLog() *StateLog {
 		},
 		Scryfall: scryfall{
 			Bulk_data_updated_at: time.Unix(0, 0).UTC(),
+			Most_recent_set: ScryfallSet{
+				Name:        "",
+				Released_at: "",
+			},
 		},
 	}
 }
