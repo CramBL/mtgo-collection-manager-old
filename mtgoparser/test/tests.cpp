@@ -4,8 +4,9 @@
 #include <mtgoparser/mtg.hpp>
 #include <mtgoparser/mtgo/card.hpp>
 #include <mtgoparser/util.hpp>
-#include <utility>
 
+#include <string_view>
+#include <utility>
 
 constinit auto static_clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
 
@@ -19,13 +20,15 @@ TEST_CASE("Test basic CLAP")
   char *argv[] = { argv0, argv1 };
   int argc = 2;
 
+  std::vector<std::string_view> arg_vec{ argv + 1, argv + argc };
+
   SECTION("Dynamically initialized - Show version")
   {
     auto clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
     fmt::print("Options are:\n");
     clap.PrintOptions();
 
-    CHECK(clap.Parse(argc, argv) == 0);
+    CHECK(clap.Parse(arg_vec) == 0);
     fmt::print("Arguments are:\n");
     clap.PrintArgs();
   }
@@ -33,7 +36,7 @@ TEST_CASE("Test basic CLAP")
   SECTION("Static initialized - show version")
   {
     fmt::print("Parsing arguments with constinit Clap\n");
-    CHECK(static_clap.Parse(argc, argv) == 0);
+    CHECK(static_clap.Parse(arg_vec) == 0);
     fmt::print("Arguments are:\n");
     static_clap.PrintArgs();
   }
@@ -43,7 +46,7 @@ TEST_CASE("Test basic CLAP")
 
     auto clap_alias_version = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true, "-V")));
 
-    CHECK(clap_alias_version.Parse(argc, argv) == 0);
+    CHECK(clap_alias_version.Parse(arg_vec) == 0);
 
     fmt::print("Arguments are:\n");
     clap_alias_version.PrintArgs();
@@ -66,11 +69,13 @@ TEST_CASE("Test CLAP with options and values")
     char *argv[] = { argv0, arg_save_as, arg_save_as_val };
     int argc = 3;
 
+    std::vector<std::string_view> arg_vec{ argv + 1, argv + argc };
+
     auto clap = clap::Clap<2, 0>(
       clap::OptionArray<2>(clap::Option("--version", true, "-V"), clap::Option("--save-as", false, "-s")));
 
 
-    CHECK(clap.Parse(argc, argv) == 0);
+    CHECK(clap.Parse(arg_vec) == 0);
     fmt::print("Got args:\n");
     clap.PrintArgs();
 
@@ -92,19 +97,24 @@ TEST_CASE("Test CLAP with options and values")
     {
       char *argv[] = { argv0, arg_save_as };
       int argc = 2;
+      std::vector<std::string_view> arg_vec{ argv + 1, argv + argc };
+
+
       fmt::print("Got args:\n");
       fmt::print("Should fail as --save-as doesn't have a value provided\n");
-      CHECK(clap.Parse(argc, argv) != 0);
+      CHECK(clap.Parse(arg_vec) != 0);
     }
 
     SECTION("Missing option value - next option instead of value")
     {
       char *argv[] = { argv0, arg_save_as, arg_version };
       int argc = 3;
+      std::vector<std::string_view> arg_vec{ argv + 1, argv + argc };
+
       fmt::print("Got args:\n");
       fmt::print(
         "Should fail as --save-as doesn't have a value provided, instead it's followed by the --version option\n");
-      CHECK(clap.Parse(argc, argv) != 0);
+      CHECK(clap.Parse(arg_vec) != 0);
     }
   }
 }

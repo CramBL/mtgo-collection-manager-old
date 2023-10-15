@@ -8,14 +8,14 @@
 
 namespace mtgo_preprocessor::setup {
 
-int setup(int argc, char *argv[])
+int setup(std::vector<std::string_view> &args)
 {
   // https://github.com/gabime/spdlog/wiki/0.-FAQ#switch-the-default-logger-to-stderr
   spdlog::set_default_logger(spdlog::stderr_color_st("rename_default_logger_to_keep_format"));
   spdlog::set_default_logger(spdlog::stderr_color_st(""));
 
   // Parse (and validate) command-line arguments
-  if (auto errors = config::Config::get()->Parse(argc, argv)) {
+  if (auto errors = config::Config::get()->Parse(args)) {
     spdlog::error("{} arguments failed to validate", errors);
     return -1;
   };

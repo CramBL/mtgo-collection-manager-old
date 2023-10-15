@@ -262,7 +262,7 @@ public:
   // TODO: Long help
 
   // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
-  [[nodiscard]] auto Parse(int argc, char *argv[]) noexcept -> size_t
+  [[nodiscard]] auto Parse(std::vector<std::string_view> &args) noexcept -> size_t
   {
     size_t errors = 0;
     if (this->is_clap_parsed) {
@@ -272,8 +272,7 @@ public:
       this->is_clap_parsed = true;
     }
 
-    auto tmp_args = std::vector<std::string_view>(argv + 1, argv + argc);
-    for (auto it = tmp_args.cbegin(), end = tmp_args.cend(); it != end; ++it) {
+    for (auto it = args.cbegin(), end = args.cend(); it != end; ++it) {
       if ((*it)[0] == '-') {
         // Find in option array
         if constexpr (N_opts == 0) {
@@ -297,11 +296,10 @@ public:
             }
             if (!this->set_options_.has_value()) {
               this->set_options_ = std::vector<std::pair<clap::Option, std::optional<std::string_view>>>{
-                std::make_pair(std::move(found_opt.value()), std::move(opt_value))
+                std::make_pair(found_opt.value(), opt_value)
               };
             } else {
-              this->set_options_.value().emplace_back(
-                std::make_pair(std::move(found_opt.value()), std::move(opt_value)));
+              this->set_options_.value().emplace_back(std::make_pair(found_opt.value(), opt_value));
             }
           } else [[unlikely]] {
             // Provided option not found
