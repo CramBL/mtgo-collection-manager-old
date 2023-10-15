@@ -42,7 +42,7 @@ template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(const std::filesystem::
   json_map.reserve(RESERVE_APPROX_CARD_COUNT);
 
   // Read file into buffer and decode to populate map
-  if (auto err_code = glz::read_json(json_map, io_util::ReadToStrBuf(path_json))) {
+  if (auto err_code = glz::read_json(json_map, io_util::read_to_str_buf(path_json))) {
     // Handle error
     spdlog::error("{}", glz::format_error(err_code, std::string{}));
     return std::nullopt;

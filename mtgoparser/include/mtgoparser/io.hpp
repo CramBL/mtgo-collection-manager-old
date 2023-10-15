@@ -8,7 +8,7 @@
 
 namespace io_util {
 
-[[nodiscard]] inline auto ReadToStrBuf(const std::filesystem::path &fpath) -> std::string
+[[nodiscard]] inline auto read_to_str_buf(const std::filesystem::path &fpath) -> std::string
 {
   // Open the stream to 'lock' the file.
   std::ifstream file(fpath, std::ios::in | std::ios::binary);
@@ -25,7 +25,7 @@ namespace io_util {
   return str_buffer;
 }
 
-[[nodiscard]] inline auto ReadToCharBuf(const std::filesystem::path &fpath) -> std::vector<char>
+[[nodiscard]] inline auto read_to_char_buf(const std::filesystem::path &fpath) -> std::vector<char>
 {
   // Open the stream to 'lock' the file.
   std::ifstream file(fpath, std::ios::in | std::ios::binary);

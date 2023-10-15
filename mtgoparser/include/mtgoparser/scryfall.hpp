@@ -50,8 +50,8 @@ struct Card
     std::string _released_at = "",
     std::string _rarity = "",
     Prices _prices = scryfall::Prices{})
-    : mtgo_id{ _mtgo_id }, name{ std::move(_name) },
-      released_at{ std::move(_released_at) }, rarity{ std::move(_rarity) }, prices{ std::move(_prices) }
+    : mtgo_id{ _mtgo_id }, name{ std::move(_name) }, released_at{ std::move(_released_at) },
+      rarity{ std::move(_rarity) }, prices{ std::move(_prices) }
   {}
 
   [[nodiscard]] inline constexpr bool operator==(const Card &other) const
@@ -100,7 +100,7 @@ using scryfall_card_vec = std::vector<scryfall::Card>;
   scryfall_vec.reserve(RESERVE_APPROX_MAX_SCRYFALL_CARDS);
 
   // Read file into buffer and decode to populate map
-  if (auto err_code = glz::read_json(scryfall_vec, io_util::ReadToStrBuf(path_json))) {
+  if (auto err_code = glz::read_json(scryfall_vec, io_util::read_to_str_buf(path_json))) {
     // Handle error
     spdlog::error("{}", glz::format_error(err_code, std::string{}));
     return std::nullopt;
