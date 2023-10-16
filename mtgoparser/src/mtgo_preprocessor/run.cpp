@@ -6,6 +6,7 @@
 #include "mtgoparser/mtgo.hpp"
 #include "mtgoparser/scryfall.hpp"
 
+#include <cassert>
 #include <spdlog/spdlog.h>
 
 #include <optional>
@@ -27,6 +28,7 @@ void parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths)
   assert(price_hist.has_value());
 
   // Extract data from the maps
+  assert(price_hist.has_value() && card_defs.has_value());
   mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
   spdlog::info("extract Goatbots info complete");
 }
@@ -79,7 +81,10 @@ int update()
     auto scryfall_vec = scryfall::ReadJsonVector(scryfall_path.value());
     assert(scryfall_vec.has_value());
 
-    mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
+    if (scryfall_path.has_value() && scryfall_vec.has_value()) {
+      mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
+    }
+
     spdlog::info("extract Scryfall info completed");
   }
 
@@ -89,8 +94,8 @@ int update()
   // If the app data directory is set, save it there
   if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
     // Write the json to a file in the appdata directory
-    std::string mtgo_cards_json_fname = "mtgo-cards.json";
-    std::string fullpath = std::string(appdata_dir.value()) + mtgo_cards_json_fname;
+    const std::string mtgo_cards_json_fname = "mtgo-cards.json";
+    const std::string fullpath = std::string(appdata_dir.value()) + mtgo_cards_json_fname;
     std::ofstream mtgo_cards_outfile(fullpath);
     if (mtgo_cards_outfile.is_open()) {
       mtgo_cards_outfile << json << std::endl;
