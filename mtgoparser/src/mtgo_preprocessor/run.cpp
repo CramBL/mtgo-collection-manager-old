@@ -38,6 +38,41 @@ using cfg = config::Config;
   return 0;
 }
 
+struct JsonAndDestinationDir
+{
+  std::string_view json;
+  std::string_view dir;
+};
+void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
+{
+  const std::string mtgo_cards_json_fname = "mtgo-cards.json";
+  const std::string fullpath = std::string(jsonAndDir.dir) + mtgo_cards_json_fname;
+  std::ofstream mtgo_cards_outfile(fullpath);
+  if (mtgo_cards_outfile.is_open()) {
+    mtgo_cards_outfile << jsonAndDir.json << std::endl;
+    mtgo_cards_outfile.close();
+  }
+}
+
+/// Read the data from the scryfall JSON file into a map.
+/// Then call the extract function on the collection to get all the useful data.
+[[nodiscard]] int parse_scryfall_data(mtgo::Collection &collection)
+{
+  if (auto scryfall_path = cfg::get()->OptionValue(config::option::scryfall_path)) {
+    if (auto scryfall_vec = scryfall::ReadJsonVector(scryfall_path.value())) {
+      collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
+
+      return 0;
+    } else {
+      spdlog::error("Expected a vector of scryfall card data");
+      return -1;
+    }
+  } else {
+    spdlog::error("Expected a path to scryfall data");
+    return -1;
+  }
+}
+
 
 [[nodiscard]] int update()
 {
@@ -52,6 +87,7 @@ using cfg = config::Config;
   // Get cards from full trade list XML
   auto fulltradelist_path = cfg::get()->OptionValue(config::option::fulltradelist_path);
   assert(fulltradelist_path.has_value());
+  if (!fulltradelist_path.has_value()) { return -1; }
   auto mtgo_cards = mtgo::xml::parse_dek_xml(fulltradelist_path.value());
   auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
 
@@ -71,6 +107,8 @@ using cfg = config::Config;
     auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
     assert(price_hist_path.has_value());
 
+    if (!(card_defs_path.has_value() && price_hist_path.has_value())) { return -1; }
+
     return parse_goatbots_data(mtgo_collection,
       GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
   }
@@ -79,15 +117,10 @@ using cfg = config::Config;
   if (!cfg::get()->FlagSet(config::option::scryfall_path)) {
     spdlog::error("Update all needs a path to a scryfall json-data file");
   } else {
-    auto scryfall_path = cfg::get()->OptionValue(config::option::scryfall_path);
-    assert(scryfall_path.has_value());
-    auto scryfall_vec = scryfall::ReadJsonVector(scryfall_path.value());
-    assert(scryfall_vec.has_value());
-
-    if (scryfall_path.has_value() && scryfall_vec.has_value()) {
-      mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
+    if (parse_scryfall_data(mtgo_collection) != 0) {
+      spdlog::error("Error parsing scryfall data");
+      return -1;
     }
-
     spdlog::info("extract Scryfall info completed");
   }
 
@@ -97,13 +130,7 @@ using cfg = config::Config;
   // If the app data directory is set, save it there
   if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
     // Write the json to a file in the appdata directory
-    const std::string mtgo_cards_json_fname = "mtgo-cards.json";
-    const std::string fullpath = std::string(appdata_dir.value()) + mtgo_cards_json_fname;
-    std::ofstream mtgo_cards_outfile(fullpath);
-    if (mtgo_cards_outfile.is_open()) {
-      mtgo_cards_outfile << json << std::endl;
-      mtgo_cards_outfile.close();
-    }
+    write_json_to_appdata_dir(JsonAndDestinationDir{ .json = json, .dir = appdata_dir.value() });
   }
 
   // Print the MTGO collection JSON to stdout
