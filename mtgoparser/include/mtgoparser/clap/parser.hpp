@@ -113,64 +113,7 @@ public:
       this->is_clap_parsed = true;
     }
 
-    for (auto it = args.cbegin(), end = args.cend(); it != end; ++it) {
-      if ((*it)[0] == '-') {
-        // Find in option array
-        if constexpr (N_opts == 0) {
-          ++errors;
-          spdlog::error("Got option '{}' but no options have been defined", *it);
-        } else {
-          if (std::optional<clap::Option> found_opt = this->options_.value().find(*it)) {
-            // Check if it is not a flag, then the next argument should be the attached value
-            std::optional<std::string_view> opt_value = std::nullopt;
-            if (!found_opt.value().is_flag_) {
-              // Then check for the value in the arguments
-              if ((it + 1 == end) || (*(it + 1)).starts_with("-")) [[unlikely]] {
-                ++errors;
-                spdlog::error("Option {} passed with missing value", *it);
-              } else {
-                opt_value = *(it + 1);
-                // Increment as we already validated the option value and we don't want to parse it as an option in
-                // the next iteration
-                ++it;
-              }
-            }
-            if (!this->set_options_.has_value()) {
-              this->set_options_ = std::vector<std::pair<clap::Option, std::optional<std::string_view>>>{
-                std::make_pair(found_opt.value(), opt_value)
-              };
-            } else {
-              this->set_options_.value().emplace_back(std::make_pair(found_opt.value(), opt_value));
-            }
-          } else [[unlikely]] {
-            // Provided option not found
-            ++errors;
-            spdlog::error("Unknown option '{}'", *it);
-          }
-        }
-
-      } else {
-        // Find in command array
-        if constexpr (N_cmds == 0) {
-          ++errors;
-          spdlog::error("Got command '{}' but no commands have been defined", *it);
-        } else {
-          if (auto found_cmd = this->commands_.value().find(*it)) {
-            if (!this->set_cmd_.has_value()) {
-              this->set_cmd_ = std::move(found_cmd);
-            } else [[unlikely]] {
-              ++errors;
-              spdlog::error(
-                "Attempted setting command: '{}' when a command was already set: '{}'. Only one command is allowed",
-                *it,
-                this->set_cmd_.value().name_);
-            }
-          }
-        }
-      }
-    }
-
-    return errors;
+    return this->parse_args(args);
   }
 
 
@@ -268,6 +211,84 @@ public:
   }
 
   [[nodiscard]] auto isClapParsed() const noexcept -> bool { return this->is_clap_parsed; }
+
+  // Helpers
+private:
+  void store_option_value(clap::Option opt, std::optional<std::string_view> opt_val)
+  {
+    if (!this->set_options_.has_value()) {
+      this->set_options_ =
+        std::vector<std::pair<clap::Option, std::optional<std::string_view>>>{ std::make_pair(opt, opt_val) };
+    } else {
+      this->set_options_.value().emplace_back(std::make_pair(opt, opt_val));
+    }
+  }
+
+  [[nodiscard]] auto find_command(std::string_view cmd) -> size_t
+  {
+    if (auto found_cmd = this->commands_.value().find(cmd)) {
+      if (!this->set_cmd_.has_value()) {
+        this->set_cmd_ = std::move(found_cmd);
+      } else [[unlikely]] {
+        spdlog::error(
+          "Attempted setting command: '{}' when a command was already set: '{}'. Only one command is allowed",
+          cmd,
+          this->set_cmd_.value().name_);
+        return 1;
+      }
+    }
+    return 0;
+  }
+
+
+  [[nodiscard]] auto parse_args(const std::vector<std::string_view> &args) noexcept -> size_t
+  {
+
+    size_t errors = 0;
+
+    for (auto it = args.cbegin(), end = args.cend(); it != end; ++it) {
+      if ((*it)[0] == '-') {
+        // Find in option array
+        if constexpr (N_opts == 0) {
+          ++errors;
+          spdlog::error("Got option '{}' but no options have been defined", *it);
+        } else {
+          if (std::optional<clap::Option> found_opt = this->options_.value().find(*it)) {
+            // Check if it is not a flag, then the next argument should be the attached value
+            std::optional<std::string_view> opt_value = std::nullopt;
+            if (!found_opt.value().is_flag_) {
+              // Then check for the value in the arguments
+              if ((it + 1 == end) || (*(it + 1)).starts_with("-")) [[unlikely]] {
+                ++errors;
+                spdlog::error("Option {} passed with missing value", *it);
+              } else {
+                opt_value = *(it + 1);
+                // Increment as we already validated the option value and we don't want to parse it as an option in
+                // the next iteration
+                ++it;
+              }
+            }
+            this->store_option_value(found_opt.value(), opt_value);
+          } else [[unlikely]] {
+            // Provided option not found
+            ++errors;
+            spdlog::error("Unknown option '{}'", *it);
+          }
+        }
+
+      } else {
+        // Find in command array
+        if constexpr (N_cmds == 0) {
+          ++errors;
+          spdlog::error("Got command '{}' but no commands have been defined", *it);
+        } else {
+          errors += this->find_command(*it);
+        }
+      }
+    }
+
+    return errors;
+  }
 };
 
 
