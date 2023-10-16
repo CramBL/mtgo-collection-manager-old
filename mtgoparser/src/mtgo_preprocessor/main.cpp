@@ -60,18 +60,21 @@ int main(int argc, char *argv[])
     if (cfg::get()->CmdSet(config::commands::run)) { mtgo_preprocessor::run::run(); }
 
     if (cfg::get()->FlagSet(config::option::mtgoupdater_json_out.name_)) {
-      auto scryfall_vec = scryfall::ReadJsonVector(path_mtgogetter_out_scryfall_full);
-      spdlog::info("got scryfall vec");
-      assert(scryfall_vec.has_value());
-      auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(path_goatbots_card_defs_full);
-      spdlog::info("got card defs");
-      assert(card_defs.has_value());
-      auto price_hist = goatbots::ReadJsonMap<goatbots::price_hist_map_t>(path_goatbots_price_hist_full);
-      spdlog::info("got price hist");
-      assert(price_hist.has_value());
       auto mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
       spdlog::info("got mtgo cards");
       auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
+
+      auto scryfall_vec = scryfall::ReadJsonVector(path_mtgogetter_out_scryfall_full);
+      spdlog::info("got scryfall vec");
+      assert(scryfall_vec.has_value());
+
+      auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(path_goatbots_card_defs_full);
+      spdlog::info("got card defs");
+      assert(card_defs.has_value());
+
+      auto price_hist = goatbots::ReadJsonMap<goatbots::price_hist_map_t>(path_goatbots_price_hist_full);
+      spdlog::info("got price hist");
+      assert(price_hist.has_value());
 
       mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
       spdlog::info("extracted Goatbots info");
@@ -82,7 +85,7 @@ int main(int argc, char *argv[])
       fmt::print("{}", pretty_json_str);
     }
   } catch (...) {
-    std::exception_ptr eptr = std::current_exception();
+    const std::exception_ptr eptr = std::current_exception();
 
     try {
       if (eptr) { std::rethrow_exception(eptr); }
