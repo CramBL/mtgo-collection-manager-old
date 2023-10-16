@@ -262,7 +262,7 @@ public:
   // TODO: Long help
 
   // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
-  [[nodiscard]] auto Parse(std::vector<std::string_view> &args) noexcept -> size_t
+  [[nodiscard]] auto Parse(const std::vector<std::string_view> &args) noexcept -> size_t
   {
     size_t errors = 0;
     if (this->is_clap_parsed) {
