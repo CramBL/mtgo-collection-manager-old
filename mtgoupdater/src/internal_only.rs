@@ -27,7 +27,10 @@ pub const DEV_MTGOPARSER_BIN: &str = if cfg!(windows) {
 
 pub fn run_mtgo_preprocessor_example_collection_json_stdout(
 ) -> Result<std::process::Output, std::io::Error> {
-    crate::util::run_with_args(crate::mtgoparser_bin(), ["run", "--collection-json-out"])
+    crate::util::run_with_args(
+        crate::mtgoparser_bin(),
+        ["--debug", "--collection-json-out"],
+    )
 }
 
 pub fn get_example_card_collection() -> Vec<crate::mtgo_card::MtgoCard> {
