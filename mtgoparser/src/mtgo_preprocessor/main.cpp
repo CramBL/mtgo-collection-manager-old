@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
     if (cfg::get()->CmdSet(config::commands::run)) { return mtgo_preprocessor::run::run(); }
 
-    if (cfg::get()->FlagSet(config::option::mtgoupdater_json_out.name_)) {
+    if (cfg::get()->FlagSet(config::option::debug) && cfg::get()->FlagSet(config::option::mtgoupdater_json_out)) {
       auto mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
       spdlog::info("got mtgo cards");
       auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
