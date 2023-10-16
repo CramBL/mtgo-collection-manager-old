@@ -17,7 +17,7 @@ namespace mtgo_preprocessor::run {
 using cfg = config::Config;
 
 
-void parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths)
+[[nodiscard]] int parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths)
 {
   // Get card definitions as a map
   auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(paths.card_defs_path);
@@ -28,13 +28,18 @@ void parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths)
   assert(price_hist.has_value());
 
   // Extract data from the maps
-  assert(price_hist.has_value() && card_defs.has_value());
-  mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
+  if (price_hist.has_value() && card_defs.has_value()) {
+
+    mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
+  } else {
+    return -1;
+  }
   spdlog::info("extract Goatbots info complete");
+  return 0;
 }
 
 
-int update()
+[[nodiscard]] int update()
 {
   // Parse collection
 
@@ -66,10 +71,8 @@ int update()
     auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
     assert(price_hist_path.has_value());
 
-    parse_goatbots_data(mtgo_collection,
+    return parse_goatbots_data(mtgo_collection,
       GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
-
-    spdlog::info("extract Goatbots info complete");
   }
 
 
@@ -108,7 +111,7 @@ int update()
   return 0;
 }
 
-int run()
+[[nodiscard]] int run()
 {
   if (cfg::get()->FlagSet(config::option::update)) { return update(); }
   return 0;

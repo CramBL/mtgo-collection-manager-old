@@ -7,11 +7,11 @@ namespace mtgo_preprocessor::run {
 
 
 /// Executed if the run command is set
-int run();
+[[nodiscard]] int run();
 
 
 /// Executed if the run command and update option is set
-int update();
+[[nodiscard]] int update();
 
 // Specifies the paths to the Goatbots card definition and price history JSON
 struct GoatbotsPaths
@@ -21,7 +21,7 @@ struct GoatbotsPaths
 };
 
 /// Parse goatbots data from specified paths to card definition and price history JSON files.
-void parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths);
+[[nodiscard]] int parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths);
 
 
 }// namespace mtgo_preprocessor::run

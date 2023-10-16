@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    if (cfg::get()->CmdSet(config::commands::run)) { mtgo_preprocessor::run::run(); }
+    if (cfg::get()->CmdSet(config::commands::run)) { return mtgo_preprocessor::run::run(); }
 
     if (cfg::get()->FlagSet(config::option::mtgoupdater_json_out.name_)) {
       auto mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
@@ -76,10 +76,18 @@ int main(int argc, char *argv[])
       spdlog::info("got price hist");
       assert(price_hist.has_value());
 
-      mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
-      spdlog::info("extracted Goatbots info");
-      mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
-      spdlog::info("extracted Scryfall info");
+      if (card_defs.has_value() && price_hist.has_value()) {
+        mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
+        spdlog::info("extracted Goatbots info");
+      } else {
+        return -1;
+      }
+      if (scryfall_vec.has_value()) {
+        mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
+        spdlog::info("extracted Scryfall info");
+      } else {
+        return -1;
+      }
 
       auto pretty_json_str = mtgo_collection.ToJsonPretty();
       fmt::print("{}", pretty_json_str);
