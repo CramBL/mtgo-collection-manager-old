@@ -34,7 +34,6 @@ using cfg = config::Config;
   } else {
     return -1;
   }
-  spdlog::info("extract Goatbots info complete");
   return 0;
 }
 
@@ -109,8 +108,12 @@ void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
 
     if (!(card_defs_path.has_value() && price_hist_path.has_value())) { return -1; }
 
-    return parse_goatbots_data(mtgo_collection,
-      GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
+    if (parse_goatbots_data(mtgo_collection,
+          GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() })
+        != 0) {
+      return -1;
+    }
+    spdlog::info("extract Goatbots info complete");
   }
 
 
