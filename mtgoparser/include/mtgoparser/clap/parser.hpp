@@ -105,10 +105,8 @@ public:
   // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
   [[nodiscard]] auto Parse(const std::vector<std::string_view> &args) noexcept -> size_t
   {
-    size_t errors = 0;
     if (this->is_clap_parsed) {
-      errors = 1;
-      return errors;
+      return 1;
     } else {
       this->is_clap_parsed = true;
     }
