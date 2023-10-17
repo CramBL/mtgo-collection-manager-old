@@ -86,8 +86,8 @@ show-versions:
 	@echo "CMake: $(CMAKE_VERSION) (min. $(CMAKE_MIN_VERSION))"
 	@echo "CMake generator: $(MTGOPARSER_GENERATOR)"
 
-.PHONY: build-mtgogetter
-build-mtgogetter:
+.PHONY: build-mtgogetter mtgogetter
+build-mtgogetter mtgogetter:
 	@echo "==> Building MTGO Getter..."
 	go build -C mtgogetter -v
 	@echo "=== Done building MTGO Getter ==="
@@ -98,8 +98,8 @@ test-mtgogetter:
 	go test -C mtgogetter -v ./...
 	@echo "=== Done testing MTGO Getter ==="
 
-.PHONY: build-mtgoparser
-build-mtgoparser:
+.PHONY: build-mtgoparser mtgoparser
+build-mtgoparser mtgoparser:
 	@echo "==> Building MTGO Parser..."
 	cd mtgoparser && cmake -S . -B build -G $(MTGOPARSER_GENERATOR) -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV)
 	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
@@ -142,8 +142,8 @@ test-mtgoupdater:
 	cd mtgoupdater && cargo test -- --nocapture
 	@echo "=== Done testing MTGO updater ==="
 
-.PHONY: build-mtgogui
-build-mtgogui:
+.PHONY: build-mtgogui mtgogui
+build-mtgogui mtgogui:
 	@echo "==> Building MTGO GUI..."
 ifeq ($(BUILD_MODE),Release)
 	cd mtgogui && cargo build --release

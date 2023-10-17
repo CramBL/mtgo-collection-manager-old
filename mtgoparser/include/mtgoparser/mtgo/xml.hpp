@@ -51,7 +51,7 @@ const std::size_t APPROX_DECK_CARDS = 1024;
 
 [[nodiscard]] auto inline parse_dek_xml(const std::filesystem::path &path_xml) noexcept -> std::vector<Card>
 {
-  std::vector<char> buf = io_util::ReadToCharBuf(path_xml);
+  std::vector<char> buf = io_util::read_to_char_buf(path_xml);
   rapidxml::xml_document<> doc;
   doc.parse<0>(buf.data());
 
