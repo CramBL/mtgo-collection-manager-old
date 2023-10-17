@@ -32,7 +32,7 @@ jobs:
             enable_ipo: On
 
           - os: macos-13
-            compiler: llvm-15.0.6
+            compiler: llvm-15.0.5
             generator: "Ninja Multi-Config"
             enable_ipo: Off
 
