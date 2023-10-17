@@ -27,12 +27,12 @@ jobs:
             enable_ipo: On
 
           - os: ubuntu-22.04
-            compiler: llvm-15.0.3
+            compiler: llvm-16.0.4
             generator: "Ninja Multi-Config"
             enable_ipo: On
 
           - os: macos-12
-            compiler: llvm-15.0.3
+            compiler: llvm-16.0.4
             generator: "Ninja Multi-Config"
             enable_ipo: Off
 
@@ -42,7 +42,7 @@ jobs:
             enable_ipo: On
 
           - os: windows-2022
-            compiler: llvm-15.0.3
+            compiler: llvm-16.0.4
             generator: "Ninja Multi-Config"
             enable_ipo: On
 
