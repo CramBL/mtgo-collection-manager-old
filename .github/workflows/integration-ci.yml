@@ -27,12 +27,12 @@ jobs:
             enable_ipo: On
 
           - os: ubuntu-22.04
-            compiler: llvm-16.0.4
+            compiler: llvm-16.0.6
             generator: "Ninja Multi-Config"
             enable_ipo: On
 
-          - os: macos-12
-            compiler: llvm-16.0.4
+          - os: macos-13
+            compiler: llvm-15.0.7
             generator: "Ninja Multi-Config"
             enable_ipo: Off
 
@@ -42,7 +42,7 @@ jobs:
             enable_ipo: On
 
           - os: windows-2022
-            compiler: llvm-16.0.4
+            compiler: llvm-16.0.6
             generator: "Ninja Multi-Config"
             enable_ipo: On
 
@@ -80,14 +80,14 @@ jobs:
           cp mtgogetter/mtgogetter mtgo-collection-manager/bin
           cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser mtgo-collection-manager/bin
           cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
-          zip -r macos-12-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
+          zip -r macos-13-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
 
       - name: 📩 Upload - MacOS 🍎
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v3
         with:
           name: macos-mtgo-collection-manager
-          path: macos-12-${{ matrix.compiler }}-mtgo-cm.zip
+          path: macos-13-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
 ####                                              ####
