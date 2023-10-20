@@ -6,7 +6,7 @@ namespace config {
 
 namespace option {
   constexpr clap::Option mtgoupdater_json_out{ "--collection-json-out", true };
-  constexpr clap::Option help{ "-h", true };
+  constexpr clap::Option help{ "-h", true, "--help" };
   constexpr clap::Option debug{ "-d", true, "--debug" };
   constexpr clap::Option update{ "-u", true, "--update", "--update-all" };
   constexpr clap::Option scryfall_path{ "--scryfall-path", false };
