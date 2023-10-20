@@ -93,6 +93,13 @@ macro(mtgoparser_setup_options)
 endmacro()
 
 macro(mtgoparser_global_options)
+  if(MSVC)
+    # Due to Boost serialization on MSVC triggering: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead.
+    # Boost authors themselves add this in their jamfile: https://github.com/boostorg/serialization/pull/151/files
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS) 
+  endif()
+
+
   if(mtgoparser_ENABLE_IPO)
     include(cmake/InterproceduralOptimization.cmake)
     mtgoparser_enable_ipo()

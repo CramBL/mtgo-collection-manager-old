@@ -83,9 +83,6 @@ function(
 
   if(MSVC)
     set(PROJECT_WARNINGS_CXX ${MSVC_WARNINGS})
-    # Due to Boost serialization on MSVC triggering: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead.
-    # Boost authors themselves add this in their jamfile: https://github.com/boostorg/serialization/pull/151/files
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS) 
   elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
     set(PROJECT_WARNINGS_CXX ${CLANG_WARNINGS})
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
