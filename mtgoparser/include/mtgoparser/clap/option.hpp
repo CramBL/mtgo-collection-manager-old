@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <fmt/core.h>
 
 #include <algorithm>
@@ -13,20 +14,22 @@ namespace clap {
 // More than 3 aliases is just too much
 static inline constexpr size_t MAX_ALIAS_COUNT = 3;
 
+enum class Opt : uint8_t { Flag, NeedValue };
+
 
 // Struct for defining options
 struct Option
 {
   std::string_view name_;
-  bool is_flag_;
+  Opt opt_type_;
   // Array should be optional, will then be std::nullopt instead of empty array if there's no aliases
   std::optional<std::array<std::optional<std::string_view>, clap::MAX_ALIAS_COUNT>> aliases_;
 
 
   template<std::convertible_to<std::string_view> T_Name,
     std::convertible_to<std::optional<std::string_view>>... T_Alias>
-  [[nodiscard]] constexpr explicit Option(T_Name name, bool is_flag, T_Alias... aliases) noexcept
-    : name_{ name }, is_flag_{ is_flag }
+  [[nodiscard]] constexpr explicit Option(T_Name name, Opt opt_type, T_Alias... aliases) noexcept
+    : name_{ name }, opt_type_{ opt_type }
   {
     // Just to improve compiler error
     static_assert(

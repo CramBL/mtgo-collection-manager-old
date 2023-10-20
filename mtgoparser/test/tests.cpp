@@ -1,4 +1,5 @@
 // NOLINTBEGIN
+#include "mtgoparser/clap/option.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <mtgoparser/clap.hpp>
 #include <mtgoparser/mtg.hpp>
@@ -8,7 +9,10 @@
 #include <string_view>
 #include <utility>
 
-constinit auto static_clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
+using clap::Opt::Flag;
+using clap::Opt::NeedValue;
+
+constinit auto static_clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", Flag)));
 
 
 TEST_CASE("Test basic CLAP")
@@ -24,7 +28,7 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Dynamically initialized - Show version")
   {
-    auto clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
+    auto clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", Flag)));
     fmt::print("Options are:\n");
     clap.PrintOptions();
 
@@ -44,7 +48,7 @@ TEST_CASE("Test basic CLAP")
   SECTION("Alias version cmd - Show version")
   {
 
-    auto clap_alias_version = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true, "-V")));
+    auto clap_alias_version = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", Flag, "-V")));
 
     CHECK(clap_alias_version.Parse(arg_vec) == 0);
 
@@ -72,7 +76,7 @@ TEST_CASE("Test CLAP with options and values")
     std::vector<std::string_view> arg_vec{ argv + 1, argv + argc };
 
     auto clap = clap::Clap<2, 0>(
-      clap::OptionArray<2>(clap::Option("--version", true, "-V"), clap::Option("--save-as", false, "-s")));
+      clap::OptionArray<2>(clap::Option("--version", Flag, "-V"), clap::Option("--save-as", NeedValue, "-s")));
 
 
     CHECK(clap.Parse(arg_vec) == 0);
@@ -87,8 +91,8 @@ TEST_CASE("Test CLAP with options and values")
 
   SECTION("Argument validation catches errors")
   {
-    constexpr auto version_option = clap::Option("--version", true, "-V");
-    constexpr auto save_as_option = clap::Option("--save-as", false, "-s");
+    constexpr auto version_option = clap::Option("--version", Flag, "-V");
+    constexpr auto save_as_option = clap::Option("--save-as", NeedValue, "-s");
     constexpr auto opt_arr = clap::OptionArray<2>(version_option, save_as_option);
     auto clap = clap::Clap<2, 0>(opt_arr);
 
@@ -231,8 +235,8 @@ TEST_CASE("Command struct")
 
 TEST_CASE("Option struct")
 {
-  constexpr clap::Option opt{ "--my-option", true };
-  constexpr clap::Option opt_w_alias("--my-option", true, "--my-alias");
+  constexpr clap::Option opt{ "--my-option", Flag };
+  constexpr clap::Option opt_w_alias("--my-option", Flag, "--my-alias");
 
   constexpr bool opt_has_alias = opt.has_alias();
   REQUIRE(opt_has_alias == false);
