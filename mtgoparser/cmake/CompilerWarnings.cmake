@@ -34,7 +34,6 @@ function(
         /w14906 # string literal cast to 'LPWSTR'
         /w14928 # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
         /permissive- # standards conformance mode for MSVC compiler.
-        /external:W0
     )
   endif()
 
@@ -84,6 +83,7 @@ function(
 
   if(MSVC)
     set(PROJECT_WARNINGS_CXX ${MSVC_WARNINGS})
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS) # Due to Boost serialization on MSVC triggering: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead.
   elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
     set(PROJECT_WARNINGS_CXX ${CLANG_WARNINGS})
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
