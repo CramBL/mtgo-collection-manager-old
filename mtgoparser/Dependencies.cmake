@@ -36,4 +36,13 @@ function(mtgoparser_setup_dependencies)
     CPMAddPackage("gh:CodeFinder2/rapidxml@1.13")
   endif()
 
+  if(NOT TARGET Boost) 
+    CPMAddPackage(
+      NAME Boost
+      VERSION 1.83.0
+      GITHUB_REPOSITORY "boostorg/boost"
+      GIT_TAG "boost-1.83.0"
+    )
+  endif()
+
 endfunction()
