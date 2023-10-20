@@ -15,6 +15,7 @@ target_link_system_libraries(
           spdlog::spdlog
           rapidxml
           mtgoparser
+          Boost::outcome
           )
 
 target_include_directories(mtgo_preprocesser PRIVATE "${CMAKE_BINARY_DIR}/configured_files/include")
