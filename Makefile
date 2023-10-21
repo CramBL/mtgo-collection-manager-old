@@ -11,11 +11,15 @@ ifeq ($(shell uname -s),Linux)
     OS_TYPE := Linux
 	MTGOPARSER_GENERATOR := "Ninja Multi-Config"
 	MTGOPARSER_IPO := On
+	ifeq ($(shell which mold),)
+    	$(error "No mold in $(PATH), please install mold for improved link times. Installable for most systems with `apt install mold`")
+	endif
 
 else ifeq ($(shell uname -s),Darwin)
     OS_TYPE := macOS
 	MTGOPARSER_GENERATOR := "Ninja Multi-Config"
 	MTGOPARSER_IPO := Off
+	MTGOPARSER_USER_LINKER := Off
 else ifeq ($(shell uname -o),Msys)
     $(error Operating System is detected as Windows (Msys). This Makefile is not intended for Windows systems. Use the powershell script wmake.ps1 instead)
 else
@@ -24,9 +28,7 @@ else
 	MTGOPARSER_IPO := On
 endif
 
-ifeq ($(shell which mold),)
-    $(error "No mold in $(PATH), please install mold for improved link times. Installable for most systems with `apt install mold`")
-endif
+
 
 # Minimum supported versions
 RUST_MIN_VERSION := 1.70.0

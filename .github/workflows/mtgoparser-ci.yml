@@ -181,8 +181,8 @@ jobs:
           gcovr: true
           opencppcoverage: true
 
-      - name: Setup Mold linker for Unix 🐧🍎 builds
-        if: runner.os != 'Windows'
+      - name: Setup Mold linker for Linux 🐧 builds
+        if: runner.os == 'Linux'
         uses: rui314/setup-mold@v1
 
       - name: Unix 🐧🍎 - 🔧 Configure CMake
@@ -199,7 +199,7 @@ jobs:
           -DGIT_SHA:STRING=${{ github.sha }}
           -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
           -DUSER_LINKER_OPTION=mold
-          -Dmtgoparser_ENABLE_USER_LINKER:BOOL=On
+          -Dmtgoparser_ENABLE_USER_LINKER:BOOL=${{ contains(matrix.os, 'ubuntu' )}}
       
       - name: Windows 💻  - 🔧 Configure CMake
         if: runner.os == 'Windows'
