@@ -42,7 +42,10 @@ int main(int argc, char *argv[])
 
     std::vector<std::string_view> args{ argv + 1, argv + argc };
 
-    if (mtgo_preprocessor::setup::setup(args) != 0) { return -1; }
+    if (auto res = mtgo_preprocessor::setup::setup(args); res.has_error()) {
+      spdlog::error("{}", res.error());
+      return -1;
+    }
 
 
     if (cfg::get()->FlagSet(config::option::help)) {

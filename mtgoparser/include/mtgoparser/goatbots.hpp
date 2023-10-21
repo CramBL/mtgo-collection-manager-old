@@ -1,6 +1,8 @@
 #pragma once
 
 #include "mtgoparser/io.hpp"
+
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
 
@@ -8,7 +10,6 @@
 #include <cstdint>
 #include <optional>
 #include <string>
-#include <unordered_map>
 
 namespace goatbots {
 
@@ -29,8 +30,8 @@ struct CardDefinition
   [[nodiscard]] inline constexpr bool operator!=(const CardDefinition &other) const { return !(*this == other); }
 };
 
-using price_hist_map_t = std::unordered_map<uint32_t, double>;
-using card_defs_map_t = std::unordered_map<uint32_t, CardDefinition>;
+using price_hist_map_t = boost::unordered_flat_map<uint32_t, double>;
+using card_defs_map_t = boost::unordered_flat_map<uint32_t, CardDefinition>;
 
 template<class T>
 concept goatbots_json = std::disjunction<std::is_same<T, price_hist_map_t>, std::is_same<T, card_defs_map_t>>::value;

@@ -181,7 +181,12 @@ jobs:
           gcovr: true
           opencppcoverage: true
 
-      - name: 🔧 Configure CMake
+      - name: Setup Mold linker for Linux 🐧 builds
+        if: runner.os == 'Linux'
+        uses: rui314/setup-mold@v1
+
+      - name: Linux 🐧 - 🔧 Configure CMake
+        if: runner.os == 'Linux'
         working-directory: ./mtgoparser
         run: >
           cmake -S .
@@ -192,6 +197,23 @@ jobs:
           -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}}
           -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }}
           -DGIT_SHA:STRING=${{ github.sha }}
+          -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
+          -DUSER_LINKER_OPTION=mold
+          -Dmtgoparser_ENABLE_USER_LINKER:BOOL=On
+      
+      - name: 💻 Windows & MacOS 🍎 - 🔧 Configure CMake
+        if: runner.os != 'Linux'
+        working-directory: ./mtgoparser
+        run: >
+          cmake -S .
+          -B ./build
+          -G "${{matrix.generator}}"
+          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }}
+          -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}}
+          -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}}
+          -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }}
+          -DGIT_SHA:STRING=${{ github.sha }}
+          -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
 
       - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser

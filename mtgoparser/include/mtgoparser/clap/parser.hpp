@@ -254,7 +254,7 @@ private:
           if (std::optional<clap::Option> found_opt = this->options_.value().find(*it)) {
             // Check if it is not a flag, then the next argument should be the attached value
             std::optional<std::string_view> opt_value = std::nullopt;
-            if (!found_opt.value().is_flag_) {
+            if (found_opt.value().opt_type_ == Opt::NeedValue) {
               // Then check for the value in the arguments
               if ((it + 1 == end) || (*(it + 1)).starts_with("-")) [[unlikely]] {
                 ++errors;

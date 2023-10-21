@@ -1,4 +1,4 @@
-macro(mtgoparser_configure_linker project_name)
+macro(configure_linker project_name)
   include(CheckCXXCompilerFlag)
 
   set(USER_LINKER_OPTION
@@ -18,14 +18,20 @@ macro(mtgoparser_configure_linker project_name)
         "Using custom linker: '${USER_LINKER_OPTION}', explicitly supported entries are ${USER_LINKER_OPTION_VALUES}")
   endif()
 
-  if(NOT ENABLE_USER_LINKER)
+  if(NOT mtgoparser_ENABLE_USER_LINKER)
+    message(
+      STATUS
+        "user linker not enabled")
     return()
   endif()
 
   set(LINKER_FLAG "-fuse-ld=${USER_LINKER_OPTION}")
+  message(
+      STATUS
+        "Using linker: ${USER_LINKER_OPTION}")
 
   check_cxx_compiler_flag(${LINKER_FLAG} CXX_SUPPORTS_USER_LINKER)
   if(CXX_SUPPORTS_USER_LINKER)
-    target_compile_options(${project_name} INTERFACE ${LINKER_FLAG})
+    target_link_options(${project_name} INTERFACE ${LINKER_FLAG})
   endif()
 endmacro()

@@ -1,4 +1,5 @@
 // NOLINTBEGIN
+#include "mtgoparser/clap/option.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <mtgoparser/clap.hpp>
 #include <mtgoparser/mtg.hpp>
@@ -8,7 +9,10 @@
 #include <string_view>
 #include <utility>
 
-constinit auto static_clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
+using clap::Opt::Flag;
+using clap::Opt::NeedValue;
+
+constinit auto static_clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", Flag)));
 
 
 TEST_CASE("Test basic CLAP")
@@ -24,7 +28,7 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Dynamically initialized - Show version")
   {
-    auto clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true)));
+    auto clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", Flag)));
     fmt::print("Options are:\n");
     clap.PrintOptions();
 
@@ -44,7 +48,7 @@ TEST_CASE("Test basic CLAP")
   SECTION("Alias version cmd - Show version")
   {
 
-    auto clap_alias_version = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", true, "-V")));
+    auto clap_alias_version = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", Flag, "-V")));
 
     CHECK(clap_alias_version.Parse(arg_vec) == 0);
 
@@ -72,7 +76,7 @@ TEST_CASE("Test CLAP with options and values")
     std::vector<std::string_view> arg_vec{ argv + 1, argv + argc };
 
     auto clap = clap::Clap<2, 0>(
-      clap::OptionArray<2>(clap::Option("--version", true, "-V"), clap::Option("--save-as", false, "-s")));
+      clap::OptionArray<2>(clap::Option("--version", Flag, "-V"), clap::Option("--save-as", NeedValue, "-s")));
 
 
     CHECK(clap.Parse(arg_vec) == 0);
@@ -87,8 +91,8 @@ TEST_CASE("Test CLAP with options and values")
 
   SECTION("Argument validation catches errors")
   {
-    constexpr auto version_option = clap::Option("--version", true, "-V");
-    constexpr auto save_as_option = clap::Option("--save-as", false, "-s");
+    constexpr auto version_option = clap::Option("--version", Flag, "-V");
+    constexpr auto save_as_option = clap::Option("--save-as", NeedValue, "-s");
     constexpr auto opt_arr = clap::OptionArray<2>(version_option, save_as_option);
     auto clap = clap::Clap<2, 0>(opt_arr);
 
@@ -125,7 +129,8 @@ TEST_CASE("MTGO card - Initialize and use of")
   SECTION("Initialize")
   {
     // Test constructors, assignments, initializations with different types
-    mtgo::Card mtgo_card = mtgo::Card(1, util::sv_to_uint<uint16_t>("1").value_or(123), "name", "set", "Common");
+    unsigned short int id_1 = 1;
+    mtgo::Card mtgo_card = mtgo::Card(id_1, util::sv_to_uint<uint16_t>("1").value_or(123), "name", "set", "Common");
     CHECK(mtgo_card.id_ == 1);
     CHECK(mtgo_card.quantity_ == 1);
     CHECK(mtgo_card.name_ == "name");
@@ -136,8 +141,9 @@ TEST_CASE("MTGO card - Initialize and use of")
     REQUIRE(mtgo_card.scryfall_price_.has_value() == false);
     REQUIRE(mtgo_card.scryfall_price_ == std::nullopt);
 
+    unsigned int id2 = 1;
     mtgo::Card mtgo_card2 =
-      mtgo::Card(1, util::sv_to_uint<uint16_t>("1").value_or(9), "name", "set", "C", true, 1.0, 2.0);
+      mtgo::Card(id2, util::sv_to_uint<uint16_t>("1").value_or(9), "name", "set", "C", true, 1.0, 2.0);
     CHECK(mtgo_card2.id_ == 1);
     CHECK(mtgo_card2.quantity_ == 1);
     CHECK(mtgo_card2.name_ == "name");
@@ -166,7 +172,9 @@ TEST_CASE("MTGO card - Initialize and use of")
     std::string name_str = "name";
     std::string set_str = "set";
     std::string rarity_str = "COMMON";
-    mtgo::Card mtgo_card4 = mtgo::Card(1, 1, name_str, set_str, rarity_str);
+    uint32_t id4 = 1;
+    uint16_t quant4 = 1;
+    mtgo::Card mtgo_card4 = mtgo::Card(id4, quant4, name_str, set_str, rarity_str);
 
     // check equality with mtgo_card
     CHECK(mtgo_card4 == mtgo_card);
@@ -178,8 +186,10 @@ TEST_CASE("MTGO card - Initialize and use of")
   {
     // Test move constructors and move assignment
 
-    mtgo::Card mtgo_card = mtgo::Card(1, 1, "name", "set", "common", true, 1.0, 2.0);
-    mtgo::Card mtgo_card2 = mtgo::Card(1, 1, "name", "set", "common", true, 1.0, 2.0);
+    uint16_t ids = 1;
+    uint16_t quantities = 1;
+    mtgo::Card mtgo_card = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0, 2.0);
+    mtgo::Card mtgo_card2 = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0, 2.0);
 
     // Move constructor
     mtgo::Card mtgo_card3(std::move(mtgo_card));
@@ -188,7 +198,8 @@ TEST_CASE("MTGO card - Initialize and use of")
     // CHECK(mtgo_card.id_ == "");// Access of moved value
 
     // Move assignment
-    auto mtgo_card_tmp = mtgo::Card(2, 1, "name", "set", "common", true, 1.0, 2.0);
+    uint16_t id_tmp = 2;
+    auto mtgo_card_tmp = mtgo::Card(id_tmp, quantities, "name", "set", "common", true, 1.0, 2.0);
     mtgo_card3 = std::move(mtgo_card_tmp);
     CHECK(mtgo_card3 != mtgo_card2);// ID should differ
     // Check that mtgo_card_tmp is now invalid (commented out as it triggered warning in CI)
@@ -231,8 +242,8 @@ TEST_CASE("Command struct")
 
 TEST_CASE("Option struct")
 {
-  constexpr clap::Option opt{ "--my-option", true };
-  constexpr clap::Option opt_w_alias("--my-option", true, "--my-alias");
+  constexpr clap::Option opt{ "--my-option", Flag };
+  constexpr clap::Option opt_w_alias("--my-option", Flag, "--my-alias");
 
   constexpr bool opt_has_alias = opt.has_alias();
   REQUIRE(opt_has_alias == false);
