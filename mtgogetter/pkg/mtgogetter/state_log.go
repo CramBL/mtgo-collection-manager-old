@@ -51,10 +51,22 @@ func (g *goatbots) UpdatePriceTimestamp(stateLogPath string) error {
 	return nil
 }
 
-// Method for the goatbots struct to check if the card definitions are up to date.
-// it's outdated if a new set has been released since the last update
-func (g *goatbots) IsCardDefinitionsUpdated(mostRecentSetReleasedAt string) bool {
-	log.Fatalln("Not implemented yet")
+// Check if the card definitions are up to date.
+//
+// it's updated unless a new set has been released and it's been >20 minutes since last update
+func IsCardDefinitionsUpdated(s *StateLog) bool {
+	// Create a UTC time 20 minutes ago
+	twentyMinutesAgo := time.Now().UTC().Add(-20 * time.Minute)
+
+	if s.Scryfall.Next_released_mtgo_set.Name != "" {
+		yyyy_dd_mm_format := "2006-01-02"
+		releaseTime, err := time.Parse(yyyy_dd_mm_format, s.Scryfall.Next_released_mtgo_set.Released_at)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return !(releaseTime.Before(time.Now().UTC()) && s.Goatbots.Card_definitions_updated_at.Before(twentyMinutesAgo))
+	}
+	// If the next released mtgo set name is empty, we have to assume that the card definitions are to updated
 	return false
 }
 
