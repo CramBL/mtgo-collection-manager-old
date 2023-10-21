@@ -42,6 +42,9 @@ function(mtgoparser_setup_dependencies)
       VERSION 1.83.0
       GITHUB_REPOSITORY "boostorg/boost"
       GIT_TAG "boost-1.83.0"
+      OPTIONS 
+        "header_only TRUE"
+        "COMPONENTS outcome"
     )
   endif()
 endfunction()
