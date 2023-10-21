@@ -1,4 +1,4 @@
-macro(mtgoparser_configure_linker project_name)
+macro(configure_linker project_name)
   include(CheckCXXCompilerFlag)
 
   set(USER_LINKER_OPTION
