@@ -25,7 +25,7 @@ else
 endif
 
 ifeq ($(shell which mold),)
-	$(error "No mold in $(PATH), please install mold for improved link times. Installable for most systems with `apt install mold`")
+    $(error "No mold in $(PATH), please install mold for improved link times. Installable for most systems with `apt install mold`")
 endif
 
 # Minimum supported versions
@@ -137,7 +137,7 @@ build-mtgoparser-integration:
 	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
 	@echo "=== Done building MTGO Parser ==="
 
-.PHONE: bench-mtgoparser
+.PHONY: bench-mtgoparser
 bench-mtgoparser:
 	@echo "==> Running benchmarks for MTGO Parser..."
 	cd mtgoparser/build/test && ./$(MTGOPARSER_BUILD_MODE)/benchmark_xml_parse [.]
