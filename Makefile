@@ -3,6 +3,8 @@ BUILD_MODE := Debug
 # MTGOPARSER_GENERATOR := "Ninja Multi-Config"
 MTGOPARSER_BUILD_MODE := Release
 MTGOPARSER_ENABLE_COV := false
+MTGOPARSER_USER_LINKER := On
+MTGOPARSER_LINKER := mold
 
 # Set generator to "Ninja Multi-Config" for unix-like systems.
 ifeq ($(shell uname -s),Linux)
@@ -22,9 +24,9 @@ else
 	MTGOPARSER_IPO := On
 endif
 
- ifeq (, $(shell which mold))
- $(error "No mold in $(PATH), please install mold for improved link times. Installable for most systems with `apt install mold`")
- endif
+ifeq (, $(shell which mold))
+	$(error "No mold in $(PATH), please install mold for improved link times. Installable for most systems with `apt install mold`")
+endif
 
 # Minimum supported versions
 RUST_MIN_VERSION := 1.70.0
@@ -106,12 +108,13 @@ test-mtgogetter:
 build-mtgoparser mtgoparser:
 	@echo "==> Building MTGO Parser..."
 	cd mtgoparser && cmake -S . -B build \
-	-G $(MTGOPARSER_GENERATOR) \
-	-Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) \
-	-DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) \
-	-Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) \
-	-DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;" \
-	-Dmtgoparser_ENABLE_USER_LINKER=mold
+	  -G $(MTGOPARSER_GENERATOR) \
+	  -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) \
+	  -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) \
+	  -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) \
+	  -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;" \
+	  -DUSER_LINKER_OPTION=$(MTGOPARSER_LINKER) \
+	  -Dmtgoparser_ENABLE_USER_LINKER:BOOL=$(MTGOPARSER_USER_LINKER)
 	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
 	@echo "=== Done building MTGO Parser ==="
 
@@ -120,16 +123,17 @@ build-mtgoparser mtgoparser:
 build-mtgoparser-integration:
 	@echo "==> Building MTGO Parser..."
 	cd mtgoparser && cmake -S . -B build \
-	-G $(MTGOPARSER_GENERATOR) \
-	-Dmtgoparser_DEPLOYING_BINARY=On \
-	-Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) \
-	-DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) \
-	-Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) \
-	-DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;" \
-	-Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF \
-	-Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF \
-	-Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF \
-	-Dmtgoparser_ENABLE_USER_LINKER=mold
+	  -G $(MTGOPARSER_GENERATOR) \
+	  -Dmtgoparser_DEPLOYING_BINARY=On \
+	  -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) \
+	  -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) \
+	  -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) \
+	  -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;" \
+	  -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF \
+	  -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF \
+	  -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF \
+	  -DUSER_LINKER_OPTION=$(MTGOPARSER_LINKER) \
+	  -Dmtgoparser_ENABLE_USER_LINKER:BOOL=$(MTGOPARSER_USER_LINKER)
 	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
 	@echo "=== Done building MTGO Parser ==="
 
