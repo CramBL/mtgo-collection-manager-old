@@ -78,8 +78,8 @@ func (g *goatbots) UpdateCardDefinitionsTimestamp(stateLogPath string) error {
 
 type scryfall struct {
 	// Bulk data is updated every 12 hours
-	Bulk_data_updated_at time.Time
-	Most_recent_set      ScryfallSet
+	Bulk_data_updated_at   time.Time
+	Next_released_mtgo_set ScryfallSet
 }
 
 // Method for the scryfall struct to check if the bulk data is up to date.
@@ -109,12 +109,15 @@ func (s *scryfall) UpdateBulkDataTimestamp(stateLogPath string) error {
 	return nil
 }
 
-// Checks if a set matches the most recent set in the log
+// Checks if a set matches the next released set in the log
 func (s *scryfall) IsSetMatch(set *ScryfallSet) bool {
-	return s.Most_recent_set == *set
+	return s.Next_released_mtgo_set == *set
 }
 
-func (s *scryfall) UpdateMostRecentSet(set ScryfallSet, stateLogPath string) error {
+// Next set is the set released at the closest date from now IF the current `next set` is empty.
+//
+// TODO: The next set gets emptied everytime that set is found in the card definition data (meaning it is now on MTGO and time to update what is the next set)
+func (s *scryfall) UpdateNextSet(set *ScryfallSet, stateLogPath string) error {
 
 	state_log_accesor, err := GetStateLogAccessor(stateLogPath)
 	if err != nil {
@@ -122,7 +125,10 @@ func (s *scryfall) UpdateMostRecentSet(set ScryfallSet, stateLogPath string) err
 	}
 
 	update_action := func(state_log *StateLog) {
-		state_log.Scryfall.Most_recent_set = set
+		// If the name string is empty -> assume it's time to update the next set
+		if state_log.Scryfall.Next_released_mtgo_set.Name == "" {
+			state_log.Scryfall.Next_released_mtgo_set = *set
+		}
 	}
 	err = state_log_accesor.UpdateStateLog(update_action)
 	if err != nil {
@@ -130,6 +136,15 @@ func (s *scryfall) UpdateMostRecentSet(set ScryfallSet, stateLogPath string) err
 	}
 
 	return nil
+}
+
+// Returns if the next set to come out is now out on MTGO.
+//
+// If it is out, we want to update which set is the next to come out
+func (s *scryfall) IsRecentSetOut() bool {
+	// If the name is empty we never set the next released set or it is out
+	// either way that means it needs to be updated
+	return s.Next_released_mtgo_set.Name == ""
 }
 
 type StateLog struct {
@@ -148,9 +163,10 @@ func NewStateLog() *StateLog {
 		},
 		Scryfall: scryfall{
 			Bulk_data_updated_at: time.Unix(0, 0).UTC(),
-			Most_recent_set: ScryfallSet{
+			Next_released_mtgo_set: ScryfallSet{
 				Name:        "",
 				Released_at: "",
+				Mtgo_code:   "",
 			},
 		},
 	}
