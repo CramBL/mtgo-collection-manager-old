@@ -4,20 +4,23 @@
 #include <string_view>
 
 
+#include <boost/implicit_cast.hpp>
+
 namespace util {
 
 template<typename SA, typename SB>
-requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
-[[nodiscard]] inline constexpr auto is_sv_same(SA a, SB b) -> bool
+  requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
+[[nodiscard]] inline constexpr auto is_sv_same(SA a_sv, SB b_sv) -> bool
 {
-  return static_cast<std::string_view>(a) == static_cast<std::string_view>(b);
+  return boost::implicit_cast<std::string_view>(a_sv) == boost::implicit_cast<std::string_view>(b_sv);
+  // return static_cast<std::string_view>(a_sv) == static_cast<std::string_view>(b_sv);
 }
 
 template<typename SA, typename... Ss>
-requires std::convertible_to<SA, std::string_view> &&(std::convertible_to<Ss, std::string_view> || ...)
-  [[nodiscard]] inline constexpr auto is_sv_any_of(SA a, Ss... bs) -> bool
+  requires std::convertible_to<SA, std::string_view> && (std::convertible_to<Ss, std::string_view> || ...)
+[[nodiscard]] inline constexpr auto is_sv_any_of(SA a_sv, Ss... bs_svs) -> bool
 {
-  return (is_sv_same(a, bs) || ...);
+  return (is_sv_same(a_sv, bs_svs) || ...);
 }
 
 
