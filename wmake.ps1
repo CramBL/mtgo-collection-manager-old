@@ -123,7 +123,7 @@ function Build-Mtgoparser {
     Show-Versions
     Write-Host "==> Building MTGO Parser..."
     Set-Location mtgoparser
-    cmake -S . -B build -G "${MTGOPARSER_GENERATOR}" -Dmtgoparser_ENABLE_IPO="${MTGOPARSER_IPO}" -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE} -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV} -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json" 2>&1
+    cmake -S . -B build -G "${MTGOPARSER_GENERATOR}" -Dmtgoparser_ENABLE_IPO="${MTGOPARSER_IPO}" -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE} -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV} -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test" 2>&1
     if ($LASTEXITCODE -ne 0) {
         Write-Error "!!! ERROR while setting up build files for MTGO Parser: code ${LASTEXITCODE}"
     } else {
@@ -142,7 +142,7 @@ function Build-MtgoparserIntegration {
     Show-Versions
     Write-Host "==> Building MTGO Parser..."
     Set-Location mtgoparser
-    cmake -S . -B build -G "${MTGOPARSER_GENERATOR}" -Dmtgoparser_DEPLOYING_BINARY=On -Dmtgoparser_ENABLE_IPO="${MTGOPARSER_IPO}" -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE} -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV} -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave"
+    cmake -S . -B build -G "${MTGOPARSER_GENERATOR}" -Dmtgoparser_DEPLOYING_BINARY=On -Dmtgoparser_ENABLE_IPO="${MTGOPARSER_IPO}" -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE} -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV} -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test"
     cmake --build build --config ${MTGOPARSER_BUILD_MODE}
     Set-Location ..
     Write-Host "=== Done building MTGO Parser ==="

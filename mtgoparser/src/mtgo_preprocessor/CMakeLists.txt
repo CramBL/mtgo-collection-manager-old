@@ -1,4 +1,6 @@
 find_package(fmt)
+find_package(Boost 1.83 REQUIRED COMPONENTS
+             outcome core conversion detail headers)
 
 add_executable(mtgo_preprocesser main.cpp setup.cpp run.cpp)
 
@@ -15,7 +17,11 @@ target_link_system_libraries(
           spdlog::spdlog
           rapidxml
           mtgoparser
+          Boost::headers
           Boost::outcome
+          Boost::conversion
+          Boost::core
+          Boost::detail
           )
 
 target_include_directories(mtgo_preprocesser PRIVATE "${CMAKE_BINARY_DIR}/configured_files/include")

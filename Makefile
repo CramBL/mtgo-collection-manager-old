@@ -101,7 +101,7 @@ test-mtgogetter:
 .PHONY: build-mtgoparser mtgoparser
 build-mtgoparser mtgoparser:
 	@echo "==> Building MTGO Parser..."
-	cd mtgoparser && cmake -S . -B build -G $(MTGOPARSER_GENERATOR) -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave"
+	cd mtgoparser && cmake -S . -B build -G $(MTGOPARSER_GENERATOR) -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test"
 	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
 	@echo "=== Done building MTGO Parser ==="
 

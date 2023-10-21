@@ -192,7 +192,7 @@ jobs:
           -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}}
           -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }}
           -DGIT_SHA:STRING=${{ github.sha }}
-          -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave"
+          -DBOOST_EXCLUDE_LIBRARIES="serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test"
           
 
       - name: Build ⚒️ MTGO Parser 🤓
