@@ -24,7 +24,7 @@ else
 	MTGOPARSER_IPO := On
 endif
 
-ifeq (,$(shell which mold))
+ifeq ($(shell which mold),)
 	$(error "No mold in $(PATH), please install mold for improved link times. Installable for most systems with `apt install mold`")
 endif
 
