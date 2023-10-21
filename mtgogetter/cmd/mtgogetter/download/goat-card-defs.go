@@ -2,6 +2,7 @@ package download
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/CramBL/mtgo-collection-manager/mtgogetter/pkg/mtgogetter"
@@ -31,6 +32,30 @@ Card definitions includes a unique card ID with associated name, cardset, rarity
 				fname = filepath.Join(working_dir, fname) // default filename
 			}
 		}
+
+		// Get the state log accessor
+		state_log_accesor, err := mtgogetter.GetStateLogAccessor(working_dir)
+		if err != nil {
+			return fmt.Errorf("error getting state log accessor: %s", err)
+		}
+
+		state_log := state_log_accesor.GetStateLog()
+		// Release the state log immediately
+		// Assumes that the state log will not be used again for the same purpose as in this command
+		// while this command is running
+		// The way this breaks is if this command is run in parallel with itself which is faulty use
+		state_log_accesor.ReleaseStateLog()
+
+		if mtgogetter.IsCardDefinitionsUpdated(state_log) {
+			log.Println("Card definitions is up to date - no need to download")
+			return nil
+		} else {
+			log.Println("Card definitions are not up to date - downloading new card definitions")
+		}
+
+		// Update the timestamp in the state log after downloading the price history
+		// Only runs if the download is successful (i.e. no call to log.Fatalln()/os.Exit())
+		defer state_log.Goatbots.UpdateCardDefinitionsTimestamp(working_dir)
 
 		dl_bytes, err := mtgogetter.DownloadBodyToBytes(GoatbotsCardDefinitionsUrl)
 		if err != nil {
