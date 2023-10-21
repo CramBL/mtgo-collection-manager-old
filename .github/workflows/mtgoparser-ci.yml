@@ -181,9 +181,12 @@ jobs:
           gcovr: true
           opencppcoverage: true
 
-      - name: Unix 🐧🍎 - 🔧 Configure CMake
+      - name: Setup Mold linker for Unix 🐧🍎 builds
         if: runner.os != 'Windows'
         uses: rui314/setup-mold@v1
+
+      - name: Unix 🐧🍎 - 🔧 Configure CMake
+        if: runner.os != 'Windows'
         working-directory: ./mtgoparser
         run: >
           cmake -S .
