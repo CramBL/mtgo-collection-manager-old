@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/implicit_cast.hpp>
+
 #include <mtgoparser/mtg.hpp>
 
 #include <compare>
@@ -69,7 +71,7 @@ struct Card
 
   // Templated constructor
   template<typename I, typename Q, typename S>
-  requires std::convertible_to<I, uint32_t> && std::convertible_to<Q, uint16_t> && std::convertible_to<S, std::string>
+    requires std::convertible_to<I, uint32_t> && std::convertible_to<Q, uint16_t> && std::convertible_to<S, std::string>
   explicit Card(I id,
     Q quantity,
     S name,
@@ -78,10 +80,9 @@ struct Card
     bool foil = false,
     double goatbots_price = 0,
     std::optional<double> scryfall_price = {}) noexcept
-    : id_{ static_cast<uint32_t>(id) }, quantity_{ static_cast<uint16_t>(quantity) }, name_{ name }, set_{ set },
-      rarity_{ mtg::util::rarity_from_t(rarity) }, foil_{ foil }, goatbots_price_{ goatbots_price }, scryfall_price_{
-        scryfall_price
-      }
+    : id_{ boost::implicit_cast<uint32_t>(id) }, quantity_{ boost::implicit_cast<uint16_t>(quantity) }, name_{ name },
+      set_{ set }, rarity_{ mtg::util::rarity_from_t(rarity) }, foil_{ foil }, goatbots_price_{ goatbots_price },
+      scryfall_price_{ scryfall_price }
   {}
 
   // Move constructor

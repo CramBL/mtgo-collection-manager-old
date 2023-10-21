@@ -13,7 +13,6 @@ requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, st
 [[nodiscard]] inline constexpr auto is_sv_same(SA a_sv, SB b_sv) -> bool
 {
   return boost::implicit_cast<std::string_view>(a_sv) == boost::implicit_cast<std::string_view>(b_sv);
-  // return static_cast<std::string_view>(a_sv) == static_cast<std::string_view>(b_sv);
 }
 
 template<typename SA, typename... Ss>

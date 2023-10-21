@@ -3,6 +3,8 @@
 
 #include "mtgoparser/util.hpp"
 
+#include <boost/implicit_cast.hpp>
+
 #include <glaze/glaze.hpp>
 
 #include <cassert>
@@ -24,7 +26,7 @@ namespace util {
       if (::util::is_sv_any_of(val, "B", "Booster", "booster", "BOOSTER")) [[unlikely]] { return Rarity::Booster; }
 
     } else if constexpr (std::is_same_v<T, uint8_t>) {
-      if (val >= 0 && val <= 4) { return static_cast<Rarity>(val); }
+      if (val >= 0 && val <= 4) { return boost::implicit_cast<Rarity>(val); }
     } else {
       static_assert(std::is_integral<T>::value || std::convertible_to<T, std::string_view>,
         "T must either be an integral type or string-like");
