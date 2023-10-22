@@ -19,6 +19,7 @@ using Catch::Matchers::ContainsSubstring;
 // Goes to top of project and into the shared 'test/test-data' directory
 const auto path_goatbots_card_defs_small_5cards = "../../../test/test-data/goatbots/card-defs-small-5cards.json";
 const auto path_goatbots_price_hist_small_5cards = "../../../test/test-data/goatbots/price-hist-small-5cards.json";
+const auto path_goatbots_card_defs_full = "../../../test/test-data/goatbots/card-definitions-2023-10-02-full.json";
 
 TEST_CASE("CardDefinition structs are correctly deserialized from Goatbots JSON", "[card_defs_from_goatbots_json]")
 {
@@ -184,6 +185,29 @@ TEST_CASE("Scryfall JSON serializing", "[scryfall_serializing]")
         }
       }
     }
+  }
+}
+
+TEST_CASE("Full JSON - CardDefinition structs deserialized from Goatbots JSON and mtgo set ID search",
+  "[card_defs_full_goatbots_json]")
+{
+  using goatbots::card_defs_map_t;
+  using goatbots::CardDefinition;
+
+  std::optional<card_defs_map_t> card_defs_opt = goatbots::ReadJsonMap<card_defs_map_t>(path_goatbots_card_defs_full);
+
+  REQUIRE(card_defs_opt.has_value());
+  // if (!card_defs_opt.has_value()) { return; }// Make the compiler shut up
+  const card_defs_map_t card_defs = card_defs_opt.value();
+
+  SECTION("Sanity checks - card definitions")
+  {
+    CHECK(card_defs.size() == 76070);
+
+    REQUIRE(card_defs.contains(116836));
+
+    CHECK(card_defs.at(116836).name == "Pollen-Shield Hare");
+    CHECK(card_defs.at(116836).foil == 0);
   }
 }
 
