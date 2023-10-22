@@ -1,5 +1,9 @@
 #pragma once
 
+// NOLINTBEGIN
+#include <toml++/toml.hpp>
+// NOLINTEND
+
 #include <filesystem>
 #include <fstream>
 #include <ios>
@@ -45,4 +49,10 @@ namespace io_util {
 
   return char_buf;
 }
+
+[[nodiscard]] inline auto read_state_log(const std::string_view str_fpath) -> decltype(auto)
+{
+  return toml::parse_file(str_fpath);
+}
+
 }// namespace io_util
