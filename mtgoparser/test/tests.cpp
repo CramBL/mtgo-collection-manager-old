@@ -1,10 +1,15 @@
 // NOLINTBEGIN
+
 #include "mtgoparser/clap/option.hpp"
+#include "mtgoparser/io.hpp"
 #include <catch2/catch_test_macros.hpp>
+#include <fmt/core.h>
 #include <mtgoparser/clap.hpp>
+#include <mtgoparser/io.hpp>
 #include <mtgoparser/mtg.hpp>
 #include <mtgoparser/mtgo/card.hpp>
 #include <mtgoparser/util.hpp>
+
 
 #include <string_view>
 #include <utility>
@@ -262,6 +267,16 @@ TEST_CASE("Option struct")
   auto found_opt = opt_arr.find("--my-alias");
   REQUIRE(found_opt.has_value() == true);
   CHECK(found_opt.value().name_ == "--my-option");
+}
+
+TEST_CASE("Parse state_log.toml")
+{
+  const auto path_state_log = "../../../test/test-data/mtgogetter-out/state_log.toml";
+  auto state_log = io_util::read_state_log(path_state_log);
+  std::string_view title = state_log["Title"].value_or("");
+
+  fmt::println("state_log has tile: {}", title);
+  CHECK(title == "log for MTGO Getter state, such as updated_at timestamps");
 }
 
 // NOLINTEND
