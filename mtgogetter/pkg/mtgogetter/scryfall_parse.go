@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 
 /*
@@ -40,6 +41,7 @@ type ScryfallSetBlob struct {
 type ScryfallSet struct {
 	Name        string `json:"name"`
 	Released_at string `json:"released_at"`
+	Mtgo_code   string `json:"mtgo_code"` // Such as RTR for Return to Ravnica
 }
 
 type ScryfallCard struct {
@@ -105,7 +107,9 @@ func ScryfallCardsFromJsonBytes(byteSlice []byte) ([]ScryfallCard, error) {
 	return bulk_data_mtgo, nil
 }
 
-func MostRecentScryfallSetFromJsonBytes(byteSlice []byte) (*ScryfallSet, error) {
+// Returns the latest set in the raw JSON set data, which is the newest announced set.
+// Meaning the set that is furthest from being released but has a release date.
+func NewestAnnouncedScryfallSetFromJsonBytes(byteSlice []byte) (*ScryfallSet, error) {
 	var blob ScryfallSetBlob
 	if err := json.Unmarshal(byteSlice, &blob); err != nil {
 		return nil, err
@@ -116,6 +120,55 @@ func MostRecentScryfallSetFromJsonBytes(byteSlice []byte) (*ScryfallSet, error) 
 	}
 
 	return &blob.Data[0], nil
+}
+
+// Takes `ScryfallSet` JSON byte data and a time to compare against.
+//
+// Returns the `ScryfallSet` that will be released on MTGO next
+func NextReleasedScryfallSetFromJsonBytes(byteSlice []byte, targetTime time.Time) (*ScryfallSet, error) {
+	var blob ScryfallSetBlob
+	if err := json.Unmarshal(byteSlice, &blob); err != nil {
+		return nil, err
+	}
+
+	if len(blob.Data) == 0 {
+		return nil, fmt.Errorf("no data found")
+	}
+
+	// Iterate through the sets to find the closest set
+	var nextReleasedSet *ScryfallSet
+
+	// Look back at most 100 sets.
+	for i := 0; i < 100; i++ {
+		// First check if the set is even gonna be available on MTGO
+		// Having no mtgo_code value means it won't be on MTGO
+		if blob.Data[i].Mtgo_code == "" {
+			continue
+		}
+
+		yyyy_dd_mm_format := "2006-01-02"
+		releaseTime, err := time.Parse(yyyy_dd_mm_format, blob.Data[i].Released_at)
+		if err != nil {
+			return nil, err
+		}
+
+		if releaseTime.Before(targetTime) {
+			// If the current set is in the past, break and return the set that the pointer is holding
+			// that must be the next released set
+			if nextReleasedSet != nil {
+				break
+			} else {
+				// If the first set is already in the past (should be never happen)
+				return nil, fmt.Errorf("the first set in the data was released before the target date: %s", targetTime)
+			}
+		}
+
+		// The set was not in the past, so it's now the closest to the date but still unreleased
+		// Set the pointer to that set
+		nextReleasedSet = &blob.Data[i]
+	}
+
+	return nextReleasedSet, nil
 }
 
 //	takes a json.Decoder and returns a slice of ScryfallCard structs

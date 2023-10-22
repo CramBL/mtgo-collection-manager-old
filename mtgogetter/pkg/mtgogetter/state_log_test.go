@@ -188,7 +188,7 @@ func TestStateLog_Scryfall_IsSetMatch_true(t *testing.T) {
 		Released_at: "2022-01-01",
 	}
 
-	state_log.Scryfall.Most_recent_set = scryfall_set
+	state_log.Scryfall.Next_released_mtgo_set = scryfall_set
 
 	if !state_log.Scryfall.IsSetMatch(&scryfall_set_copy) {
 		t.Errorf("Unexpected mismatch between set and statelog set")

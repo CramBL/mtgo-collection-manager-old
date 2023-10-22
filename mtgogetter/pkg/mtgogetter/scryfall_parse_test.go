@@ -2,7 +2,9 @@ package mtgogetter_test
 
 import (
 	"log"
+	"os"
 	"testing"
+	"time"
 
 	. "github.com/CramBL/mtgo-collection-manager/mtgogetter/pkg/mtgogetter"
 )
@@ -199,7 +201,7 @@ func TestScryfallJson_Deserialize_50cards_streamed(t *testing.T) {
 	}
 }
 
-func TestMostRecentScryfallSetFromJsonBytes(t *testing.T) {
+func TestNewestAnnouncedScryfallSetFromJsonBytes(t *testing.T) {
 	var scryfallSetJson = []byte(`
 	{
 	  "object": "list",
@@ -225,7 +227,7 @@ func TestMostRecentScryfallSetFromJsonBytes(t *testing.T) {
 	  ]
 	}`)
 
-	mostRecentSet, err := MostRecentScryfallSetFromJsonBytes(scryfallSetJson)
+	mostRecentSet, err := NewestAnnouncedScryfallSetFromJsonBytes(scryfallSetJson)
 	if err != nil {
 		t.Errorf("Failed decoding scryfall set json: %s", err)
 	}
@@ -238,6 +240,76 @@ func TestMostRecentScryfallSetFromJsonBytes(t *testing.T) {
 	expectReleasedAt := "2024-03-01"
 	if mostRecentSet.Released_at != expectReleasedAt {
 		t.Errorf("Expected most recent set to be released at %s, got %s", expectReleasedAt, mostRecentSet.Released_at)
+	}
+
+}
+
+func TestNextReleasedScryfallSetFromJsonBytes_simple(t *testing.T) {
+	// Read the JSON file into a byte slice
+	scryfallSetJson, err := os.ReadFile("../../../test/test-data/scryfall/sets-small-16sets.json")
+	if err != nil {
+		t.Errorf("Error reading file: %s", err)
+	}
+
+	targetTime := time.Date(2023, time.October, 14, 0, 0, 0, 0, time.UTC)
+
+	mostRecentSet, err := NextReleasedScryfallSetFromJsonBytes(scryfallSetJson, targetTime)
+	if err != nil {
+		t.Errorf("Failed decoding scryfall set json: %s", err)
+	}
+
+	expectSetName := "Lost Caverns of Ixalan Commander"
+	if mostRecentSet.Name != expectSetName {
+		t.Errorf("Expected most recent set name to be %s, got: %s", expectSetName, mostRecentSet.Name)
+	}
+
+	expectReleasedAt := "2023-11-17"
+	if mostRecentSet.Released_at != expectReleasedAt {
+		t.Errorf("Expected most recent set to be released at %s, got %s", expectReleasedAt, mostRecentSet.Released_at)
+	}
+}
+
+// Tests the scenario where the date is exactly equal to a set's release
+// it should be the same behaviour as if the date was just before that set's release
+func TestNextReleasedScryfallSetFromJsonBytes_exactDate(t *testing.T) {
+	// Read the JSON file into a byte slice
+	scryfallSetJson, err := os.ReadFile("../../../test/test-data/scryfall/sets-small-16sets.json")
+	if err != nil {
+		t.Errorf("Error reading file: %s", err)
+	}
+
+	targetTime := time.Date(2023, time.November, 17, 0, 0, 0, 0, time.UTC)
+
+	mostRecentSet, err := NextReleasedScryfallSetFromJsonBytes(scryfallSetJson, targetTime)
+	if err != nil {
+		t.Errorf("Failed decoding scryfall set json: %s", err)
+	}
+
+	expectSetName := "Lost Caverns of Ixalan Commander"
+	if mostRecentSet.Name != expectSetName {
+		t.Errorf("Expected most recent set name to be %s, got: %s", expectSetName, mostRecentSet.Name)
+	}
+
+	expectReleasedAt := "2023-11-17"
+	if mostRecentSet.Released_at != expectReleasedAt {
+		t.Errorf("Expected most recent set to be released at %s, got %s", expectReleasedAt, mostRecentSet.Released_at)
+	}
+}
+
+// Tests where the target date is later than the latest set release, meaning we won't find a set that will be released in the future
+// this should never happen and should error
+func TestNextReleasedScryfallSetFromJsonBytes_laterDateErrors(t *testing.T) {
+	// Read the JSON file into a byte slice
+	scryfallSetJson, err := os.ReadFile("../../../test/test-data/scryfall/sets-small-16sets.json")
+	if err != nil {
+		t.Errorf("Error reading file: %s", err)
+	}
+
+	targetTime := time.Date(2024, time.November, 17, 0, 0, 0, 0, time.UTC)
+
+	mostRecentSet, err := NextReleasedScryfallSetFromJsonBytes(scryfallSetJson, targetTime)
+	if err == nil {
+		t.Errorf("Expected failure when target date is later than the latest release, instead got set: %s ", mostRecentSet.Name)
 	}
 
 }
