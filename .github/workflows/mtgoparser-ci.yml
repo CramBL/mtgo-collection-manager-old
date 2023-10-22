@@ -198,7 +198,7 @@ jobs:
           -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}}
           -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }}
           -DGIT_SHA:STRING=${{ github.sha }}
-          -DBOOST_EXCLUDE_LIBRARIES=${{ env.EXCLUDE_BOOST_LIBS }}
+          -DBOOST_EXCLUDE_LIBRARIES="${{ env.EXCLUDE_BOOST_LIBS }}"
           -DUSER_LINKER_OPTION=mold
           -Dmtgoparser_ENABLE_USER_LINKER:BOOL=On
       
@@ -214,7 +214,7 @@ jobs:
           -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}}
           -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }}
           -DGIT_SHA:STRING=${{ github.sha }}
-          -DBOOST_EXCLUDE_LIBRARIES=${{ env.EXCLUDE_BOOST_LIBS }}
+          -DBOOST_EXCLUDE_LIBRARIES="${{ env.EXCLUDE_BOOST_LIBS }}"
 
       - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser

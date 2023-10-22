@@ -97,7 +97,7 @@ jobs:
           -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
           -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF
           -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
-          -DBOOST_EXCLUDE_LIBRARIES=${{ env.EXCLUDE_BOOST_LIBS }}
+          -DBOOST_EXCLUDE_LIBRARIES="${{ env.EXCLUDE_BOOST_LIBS }}"
       - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser
         run: >
