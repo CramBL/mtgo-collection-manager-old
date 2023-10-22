@@ -55,6 +55,12 @@ func (g *goatbots) UpdatePriceTimestamp(stateLogPath string) error {
 //
 // it's updated unless a new set has been released and it's been >20 minutes since last update
 func IsCardDefinitionsUpdated(s *StateLog) bool {
+
+	// If we never updated card definitions, they are not updated
+	if s.Goatbots.Card_definitions_updated_at == time.Unix(0, 0).UTC() {
+		return false
+	}
+
 	// Create a UTC time 20 minutes ago
 	twentyMinutesAgo := time.Now().UTC().Add(-20 * time.Minute)
 
