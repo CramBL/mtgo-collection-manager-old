@@ -2,6 +2,7 @@
 
 #include "mtgoparser/io.hpp"
 
+#include <boost/implicit_cast.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
@@ -57,8 +58,21 @@ template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(const std::filesystem::
 [[nodiscard]] auto inline set_id_in_card_defs(std::string_view mtgo_id, const goatbots::card_defs_map_t &card_defs)
   -> bool
 {
+  // Make a string copy of the string_view
+  std::string id_str{ mtgo_id };
+  // Convert to uppercase before doing the search
+  std::transform(id_str.begin(), id_str.end(), id_str.begin(), [](char chr) -> char {
+    // ASCII specific, should be 100% safe for mtgo set IDs as they are IDs for software already
+    if (chr >= 'a' && chr <= 'z') {
+      constexpr char c_sub_to_upper = ('a' - 'A');
+      return boost::implicit_cast<char>(chr - c_sub_to_upper);
+    }
+    return chr;
+  });
+
+
   return std::any_of(
-    card_defs.begin(), card_defs.end(), [&](const auto &card_def_kv) { return card_def_kv.second.cardset == mtgo_id; });
+    card_defs.begin(), card_defs.end(), [&](const auto &card_def_kv) { return card_def_kv.second.cardset == id_str; });
 }
 
 }// namespace goatbots
