@@ -6,6 +6,7 @@
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <concepts>
 #include <cstdint>
 #include <optional>
@@ -51,6 +52,15 @@ template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(const std::filesystem::
 
   return json_map;
 }
+
+// Check if an MTGO set ID such as `RTR` is present in the card definitions
+[[nodiscard]] auto inline set_id_in_card_defs(std::string_view mtgo_id, const goatbots::card_defs_map_t &card_defs)
+  -> bool
+{
+  return std::any_of(
+    card_defs.begin(), card_defs.end(), [&](const auto &card_def_kv) { return card_def_kv.second.cardset == mtgo_id; });
+}
+
 }// namespace goatbots
 
 template<> struct glz::meta<goatbots::CardDefinition>
