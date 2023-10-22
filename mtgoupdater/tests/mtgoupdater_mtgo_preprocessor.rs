@@ -197,8 +197,15 @@ fn test_full_parse_3000cards_from_path_with_save_to_dir_state_log() {
             println!("Got {} cards", cards.len());
             assert_eq!(3000, cards.len());
             // Cleanup
-            std::fs::remove_file("target/mtgo-cards.json")
-                .expect("Failed to remove mtgo-cards.json");
+            if let Err(e) = std::fs::remove_file("target/mtgo-cards.json") {
+                eprintln!("Failed to remove mtgo-cards.json: {e}");
+                eprintln!("All files in {:?}:", save_to_dir);
+                let paths = std::fs::read_dir(save_to_dir).unwrap();
+                for path in paths {
+                    eprintln!("Name: {}", path.unwrap().path().display())
+                }
+                panic!("Test failed")
+            }
         }
         Err(e) => {
             panic!("MTGO Preprocessor error: {e}")
