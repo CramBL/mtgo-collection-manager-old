@@ -38,7 +38,7 @@ using cfg = config::Config;
       const std::string state_log = "state_log.toml";
       const std::string log_fullpath = std::string(appdata_dir.value()) + state_log;
       decltype(auto) log = io_util::read_state_log(log_fullpath);
-      std::string_view next_released_set_mtgo_code =
+      const std::string_view next_released_set_mtgo_code =
         log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("");
       if (goatbots::set_id_in_card_defs(next_released_set_mtgo_code, card_defs.value())) {
         // clear the set from the statelog
@@ -57,7 +57,6 @@ using cfg = config::Config;
         }
       }
     }
-
 
   } else {
     return -1;
