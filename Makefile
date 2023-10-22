@@ -148,7 +148,7 @@ bench-mtgoparser:
 .PHONY: test-mtgoparser
 test-mtgoparser:
 	@echo "==> Testing MTGO Parser..."
-	cd mtgoparser/build && ctest
+	cd mtgoparser/build && ctest --output-on-failure
 	@echo "=== Done testing MTGO Parser ==="
 
 
