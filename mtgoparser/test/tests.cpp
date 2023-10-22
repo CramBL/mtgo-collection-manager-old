@@ -338,6 +338,33 @@ TEST_CASE("Parse state_log.toml")
 
     std::string mtgo_code_str = state_log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("error");
     CHECK(mtgo_code_str == "");
+
+    INFO("State log:\n" << state_log << '\n');
+
+    SECTION("TOML File operations")
+    {
+      std::ofstream test_state_log_file("test_tmp_state_log.toml");
+      REQUIRE(test_state_log_file.is_open());
+
+      if (test_state_log_file.is_open()) {
+        INFO("test_tmp_state_log.toml opened");
+        test_state_log_file << state_log;
+        test_state_log_file.close();
+      } else {
+        FAIL("Opening file for writing failed.");
+      }
+
+
+      std::ifstream newly_open_test_state_log_file("test_tmp_state_log.toml");
+      std::string line{};
+      REQUIRE(newly_open_test_state_log_file.is_open());
+      if (newly_open_test_state_log_file.is_open()) {
+        while (std::getline(newly_open_test_state_log_file, line)) { INFO("Line from file: " << line); }
+        newly_open_test_state_log_file.close();
+      } else {
+        FAIL("Opening file for reading failed.");
+      }
+    }
   }
 }
 
