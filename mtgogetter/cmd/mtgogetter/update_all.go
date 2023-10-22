@@ -1,6 +1,7 @@
 package mtgogetter
 
 import (
+	"fmt"
 	"log"
 	"sync"
 
@@ -50,7 +51,20 @@ var UpdateAllCmd = &cobra.Command{
 
 		log.Println("Updating goatbots card definitions")
 		dl_gb_card_definitions := func() error {
-			return download.DownloadGoatbotsCardDefinitionsCmd.RunE(cmd, []string{"--save-to-dir", target_dir, "--save-as", "card-definitions.json"})
+			var any_errs_str string = ""
+			err := download.DownloadScryfallSetListCmd.RunE(cmd, []string{"--save-to-dir", target_dir, "--save-as", "scryfall-sets.json"})
+			if err != nil {
+				any_errs_str = err.Error()
+			}
+			err = download.DownloadGoatbotsCardDefinitionsCmd.RunE(cmd, []string{"--save-to-dir", target_dir, "--save-as", "card-definitions.json"})
+			if err != nil {
+				any_errs_str = any_errs_str + " " + err.Error()
+			}
+			if any_errs_str != "" {
+				return fmt.Errorf("error(s) encountered during card definition updates: %s", any_errs_str)
+			} else {
+				return nil
+			}
 		}
 		work_group.Add(1)
 		go do_work(dl_gb_card_definitions, &work_group, error_channel)
