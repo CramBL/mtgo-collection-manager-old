@@ -356,9 +356,9 @@ TEST_CASE("Parse state_log.toml")
 
 
       std::ifstream newly_open_test_state_log_file("test_tmp_state_log.toml");
-      std::string line{};
       REQUIRE(newly_open_test_state_log_file.is_open());
       if (newly_open_test_state_log_file.is_open()) {
+        std::string line{};
         while (std::getline(newly_open_test_state_log_file, line)) { INFO("Line from file: " << line); }
         newly_open_test_state_log_file.close();
       } else {
