@@ -208,6 +208,50 @@ TEST_CASE("Full JSON - CardDefinition structs deserialized from Goatbots JSON an
 
     CHECK(card_defs.at(116836).name == "Pollen-Shield Hare");
     CHECK(card_defs.at(116836).foil == 0);
+
+    SECTION("Check card definitions for set ID")
+    {
+      using goatbots::set_id_in_card_defs;
+
+
+      REQUIRE(set_id_in_card_defs("WOE", card_defs));
+      CHECK(set_id_in_card_defs("wOE", card_defs));// Case insensitive
+      CHECK(set_id_in_card_defs("woE", card_defs));// Case insensitive
+      CHECK(set_id_in_card_defs("wOe", card_defs));// Case insensitive
+      CHECK(set_id_in_card_defs("woe", card_defs));// Case insensitive
+      CHECK(set_id_in_card_defs("WoE", card_defs));// Case insensitive
+      CHECK(set_id_in_card_defs("Woe", card_defs));// Case insensitive
+      CHECK(set_id_in_card_defs("WOe", card_defs));// Case insensitive
+
+
+      CHECK(!set_id_in_card_defs("RVR", card_defs));// RVR comes out in 2024
+
+      CHECK(set_id_in_card_defs("MM", card_defs));
+      CHECK(set_id_in_card_defs("mm", card_defs));
+      CHECK(set_id_in_card_defs("Mm", card_defs));
+      CHECK(set_id_in_card_defs("mM", card_defs));
+      // Check that part of the string matching doesn't cause a match
+      CHECK(!set_id_in_card_defs("mM1", card_defs));
+      CHECK(!set_id_in_card_defs("mME", card_defs));
+      CHECK(!set_id_in_card_defs("1mM", card_defs));
+      CHECK(!set_id_in_card_defs("EmM", card_defs));
+
+      // Sets with numbers
+      CHECK(set_id_in_card_defs("1E", card_defs));
+      CHECK(set_id_in_card_defs("1e", card_defs));
+      CHECK(set_id_in_card_defs("8ED", card_defs));
+      CHECK(set_id_in_card_defs("8eD", card_defs));
+      CHECK(set_id_in_card_defs("8Ed", card_defs));
+      // These doesn't exist
+      CHECK(!set_id_in_card_defs("3ED", card_defs));
+      CHECK(!set_id_in_card_defs("3Ed", card_defs));
+      CHECK(!set_id_in_card_defs("3eD", card_defs));
+      CHECK(!set_id_in_card_defs("3ed", card_defs));
+      CHECK(!set_id_in_card_defs("0E", card_defs));
+      CHECK(!set_id_in_card_defs("0e", card_defs));
+      CHECK(!set_id_in_card_defs("1EE", card_defs));
+      CHECK(!set_id_in_card_defs("8EDD", card_defs));
+    }
   }
 }
 
