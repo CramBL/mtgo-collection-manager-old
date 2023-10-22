@@ -29,8 +29,9 @@ using cfg = config::Config;
 
   // Extract data from the maps
   if (price_hist.has_value() && card_defs.has_value()) {
-
     mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
+    // TODO: Check if the next released set from the TOML state_log is now in the card definitions
+    //
   } else {
     return -1;
   }
