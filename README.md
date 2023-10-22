@@ -11,7 +11,7 @@ To automate some tasks regarding effective management of [MTGO](https://www.mtgo
 
 # Table of contents
 - [Table of contents](#table-of-contents)
-  - [Features? Who knows, we'll see what I come up with, and how much time I have.](#features-who-knows-well-see-what-i-come-up-with-and-how-much-time-i-have)
+  - [Features? Make an issue if you have suggestions.](#features-make-an-issue-if-you-have-suggestions)
     - [Feature Ideas:](#feature-ideas)
 - [Contributing](#contributing)
   - [Quickstart](#quickstart)
@@ -19,21 +19,20 @@ To automate some tasks regarding effective management of [MTGO](https://www.mtgo
     - [Windows (with PowerShell)](#windows-with-powershell)
 
 
-## Features? Who knows, we'll see what I come up with, and how much time I have.
+## Features? Make an issue if you have suggestions.
 If you have a great idea, make a feature request via an issue, thanks!
 ### Feature Ideas:
-
 * **Price alerts** certain sites already have price alerts, but they are kind of crappy and hard to maintain. So better and smarter price alerts is a place to start.
 * **Auto fetch users full MTGO collection** might be difficult. MTGO's local user files are a giant mess, it's solvable for sure, but might break quite often depending on how MTGO files are actually managed long term. Could be difficult to handle multiple accounts as well.
 * **[A million data driven features]** like giving alerts when a card with a historically stable price suddenly spikes, and stuff like that.
 
 # Contributing
-
-This project is in a very early phase (the technology for GUI is still an open question), but build tools and CI are in a state where the practical aspects of making simple contributions should be fairly straightforward.
-
 There's scripts for building and testing all projects described in the [Quickstart](#quickstart) section below.
 
-If you're serious about starting a collaboration, send me a mail at `mbkj@tutamail.com`
+You're welcome to submit PRs or make issues.
+
+If you're serious about starting a collaboration, send me a mail at `mbkj@tutamail.com`.
+
 ## Quickstart
 
 ### Unix-like (with Make)
@@ -44,15 +43,15 @@ Check versions of Rust/Go/C++ (also display minimum required versions) and more
 make show-versions
 ```
 
-Build all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater`
+Build all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater -> MTGO GUI`
 ```shell
 make
 ```
-Test all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater`
+Test all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater -> MTGO GUI`
 ```shell
 make test
 ```
-Build/test a single subproject with the `_{projectname}`-suffix e.g.
+Build/test a single subproject with the `-{projectname}`-suffix e.g.
 ```shell
 make test-mtgogetter
 ```
@@ -66,11 +65,11 @@ Check versions of Rust/Go/C++ (also display minimum required versions) and more
 .\wmake.ps1 show-versions
 ```
 
-Build all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater`
+Build all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater -> MTGO GUI`
 ```shell
 .\wmake.ps1
 ```
-Test all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater`
+Test all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater -> MTGO GUI`
 ```shell
 .\wmake.ps1 test
 ```
