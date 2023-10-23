@@ -78,12 +78,26 @@ endif
 
 
 .PHONY: all
-all:\
-	show-versions \
-	build-mtgogetter \
-	build-mtgoparser \
-	build-mtgoupdater \
-	build-mtgogui \
+all:
+	@echo "----------------------------------"
+	@echo "==> Building all targets"
+	@echo "----------------------------------"
+	@$(call fn_show_versions)
+	@echo "==> Building MTGO Getter..."
+	$(call fn_build_mtgogetter)
+	@echo "=== Done building MTGO Getter ==="
+	@echo "==> Building MTGO Parser..."
+	$(call fn_build_mtgoparser)
+	@echo "=== Done building MTGO Parser ==="
+	@echo "==> Building MTGO Updater..."
+	$(call fn_build_mtgoupdater)
+	@echo "=== Done building MTGO Updater ==="
+	@echo "==> Building MTGO GUI..."
+	$(call fn_build_mtgogui)
+	@echo "=== Done building MTGO GUI ==="
+	@echo "================================= "
+	@echo "=== Done building all targets === "
+	@echo "================================= "
 
 .PHONY: build-integration
 build-integration:\
@@ -101,106 +115,65 @@ test:\
 	test-mtgoupdater \
 	test-mtgogui \
 
-.PHONY: show-versions
-show-versions:
-	@echo "Operating System: $(OS_TYPE)"
-	@echo "   Rust : $(RUST_VERSION) (min. $(RUST_MIN_VERSION))"
-	@echo "   Go   : $(GO_VERSION) (min. $(GO_MIN_VERSION))"
-	@echo "   C++"
-	@echo "     - LLVM     : ${CLANG_VERSION} (min. ${LLVM_MIN_VERSION})"
-	@echo "     - GCC      : ${GCC_VERSION} (min. ${GCC_MIN_VERSION})"
-	@echo "     - CMake    : $(CMAKE_VERSION) (min. $(CMAKE_MIN_VERSION))"
-ifeq ($(MTGOPARSER_GENERATOR),"Ninja Multi-Config")
-	@echo "     - Generator: $(MTGOPARSER_GENERATOR) $(MTGOPARSER_NINJA_VERSION)"
-else
-	@echo "     - Generator: $(MTGOPARSER_GENERATOR)"
-endif
-ifeq ($(MTGOPARSER_LINKER),mold)
-	@echo "     - Linker   : mold $(MOLD_VERSION)"
-endif
+.PHONY: show-versions versions
+show-versions versions:
+	@$(call fn_show_versions)
+
 
 .PHONY: build-mtgogetter mtgogetter
 build-mtgogetter mtgogetter:
 	@echo "==> Building MTGO Getter..."
-	go build -C mtgogetter -v
+	$(call fn_build_mtgogetter)
 	@echo "=== Done building MTGO Getter ==="
 
 .PHONY: test-mtgogetter
 test-mtgogetter:
 	@echo "==> Testing MTGO Getter..."
-	go test -C mtgogetter -v ./...
+	$(call fn_test_mtgogetter)
 	@echo "=== Done testing MTGO Getter ==="
 
 .PHONY: build-mtgoparser mtgoparser
 build-mtgoparser mtgoparser:
 	@echo "==> Building MTGO Parser..."
-	cd mtgoparser && cmake -S . -B build \
-	  -G $(MTGOPARSER_GENERATOR) \
-	  -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) \
-	  -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) \
-	  -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) \
-	  -DBOOST_EXCLUDE_LIBRARIES=$(MTGOPARSER_EXCLUDE_BOOST_LIBS) \
-	  -DUSER_LINKER_OPTION=$(MTGOPARSER_LINKER) \
-	  -Dmtgoparser_ENABLE_USER_LINKER:BOOL=$(MTGOPARSER_USER_LINKER)
-	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
+	$(call fn_build_mtgoparser)
 	@echo "=== Done building MTGO Parser ==="
 
 # For CI, turning off warnings as errors and other things (trusting the MTGO Parser CI for the more rigorous testing and static analysis)
 .PHONY: build-mtgoparser-integration mtgoparser-integration
 build-mtgoparser-integration mtgoparser-integration:
 	@echo "==> Building MTGO Parser..."
-	cd mtgoparser && cmake -S . -B build \
-	  -G $(MTGOPARSER_GENERATOR) \
-	  -Dmtgoparser_DEPLOYING_BINARY=On \
-	  -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) \
-	  -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) \
-	  -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) \
-	  -DBOOST_EXCLUDE_LIBRARIES=$(MTGOPARSER_EXCLUDE_BOOST_LIBS) \
-	  -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF \
-	  -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF \
-	  -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF \
-	  -DUSER_LINKER_OPTION=$(MTGOPARSER_LINKER) \
-	  -Dmtgoparser_ENABLE_USER_LINKER:BOOL=$(MTGOPARSER_USER_LINKER)
-	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
+	$(call fn_build_mtgoparser_integration)
 	@echo "=== Done building MTGO Parser ==="
 
 .PHONY: bench-mtgoparser
 bench-mtgoparser:
 	@echo "==> Running benchmarks for MTGO Parser..."
-	cd mtgoparser/build/test && ./$(MTGOPARSER_BUILD_MODE)/benchmark_xml_parse [.]
+	$(call fn_bench_mtgoparser)
 	@echo "=== Done running benchmarks MTGO Parser ==="
 
 .PHONY: test-mtgoparser
 test-mtgoparser:
 	@echo "==> Testing MTGO Parser..."
-	cd mtgoparser/build && ctest --output-on-failure
+	$(call fn_test_mtgoparser)
 	@echo "=== Done testing MTGO Parser ==="
 
 
 .PHONY: build-mtgoupdater
 build-mtgoupdater:
 	@echo "==> Building MTGO Updater..."
-ifeq ($(BUILD_MODE),Release)
-	cd mtgoupdater && cargo build --release
-else
-	cd mtgoupdater && cargo build
-endif
+	$(call fn_build_mtgoupdater)
 	@echo "=== Done building MTGO Updater ==="
 
 .PHONY: test-mtgoupdater
 test-mtgoupdater:
 	@echo "==> Testing MTGO Updater..."
-	cd mtgoupdater && cargo test -- --nocapture
+	$(call fn_test_mtgoupdater)
 	@echo "=== Done testing MTGO updater ==="
 
 .PHONY: build-mtgogui mtgogui
 build-mtgogui mtgogui:
 	@echo "==> Building MTGO GUI..."
-ifeq ($(BUILD_MODE),Release)
-	cd mtgogui && cargo build --release
-else
-	cd mtgogui && cargo build
-endif
+	$(call fn_build_mtgogui)
 	@echo "=== Done building MTGO GUI ==="
 
 
@@ -222,3 +195,112 @@ clean:
 	cd mtgoupdater && cargo clean
 	cd mtgogetter && go clean
 	cd mtgogui && cargo clean
+
+#
+##############################################################
+## Defines for building, testing, benchmarking sub projects ##
+##############################################################
+#
+
+# Show versions
+define fn_show_versions
+		@echo "Operating System: $(OS_TYPE)"
+		@echo "   Rust : $(RUST_VERSION) (min. $(RUST_MIN_VERSION))"
+		@echo "   Go   : $(GO_VERSION) (min. $(GO_MIN_VERSION))"
+		@echo "   C++"
+		@echo "     - LLVM     : ${CLANG_VERSION} (min. ${LLVM_MIN_VERSION})"
+		@echo "     - GCC      : ${GCC_VERSION} (min. ${GCC_MIN_VERSION})"
+		@echo "     - CMake    : $(CMAKE_VERSION) (min. $(CMAKE_MIN_VERSION))"
+		@if [ $(MTGOPARSER_GENERATOR) = "Ninja Multi-Config" ]; then \
+			echo "     - Generator: $(MTGOPARSER_GENERATOR) $(MTGOPARSER_NINJA_VERSION)"; \
+		else \
+			echo "     - Generator: $(MTGOPARSER_GENERATOR)"; \
+		fi
+		@if [ "$(MTGOPARSER_LINKER)" = "mold" ]; then \
+			echo "     - Linker   : mold $(MOLD_VERSION)"; \
+		fi
+endef
+
+##################################
+# MTGO Getter - Build & Test     #
+##################################
+define fn_build_mtgogetter
+	@echo "==> Building MTGO Getter..."
+	go build -C mtgogetter -v
+endef
+
+define fn_test_mtgogetter
+	go test -C mtgogetter -v ./...
+endef
+
+
+
+##########################################
+# MTGO Parser - Build, test, & benchmark #
+##########################################
+
+# Preferred way to build MTGO Parser
+define fn_build_mtgoparser
+	cd mtgoparser && cmake -S . -B build \
+	    -G $(MTGOPARSER_GENERATOR) \
+	    -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) \
+	    -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) \
+	    -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) \
+	    -DBOOST_EXCLUDE_LIBRARIES=$(MTGOPARSER_EXCLUDE_BOOST_LIBS) \
+	    -DUSER_LINKER_OPTION=$(MTGOPARSER_LINKER) \
+	    -Dmtgoparser_ENABLE_USER_LINKER:BOOL=$(MTGOPARSER_USER_LINKER)
+	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
+endef
+
+# Build for integration, disable warnings as errors, and some linting.
+define fn_build_mtgoparser_integration
+	cd mtgoparser && cmake -S . -B build \
+	    -G $(MTGOPARSER_GENERATOR) \
+	    -Dmtgoparser_DEPLOYING_BINARY=On \
+	    -Dmtgoparser_ENABLE_IPO=$(MTGOPARSER_IPO) \
+	    -DCMAKE_BUILD_TYPE:STRING=$(MTGOPARSER_BUILD_MODE) \
+	    -Dmtgoparser_ENABLE_COVERAGE:BOOL=$(MTGOPARSER_ENABLE_COV) \
+	    -DBOOST_EXCLUDE_LIBRARIES=$(MTGOPARSER_EXCLUDE_BOOST_LIBS) \
+	    -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF \
+	    -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF \
+	    -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF \
+	    -DUSER_LINKER_OPTION=$(MTGOPARSER_LINKER) \
+	    -Dmtgoparser_ENABLE_USER_LINKER:BOOL=$(MTGOPARSER_USER_LINKER)
+	cd mtgoparser && cmake --build build --config $(MTGOPARSER_BUILD_MODE)
+endef
+
+define fn_test_mtgoparser
+	cd mtgoparser/build && ctest --output-on-failure
+endef
+
+define fn_bench_mtgoparser
+	cd mtgoparser/build/test && ./$(MTGOPARSER_BUILD_MODE)/benchmark_xml_parse [.]
+endef
+
+
+##################################
+# MTGO Updater - Build & Test    #
+##################################
+define fn_build_mtgoupdater
+	@if [ $(BUILD_MODE) = Release ]; then 		 \
+		cd mtgoupdater && cargo build --release; \
+	else                                         \
+		cd mtgoupdater && cargo build; 			 \
+	fi
+endef
+
+define fn_test_mtgoupdater
+	cd mtgoupdater && cargo test -- --nocapture
+endef
+
+
+##################################
+# MTGO GUI - Build & Test    	 #
+##################################
+define fn_build_mtgogui
+	@if [ $(BUILD_MODE) = Release ]; then    \
+		cd mtgogui && cargo build --release; \
+	else									 \
+		cd mtgogui && cargo build;           \
+	fi
+endef
