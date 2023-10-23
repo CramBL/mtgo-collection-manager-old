@@ -82,7 +82,7 @@ all:
 	@echo "----------------------------------"
 	@echo "==> Building all targets"
 	@echo "----------------------------------"
-	@$(call fn_show_versions)
+	$(call fn_show_versions)
 	@echo "==> Building MTGO Getter..."
 	$(call fn_build_mtgogetter)
 	@echo "=== Done building MTGO Getter ==="
@@ -99,21 +99,48 @@ all:
 	@echo "=== Done building all targets === "
 	@echo "================================= "
 
-.PHONY: build-integration
-build-integration:\
-	show-versions \
-	build-mtgogetter \
-	build-mtgoparser-integration \
-	build-mtgoupdater \
-	build-mtgogui \
+.PHONY: build-integration integration
+build-integration integration:
+	@echo "----------------------------------------"
+	@echo "==> Building all targets for integration"
+	@echo "----------------------------------------"
+	$(call fn_show_versions)
+	@echo "==> Building MTGO Getter..."
+	$(call fn_build_mtgogetter)
+	@echo "=== Done building MTGO Getter ==="
+	@echo "==> Building MTGO Parser..."
+	$(call fn_build_mtgoparser_integration)
+	@echo "=== Done building MTGO Parser ==="
+	@echo "==> Building MTGO Updater..."
+	$(call fn_build_mtgoupdater)
+	@echo "=== Done building MTGO Updater ==="
+	@echo "==> Building MTGO GUI..."
+	$(call fn_build_mtgogui)
+	@echo "=== Done building MTGO GUI ==="
+	@echo "================================================= "
+	@echo "=== Done building all targets for integration === "
+	@echo "================================================= "
 
 .PHONY: test
-test:\
-	show-versions \
-	test-mtgogetter \
-	test-mtgoparser \
-	test-mtgoupdater \
-	test-mtgogui \
+test:
+	@echo "----------------------------------"
+	@echo "==> Testing all targets"
+	@echo "----------------------------------"
+	@echo "==> Testing MTGO Getter..."
+	$(call fn_test_mtgogetter)
+	@echo "=== Done testing MTGO Getter ==="
+	@echo "==> testing MTGO Parser..."
+	$(call fn_test_mtgoparser)
+	@echo "=== Done testing MTGO Parser ==="
+	@echo "==> Testing MTGO Updater..."
+	$(call fn_test_mtgoupdater)
+	@echo "=== Done testing MTGO Updater ==="
+	@echo "==> Testing MTGO GUI..."
+	$(call fn_test_mtgogui)
+	@echo "=== Done testing MTGO GUI ==="
+	@echo "================================= "
+	@echo "=== Done testing all targets === "
+	@echo "================================= "
 
 .PHONY: show-versions versions
 show-versions versions:
@@ -180,11 +207,7 @@ build-mtgogui mtgogui:
 .PHONY: test-mtgogui
 test-mtgogui:
 	@echo "==> Testing MTGO GUI..."
-ifeq ($(shell uname -s),Darwin)
-	@echo "WARNING CARGO TEST FOR FLTK ARE CURRENTLY NOT WORKING ON MACOS"
-else
-	cd mtgogui && cargo test -- --nocapture
-endif
+	$(call fn_test_mtgogui)
 	@echo "=== Done testing MTGO GUI ==="
 
 
@@ -225,7 +248,6 @@ endef
 # MTGO Getter - Build & Test     #
 ##################################
 define fn_build_mtgogetter
-	@echo "==> Building MTGO Getter..."
 	go build -C mtgogetter -v
 endef
 
@@ -302,5 +324,13 @@ define fn_build_mtgogui
 		cd mtgogui && cargo build --release; \
 	else									 \
 		cd mtgogui && cargo build;           \
+	fi
+endef
+
+define fn_test_mtgogui
+	@if [ $(uname -s) = Darwin ]; then    								      \
+		echo "WARNING CARGO TEST FOR FLTK ARE CURRENTLY NOT WORKING ON MACOS";\
+	else																	  \
+		cd mtgogui && cargo test -- --nocapture;							  \
 	fi
 endef
