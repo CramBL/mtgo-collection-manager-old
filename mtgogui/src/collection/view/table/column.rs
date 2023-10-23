@@ -32,27 +32,17 @@ pub enum Ordering {
 
 impl SortedBy {
     pub fn is_descending(&self) -> bool {
-        match self {
-            SortedBy::Name(d)
+        matches!(self, SortedBy::Name(d)
             | SortedBy::Quantity(d)
             | SortedBy::Foil(d)
             | SortedBy::Goatbots(d)
             | SortedBy::Scryfall(d)
             | SortedBy::Set(d)
-            | SortedBy::Rarity(d)
-                if *d == Ordering::Descending =>
-            {
-                true
-            }
-            _ => false,
-        }
+            | SortedBy::Rarity(d) if *d == Ordering::Descending)
     }
 
     pub fn is_sorted(&self) -> bool {
-        match self {
-            SortedBy::None => false,
-            _ => true,
-        }
+        !matches!(self, SortedBy::None)
     }
 }
 

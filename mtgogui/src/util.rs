@@ -69,7 +69,7 @@ mod tests {
         let path = first_match.unwrap();
         let name = path.file_name().unwrap();
 
-        if name != PathBuf::from("Cargo.lock") && name != PathBuf::from("Cargo.toml") {
+        if name != "Cargo.lock" && name != "Cargo.toml" {
             panic!("Did not get Cargo.lock or Cargo.toml, got: {name:?}")
         }
     }

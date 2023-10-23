@@ -17,6 +17,10 @@ To automate some tasks regarding effective management of [MTGO](https://www.mtgo
   - [Quickstart](#quickstart)
     - [Unix-like (with Make)](#unix-like-with-make)
     - [Windows (with PowerShell)](#windows-with-powershell)
+    - [Trouble shooting](#trouble-shooting)
+      - [Compiling FLTK-rs on Linux](#compiling-fltk-rs-on-linux)
+      - [Ubuntu](#ubuntu)
+      - [Debian](#debian)
 
 
 ## Features? Make an issue if you have suggestions.
@@ -77,3 +81,16 @@ Build/test a single subproject with the `-{projectname}`-suffix e.g.
 ```shell
 .\wmake.ps1 test-mtgogetter
 ```
+
+### Trouble shooting
+#### Compiling FLTK-rs on Linux
+Compiling FLTK requires some development headers on Linux.
+#### Ubuntu
+Everything should be in [linux-fltk-deps.txt](linux-fltk-deps.txt) which the CI Linux runners install with `cat linux-fltk-deps.txt | xargs sudo apt-get -y install`.
+
+Tested on Ubuntu 22.04.3 and Lubuntu 22.04.3.
+
+#### Debian
+When compiling with GCC you will need headers for statically linking with **libstdc++**, which are installable via **dnf** and are found as `libstdc++-static.<CPU architecture>` or simiar, e.g. `libstdc++-static.x86_64`.
+
+Tested on CentOS Stream 9.

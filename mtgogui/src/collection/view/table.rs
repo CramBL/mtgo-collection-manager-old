@@ -122,14 +122,10 @@ impl CollectionTable {
                     return;
                 }
                 let pattern = str.to_lowercase();
-                let filtered_cards = self.cards.iter().filter_map(|c| {
-                    if c.name.to_lowercase().contains(&pattern) {
-                        eprintln!("{p}={m}", p = pattern, m = c.name);
-                        return Some(c);
-                    } else {
-                        None
-                    }
-                });
+                let filtered_cards = self
+                    .cards
+                    .iter()
+                    .filter(|c| c.name.to_lowercase().contains(&pattern));
 
                 let mut filter_count = 0;
                 filtered_cards.into_iter().enumerate().for_each(|(idx, c)| {

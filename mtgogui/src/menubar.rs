@@ -141,7 +141,7 @@ pub(super) fn show_about() {
 
     let project_url = "https://github.com/CramBL/mtgo-collection-manager/";
 
-    let w_width = 400;
+    let w_width = 450;
     let mut tbuf = text::TextBuffer::default();
     let mut sbuf = text::TextBuffer::default();
     let mtgo_cm_txt = format!(
@@ -191,7 +191,6 @@ pub(super) fn show_about() {
     sbuf.append(&"D".repeat(project_url.len()));
 
     let txt_lines = tbuf.count_lines(0, tbuf.length());
-    eprintln!("txt_lines: {}", txt_lines);
 
     let mut win = Window::default()
         .with_size(w_width, txt_lines * 30)
