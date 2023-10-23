@@ -30,6 +30,7 @@ use collection::view::table::column;
 use collection::TableMessage;
 use menubar::McmMenuBar;
 use mtgogui::MtgoGui;
+use mtgoupdater::mtgo_card::MtgoCard;
 use mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_version;
 use mtgoupdater::mtgogetter_api::mtgogetter_version;
 
@@ -51,6 +52,7 @@ pub enum Message {
     MenuBar(menubar::MenubarMessage),
     Table(collection::TableMessage),
     GotFullTradeList(Box<std::path::Path>),
+    SetCards(Vec<MtgoCard>),
 }
 
 impl From<menubar::MenubarMessage> for Message {

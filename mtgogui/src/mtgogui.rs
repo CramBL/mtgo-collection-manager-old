@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::sync::OnceLock;
 
 use crate::assets::{self, get_asc_svg, get_icon_search, get_logo};
+use crate::collection::processor::TradelistProcessor;
 use crate::collection::view::table::CollectionTable;
 use crate::collection::TableMessage;
 use crate::menubar::McmMenuBar;
@@ -30,6 +31,7 @@ pub struct MtgoGui {
     main_win: window::Window,
     menu: McmMenuBar,
     collection: CollectionTable,
+    tradelist_processor: TradelistProcessor,
 }
 
 impl MtgoGui {
@@ -55,6 +57,9 @@ impl MtgoGui {
 
         main_win.end();
         main_win.show();
+
+        let tradelist_processor = TradelistProcessor::new(ev_send.clone());
+
         main_win.set_callback(move |_| {
             if app::event() == Event::Close {
                 ev_send.send(Message::Quit);
@@ -67,6 +72,7 @@ impl MtgoGui {
             main_win,
             menu,
             collection,
+            tradelist_processor,
         }
     }
 
@@ -89,73 +95,9 @@ impl MtgoGui {
                         self.app.redraw();
                     }
                     Message::GotFullTradeList(full_trade_list_path) => {
-                        // TODO: Some basic verification that we actually got a trade list and not some random non-sense.
-
-                        // Invoke MTGO getter
-                        match mtgoupdater::mtgogetter_api::mtgogetter_update_all(OsStr::new(
-                            APP_DATA_DIR,
-                        )) {
-                            Ok(output) => {
-                                eprintln!("MTGO Getter output: {}", output.status);
-                            }
-                            Err(e) => {
-                                eprintln!("MTGO Getter error: {}", e);
-                            }
-                        }
-                        // TOOD: Fill the progress bar as appropriate
-                        // Give the full trade list to the parser
-                        // Find all the most recent files in the appdata directory
-                        let appdata_dir = std::path::Path::new(APP_DATA_DIR);
-                        if !appdata_dir.exists() {
-                            eprintln!("App data path doesn't exist:{APP_DATA_DIR}");
-                            return;
-                        }
-                        let scryfall_path = if let Some(p) =
-                            first_file_match_from_dir("scryfall", appdata_dir, None)
-                        {
-                            p
-                        } else {
-                            eprintln!("Could not locate Scryfall data json in {APP_DATA_DIR}");
-                            return;
-                        };
-
-                        let card_definitions_path = if let Some(p) =
-                            first_file_match_from_dir("card-def", appdata_dir, None)
-                        {
-                            p
-                        } else {
-                            eprintln!("Could not locate card definition json in {APP_DATA_DIR}");
-                            return;
-                        };
-                        let price_history_path = if let Some(p) =
-                            first_file_match_from_dir("price-his", appdata_dir, None)
-                        {
-                            p
-                        } else {
-                            eprintln!("Could not locate price history json");
-                            return;
-                        };
-                        let appdata_dir_str = format!("{APP_DATA_DIR}/");
-                        let appdata_dir_path = OsStr::new(&appdata_dir_str);
-                        // Invoke MTGO preprocessor
-                        match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
-                            scryfall_path.as_os_str(),
-                            OsStr::new(full_trade_list_path.as_ref()),
-                            card_definitions_path.as_os_str(),
-                            price_history_path.as_os_str(),
-                            Some(appdata_dir_path),
-                        ) {
-                            Ok(cards) => {
-                                eprintln!("MTGO Preprocessor output: {} cards", cards.len());
-                                // Fill the progress bar as appropriate
-                                // Give all the data to the collection table
-                                self.collection.set_cards(cards);
-                            }
-                            Err(e) => {
-                                eprintln!("MTGO Preprocessor error: {e}");
-                            }
-                        }
+                        self.tradelist_processor.process(full_trade_list_path);
                     }
+                    Message::SetCards(cards) => self.collection.set_cards(cards),
                 }
             }
         }
