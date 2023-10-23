@@ -199,7 +199,6 @@ fn set_left_col_box(ev_send: app::Sender<Message>) {
     if cfg!(debug_assertions) {
         let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
         btn_example.set_callback({
-            let ev_send = ev_send;
             move |b| {
                 ev_send.send(Message::Example);
 

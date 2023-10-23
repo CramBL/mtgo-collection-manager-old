@@ -36,7 +36,7 @@ impl CollectionColumn {
     }
 }
 
-pub fn sort_cards(cards: &mut Vec<MtgoCard>, sort_states: &mut SortStates, category: Column) {
+pub fn sort_cards(cards: &mut [MtgoCard], sort_states: &mut SortStates, category: Column) {
     match category {
         Column::Name => {
             if sort_states.name_ord().is_descending() {
