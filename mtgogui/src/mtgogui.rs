@@ -9,8 +9,7 @@ use crate::collection::TableMessage;
 use crate::menubar::McmMenuBar;
 use crate::util::first_file_match_from_dir;
 use crate::{
-    collection, Message, APP_DATA_DIR, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MIN_APP_HEIGHT,
-    MIN_APP_WIDTH,
+    collection, Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MIN_APP_HEIGHT, MIN_APP_WIDTH,
 };
 use fltk::enums::{CallbackTrigger, Event, Font, FrameType, Shortcut};
 use fltk::image::{Image, PngImage, TiledImage};

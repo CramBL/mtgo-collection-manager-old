@@ -1,8 +1,16 @@
-use std::{ffi::OsStr, path::Path};
+use std::{
+    ffi::OsStr,
+    io::Error,
+    path::{Path, PathBuf},
+};
 
 use fltk::app::Sender;
 
-use crate::{util::first_file_match_from_dir, Message, APP_DATA_DIR};
+use crate::{
+    appdata::{paths::AppdataPaths, APP_DATA_DIR},
+    util::first_file_match_from_dir,
+    Message,
+};
 
 #[derive(Debug)]
 pub struct TradelistProcessor {
@@ -32,49 +40,27 @@ impl TradelistProcessor {
                             eprintln!("MTGO Getter output: {}", output.status);
                         }
                         Err(e) => {
-                            eprintln!("MTGO Getter error: {}", e);
+                            eprintln!("MTGO Getter error: {e}");
                         }
                     }
                     // TOOD: Fill the progress bar as appropriate
                     // Give the full trade list to the parser
                     // Find all the most recent files in the appdata directory
-                    let appdata_dir = std::path::Path::new(APP_DATA_DIR);
-                    if !appdata_dir.exists() {
-                        eprintln!("App data path doesn't exist:{APP_DATA_DIR}");
-                        return;
-                    }
-                    let scryfall_path =
-                        if let Some(p) = first_file_match_from_dir("scryfall", appdata_dir, None) {
-                            p
-                        } else {
-                            eprintln!("Could not locate Scryfall data json in {APP_DATA_DIR}");
+                    let appdata_paths = match AppdataPaths::new() {
+                        Ok(paths) => paths,
+                        Err(err) => {
+                            eprintln!("{err}");
                             return;
-                        };
-
-                    let card_definitions_path =
-                        if let Some(p) = first_file_match_from_dir("card-def", appdata_dir, None) {
-                            p
-                        } else {
-                            eprintln!("Could not locate card definition json in {APP_DATA_DIR}");
-                            return;
-                        };
-                    let price_history_path = if let Some(p) =
-                        first_file_match_from_dir("price-his", appdata_dir, None)
-                    {
-                        p
-                    } else {
-                        eprintln!("Could not locate price history json");
-                        return;
+                        }
                     };
-                    let appdata_dir_str = format!("{APP_DATA_DIR}/");
-                    let appdata_dir_path = OsStr::new(&appdata_dir_str);
+
                     // Invoke MTGO preprocessor
                     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
-                        scryfall_path.as_os_str(),
+                        appdata_paths.scryfall_path(),
                         OsStr::new(full_trade_list_path.as_ref()),
-                        card_definitions_path.as_os_str(),
-                        price_history_path.as_os_str(),
-                        Some(appdata_dir_path),
+                        appdata_paths.card_definitions_path(),
+                        appdata_paths.price_history_path(),
+                        Some(appdata_paths.appdata_dir_path()),
                     ) {
                         Ok(cards) => {
                             eprintln!("MTGO Preprocessor output: {} cards", cards.len());

@@ -19,6 +19,7 @@ use fltk_grid::Grid;
 use fltk_table::{SmartTable, TableOpts};
 use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 
+mod appdata;
 mod assets;
 mod collection;
 mod menubar;
@@ -35,9 +36,6 @@ use mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_version;
 use mtgoupdater::mtgogetter_api::mtgogetter_version;
 
 use crate::util::center;
-
-// Directory that stores all collection data
-pub const APP_DATA_DIR: &str = "appdata";
 
 pub const MIN_APP_WIDTH: i32 = 400;
 pub const MIN_APP_HEIGHT: i32 = 400;
