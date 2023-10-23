@@ -1,6 +1,6 @@
 # Default flags
 BUILD_MODE := Debug
-# MTGOPARSER_GENERATOR := "Ninja Multi-Config"
+MTGOPARSER_GENERATOR := "Ninja Multi-Config"
 MTGOPARSER_BUILD_MODE := Release
 MTGOPARSER_ENABLE_COV := false
 MTGOPARSER_USER_LINKER := On
@@ -13,7 +13,7 @@ ifeq ($(shell uname -s),Linux)
 	MTGOPARSER_GENERATOR := "Ninja Multi-Config"
 	MTGOPARSER_IPO := On
 	ifeq ($(shell which mold),)
-    	$(error "No mold in $(PATH), please install mold for improved link times. Installable for most systems with `apt install mold`")
+    	$(error "No mold in PATH:$(PATH), please install mold for improved link times. Installable for most systems with `apt install mold`")
 	endif
 
 else ifeq ($(shell uname -s),Darwin)
@@ -41,24 +41,41 @@ LLVM_MIN_VERSION := 15.0.3
 # Get version from a unix-like terminal
 RUST_VERSION := $(shell rustc --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*')
 ifeq ($(RUST_VERSION),)
-RUST_VERSION := "NOT FOUND"
+	RUST_VERSION := "NOT FOUND"
 endif
-GO_VERSION := $(shell go version | cut -d' ' -f3 | sed 's/go//')
+
+	GO_VERSION := $(shell go version | cut -d' ' -f3 | sed 's/go//')
 ifeq ($(GO_VERSION),)
-GO_VERSION := "NOT FOUND"
+	GO_VERSION := "NOT FOUND"
 endif
+
 CMAKE_VERSION := $(shell cmake --version | cut -d' ' -f3 | head -n 1)
 ifeq ($(CMAKE_VERSION),)
-CMAKE_VERSION := "NOT FOUND"
+	CMAKE_VERSION := "NOT FOUND"
 endif
+
 CLANG_VERSION := $(shell clang --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*' | head -n 1)
 ifeq ($(CLANG_VERSION),)
-CLANG_VERSION := "NOT FOUND"
+	CLANG_VERSION := "NOT FOUND"
 endif
+
 GCC_VERSION := $(shell gcc --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*' | head -n 1)
 ifeq ($(GCC_VERSION),)
-GCC_VERSION := "NOT FOUND"
+	GCC_VERSION := "NOT FOUND"
 endif
+
+MTGOPARSER_NINJA_VERSION := $(shell ninja --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*' | head -n 1)
+ifeq ($(MTGOPARSER_NINJA_VERSION),)
+	MTGOPARSER_NINJA_VERSION := "NOT FOUND"
+endif
+
+ifeq ($(MTGOPARSER_LINKER),mold)
+	MOLD_VERSION := $(shell mold --version | grep -o '[0-9]*\.[0-9]*\.[0-9]*' | head -n 1)
+	ifeq ($(MOLD_VERSION),)
+		MOLD_VERSION := "NOT FOUND"
+	endif
+endif
+
 
 .PHONY: all
 all:\
@@ -90,10 +107,17 @@ show-versions:
 	@echo "   Rust : $(RUST_VERSION) (min. $(RUST_MIN_VERSION))"
 	@echo "   Go   : $(GO_VERSION) (min. $(GO_MIN_VERSION))"
 	@echo "   C++"
-	@echo "     - LLVM: ${CLANG_VERSION} (min. ${LLVM_MIN_VERSION})"
-	@echo "     - GCC : ${GCC_VERSION} (min. ${GCC_MIN_VERSION})"
-	@echo "   CMake: $(CMAKE_VERSION) (min. $(CMAKE_MIN_VERSION))"
-	@echo "   CMake generator: $(MTGOPARSER_GENERATOR)"
+	@echo "     - LLVM     : ${CLANG_VERSION} (min. ${LLVM_MIN_VERSION})"
+	@echo "     - GCC      : ${GCC_VERSION} (min. ${GCC_MIN_VERSION})"
+	@echo "     - CMake    : $(CMAKE_VERSION) (min. $(CMAKE_MIN_VERSION))"
+ifeq ($(MTGOPARSER_GENERATOR),"Ninja Multi-Config")
+	@echo "     - Generator: $(MTGOPARSER_GENERATOR) $(MTGOPARSER_NINJA_VERSION)"
+else
+	@echo "     - Generator: $(MTGOPARSER_GENERATOR)"
+endif
+ifeq ($(MTGOPARSER_LINKER),mold)
+	@echo "     - Linker   : mold $(MOLD_VERSION)"
+endif
 
 .PHONY: build-mtgogetter mtgogetter
 build-mtgogetter mtgogetter:
@@ -122,8 +146,8 @@ build-mtgoparser mtgoparser:
 	@echo "=== Done building MTGO Parser ==="
 
 # For CI, turning off warnings as errors and other things (trusting the MTGO Parser CI for the more rigorous testing and static analysis)
-.PHONY: build-mtgoparser-integration
-build-mtgoparser-integration:
+.PHONY: build-mtgoparser-integration mtgoparser-integration
+build-mtgoparser-integration mtgoparser-integration:
 	@echo "==> Building MTGO Parser..."
 	cd mtgoparser && cmake -S . -B build \
 	  -G $(MTGOPARSER_GENERATOR) \
