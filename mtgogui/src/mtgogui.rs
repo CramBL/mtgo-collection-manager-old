@@ -113,14 +113,15 @@ fn set_left_col_box(ev_send: app::Sender<Message>) {
     let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
     flx_left_col.set_align(enums::Align::LeftTop);
 
-    let mut search_box_grid_row = Grid::new(0, 0, 400, 100, "");
+    let mut search_box_grid_row = Grid::new(0, 0, 400, 30, "");
     if cfg!(debug_assertions) {
         search_box_grid_row.debug(true);
     }
     search_box_grid_row.set_layout(1, 4);
-    let mut frame = frame::Frame::new(0, 0, 100, 100, "");
+    let mut frame = frame::Frame::new(0, 0, 100, 30, "");
     frame.draw(|f| {
         let mut icon = get_icon_search();
+        icon.scale(f.w(), f.h(), true, false);
         icon.draw(f.x(), f.y(), f.w(), f.h());
     });
     let mut search_input = input::Input::default().with_label("Search");

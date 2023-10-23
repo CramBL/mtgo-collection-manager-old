@@ -141,7 +141,7 @@ pub(super) fn show_about() {
 
     let project_url = "https://github.com/CramBL/mtgo-collection-manager/";
 
-    let w_width = 400;
+    let w_width = 450;
     let mut tbuf = text::TextBuffer::default();
     let mut sbuf = text::TextBuffer::default();
     let mtgo_cm_txt = format!(
