@@ -52,6 +52,12 @@ pub fn run_mtgo_preprocessor_parse_full(
 
     let out = run_mtgo_preprocessor(args)?;
     if out.status.success() {
+        if cfg!(debug_assertions) {
+            eprintln!(
+                "stderr:\n{stderr}",
+                stderr = String::from_utf8_lossy(&out.stderr),
+            );
+        }
         let stdout_json = String::from_utf8_lossy(&out.stdout);
         Ok(serde_json::from_str(&stdout_json).unwrap())
     } else {

@@ -47,4 +47,14 @@ function(mtgoparser_setup_dependencies)
         "COMPONENTS core;outcome;headers;conversion;detail;unordered"
     )
   endif()
+
+  if (NOT TARGET tomlplusplus)
+    cpmaddpackage(
+      NAME tomlplusplus
+      VERSION 3.4.0
+      GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+      GIT_TAG        v3.4.0
+    )
+  endif()
+
 endfunction()

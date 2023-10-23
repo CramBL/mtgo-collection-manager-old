@@ -13,6 +13,7 @@ on:
 
 env:
   VERBOSE: 1
+  EXCLUDE_BOOST_LIBS: "serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
 
 jobs:
     # JOB to run change detection
@@ -47,8 +48,8 @@ jobs:
             generator: "Ninja Multi-Config"
             enable_ipo: On
 
-          - os: macos-12
-            compiler: llvm-16.0.4
+          - os: macos-13
+            compiler: llvm-15.0.3
             generator: "Ninja Multi-Config"
             enable_ipo: Off
 
@@ -96,6 +97,7 @@ jobs:
           -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
           -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF
           -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
+          -DBOOST_EXCLUDE_LIBRARIES="${{ env.EXCLUDE_BOOST_LIBS }}"
       - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser
         run: >

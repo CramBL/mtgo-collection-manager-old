@@ -29,8 +29,35 @@ using cfg = config::Config;
 
   // Extract data from the maps
   if (price_hist.has_value() && card_defs.has_value()) {
-
     mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
+
+    // Check if the next released set from the TOML state_log is now in the card definitions
+    //
+    // If it is, clear it from the state_log by replacing the values with empty strings.
+    if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
+      const std::string state_log = "state_log.toml";
+      const std::string log_fullpath = std::string(appdata_dir.value()) + state_log;
+      decltype(auto) log = io_util::read_state_log(log_fullpath);
+      const std::string_view next_released_set_mtgo_code =
+        log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("");
+      if (goatbots::set_id_in_card_defs(next_released_set_mtgo_code, card_defs.value())) {
+        // clear the set from the statelog
+        toml::value<std::string> *name = log["scryfall"]["Next_released_mtgo_set"]["Name"].as_string();
+        *name = "";
+        toml::value<std::string> *released_at = log["scryfall"]["Next_released_mtgo_set"]["Released_at"].as_string();
+        *released_at = "";
+        toml::value<std::string> *mtgo_code = log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].as_string();
+        *mtgo_code = "";
+        std::ofstream replace_state_log(log_fullpath);
+        if (replace_state_log.is_open()) {
+          replace_state_log << log << std::endl;
+          replace_state_log.close();
+        } else {
+          spdlog::error("Could not open state_log for writing at: {}", log_fullpath);
+        }
+      }
+    }
+
   } else {
     return -1;
   }

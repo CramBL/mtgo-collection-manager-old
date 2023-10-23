@@ -118,15 +118,15 @@ public:
   void PrintArgs() const
   {
     if (this->set_cmd_.has_value()) {
-      fmt::print("Set command: {}", this->set_cmd_.value().name_);
+      fmt::println("Set command: {}", this->set_cmd_.value().name_);
     } else {
-      fmt::print("No command set\n");
+      fmt::println("No command set");
     }
     if (this->set_options_.has_value()) {
-      fmt::print("{} options set:\n", this->set_options_.value().size());
+      fmt::println("{} options set:\n", this->set_options_.value().size());
       for (const auto &opt : this->set_options_.value()) { fmt::print("\t{}\n", opt.first.name_); }
     } else {
-      fmt::print("No options set\n");
+      fmt::println("No options set");
     }
   }
 
