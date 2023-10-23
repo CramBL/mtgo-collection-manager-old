@@ -191,7 +191,6 @@ pub(super) fn show_about() {
     sbuf.append(&"D".repeat(project_url.len()));
 
     let txt_lines = tbuf.count_lines(0, tbuf.length());
-    eprintln!("txt_lines: {}", txt_lines);
 
     let mut win = Window::default()
         .with_size(w_width, txt_lines * 30)

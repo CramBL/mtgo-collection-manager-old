@@ -22,15 +22,15 @@ use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 mod appdata;
 mod assets;
 mod collection;
+mod gui;
 mod menubar;
-mod mtgogui;
 mod util;
 
 use collection::view::table;
 use collection::view::table::column;
 use collection::TableMessage;
+use gui::MtgoGui;
 use menubar::McmMenuBar;
-use mtgogui::MtgoGui;
 use mtgoupdater::mtgo_card::MtgoCard;
 use mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_version;
 use mtgoupdater::mtgogetter_api::mtgogetter_version;
@@ -43,6 +43,7 @@ pub const DEFAULT_APP_WIDTH: i32 = 1400;
 pub const DEFAULT_APP_HEIGHT: i32 = 800;
 pub const WIDGET_PADDING: i32 = 0;
 
+/// Messages for the main event loop
 #[derive(Debug, Clone)]
 pub enum Message {
     Quit,
@@ -66,9 +67,11 @@ impl From<collection::TableMessage> for Message {
 }
 
 fn main() {
+    // In debug mode use the paths to the binaries when they're built in each subproject
     if cfg!(debug_assertions) {
         mtgoupdater::internal_only::dev_try_init_mtgogetter_bin();
         mtgoupdater::internal_only::dev_try_init_mtgoparser_bin();
+        // Show box edges
         Flex::debug(true);
     }
     let mut gui = MtgoGui::default();

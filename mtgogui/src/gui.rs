@@ -23,6 +23,8 @@ use fltk_grid::Grid;
 use fltk_table::{SmartTable, TableOpts};
 use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 
+mod setup;
+
 pub struct MtgoGui {
     app: app::App,
     full_tradelist: Option<PathBuf>,
@@ -31,6 +33,12 @@ pub struct MtgoGui {
     menu: McmMenuBar,
     collection: CollectionTable,
     tradelist_processor: TradelistProcessor,
+}
+
+impl Default for MtgoGui {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl MtgoGui {
@@ -51,7 +59,7 @@ impl MtgoGui {
         main_win.set_color(Color::Black);
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 25, &ev_send);
 
-        set_left_col_box(ev_send.clone());
+        setup::set_left_col_box(ev_send.clone());
         let collection = collection::view::set_collection_main_box(ev_send.clone());
 
         main_win.end();
@@ -101,53 +109,4 @@ impl MtgoGui {
             }
         }
     }
-}
-
-impl Default for MtgoGui {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-fn set_left_col_box(ev_send: app::Sender<Message>) {
-    let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
-    flx_left_col.set_align(enums::Align::LeftTop);
-
-    let mut search_box_grid_row = Grid::new(0, 0, 400, 30, "");
-    if cfg!(debug_assertions) {
-        search_box_grid_row.debug(true);
-    }
-    search_box_grid_row.set_layout(1, 4);
-    let mut frame = frame::Frame::new(0, 0, 100, 30, "");
-    frame.draw(|f| {
-        let mut icon = get_icon_search();
-        icon.scale(f.w(), f.h(), true, false);
-        icon.draw(f.x(), f.y(), f.w(), f.h());
-    });
-    let mut search_input = input::Input::default().with_label("Search");
-    search_input.set_trigger(CallbackTrigger::Changed);
-    search_input.set_callback({
-        let s = ev_send.clone();
-        move |i| {
-            println!("Got: {}", i.value());
-            s.send(TableMessage::Search(i.value().into()).into());
-        }
-    });
-    search_box_grid_row.insert(&mut frame, 0, 0);
-    search_box_grid_row.insert(&mut search_input, 0, 1..4);
-
-    search_box_grid_row.end();
-
-    if cfg!(debug_assertions) {
-        let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
-        btn_example.set_callback({
-            move |b| {
-                ev_send.send(Message::Example);
-
-                b.set_label("Getting example...");
-            }
-        });
-    }
-
-    flx_left_col.end();
 }
