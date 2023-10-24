@@ -23,7 +23,12 @@ impl AppdataPaths {
     ///
     /// Fails if not all the expected files can be located
     pub fn new() -> Result<Self, Error> {
-        let appdata_dir = Path::new(APP_DATA_DIR);
+        let mut appdata_dir = std::env::current_exe().unwrap();
+        eprintln!("Path to executable: {appdata_dir:?}");
+        appdata_dir.pop();
+
+        appdata_dir.push(format!("{APP_DATA_DIR}/"));
+
         if !appdata_dir.exists() {
             eprintln!("App data path doesn't exist:{APP_DATA_DIR}");
             return Err(Error::new(
@@ -32,7 +37,7 @@ impl AppdataPaths {
             ));
         }
         let scryfall_path =
-            if let Some(p) = first_file_match_from_dir("scryfall", appdata_dir, None) {
+            if let Some(p) = first_file_match_from_dir("scryfall", appdata_dir.as_path(), None) {
                 p
             } else {
                 eprintln!("Could not locate Scryfall data json in {APP_DATA_DIR}");
@@ -43,7 +48,7 @@ impl AppdataPaths {
             };
 
         let card_definitions_path =
-            if let Some(p) = first_file_match_from_dir("card-def", appdata_dir, None) {
+            if let Some(p) = first_file_match_from_dir("card-def", appdata_dir.as_path(), None) {
                 p
             } else {
                 eprintln!("Could not locate card definition json in {APP_DATA_DIR}");
@@ -53,7 +58,7 @@ impl AppdataPaths {
                 ));
             };
         let price_history_path =
-            if let Some(p) = first_file_match_from_dir("price-his", appdata_dir, None) {
+            if let Some(p) = first_file_match_from_dir("price-his", appdata_dir.as_path(), None) {
                 p
             } else {
                 eprintln!("Could not locate price history json");
