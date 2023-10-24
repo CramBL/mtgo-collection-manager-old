@@ -34,21 +34,6 @@ impl TradelistProcessor {
                 move || {
                     // Invoke MTGO getter
 
-                    let mut path = std::env::current_exe().unwrap();
-                    path.pop();
-                    path.push(APP_DATA_DIR);
-
-                    match mtgoupdater::mtgogetter_api::mtgogetter_update_all(
-                        &path.clone().into_os_string(),
-                    ) {
-                        Ok(output) => {
-                            eprintln!("MTGO Getter output: {}", output.status);
-                        }
-                        Err(e) => {
-                            eprintln!("MTGO Getter error: {e}");
-                        }
-                    }
-                    // TOOD: Fill the progress bar as appropriate
                     // Give the full trade list to the parser
                     // Find all the most recent files in the appdata directory
                     let appdata_paths = match AppdataPaths::new() {
@@ -59,15 +44,25 @@ impl TradelistProcessor {
                         }
                     };
 
-                    path.pop();
-                    path.push(format!("{APP_DATA_DIR}/"));
+                    match mtgoupdater::mtgogetter_api::mtgogetter_update_all(
+                        appdata_paths.appdata_dir_path(),
+                    ) {
+                        Ok(output) => {
+                            eprintln!("MTGO Getter output: {}", output.status);
+                        }
+                        Err(e) => {
+                            eprintln!("MTGO Getter error: {e}");
+                        }
+                    }
+                    // TOOD: Fill the progress bar as appropriate
+
                     // Invoke MTGO preprocessor
                     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
                         appdata_paths.scryfall_path(),
                         OsStr::new(full_trade_list_path.as_ref()),
                         appdata_paths.card_definitions_path(),
                         appdata_paths.price_history_path(),
-                        Some(&path.into_os_string()),
+                        Some(appdata_paths.appdata_dir_path()),
                     ) {
                         Ok(cards) => {
                             eprintln!("MTGO Preprocessor output: {} cards", cards.len());
