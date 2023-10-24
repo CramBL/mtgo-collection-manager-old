@@ -79,7 +79,7 @@ impl AppdataPaths {
 
     /// Get the path to the appdata dir with a trailing '/'
     pub fn appdata_dir_path(&self) -> &OsStr {
-        OsStr::new(&self.appdata_dir_path)
+        self.appdata_dir.as_ref()
     }
 
     pub fn scryfall_path(&self) -> &OsStr {
