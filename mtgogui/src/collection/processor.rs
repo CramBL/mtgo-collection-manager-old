@@ -33,9 +33,14 @@ impl TradelistProcessor {
                 let sender = self.event_sender.clone();
                 move || {
                     // Invoke MTGO getter
-                    match mtgoupdater::mtgogetter_api::mtgogetter_update_all(OsStr::new(
-                        APP_DATA_DIR,
-                    )) {
+
+                    let mut path = std::env::current_exe().unwrap();
+                    path.pop();
+                    path.push(APP_DATA_DIR);
+
+                    match mtgoupdater::mtgogetter_api::mtgogetter_update_all(
+                        &path.clone().into_os_string(),
+                    ) {
                         Ok(output) => {
                             eprintln!("MTGO Getter output: {}", output.status);
                         }
@@ -54,13 +59,15 @@ impl TradelistProcessor {
                         }
                     };
 
+                    path.pop();
+                    path.push(format!("{APP_DATA_DIR}/"));
                     // Invoke MTGO preprocessor
                     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
                         appdata_paths.scryfall_path(),
                         OsStr::new(full_trade_list_path.as_ref()),
                         appdata_paths.card_definitions_path(),
                         appdata_paths.price_history_path(),
-                        Some(appdata_paths.appdata_dir_path()),
+                        Some(&path.into_os_string()),
                     ) {
                         Ok(cards) => {
                             eprintln!("MTGO Preprocessor output: {} cards", cards.len());
