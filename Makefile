@@ -328,7 +328,8 @@ define fn_build_mtgogui
 endef
 
 define fn_test_mtgogui
-	@if [ $(uname -s) = Darwin ]; then    								      \
+	@os=$(uname -s); \
+	if [ ${os} = Darwin ]; then    								      \
 		echo "WARNING CARGO TEST FOR FLTK ARE CURRENTLY NOT WORKING ON MACOS";\
 	else																	  \
 		cd mtgogui && cargo test -- --nocapture;							  \
