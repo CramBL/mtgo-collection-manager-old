@@ -47,7 +47,7 @@ template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(const std::filesystem::
   // Read file into buffer and decode to populate map
   if (auto err_code = glz::read_json(json_map, io_util::read_to_str_buf(path_json))) {
     // Handle error
-    spdlog::error("{}", glz::format_error(err_code, std::string{}));
+    spdlog::error("Reading JSON from {} failed with {}", static_cast<std::string>(path_json),glz::format_error(err_code, std::string{}));
     return std::nullopt;
   }
 

@@ -35,8 +35,12 @@ impl TradelistProcessor {
                     // Invoke MTGO getter
 
                     let mut path = std::env::current_exe().unwrap();
+                    eprintln!("Path to executable: {path:?}");
                     path.pop();
-                    path.push(APP_DATA_DIR);
+
+                    path.push(format!("{APP_DATA_DIR}/"));
+                    eprintln!("Path to APP DATA relative to exe:{path:?}");
+                    eprintln!("As OS string {:?}", &path.as_os_str());
 
                     match mtgoupdater::mtgogetter_api::mtgogetter_update_all(
                         &path.clone().into_os_string(),

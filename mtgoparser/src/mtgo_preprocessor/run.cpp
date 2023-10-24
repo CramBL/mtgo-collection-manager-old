@@ -31,13 +31,18 @@ using cfg = config::Config;
   if (price_hist.has_value() && card_defs.has_value()) {
     mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
 
+    spdlog::info("GB Extraction complete");
+    
+    spdlog::info("checking state_log");
     // Check if the next released set from the TOML state_log is now in the card definitions
     //
     // If it is, clear it from the state_log by replacing the values with empty strings.
     if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
       const std::string state_log = "state_log.toml";
       const std::string log_fullpath = std::string(appdata_dir.value()) + state_log;
-      decltype(auto) log = io_util::read_state_log(log_fullpath);
+      
+        spdlog::info("Getting state_log from {}", log_fullpath);
+        decltype(auto) log = io_util::read_state_log(log_fullpath);
       const std::string_view next_released_set_mtgo_code =
         log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("");
       if (goatbots::set_id_in_card_defs(next_released_set_mtgo_code, card_defs.value())) {
