@@ -17,6 +17,9 @@ fltk-table = "0.3.1"
 fltk-theme = "0.7"
 mtgoupdater = { version = "0.1.0", path = "../mtgoupdater"}
 url = "2.4.1"
+flexi_logger = { version = "0.27", features = ["async", "specfile"] }
+log = "0.4"
+
 
 [profile.release]
 strip = true
