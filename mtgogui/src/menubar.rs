@@ -90,7 +90,7 @@ impl McmMenuBar {
         let filename = dlg.filename();
         if !filename.to_string_lossy().to_string().is_empty() {
             if filename.is_file() {
-                eprintln!("Full trade list: {:?}", filename);
+                log::info!("Full trade list: {:?}", filename);
                 self.ev_emitter
                     .send(Message::GotFullTradeList(filename.into()));
             } else {
@@ -106,7 +106,7 @@ pub(super) fn show_about() {
     let mtgogetter_version = match mtgogetter_version() {
         Ok(v) => v,
         Err(e) => {
-            eprintln!("Error getting mtgogetter version: {e}");
+            log::info!("Error getting mtgogetter version: {e}");
             dialog::alert(
                 center().0 - 200,
                 center().1 - 100,
@@ -118,7 +118,7 @@ pub(super) fn show_about() {
     let mtgo_preproc_version = match run_mtgo_preprocessor_version() {
         Ok(v) => v,
         Err(e) => {
-            eprintln!("Error getting mtgo preprocessor version: {e}");
+            log::info!("Error getting mtgo preprocessor version: {e}");
             dialog::alert(
                 center().0 - 200,
                 center().1 - 100,

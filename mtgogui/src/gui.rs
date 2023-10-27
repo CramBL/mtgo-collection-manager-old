@@ -88,7 +88,7 @@ impl MtgoGui {
             if let Some(msg) = self.rcv.recv() {
                 match msg {
                     Message::Quit => {
-                        eprintln!("Quit");
+                        log::info!("Quit");
                         self.app.quit();
                     }
                     Message::MenuBar(mb_msg) => self.menu.handle_ev(mb_msg),

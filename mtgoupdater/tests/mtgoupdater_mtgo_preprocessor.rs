@@ -72,7 +72,7 @@ fn test_full_parse_3000cards_from_pathbuf() {
         None,
     ) {
         Ok(cards) => {
-            eprintln!("MTGO Preprocessor output: {} cards", cards.len());
+            log::info!("MTGO Preprocessor output: {} cards", cards.len());
             // Fill the progress bar as appropriate
             // Give all the data to the collection table
             println!("Got {} cards", cards.len());
@@ -106,14 +106,14 @@ fn test_full_parse_3000cards_bad_path() {
         None,
     ) {
         Ok(cards) => {
-            eprintln!("MTGO Preprocessor output: {} cards", cards.len());
+            log::info!("MTGO Preprocessor output: {} cards", cards.len());
             // Fill the progress bar as appropriate
             // Give all the data to the collection table
             println!("Got {} cards", cards.len());
             panic!("Expected failure with bad path!")
         }
         Err(e) => {
-            eprintln!("MTGO Preprocessor error: {e}");
+            log::info!("MTGO Preprocessor error: {e}");
         }
     }
 }
@@ -155,7 +155,7 @@ fn test_full_parse_3000cards_from_path_with_save_to_dir() {
         Some(save_to_dir.as_os_str()),
     ) {
         Ok(cards) => {
-            eprintln!("MTGO Preprocessor output: {} cards", cards.len());
+            log::info!("MTGO Preprocessor output: {} cards", cards.len());
             // Fill the progress bar as appropriate
             // Give all the data to the collection table
             println!("Got {} cards", cards.len());
@@ -209,10 +209,9 @@ fn test_full_parse_3000cards_from_path_with_save_to_dir_state_log() {
         Some(save_to_dir.as_os_str()),
     ) {
         Ok(cards) => {
-            eprintln!("MTGO Preprocessor output: {} cards", cards.len());
+            log::info!("MTGO Preprocessor output: {} cards", cards.len());
             // Fill the progress bar as appropriate
             // Give all the data to the collection table
-            println!("Got {} cards", cards.len());
             assert_eq!(3000, cards.len());
             // Cleanup
             std::fs::remove_dir_all(local_test_dir).unwrap();
