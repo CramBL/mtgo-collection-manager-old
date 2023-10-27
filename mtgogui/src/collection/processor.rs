@@ -7,7 +7,7 @@ use std::{
 use fltk::app::Sender;
 
 use crate::{
-    appdata::{paths::AppdataPaths, APP_DATA_DIR},
+    appdata::{paths::AppData, APP_DATA_DIR},
     util::first_file_match_from_dir,
     Message,
 };
@@ -36,27 +36,28 @@ impl TradelistProcessor {
 
                     // Give the full trade list to the parser
                     // Find all the most recent files in the appdata directory
-                    let appdata_paths = match AppdataPaths::new() {
+                    let appdata_paths = match AppData::new() {
                         Ok(paths) => paths,
                         Err(err) => {
-                            eprintln!("{err}");
+                            log::info!("{err}");
                             return;
                         }
                     };
 
-                    match mtgoupdater::mtgogetter_api::mtgogetter_update_all(
-                        appdata_paths.appdata_dir_path(),
-                    ) {
-                        Ok(output) => {
-                            eprintln!("MTGO Getter output: {}", output.status);
-                        }
-                        Err(e) => {
-                            eprintln!("MTGO Getter error: {e}");
-                        }
-                    }
                     // TOOD: Fill the progress bar as appropriate
 
                     // Invoke MTGO preprocessor
+                    log::info!("Running MTGO Preprocessor");
+                    log::info!("Scryfall path: {p:?}", p = appdata_paths.scryfall_path());
+                    log::info!(
+                        "Card definitions path: {p:?}",
+                        p = appdata_paths.card_definitions_path()
+                    );
+                    log::info!(
+                        "Price history path: {p:?}",
+                        p = appdata_paths.price_history_path()
+                    );
+                    log::info!("Save to dir: {p:?}", p = appdata_paths.appdata_dir_path());
                     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
                         appdata_paths.scryfall_path(),
                         OsStr::new(full_trade_list_path.as_ref()),
@@ -65,14 +66,14 @@ impl TradelistProcessor {
                         Some(appdata_paths.appdata_dir_path()),
                     ) {
                         Ok(cards) => {
-                            eprintln!("MTGO Preprocessor output: {} cards", cards.len());
+                            log::info!("MTGO Preprocessor output: {} cards", cards.len());
                             // Fill the progress bar as appropriate
                             // Give all the data to the collection table
 
                             sender.send(Message::SetCards(cards));
                         }
                         Err(e) => {
-                            eprintln!("MTGO Preprocessor error: {e}");
+                            log::info!("MTGO Preprocessor error: {e}");
                         }
                     }
                 }
