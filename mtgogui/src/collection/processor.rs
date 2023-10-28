@@ -93,8 +93,8 @@ impl TradelistProcessor {
                     )));
 
                     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
-                        appdata_paths.scryfall_path(),
                         OsStr::new(full_trade_list_path.as_ref()),
+                        appdata_paths.scryfall_path(),
                         appdata_paths.card_definitions_path(),
                         appdata_paths.price_history_path(),
                         Some(appdata_paths.appdata_dir_path()),

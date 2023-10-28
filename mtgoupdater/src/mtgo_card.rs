@@ -15,6 +15,7 @@ pub struct MtgoCard {
     pub scryfall_price: Option<f32>,
 }
 
+/// Represents the rarity of an MTGO item (e.g. card, booster, event ticket)
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, PartialOrd, Ord, Eq)]
 pub enum Rarity {
     #[default]
