@@ -14,6 +14,11 @@ use crate::{
     Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MIN_APP_HEIGHT, MIN_APP_WIDTH,
 };
 
+/// Sets up the left column of the application
+///
+/// # Arguments
+///
+/// * `ev_send` - Sender to send messages to the main thread
 pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
     let mut search_box_grid_row = Grid::new(0, 0, 400, 30, "");
     if cfg!(debug_assertions) {
@@ -52,6 +57,11 @@ pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
     }
 }
 
+/// Sets up the main window of the application
+///
+/// # Returns
+///
+/// The main window of the application as a [DoubleWindow]
 pub(super) fn setup_main_window() -> DoubleWindow {
     let mut main_win: DoubleWindow = Window::default()
         .with_size(DEFAULT_APP_WIDTH, DEFAULT_APP_HEIGHT)
@@ -65,7 +75,12 @@ pub(super) fn setup_main_window() -> DoubleWindow {
     main_win
 }
 
-pub(super) fn setup_left_column() -> Flex {
+/// Sets up the left column [Flex] box of the application
+///
+/// # Returns
+///
+/// The left column [Flex] box of the application
+pub(super) fn setup_left_column_flx_box() -> Flex {
     let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
     flx_left_col.set_align(enums::Align::LeftTop);
     flx_left_col

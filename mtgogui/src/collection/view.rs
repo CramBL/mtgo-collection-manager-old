@@ -21,6 +21,16 @@ pub mod table;
 const TABLE_WIDTH: i32 = 790;
 
 /// Set the layout for the main collection table to the main window
+///
+/// Includes setting up all the column headers and their sort buttons
+///
+/// # Arguments
+///
+/// * `ev_send` - Sender to send messages to the main thread
+///
+/// # Returns
+///
+/// The collection table as a [CollectionTable]
 pub fn set_collection_main_box(ev_send: app::Sender<Message>) -> table::CollectionTable {
     let mut flx_table = Flex::default()
         .with_pos(400, 35)

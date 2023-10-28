@@ -38,6 +38,13 @@ pub struct McmMenuBar {
 }
 
 impl McmMenuBar {
+    /// Creates a new menubar
+    ///
+    /// # Arguments
+    ///
+    /// * `w` - Width of the menubar
+    /// * `h` - Height of the menubar
+    /// * `s` - Sender to send messages to the main thread
     pub fn new(w: i32, h: i32, s: &app::Sender<Message>) -> Self {
         let mut mb = menu::SysMenuBar::default().with_size(w, h);
         setup::init_menu_bar(&mut mb, s);
@@ -65,6 +72,11 @@ impl McmMenuBar {
         }
     }
 
+    /// Handles events sent to the menubar
+    ///
+    /// # Arguments
+    ///
+    /// * `ev` - The event to handle
     pub fn handle_ev(&mut self, ev: MenubarMessage) {
         match ev {
             MenubarMessage::Open => self.open_full_tradelist(),

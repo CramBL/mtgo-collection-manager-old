@@ -8,6 +8,7 @@ use flexi_logger::{
     Cleanup, Criterion, Duplicate, FileSpec, Logger, LoggerHandle, Naming, WriteMode,
 };
 
+/// Returns the X and Y coordinates of the center of the screen
 pub fn center() -> (i32, i32) {
     (
         (fltk::app::screen_size().0 / 2.0) as i32,
@@ -25,7 +26,7 @@ pub fn center() -> (i32, i32) {
 ///
 /// # Returns
 ///
-/// The path to the first file that contains the given string, or None if no such file was found
+/// The path to the first file that contains the given string, or [None] if no such file was found
 ///
 /// # Errors
 ///
@@ -34,6 +35,20 @@ pub fn center() -> (i32, i32) {
 /// * If the metadata of a file in the given directory cannot be read (permissions)
 /// * If the last modified time of a file in the given directory cannot be read
 /// * If the last modified time of a file in the given directory is in the future (very unlikely, but possible because of system clock drift)
+///
+/// # Example
+/// ```
+/// # use std::path::Path;
+/// # use mtgoupdater::util::first_file_match_from_dir;
+///
+///  let cwd = std::env::current_dir().unwrap();
+///  let first_match = first_file_match_from_dir("Cargo.lock", &cwd, None);
+///
+///  assert_eq!(
+///      PathBuf::from("Cargo.lock"),
+///      first_match.unwrap().unwrap().file_name().unwrap()
+///  );
+/// ```
 pub fn first_file_match_from_dir(
     f_name: &str,
     path: &Path,

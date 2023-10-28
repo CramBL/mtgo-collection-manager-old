@@ -22,12 +22,18 @@ pub struct TradelistProcessor {
 }
 
 impl TradelistProcessor {
+    /// Create a new [TradelistProcessor] instance
     pub fn new(ev_send: Sender<Message>) -> Self {
         Self {
             event_sender: ev_send,
         }
     }
 
+    /// Process the tradelist at the given path
+    ///
+    /// # Arguments
+    ///
+    /// * `full_trade_list_path` - [Path] to the full trade list
     pub fn process(&mut self, full_trade_list_path: Box<Path>) {
         // TODO: Some basic verification that we actually got a trade list and not some random non-sense.
         let trade_list_processor_thread =
@@ -126,6 +132,10 @@ impl TradelistProcessor {
 }
 
 /// Spawn a thread to set the progress bar to 100% and then hide it after a second
+///
+/// # Arguments
+///
+/// * `ev_sender` - [Sender] to send the [Message] to
 fn complete_progress_bar(ev_sender: Sender<Message>) {
     thread::spawn({
         move || {

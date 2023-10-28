@@ -59,7 +59,7 @@ impl MtgoGui {
 
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, &ev_send);
 
-        let flx_left_col = setup::setup_left_column();
+        let flx_left_col = setup::setup_left_column_flx_box();
         setup::set_left_col_box(ev_send.clone());
         flx_left_col.end();
 
