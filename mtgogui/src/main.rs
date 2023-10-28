@@ -44,6 +44,8 @@ pub const DEFAULT_APP_WIDTH: i32 = 1400;
 pub const DEFAULT_APP_HEIGHT: i32 = 800;
 pub const WIDGET_PADDING: i32 = 0;
 
+pub const MENU_BAR_HEIGHT: i32 = 25;
+
 /// Messages for the main event loop
 #[derive(Debug, Clone)]
 pub enum Message {

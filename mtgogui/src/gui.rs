@@ -9,10 +9,13 @@ use crate::collection::TableMessage;
 use crate::menubar::McmMenuBar;
 use crate::util::first_file_match_from_dir;
 use crate::{
-    collection, Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MIN_APP_HEIGHT, MIN_APP_WIDTH,
+    collection, Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, MIN_APP_HEIGHT,
+    MIN_APP_WIDTH,
 };
 use fltk::enums::{CallbackTrigger, Event, Font, FrameType, Shortcut};
+use fltk::frame::Frame;
 use fltk::image::{Image, PngImage, TiledImage};
+use fltk::misc::Progress;
 use fltk::prelude::WidgetExt;
 use fltk::text::TextAttr;
 use fltk::window::DoubleWindow;
@@ -57,9 +60,14 @@ impl MtgoGui {
         main_win.make_resizable(true);
         main_win.size_range(MIN_APP_WIDTH, MIN_APP_HEIGHT, 0, 0);
         main_win.set_color(Color::Black);
-        let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, 25, &ev_send);
+        let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, &ev_send);
 
+        let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
+        flx_left_col.set_align(enums::Align::LeftTop);
         setup::set_left_col_box(ev_send.clone());
+
+        flx_left_col.end();
+
         let collection = collection::view::set_collection_main_box(ev_send.clone());
 
         main_win.end();
@@ -93,6 +101,7 @@ impl MtgoGui {
                     }
                     Message::MenuBar(mb_msg) => self.menu.handle_ev(mb_msg),
                     Message::Example => {
+                        log::info!("Example");
                         let cards: Vec<mtgoupdater::mtgo_card::MtgoCard> =
                             mtgoupdater::internal_only::get_example_card_collection();
                         self.collection.set_cards(cards);

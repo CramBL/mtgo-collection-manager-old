@@ -10,9 +10,6 @@ use fltk_grid::Grid;
 use crate::{assets::get_icon_search, collection::TableMessage, Message};
 
 pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
-    let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
-    flx_left_col.set_align(enums::Align::LeftTop);
-
     let mut search_box_grid_row = Grid::new(0, 0, 400, 30, "");
     if cfg!(debug_assertions) {
         // Show box edges and coordinates
@@ -48,6 +45,4 @@ pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
             }
         });
     }
-
-    flx_left_col.end();
 }
