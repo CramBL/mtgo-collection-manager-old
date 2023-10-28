@@ -8,6 +8,7 @@ use std::sync::OnceLock;
 
 use assets::{get_asc_svg, get_icon_search, get_logo};
 use flexi_logger::{Cleanup, Criterion, Duplicate, Naming};
+use flexi_logger::{FileSpec, Logger, WriteMode};
 use fltk::enums::{CallbackTrigger, Event, Font, FrameType, Shortcut};
 use fltk::image::{Image, PngImage, TiledImage};
 use fltk::prelude::WidgetExt;
@@ -77,34 +78,8 @@ fn main() {
         // Show box edges
         Flex::debug(true);
     }
-
-    use flexi_logger::{FileSpec, Logger, WriteMode};
-
-    let mut appdata_dir = std::env::current_exe().unwrap();
-    log::info!("Path to executable: {appdata_dir:?}");
-    appdata_dir.pop();
-    appdata_dir.push("appdata");
-    appdata_dir.push("log_files");
-    log::info!("Path to log files: {appdata_dir:?}");
-
-    const FIVE_MI_B: u64 = 5 * 1024 * 1024;
-    let _logger = Logger::try_with_str("info")
-        .expect("Failed setting up logger")
-        .log_to_file(
-            FileSpec::default()
-                .directory(appdata_dir)
-                .basename("mcm_log"),
-        )
-        .rotate(
-            // If the program runs long enough,
-            Criterion::Size(FIVE_MI_B), // - create a new file every day
-            Naming::Timestamps,         // - let the rotated files have a timestamp in their name
-            Cleanup::KeepLogFiles(7),   // - keep at most 7 log files
-        )
-        .duplicate_to_stderr(Duplicate::Info)
-        .write_mode(WriteMode::Async)
-        .start()
-        .expect("Failed to initialize logger");
+    // Setup logger (has to be done with a let binding to make the logger live long enough)
+    let _logger = util::setup_logger();
     log::info!("Setup GUI");
     let mut gui = MtgoGui::default();
     log::info!("Starting GUI");
