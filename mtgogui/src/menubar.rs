@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 
-use crate::{util::center, Message};
+use crate::{util::center, Message, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, MIN_APP_WIDTH};
 use fltk::{
     app, dialog,
     enums::{self, Color, Font, FrameType, Shortcut},
     menu,
+    misc::Progress,
     prelude::*,
     text::{self, TextAttr},
     window::Window,
@@ -15,12 +16,20 @@ use mtgoupdater::{
 };
 
 /// Messages that can be received by the menubar
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum MenubarMessage {
     Open,
     Quit,
     About,
     Example,
+    ProgressBar(ProgressUpdate),
+}
+
+#[derive(Debug, Clone)]
+pub struct ProgressUpdate {
+    pub show: bool,
+    pub progress: f64,
+    pub label: Box<str>,
 }
 
 // Styling for the about window text
@@ -61,15 +70,34 @@ const TEXT_ABOUT_STYLES: &[text::StyleTableEntryExt] = &[
 pub(super) struct McmMenuBar {
     pub(super) menu: menu::SysMenuBar,
     ev_emitter: app::Sender<Message>,
+    pub(super) progress_bar: Progress,
 }
 
 impl McmMenuBar {
     pub fn new(w: i32, h: i32, s: &app::Sender<Message>) -> Self {
         let mut mb = menu::SysMenuBar::default().with_size(w, h);
         init_menu_bar(&mut mb, s);
+
+        let progress_bar_width = 300;
+        let mut progress = Progress::new(
+            DEFAULT_APP_WIDTH - progress_bar_width,
+            0,
+            progress_bar_width,
+            MENU_BAR_HEIGHT,
+            "Progress bar title",
+        );
+        progress.set_color(Color::White);
+        progress.set_selection_color(Color::Green);
+        progress.set_frame(FrameType::FlatBox);
+        progress.set_color(Color::Background2);
+        progress.set_maximum(100.);
+        progress.set_value(0.);
+        progress.hide();
+
         Self {
             menu: mb,
             ev_emitter: s.clone(),
+            progress_bar: progress,
         }
     }
 
@@ -79,6 +107,16 @@ impl McmMenuBar {
             MenubarMessage::Quit => app::quit(),
             MenubarMessage::About => show_about(),
             MenubarMessage::Example => todo!("example"),
+            MenubarMessage::ProgressBar(update) => {
+                if update.show {
+                    self.progress_bar.show();
+                    self.progress_bar.redraw();
+                    self.progress_bar.set_value(update.progress);
+                    self.progress_bar.set_label(&update.label);
+                } else {
+                    self.progress_bar.hide();
+                }
+            }
         }
     }
 
