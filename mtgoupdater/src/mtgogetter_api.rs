@@ -1,4 +1,6 @@
 use std::ffi::OsStr;
+use std::io;
+use std::process;
 
 use crate::mtgogetter_bin;
 use crate::util;
@@ -15,11 +17,33 @@ where
     util::run_with_args(mtgogetter_bin(), args)
 }
 
-pub fn mtgogetter_version() -> Result<std::process::Output, std::io::Error> {
+/// Returns the version of `MTGO Getter`
+///
+/// # Example
+/// ```
+/// # use std::path::Path;
+/// # use mtgoupdater::mtgogetter_api::mtgogetter_version;
+///
+/// match mtgogetter_version() {
+///   Ok(out) => {
+///     eprintln!("stderr:\n{stderr}", stderr = String::from_utf8_lossy(&out.stderr),);
+///     eprintln!("stdout:\n{stdout}", stdout = String::from_utf8_lossy(&out.stdout),);
+///     assert!(out.status.success());
+///     assert!(String::from_utf8_lossy(&out.stdout).contains("mtgogetter version"));
+/// },
+///     Err(e) => panic!("MTGO Getter error: {e}")
+/// }
+/// ```
+pub fn mtgogetter_version() -> Result<process::Output, io::Error> {
     run_mtgogetter(["--version"])
 }
 
-pub fn mtgogetter_update_all(save_to_dir: &OsStr) -> Result<std::process::Output, std::io::Error> {
+/// Runs a full update of all MTGO data and saves the output to the given directory
+///
+/// # Arguments
+///
+/// * `save_to_dir` - Path to the directory to save the output to
+pub fn mtgogetter_update_all(save_to_dir: &OsStr) -> Result<process::Output, io::Error> {
     run_mtgogetter([
         "update",
         "--save-to-dir",
@@ -29,19 +53,43 @@ pub fn mtgogetter_update_all(save_to_dir: &OsStr) -> Result<std::process::Output
     ])
 }
 
-pub fn download_goatbots_price_history() -> Result<std::process::Output, std::io::Error> {
+/// Downloads the latest GoatBots price history and saves it to the current directory
+pub fn download_goatbots_price_history() -> Result<process::Output, io::Error> {
     run_mtgogetter(["download", "goatbots-price-history"])
 }
 
-pub fn download_goatbots_card_definitions() -> Result<std::process::Output, std::io::Error> {
+/// Downloads the latest GoatBots card definitions and saves it to the current directory
+pub fn download_goatbots_card_definitions() -> Result<process::Output, io::Error> {
     run_mtgogetter(["download", "goatbots-card-definitions"])
 }
 
+/// Downloads from the given URL and saves it to the current directory
+///
+/// # Arguments
+///
+/// * `url` - URL to download from
+/// * `decompress` - If `true`, decompresses the downloaded file
+/// * `save_as` - If `Some(path)`, saves the downloaded file to the given path
+///
+/// # Example
+/// ```
+/// # use std::path::Path;
+/// # use mtgoupdater::mtgogetter_api::download_custom_url;
+///
+/// match download_custom_url("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/LICENSE", false, None) {
+///  Ok(out) => {
+///   eprintln!("stderr:\n{stderr}", stderr = String::from_utf8_lossy(&out.stderr),);
+///   eprintln!("stdout:\n{stdout}", stdout = String::from_utf8_lossy(&out.stdout),);
+///   assert!(out.status.success());
+/// },
+/// Err(e) => panic!("MTGO Getter error: {e}")
+/// }
+/// ```
 pub fn download_custom_url(
     url: &str,
     decompress: bool,
     save_as: Option<&str>,
-) -> Result<std::process::Output, std::io::Error> {
+) -> Result<process::Output, io::Error> {
     let mut custom_args = vec!["download", "custom", "url-raw", url];
     if decompress {
         custom_args.push("--decompress");
