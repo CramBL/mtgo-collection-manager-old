@@ -8,7 +8,7 @@ use std::{
 use fltk::app::Sender;
 
 use crate::{
-    appdata::{paths::AppData, APP_DATA_DIR},
+    appdata::{update::AppData, APP_DATA_DIR},
     menubar::MenubarMessage,
     menubar::ProgressUpdate,
     util::first_file_match_from_dir,
