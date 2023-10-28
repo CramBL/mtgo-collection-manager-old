@@ -53,7 +53,7 @@ impl TradelistProcessor {
                     )));
 
                     // Give the full trade list to the parser
-                    // Find all the most recent files in the appdata directory
+                    // Find all the most recent files in the appdata directory, download and update them if necessary
                     let appdata_paths = match AppData::new() {
                         Ok(paths) => paths,
                         Err(err) => {
