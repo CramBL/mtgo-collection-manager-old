@@ -8,6 +8,10 @@ fn run_mtgogetter<'a, I>(args: I) -> Result<std::process::Output, std::io::Error
 where
     I: IntoIterator<Item = &'a str>,
 {
+    // If we're in debug mode initialize the mtgogetter binary path relative to a subdirectory of the project root
+    if cfg!(debug_assertions) {
+        crate::internal_only::dev_try_init_mtgogetter_bin();
+    }
     util::run_with_args(mtgogetter_bin(), args)
 }
 

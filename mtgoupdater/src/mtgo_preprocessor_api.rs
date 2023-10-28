@@ -7,6 +7,10 @@ fn run_mtgo_preprocessor<'a, I>(args: I) -> Result<std::process::Output, std::io
 where
     I: IntoIterator<Item = &'a str>,
 {
+    // If we're in debug mode initialize the mtgoparser/mtgo_preprocessor binary path relative to a subdirectory of the project root
+    if cfg!(debug_assertions) {
+        crate::internal_only::dev_try_init_mtgoparser_bin();
+    }
     util::run_with_args(mtgoparser_bin(), args)
 }
 

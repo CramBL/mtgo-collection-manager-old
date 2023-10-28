@@ -96,18 +96,12 @@ mod tests {
 
     #[test]
     fn get_mtgogetter_version() {
-        mtgoupdater::internal_only::dev_try_init_mtgogetter_bin();
-        mtgoupdater::internal_only::dev_try_init_mtgoparser_bin();
-
         let mtgogetter_version = mtgogetter_version_str().unwrap();
         assert_eq!(mtgogetter_version, "0.1.0\n");
     }
 
     #[test]
     fn get_mtgo_preprocessor_version() {
-        mtgoupdater::internal_only::dev_try_init_mtgogetter_bin();
-        mtgoupdater::internal_only::dev_try_init_mtgoparser_bin();
-
         let mtgo_preproc_version = mtgo_preprocessor_version().unwrap();
         assert_eq!(mtgo_preproc_version, "v0.1.0");
     }
