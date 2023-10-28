@@ -20,6 +20,9 @@ url = "2.4.1"
 flexi_logger = { version = "0.27", features = ["async", "specfile"] }
 log = "0.4"
 
+[dev-dependencies]
+pretty_assertions = "1.4.0"
+
 
 [profile.release]
 strip = true
