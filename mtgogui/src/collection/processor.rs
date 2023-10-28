@@ -5,7 +5,7 @@ use std::{
     thread,
 };
 
-use fltk::app::Sender;
+use fltk::{app::Sender, enums::Color};
 
 use crate::{
     appdata::{update::AppData, APP_DATA_DIR},
@@ -46,7 +46,8 @@ impl TradelistProcessor {
                         ProgressUpdate {
                             show: true,
                             progress: 5.,
-                            label: "Processing trade list...".into(),
+                            label: "Processing trade list".into(),
+                            ..Default::default()
                         },
                     )));
 
@@ -56,6 +57,7 @@ impl TradelistProcessor {
                             show: true,
                             progress: 10.,
                             label: "Updating card data...".into(),
+                            ..Default::default()
                         },
                     )));
 
@@ -74,6 +76,7 @@ impl TradelistProcessor {
                             show: true,
                             progress: 70.,
                             label: "Update done".into(),
+                            ..Default::default()
                         },
                     )));
 
@@ -94,7 +97,8 @@ impl TradelistProcessor {
                         ProgressUpdate {
                             show: true,
                             progress: 75.,
-                            label: "Processing updated card data...".into(),
+                            label: "Processing card data...".into(),
+                            ..Default::default()
                         },
                     )));
 
@@ -113,11 +117,12 @@ impl TradelistProcessor {
                                 ProgressUpdate {
                                     show: true,
                                     progress: 95.,
-                                    label: "Processing complete!".into(),
+                                    label: "Processing complete...".into(),
+                                    ..Default::default()
                                 },
                             )));
 
-                            complete_progress_bar(sender.clone());
+                            fadeout_progress_bar(sender.clone());
 
                             sender.send(Message::SetCards(cards));
                         }
@@ -131,27 +136,40 @@ impl TradelistProcessor {
     }
 }
 
-/// Spawn a thread to set the progress bar to 100% and then hide it after a second
+/// Spawn a thread to set the progress bar to 100% and then fade it out.
 ///
 /// # Arguments
 ///
 /// * `ev_sender` - [Sender] to send the [Message] to
-fn complete_progress_bar(ev_sender: Sender<Message>) {
+fn fadeout_progress_bar(ev_sender: Sender<Message>) {
     thread::spawn({
         move || {
-            ev_sender.send(Message::MenuBar(MenubarMessage::ProgressBar(
-                ProgressUpdate {
-                    show: true,
-                    progress: 100.,
-                    label: "Updating complete".into(),
-                },
-            )));
-            thread::sleep(std::time::Duration::from_secs(1));
+            // Fade effect
+            for i in 1..=255 {
+                thread::sleep(std::time::Duration::from_millis(10));
+                ev_sender.send(Message::MenuBar(MenubarMessage::ProgressBar(
+                    ProgressUpdate {
+                        show: true,
+                        progress: 100.,
+                        label: match i {
+                            0..=31 => "Collection updated!".into(),
+                            32..=63 => "Collection updated.".into(),
+                            64..=127 => "Collection updated..".into(),
+                            128..=142 => "Collection updated...".into(),
+                            143..=158 => "                  ...".into(),
+                            159..=190 => "                   ..".into(),
+                            191..=222 => "                    .".into(),
+                            223..=255 => "".into(),
+                        },
+                        selection_color: Color::from_rgba_tuple((0, 255, 0, 255 - i)),
+                    },
+                )));
+            }
+            // Finally hide it
             ev_sender.send(Message::MenuBar(MenubarMessage::ProgressBar(
                 ProgressUpdate {
                     show: false,
-                    progress: 0.,
-                    label: "".into(),
+                    ..Default::default()
                 },
             )));
         }

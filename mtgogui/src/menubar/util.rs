@@ -1,4 +1,4 @@
-use std::io;
+use std::{default, io};
 
 use fltk::{
     enums::{Color, Font},
@@ -14,6 +14,32 @@ pub struct ProgressUpdate {
     pub show: bool,
     pub progress: f64,
     pub label: Box<str>,
+    pub selection_color: Color,
+}
+
+impl default::Default for ProgressUpdate {
+    fn default() -> Self {
+        Self::new(false, 0., "".into(), Color::Green)
+    }
+}
+
+impl ProgressUpdate {
+    /// Create a new [ProgressUpdate] instance
+    ///
+    /// # Arguments
+    ///
+    /// * `show` - Whether or not to show the progress bar
+    /// * `progress` - The progress of the progress bar
+    /// * `label` - The label to display on the progress bar
+    /// * `selection_color` - The color that fills the progress bar
+    pub fn new(show: bool, progress: f64, label: Box<str>, selection_color: Color) -> Self {
+        Self {
+            show,
+            progress,
+            label,
+            selection_color,
+        }
+    }
 }
 
 /// Get the version of the MTGO Getter binary (X.Y.Z) and return it as a string
