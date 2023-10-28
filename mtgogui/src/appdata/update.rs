@@ -15,10 +15,10 @@ pub struct AppData {
 }
 
 impl AppData {
-    /// Instiatiate [AppdataPaths] from the path to the appdata directory
+    /// Instantiate [AppData] from the path to the appdata directory
     ///
-    /// Fails if not all the expected files can be located
-    pub fn new() -> Result<Self, Error> {
+    /// Fails if not all the expected files can be located or the MTGO Getter fails
+    pub fn update() -> Result<Self, Error> {
         let mut appdata_dir = std::env::current_exe().unwrap();
         log::info!("Path to executable: {appdata_dir:?}");
         appdata_dir.pop();
