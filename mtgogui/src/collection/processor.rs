@@ -109,26 +109,8 @@ impl TradelistProcessor {
                                     label: "Processing complete!".into(),
                                 },
                             )));
-                            thread::spawn({
-                                let sender = sender.clone();
-                                move || {
-                                    sender.send(Message::MenuBar(MenubarMessage::ProgressBar(
-                                        ProgressUpdate {
-                                            show: true,
-                                            progress: 100.,
-                                            label: "Updating complete".into(),
-                                        },
-                                    )));
-                                    thread::sleep(std::time::Duration::from_secs(1));
-                                    sender.send(Message::MenuBar(MenubarMessage::ProgressBar(
-                                        ProgressUpdate {
-                                            show: false,
-                                            progress: 0.,
-                                            label: "".into(),
-                                        },
-                                    )));
-                                }
-                            });
+
+                            complete_progress_bar(sender.clone());
 
                             sender.send(Message::SetCards(cards));
                         }
@@ -140,4 +122,27 @@ impl TradelistProcessor {
             })
             .expect("Failed spawning Trade List Processor thread");
     }
+}
+
+/// Spawn a thread to set the progress bar to 100% and then hide it after a second
+fn complete_progress_bar(ev_sender: Sender<Message>) {
+    thread::spawn({
+        move || {
+            ev_sender.send(Message::MenuBar(MenubarMessage::ProgressBar(
+                ProgressUpdate {
+                    show: true,
+                    progress: 100.,
+                    label: "Updating complete".into(),
+                },
+            )));
+            thread::sleep(std::time::Duration::from_secs(1));
+            ev_sender.send(Message::MenuBar(MenubarMessage::ProgressBar(
+                ProgressUpdate {
+                    show: false,
+                    progress: 0.,
+                    label: "".into(),
+                },
+            )));
+        }
+    });
 }
