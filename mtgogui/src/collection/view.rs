@@ -1,13 +1,5 @@
 use std::sync::{Arc, Mutex};
 
-use fltk::{
-    app, button,
-    enums::{self, Event},
-    prelude::{GroupExt, WidgetBase, WidgetExt},
-    widget_extends,
-};
-use fltk_flex::Flex;
-
 use crate::{
     collection::{
         view::table::{column::SortStates, CollectionTable, SortToggle},
@@ -15,11 +7,30 @@ use crate::{
     },
     Message,
 };
+use fltk::{
+    app, button,
+    enums::{self, Event},
+    prelude::{GroupExt, WidgetBase, WidgetExt},
+    widget_extends,
+};
+use fltk_flex::Flex;
+use table::column::Column::*;
 
 pub mod table;
 
 const TABLE_WIDTH: i32 = 790;
 
+/// Set the layout for the main collection table to the main window
+///
+/// Includes setting up all the column headers and their sort buttons
+///
+/// # Arguments
+///
+/// * `ev_send` - Sender to send messages to the main thread
+///
+/// # Returns
+///
+/// The collection table as a [CollectionTable]
 pub fn set_collection_main_box(ev_send: app::Sender<Message>) -> table::CollectionTable {
     let mut flx_table = Flex::default()
         .with_pos(400, 35)
@@ -36,7 +47,6 @@ pub fn set_collection_main_box(ev_send: app::Sender<Message>) -> table::Collecti
     const BTN_SORT_PADDING: i32 = 1;
     flx_header.set_pad(BTN_SORT_PADDING);
 
-    use table::column::Column::*;
     let sort_states = SortStates::default();
 
     let mut btn_sort_name = SortToggle::new("Name", sort_states.name.clone());

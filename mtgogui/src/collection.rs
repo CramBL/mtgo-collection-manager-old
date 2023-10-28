@@ -1,6 +1,7 @@
 pub mod processor;
 pub mod view;
 
+use crate::Message;
 use fltk::{
     app::{self, App},
     enums::{Align, Color, Event, FrameType},
@@ -16,8 +17,7 @@ use std::{
 };
 use view::table;
 
-use crate::Message;
-
+/// [TableMessage] is a message/event that can be sent to the collection table
 #[derive(Debug, Clone)]
 pub enum TableMessage {
     SortBy(table::column::Column),

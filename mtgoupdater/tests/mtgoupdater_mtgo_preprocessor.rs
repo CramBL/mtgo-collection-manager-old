@@ -65,8 +65,8 @@ fn test_full_parse_3000cards_from_pathbuf() {
         std::path::PathBuf::from("../test/test-data/mtgo/Full Trade List-medium-3000cards.dek");
     // Invoke MTGO preprocessor
     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
-        scryfall_path.as_os_str(),
         full_trade_list_path.as_os_str(),
+        scryfall_path.as_os_str(),
         card_definitions_path.as_os_str(),
         price_history_path.as_os_str(),
         None,
@@ -99,8 +99,8 @@ fn test_full_parse_3000cards_bad_path() {
 
     // Invoke MTGO preprocessor
     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
-        scryfall_path.as_os_str(),
         full_trade_list_path_bad.as_os_str(),
+        scryfall_path.as_os_str(),
         card_definitions_path.as_os_str(),
         price_history_path.as_os_str(),
         None,
@@ -148,8 +148,8 @@ fn test_full_parse_3000cards_from_path_with_save_to_dir() {
 
     // Invoke MTGO preprocessor
     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
-        OsStr::new("../test/test-data/mtgogetter-out/scryfall-20231002-full.json"),
         full_trade_list_path.as_os_str(),
+        OsStr::new("../test/test-data/mtgogetter-out/scryfall-20231002-full.json"),
         card_definitions_path.as_os_str(),
         price_history_path.as_os_str(),
         Some(save_to_dir.as_os_str()),
@@ -202,8 +202,8 @@ fn test_full_parse_3000cards_from_path_with_save_to_dir_state_log() {
 
     // Invoke MTGO preprocessor
     match mtgoupdater::mtgo_preprocessor_api::run_mtgo_preprocessor_parse_full(
-        OsStr::new("../test/test-data/mtgogetter-out/scryfall-20231002-full.json"),
         full_trade_list_path.as_os_str(),
+        OsStr::new("../test/test-data/mtgogetter-out/scryfall-20231002-full.json"),
         card_definitions_path.as_os_str(),
         price_history_path.as_os_str(),
         Some(save_to_dir.as_os_str()),
@@ -212,7 +212,6 @@ fn test_full_parse_3000cards_from_path_with_save_to_dir_state_log() {
             eprintln!("MTGO Preprocessor output: {} cards", cards.len());
             // Fill the progress bar as appropriate
             // Give all the data to the collection table
-            println!("Got {} cards", cards.len());
             assert_eq!(3000, cards.len());
             // Cleanup
             std::fs::remove_dir_all(local_test_dir).unwrap();

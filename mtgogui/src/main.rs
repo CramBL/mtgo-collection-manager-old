@@ -3,10 +3,12 @@
 #![allow(dead_code)]
 
 use std::ffi::OsStr;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
 use assets::{get_asc_svg, get_icon_search, get_logo};
+use flexi_logger::{Cleanup, Criterion, Duplicate, Naming};
+use flexi_logger::{FileSpec, Logger, WriteMode};
 use fltk::enums::{CallbackTrigger, Event, Font, FrameType, Shortcut};
 use fltk::image::{Image, PngImage, TiledImage};
 use fltk::prelude::WidgetExt;
@@ -43,6 +45,8 @@ pub const DEFAULT_APP_WIDTH: i32 = 1400;
 pub const DEFAULT_APP_HEIGHT: i32 = 800;
 pub const WIDGET_PADDING: i32 = 0;
 
+pub const MENU_BAR_HEIGHT: i32 = 25;
+
 /// Messages for the main event loop
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -50,16 +54,18 @@ pub enum Message {
     Example,
     MenuBar(menubar::MenubarMessage),
     Table(collection::TableMessage),
-    GotFullTradeList(Box<std::path::Path>),
+    GotFullTradeList(Box<Path>),
     SetCards(Vec<MtgoCard>),
 }
 
+/// Conversion from [menubar::MenubarMessage] to [Message]
 impl From<menubar::MenubarMessage> for Message {
     fn from(mb_msg: menubar::MenubarMessage) -> Self {
         Message::MenuBar(mb_msg)
     }
 }
 
+/// Conversion from [collection::TableMessage] to [Message]
 impl From<collection::TableMessage> for Message {
     fn from(ct_msg: collection::TableMessage) -> Self {
         Message::Table(ct_msg)
@@ -74,7 +80,10 @@ fn main() {
         // Show box edges
         Flex::debug(true);
     }
+    // Setup logger (has to be done with a let binding to make the logger live long enough)
+    let _logger = util::setup_logger();
+    log::info!("Setup GUI");
     let mut gui = MtgoGui::default();
-
+    log::info!("Starting GUI");
     gui.run();
 }

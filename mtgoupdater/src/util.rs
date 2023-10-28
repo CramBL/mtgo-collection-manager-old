@@ -1,5 +1,6 @@
 use std::{
     ffi::OsStr,
+    io,
     process::{Command, Output, Stdio},
 };
 
@@ -8,7 +9,13 @@ use std::os::windows::process::CommandExt;
 #[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
-pub(super) fn run_with_args<'s, I, S>(bin: S, args: I) -> Result<Output, std::io::Error>
+/// Runs a command with the given arguments and returns the output
+///
+/// # Arguments
+///
+/// * `bin` - The path to the binary to run
+/// * `args` - The arguments to pass to the binary
+pub(super) fn run_with_args<'s, I, S>(bin: S, args: I) -> Result<Output, io::Error>
 where
     I: IntoIterator<Item = &'s str>,
     S: AsRef<OsStr>,
@@ -26,6 +33,12 @@ where
     cmd.output()
 }
 
+/// Runs a command with the given argument and returns the output
+///
+/// # Arguments
+///
+/// * `bin` - The path to the binary to run
+/// * `arg` - The argument to pass to the binary
 pub(super) fn run_with_arg<S>(bin: S, arg: S) -> Result<Output, std::io::Error>
 where
     S: AsRef<OsStr>,
