@@ -26,6 +26,8 @@ use fltk_grid::Grid;
 use fltk_table::{SmartTable, TableOpts};
 use fltk_theme::{widget_themes, ThemeType, WidgetTheme};
 
+use self::setup::setup_main_window;
+
 mod setup;
 
 pub struct MtgoGui {
@@ -51,21 +53,12 @@ impl MtgoGui {
         theme.apply();
 
         let (ev_send, ev_rcv) = app::channel();
-        let mut main_win: DoubleWindow = Window::default()
-            .with_size(DEFAULT_APP_WIDTH, DEFAULT_APP_HEIGHT)
-            .center_screen()
-            .with_label("MTGO Collection Manager");
+        let mut main_win: DoubleWindow = setup::setup_main_window();
 
-        main_win.set_icon(Some(assets::get_logo()));
-        main_win.make_resizable(true);
-        main_win.size_range(MIN_APP_WIDTH, MIN_APP_HEIGHT, 0, 0);
-        main_win.set_color(Color::Black);
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, &ev_send);
 
-        let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
-        flx_left_col.set_align(enums::Align::LeftTop);
+        let flx_left_col = setup::setup_left_column();
         setup::set_left_col_box(ev_send.clone());
-
         flx_left_col.end();
 
         let collection = collection::view::set_collection_main_box(ev_send.clone());
