@@ -1,19 +1,22 @@
-use std::path::PathBuf;
-
-use crate::{util::center, Message, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, MIN_APP_WIDTH};
+use crate::{assets, util::center, Message, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, MIN_APP_WIDTH};
 use fltk::{
-    app, dialog,
-    enums::{self, Color, Font, FrameType, Shortcut},
-    menu,
+    app::{self, Sender},
+    dialog::{self, FileDialog, FileDialogOptions, FileDialogType},
+    enums::{self, Align, Color, Font, FrameType, Shortcut},
+    menu::{self, MenuFlag},
     misc::Progress,
     prelude::*,
-    text::{self, TextAttr},
+    text::{self, TextAttr, TextBuffer, TextDisplay, WrapMode},
     window::Window,
 };
 use fltk_flex::Flex;
 use mtgoupdater::{
     mtgo_preprocessor_api::run_mtgo_preprocessor_version, mtgogetter_api::mtgogetter_version,
 };
+use std::path::PathBuf;
+use util::ProgressUpdate;
+
+pub mod util;
 
 /// Messages that can be received by the menubar
 #[derive(Debug, Clone)]
@@ -25,48 +28,7 @@ pub enum MenubarMessage {
     ProgressBar(ProgressUpdate),
 }
 
-#[derive(Debug, Clone)]
-pub struct ProgressUpdate {
-    pub show: bool,
-    pub progress: f64,
-    pub label: Box<str>,
-}
-
-// Styling for the about window text
-const TEXT_ABOUT_STYLES: &[text::StyleTableEntryExt] = &[
-    text::StyleTableEntryExt {
-        color: Color::White,
-        font: Font::HelveticaBold,
-        size: 20,
-        // defaults
-        attr: TextAttr::None,
-        bgcolor: Color::Background2,
-    },
-    text::StyleTableEntryExt {
-        color: Color::from_hex(0xA8A8A8),
-        font: Font::Helvetica,
-        size: 18,
-        attr: TextAttr::Underline,
-        bgcolor: Color::Background2, // default
-    },
-    text::StyleTableEntryExt {
-        color: Color::Yellow,
-        font: Font::Courier,
-        size: 16,
-        // defaults
-        attr: TextAttr::None,
-        bgcolor: Color::Background2,
-    },
-    text::StyleTableEntryExt {
-        color: Color::DarkBlue,
-        font: Font::HelveticaItalic,
-        size: 16,
-        // defaults
-        attr: TextAttr::None,
-        bgcolor: Color::Background2,
-    },
-];
-
+/// The menubar for the application
 pub(super) struct McmMenuBar {
     pub(super) menu: menu::SysMenuBar,
     ev_emitter: app::Sender<Message>,
@@ -121,8 +83,8 @@ impl McmMenuBar {
     }
 
     fn open_full_tradelist(&mut self) {
-        let mut dlg = dialog::FileDialog::new(dialog::FileDialogType::BrowseFile);
-        dlg.set_option(dialog::FileDialogOptions::NoOptions);
+        let mut dlg = FileDialog::new(FileDialogType::BrowseFile);
+        dlg.set_option(FileDialogOptions::NoOptions);
         dlg.set_filter("MTGO Full Trade List\t*.{txt,dek}");
         dlg.show();
         let filename = dlg.filename();
@@ -180,8 +142,8 @@ pub(super) fn show_about() {
     let project_url = "https://github.com/CramBL/mtgo-collection-manager/";
 
     let w_width = 450;
-    let mut tbuf = text::TextBuffer::default();
-    let mut sbuf = text::TextBuffer::default();
+    let mut tbuf = TextBuffer::default();
+    let mut sbuf = TextBuffer::default();
     let mtgo_cm_txt = format!(
         "{:^width$}\n",
         "MTGO Collection Manager",
@@ -237,19 +199,19 @@ pub(super) fn show_about() {
             "About MTGO Collection Manager v{}",
             mtgo_gui_version
         ));
-    win.set_icon(Some(crate::assets::get_logo()));
+    win.set_icon(Some(assets::get_logo()));
     let flex_about = Flex::default()
         .with_pos(0, 0)
-        .with_align(enums::Align::Center)
+        .with_align(Align::Center)
         .size_of_parent()
         .column();
 
-    let mut txt_disp = text::TextDisplay::default();
+    let mut txt_disp = TextDisplay::default();
     txt_disp.align();
     txt_disp.set_buffer(tbuf);
-    txt_disp.set_highlight_data_ext(sbuf, TEXT_ABOUT_STYLES);
-    txt_disp.set_align(enums::Align::Center);
-    txt_disp.wrap_mode(text::WrapMode::AtBounds, 0);
+    txt_disp.set_highlight_data_ext(sbuf, util::TEXT_ABOUT_STYLES);
+    txt_disp.set_align(Align::Center);
+    txt_disp.wrap_mode(WrapMode::AtBounds, 0);
     txt_disp.set_text_color(Color::White);
 
     flex_about.end();
@@ -257,13 +219,13 @@ pub(super) fn show_about() {
     win.show();
 }
 
-fn init_menu_bar(menu: &mut menu::SysMenuBar, s: &fltk::app::Sender<Message>) {
+fn init_menu_bar(menu: &mut menu::SysMenuBar, s: &Sender<Message>) {
     menu.set_frame(FrameType::FlatBox);
 
     menu.add_emit(
         "&File/Open Full Trade list...\t",
         Shortcut::Ctrl | 'o',
-        menu::MenuFlag::Normal,
+        MenuFlag::Normal,
         s.clone(),
         MenubarMessage::Open.into(),
     );
@@ -271,7 +233,7 @@ fn init_menu_bar(menu: &mut menu::SysMenuBar, s: &fltk::app::Sender<Message>) {
     menu.add_emit(
         "&File/Quit\t",
         Shortcut::Ctrl | 'q',
-        menu::MenuFlag::Normal,
+        MenuFlag::Normal,
         s.clone(),
         Message::Quit,
     );
@@ -279,12 +241,27 @@ fn init_menu_bar(menu: &mut menu::SysMenuBar, s: &fltk::app::Sender<Message>) {
     menu.add_emit(
         "&Help/About\t",
         Shortcut::None,
-        menu::MenuFlag::Normal,
+        MenuFlag::Normal,
         s.clone(),
         MenubarMessage::About.into(),
     );
 
     if let Some(mut item) = menu.find_item("&File/Quit\t") {
         item.set_label_color(Color::Red);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_init_menu_bar() {
+        let mut menu = menu::SysMenuBar::default();
+        let (s, _) = app::channel();
+        init_menu_bar(&mut menu, &s);
+        assert!(menu.find_item("&File/Open Full Trade list...\t").is_some());
+        assert!(menu.find_item("&File/Quit\t").is_some());
+        assert!(menu.find_item("&Help/About\t").is_some());
     }
 }
