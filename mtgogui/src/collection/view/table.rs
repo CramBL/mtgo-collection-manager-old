@@ -23,11 +23,13 @@ pub mod column;
 mod util;
 use util::CollectionColumn;
 
+/// [SortToggle] is a button that toggles between ascending and descending sort order
 pub struct SortToggle {
     b: button::Button,
 }
 
 impl SortToggle {
+    /// Create a new [SortToggle] button with the given label and [SortedBy] state
     pub fn new(label: &str, ord: Arc<Mutex<SortedBy>>) -> Self {
         let mut b = button::Button::default()
             .with_size(70, 0)
