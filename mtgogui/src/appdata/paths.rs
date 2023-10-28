@@ -37,7 +37,7 @@ impl CardDataPaths {
         let mut find_errs = Vec::new();
 
         let scryfall_path: Option<PathBuf> =
-            first_file_match_from_dir(Self::FIND_CARD_DEFINITIONS, appdata_dir, None);
+            first_file_match_from_dir(Self::FIND_CARD_DEFINITIONS, appdata_dir, None)?;
         if scryfall_path.is_none() {
             log::info!("Could not locate Scryfall data json in {appdata_dir:?}");
             find_errs.push(format!(
@@ -46,7 +46,7 @@ impl CardDataPaths {
         }
 
         let card_definitions_path: Option<PathBuf> =
-            first_file_match_from_dir(Self::FIND_CARD_DEFINITIONS, appdata_dir, None);
+            first_file_match_from_dir(Self::FIND_CARD_DEFINITIONS, appdata_dir, None)?;
         if card_definitions_path.is_none() {
             log::info!("Could not locate card definition json in {appdata_dir:?}");
             find_errs.push(format!(
@@ -55,7 +55,7 @@ impl CardDataPaths {
         }
 
         let price_history_path: Option<PathBuf> =
-            first_file_match_from_dir(Self::FIND_PRICE_HISTORY, appdata_dir, None);
+            first_file_match_from_dir(Self::FIND_PRICE_HISTORY, appdata_dir, None)?;
         if price_history_path.is_none() {
             log::info!("Could not locate price history json in {appdata_dir:?}");
             find_errs.push(format!(

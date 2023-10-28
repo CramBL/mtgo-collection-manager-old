@@ -1,3 +1,9 @@
+use std::{
+    io::Error,
+    path::{Path, PathBuf},
+    time::{Duration, Instant, SystemTime},
+};
+
 use flexi_logger::{
     Cleanup, Criterion, Duplicate, FileSpec, Logger, LoggerHandle, Naming, WriteMode,
 };
@@ -9,16 +15,40 @@ pub fn center() -> (i32, i32) {
     )
 }
 
+/// Find the first file in the given directory that contains the given string
+///
+/// # Arguments
+///
+/// * `f_name` - The string to search for in the file names
+/// * `path` - The path to the directory to search in
+/// * `max_file_age_secs` - If set, only files younger than this many seconds will be considered
+///
+/// # Returns
+///
+/// The path to the first file that contains the given string, or None if no such file was found
+///
+/// # Errors
+///
+/// * If the given path is not a directory
+/// * If the given path cannot be read
+/// * If the metadata of a file in the given directory cannot be read (permissions)
+/// * If the last modified time of a file in the given directory cannot be read
+/// * If the last modified time of a file in the given directory is in the future (very unlikely, but possible because of system clock drift)
 pub fn first_file_match_from_dir(
     f_name: &str,
-    path: &std::path::Path,
+    path: &Path,
     max_file_age_secs: Option<u64>,
-) -> Option<std::path::PathBuf> {
-    for entry in path.read_dir().unwrap() {
-        let dir_entry = entry.unwrap();
+) -> Result<Option<PathBuf>, Error> {
+    for entry in path.read_dir()? {
+        let dir_entry = entry?;
 
-        let metadata = std::fs::metadata(&dir_entry.path()).unwrap();
-        let last_modified = metadata.modified().unwrap().elapsed().unwrap().as_secs();
+        let metadata = std::fs::metadata(&dir_entry.path())?;
+        let last_modified = metadata
+            .modified()?
+            .elapsed()
+            .unwrap_or_else(|_| Duration::from_nanos(1)) // If the file was modified in the future, pretend it was modified 1 nanosecond ago
+            .as_secs();
+
         if metadata.is_file() {
             if let Some(max_file_age) = max_file_age_secs {
                 if last_modified > max_file_age {
@@ -27,12 +57,12 @@ pub fn first_file_match_from_dir(
             }
 
             if dir_entry.file_name().to_string_lossy().contains(f_name) {
-                return Some(dir_entry.path());
+                return Ok(Some(dir_entry.path()));
             }
         }
     }
 
-    None
+    Ok(None)
 }
 
 /// Setup the logger
