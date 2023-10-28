@@ -40,6 +40,7 @@ pub fn get_logo() -> SvgImage {
     logo
 }
 
+/// Returns the search icon as an owned [SvgImage] with scaling set.
 pub fn get_icon_search() -> SvgImage {
     SEARCH_ICON_IMG
         .get_or_init(|| SvgImage::from_data(SEARCH_ICON_SVG).unwrap())

@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 
 use std::ffi::OsStr;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
 use assets::{get_asc_svg, get_icon_search, get_logo};
@@ -54,16 +54,18 @@ pub enum Message {
     Example,
     MenuBar(menubar::MenubarMessage),
     Table(collection::TableMessage),
-    GotFullTradeList(Box<std::path::Path>),
+    GotFullTradeList(Box<Path>),
     SetCards(Vec<MtgoCard>),
 }
 
+/// Conversion from [menubar::MenubarMessage] to [Message]
 impl From<menubar::MenubarMessage> for Message {
     fn from(mb_msg: menubar::MenubarMessage) -> Self {
         Message::MenuBar(mb_msg)
     }
 }
 
+/// Conversion from [collection::TableMessage] to [Message]
 impl From<collection::TableMessage> for Message {
     fn from(ct_msg: collection::TableMessage) -> Self {
         Message::Table(ct_msg)

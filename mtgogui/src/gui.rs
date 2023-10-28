@@ -30,6 +30,7 @@ use self::setup::setup_main_window;
 
 mod setup;
 
+/// [MtgoGui] is the main GUI struct that holds all the widgets and state for the application
 pub struct MtgoGui {
     app: app::App,
     full_tradelist: Option<PathBuf>,
@@ -47,6 +48,7 @@ impl Default for MtgoGui {
 }
 
 impl MtgoGui {
+    /// Create a new [MtgoGui] instance
     pub fn new() -> Self {
         let app = app::App::default();
         let theme = WidgetTheme::new(ThemeType::Dark);
@@ -84,6 +86,7 @@ impl MtgoGui {
         }
     }
 
+    /// Run the main application event loop
     pub fn run(&mut self) {
         while self.app.wait() {
             if let Some(msg) = self.rcv.recv() {

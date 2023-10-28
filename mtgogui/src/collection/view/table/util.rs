@@ -18,9 +18,13 @@ use super::{
     CollectionTable,
 };
 
+/// Basic column layout for the collection table
 pub struct CollectionColumn {
+    /// The name of the column
     pub name: &'static str,
+    /// The width of the column
     pub width: i32,
+    /// The index of the column
     pub idx: i32,
 }
 
@@ -36,6 +40,7 @@ impl CollectionColumn {
     }
 }
 
+/// Sort the rows (card) of the table by the given column
 pub fn sort_cards(cards: &mut [MtgoCard], sort_states: &mut SortStates, category: Column) {
     match category {
         Column::Name => {

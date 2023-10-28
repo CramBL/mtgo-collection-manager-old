@@ -84,14 +84,17 @@ impl CardDataPaths {
         })
     }
 
+    /// Get the path to the scryfall data JSON-file
     pub fn scryfall_path(&self) -> &Path {
         self.scryfall.as_path()
     }
 
+    /// Get the path to the card definitions JSON-file
     pub fn card_definitions_path(&self) -> &Path {
         self.card_definitions.as_path()
     }
 
+    /// Get the path to the price history JSON-file
     pub fn price_history_path(&self) -> &Path {
         self.price_history.as_path()
     }

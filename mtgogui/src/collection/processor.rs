@@ -9,12 +9,13 @@ use fltk::app::Sender;
 
 use crate::{
     appdata::{update::AppData, APP_DATA_DIR},
+    menubar::util::ProgressUpdate,
     menubar::MenubarMessage,
-    menubar::ProgressUpdate,
     util::first_file_match_from_dir,
     Message,
 };
 
+/// [TradelistProcessor] is responsible for processing the tradelist, updating the card data, and assigning the cards to the collection table.
 #[derive(Debug)]
 pub struct TradelistProcessor {
     event_sender: Sender<Message>,
