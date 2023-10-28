@@ -5,8 +5,14 @@ use std::{
 
 use crate::util::first_file_match_from_dir;
 
+/// [CardDataPaths] contains the paths to the card data files
+///
+/// The card data files are:
+/// * Scryfall data JSON
+/// * Card definition JSON
+/// * Price history JSON
 #[derive(Debug)]
-pub(super) struct CardDataPaths {
+pub struct CardDataPaths {
     scryfall: PathBuf,
     card_definitions: PathBuf,
     price_history: PathBuf,
