@@ -108,8 +108,6 @@ pub fn setup_logger() -> LoggerHandle {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use super::*;
 
     #[test]
@@ -119,7 +117,7 @@ mod tests {
 
         assert_eq!(
             PathBuf::from("Cargo.lock"),
-            first_match.unwrap().file_name().unwrap()
+            first_match.unwrap().unwrap().file_name().unwrap()
         );
     }
 
@@ -130,7 +128,7 @@ mod tests {
 
         assert_eq!(
             PathBuf::from("Cargo.toml"),
-            first_match.unwrap().file_name().unwrap()
+            first_match.unwrap().unwrap().file_name().unwrap()
         );
     }
 
@@ -141,7 +139,7 @@ mod tests {
         let cwd = std::env::current_dir().unwrap();
         let first_match = first_file_match_from_dir("Cargo", &cwd, None);
 
-        let path = first_match.unwrap();
+        let path = first_match.unwrap().unwrap();
         let name = path.file_name().unwrap();
 
         if name != "Cargo.lock" && name != "Cargo.toml" {
