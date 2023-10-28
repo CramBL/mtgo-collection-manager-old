@@ -13,10 +13,10 @@ pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
     let mut search_box_grid_row = Grid::new(0, 0, 400, 30, "");
     if cfg!(debug_assertions) {
         // Show box edges and coordinates
-        search_box_grid_row.debug(true);
+        search_box_grid_row.show_grid(true);
     }
-    search_box_grid_row.set_layout(1, 4);
-    let mut frame = frame::Frame::new(0, 0, 100, 30, "");
+    search_box_grid_row.set_layout(10, 4);
+    let mut frame = frame::Frame::new(0, 0, 0, 10, "");
     frame.draw(|f| {
         let mut icon = get_icon_search();
         icon.scale(f.w(), f.h(), true, false);
@@ -30,8 +30,8 @@ pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
             s.send(TableMessage::Search(i.value().into()).into());
         }
     });
-    search_box_grid_row.insert(&mut frame, 0, 0);
-    search_box_grid_row.insert(&mut search_input, 0, 1..4);
+    search_box_grid_row.set_widget(&mut frame, 0, 0);
+    search_box_grid_row.set_widget(&mut search_input, 0, 1..4);
 
     search_box_grid_row.end();
 
