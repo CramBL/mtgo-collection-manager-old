@@ -1,4 +1,4 @@
-use std::io;
+use std::{default, io};
 
 use fltk::{
     enums::{Color, Font},
@@ -8,12 +8,57 @@ use mtgoupdater::{
     mtgo_preprocessor_api::run_mtgo_preprocessor_version, mtgogetter_api::mtgogetter_version,
 };
 
+use crate::{util::RelativeSize, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT};
+
+use super::McmMenuBar;
+
 /// Progress bar update message
 #[derive(Debug, Clone)]
 pub struct ProgressUpdate {
     pub show: bool,
     pub progress: f64,
     pub label: Box<str>,
+    pub selection_color: Color,
+    pub rel_size: RelativeSize,
+}
+
+impl default::Default for ProgressUpdate {
+    fn default() -> Self {
+        Self::new(false, 0., "".into(), Color::Green, RelativeSize::default())
+    }
+}
+
+impl ProgressUpdate {
+    /// Create a new [ProgressUpdate] instance. Allowing updating the appearance of the progress bar.
+    /// Updating relative values means scaling the progress bar relative to its current position and/or size.
+    ///
+    /// # Arguments
+    ///
+    /// * `show` - Whether or not to show the progress bar
+    /// * `progress` - The progress of the progress bar
+    /// * `label` - The label to display on the progress bar
+    /// * `selection_color` - The color that fills the progress bar
+    /// * `relative_size` - The relative position and size of the progress bar
+    pub fn new(
+        show: bool,
+        progress: f64,
+        label: Box<str>,
+        selection_color: Color,
+        relative_size: RelativeSize,
+    ) -> Self {
+        Self {
+            show,
+            progress,
+            label,
+            selection_color,
+            rel_size: relative_size,
+        }
+    }
+
+    /// Get the relative position and size to perform a [ProgressUpdate] with
+    pub fn rel_size(&self) -> &RelativeSize {
+        &self.rel_size
+    }
 }
 
 /// Get the version of the MTGO Getter binary (X.Y.Z) and return it as a string

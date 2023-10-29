@@ -1,4 +1,5 @@
 use std::{
+    default,
     io::Error,
     path::{Path, PathBuf},
     time::{Duration, Instant, SystemTime},
@@ -119,6 +120,95 @@ pub fn setup_logger() -> LoggerHandle {
         .write_mode(WriteMode::Async)
         .start()
         .expect("Failed to initialize logger")
+}
+
+/// Describes the relative position and size of a widget in percentage 0-100%.
+///
+/// Can be used to update the position and size of a widget relative to its current position and size.
+#[derive(Debug, Clone, Copy)]
+pub struct RelativeSize {
+    pub perc_rel_pos_x: i32,
+    pub perc_rel_pos_y: i32,
+    pub perc_rel_size_w: i32,
+    pub perc_rel_size_h: i32,
+}
+impl RelativeSize {
+    /// Create a new [RelativeSize] instance
+    pub fn new(
+        perc_rel_pos_x: i32,
+        perc_rel_pos_y: i32,
+        perc_rel_size_w: i32,
+        perc_rel_size_h: i32,
+    ) -> Self {
+        Self {
+            perc_rel_pos_x,
+            perc_rel_pos_y,
+            perc_rel_size_w,
+            perc_rel_size_h,
+        }
+    }
+
+    /// Get the relative value to the given value. e.g. if the relative value percentage
+    /// is 50% and the given value is 100, the relative value will be 50.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - The value to get the relative value of
+    ///
+    /// # Returns
+    ///
+    /// The relative value of the given value.
+    pub fn rel_val_x(&self, x: i32) -> i32 {
+        (x * self.perc_rel_pos_x) / 100
+    }
+
+    /// Get the relative value to the given value. e.g. if the relative value percentage
+    /// is 50% and the given value is 100, the relative value will be 50.
+    ///
+    /// # Arguments
+    ///
+    /// * `y` - The value to get the relative value of
+    ///
+    /// # Returns
+    ///
+    /// The relative value of the given value.
+    pub fn rel_val_y(&self, y: i32) -> i32 {
+        (y * self.perc_rel_pos_y) / 100
+    }
+
+    /// Get the relative value to the given value. e.g. if the relative value percentage
+    /// is 50% and the given value is 100, the relative value will be 50.
+    ///
+    /// # Arguments
+    ///
+    /// * `w` - The value to get the relative value of
+    ///
+    /// # Returns
+    ///
+    /// The relative value of the given value.
+    pub fn rel_val_w(&self, w: i32) -> i32 {
+        (w * self.perc_rel_size_w) / 100
+    }
+
+    /// Get the relative value to the given value. e.g. if the relative value percentage
+    /// is 50% and the given value is 100, the relative value will be 50.
+    ///
+    /// # Arguments
+    ///
+    /// * `h` - The value to get the relative value of
+    ///
+    /// # Returns
+    ///
+    /// The relative value of the given value.
+    pub fn rel_val_h(&self, h: i32) -> i32 {
+        (h * self.perc_rel_size_h) / 100
+    }
+}
+
+impl default::Default for RelativeSize {
+    fn default() -> Self {
+        Self::new(100, 100, 100, 100)
+    }
 }
 
 #[cfg(test)]

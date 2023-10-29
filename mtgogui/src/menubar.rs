@@ -38,6 +38,8 @@ pub struct McmMenuBar {
 }
 
 impl McmMenuBar {
+    pub const PROGRESS_BAR_WIDTH: i32 = 300;
+
     /// Creates a new menubar
     ///
     /// # Arguments
@@ -49,20 +51,20 @@ impl McmMenuBar {
         let mut mb = menu::SysMenuBar::default().with_size(w, h);
         setup::init_menu_bar(&mut mb, s);
 
-        let progress_bar_width = 300;
         let mut progress = Progress::new(
-            DEFAULT_APP_WIDTH - progress_bar_width,
+            DEFAULT_APP_WIDTH - Self::PROGRESS_BAR_WIDTH,
             0,
-            progress_bar_width,
+            Self::PROGRESS_BAR_WIDTH,
             MENU_BAR_HEIGHT,
-            "Progress bar title",
+            "",
         );
-        progress.set_color(Color::White);
         progress.set_selection_color(Color::Green);
         progress.set_frame(FrameType::FlatBox);
         progress.set_color(Color::Background2);
         progress.set_maximum(100.);
         progress.set_value(0.);
+        progress.set_align(enums::Align::Left | enums::Align::Inside);
+        progress.set_label_font(Font::Screen);
         progress.hide();
 
         Self {
@@ -85,10 +87,21 @@ impl McmMenuBar {
             MenubarMessage::Example => todo!("example"),
             MenubarMessage::ProgressBar(update) => {
                 if update.show {
-                    self.progress_bar.show();
-                    self.progress_bar.redraw();
                     self.progress_bar.set_value(update.progress);
-                    self.progress_bar.set_label(&update.label);
+                    self.progress_bar
+                        .set_label(&format!("     {}", update.label));
+                    self.progress_bar
+                        .set_selection_color(update.selection_color);
+                    self.progress_bar.resize(
+                        self.menu.width() - update.rel_size().rel_val_x(Self::PROGRESS_BAR_WIDTH),
+                        0,
+                        update.rel_size().rel_val_w(Self::PROGRESS_BAR_WIDTH),
+                        MENU_BAR_HEIGHT,
+                    );
+                    self.progress_bar.redraw_label();
+                    self.progress_bar.redraw();
+                    self.progress_bar.show();
+                    app::redraw();
                 } else {
                     self.progress_bar.hide();
                 }
