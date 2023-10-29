@@ -10,9 +10,9 @@ use fltk::{app::Sender, enums::Color};
 use crate::{
     appdata::{update::AppData, APP_DATA_DIR},
     menubar::util::ProgressUpdate,
-    menubar::MenubarMessage,
-    util::first_file_match_from_dir,
-    Message,
+    menubar::{McmMenuBar, MenubarMessage},
+    util::{first_file_match_from_dir, RelativeSize},
+    Message, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT,
 };
 
 /// [TradelistProcessor] is responsible for processing the tradelist, updating the card data, and assigning the cards to the collection table.
@@ -144,7 +144,11 @@ impl TradelistProcessor {
 fn fadeout_progress_bar(ev_sender: Sender<Message>) {
     thread::spawn({
         move || {
-            // Fade effect
+            // Fade and slide right effect
+
+            // Working with integers so we need to scale the values to get a fraction
+            const PERCENT: i32 = 100;
+            const CEILING: i32 = 255;
             for i in 1..=255 {
                 thread::sleep(std::time::Duration::from_millis(10));
                 ev_sender.send(Message::MenuBar(MenubarMessage::ProgressBar(
@@ -152,16 +156,23 @@ fn fadeout_progress_bar(ev_sender: Sender<Message>) {
                         show: true,
                         progress: 100.,
                         label: match i {
-                            0..=31 => "Collection updated!".into(),
+                            0..=31 => "Collection updated".into(),
                             32..=63 => "Collection updated.".into(),
                             64..=127 => "Collection updated..".into(),
                             128..=142 => "Collection updated...".into(),
+                            // Add this point the text switches from black to white, so we just remove it
+                            //  otherwise it has a slight *flash* effect which is distracting
                             143..=158 => "                  ...".into(),
                             159..=190 => "                   ..".into(),
                             191..=222 => "                    .".into(),
                             223..=255 => "".into(),
                         },
                         selection_color: Color::from_rgba_tuple((0, 255, 0, 255 - i)),
+                        rel_size: RelativeSize {
+                            perc_rel_pos_x: PERCENT - ((i as i32 * PERCENT) / CEILING),
+                            perc_rel_size_w: PERCENT - ((i as i32 * PERCENT) / CEILING),
+                            ..Default::default()
+                        },
                     },
                 )));
             }
