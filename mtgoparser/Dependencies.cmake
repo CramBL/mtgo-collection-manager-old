@@ -9,7 +9,7 @@ function(mtgoparser_setup_dependencies)
   # already been provided to us by a parent project
 
   if(NOT TARGET glaze::glaze)
-    cpmaddpackage("gh:stephenberry/glaze@1.5.2")
+    cpmaddpackage("gh:stephenberry/glaze@1.5.5")
   endif()
 
   if(NOT TARGET fmtlib::fmtlib)
@@ -36,13 +36,13 @@ function(mtgoparser_setup_dependencies)
     cpmaddpackage("gh:CodeFinder2/rapidxml@1.13")
   endif()
 
-  if(NOT TARGET Boost) 
+  if(NOT TARGET Boost)
     cpmaddpackage(
       NAME Boost
       VERSION 1.83.0
       GITHUB_REPOSITORY "boostorg/boost"
       GIT_TAG "boost-1.83.0"
-      OPTIONS 
+      OPTIONS
         "header_only TRUE"
         "COMPONENTS core;outcome;headers;conversion;detail;unordered"
     )
