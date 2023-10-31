@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::util::first_file_match_from_dir;
+use crate::util::{self, first_file_match_from_dir};
 
 use super::{paths::CardDataPaths, APP_DATA_DIR};
 
@@ -22,24 +22,7 @@ impl AppData {
     ///
     /// Fails if not all the expected files can be located or the MTGO Getter fails to update the data
     pub fn update() -> Result<Self, Error> {
-        let mut appdata_dir =
-            std::env::current_exe().expect("Failed to get current executable path");
-        log::info!("Path to executable: {appdata_dir:?}");
-        appdata_dir.pop();
-        if cfg!(windows) {
-            appdata_dir.push(format!(r#"{APP_DATA_DIR}\"#));
-        } else {
-            appdata_dir.push(format!(r#"{APP_DATA_DIR}/"#));
-        }
-        log::info!("Path to appdata dir: {appdata_dir:?}");
-
-        if !appdata_dir.exists() {
-            log::info!("App data path doesn't exist! - {appdata_dir:?}");
-            return Err(Error::new(
-                std::io::ErrorKind::InvalidInput,
-                format!("App data path {APP_DATA_DIR} doesn't exist!"),
-            ));
-        }
+        let appdata_dir = super::util::appdata_path()?;
 
         // Get App Data
         match mtgoupdater::mtgogetter_api::mtgogetter_update_all(appdata_dir.as_os_str()) {

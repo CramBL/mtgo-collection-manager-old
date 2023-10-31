@@ -2,6 +2,7 @@ use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
+use crate::appdata::state::GuiState;
 use crate::assets::{self, get_asc_svg, get_icon_search, get_logo};
 use crate::collection::processor::TradelistProcessor;
 use crate::collection::view::table::CollectionTable;
@@ -9,15 +10,15 @@ use crate::collection::TableMessage;
 use crate::menubar::McmMenuBar;
 use crate::util::first_file_match_from_dir;
 use crate::{
-    collection, Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, MIN_APP_HEIGHT,
-    MIN_APP_WIDTH,
+    appdata, collection, Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT,
+    MIN_APP_HEIGHT, MIN_APP_WIDTH,
 };
-use fltk::enums::{CallbackTrigger, Event, Font, FrameType, Shortcut};
+use fltk::enums::{Align, CallbackTrigger, Event, Font, FrameType, Shortcut};
 use fltk::frame::Frame;
 use fltk::image::{Image, PngImage, TiledImage};
 use fltk::misc::Progress;
 use fltk::prelude::WidgetExt;
-use fltk::text::TextAttr;
+use fltk::text::{TextAttr, TextBuffer, TextDisplay, WrapMode};
 use fltk::window::DoubleWindow;
 use fltk::{app, button, enums::Color, prelude::*, window::Window};
 use fltk::{prelude::*, *};
@@ -33,12 +34,13 @@ mod setup;
 /// [MtgoGui] is the main GUI struct that holds all the widgets and state for the application
 pub struct MtgoGui {
     app: app::App,
-    full_tradelist: Option<PathBuf>,
+    state: GuiState,
     rcv: app::Receiver<Message>,
     main_win: window::Window,
     menu: McmMenuBar,
     collection: CollectionTable,
     tradelist_processor: TradelistProcessor,
+    tradelist_age: TextDisplay,
 }
 
 impl Default for MtgoGui {
@@ -60,7 +62,8 @@ impl MtgoGui {
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, &ev_send);
 
         let flx_left_col = setup::setup_left_column_flx_box();
-        setup::set_left_col_box(ev_send.clone());
+
+        let txt_disp_tradelist_age = setup::set_left_col_box(ev_send.clone());
         flx_left_col.end();
 
         let collection = collection::view::set_collection_main_box(ev_send.clone());
@@ -77,22 +80,71 @@ impl MtgoGui {
         });
         Self {
             app,
-            full_tradelist: None,
+            state: GuiState::default(), // Placeholder, is overwritten at startup
             rcv: ev_rcv,
             main_win,
             menu,
             collection,
             tradelist_processor,
+            tradelist_age: txt_disp_tradelist_age,
         }
     }
 
-    /// Run the main application event loop
+    /// Perform any startup tasks.
+    ///
+    /// Runs after all the GUI elements are created. And just before the main event loop starts.
+    fn run_startup(&mut self) {
+        self.state =
+            GuiState::load(appdata::util::appdata_path().expect("Failed to get appdata path"))
+                .expect("Failed to load GUI state");
+
+        let mut txt_buf_tradelist_age = TextBuffer::default();
+        if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
+            txt_buf_tradelist_age.set_text(&format!(
+                "\n{}",
+                tradelist_added_date.format("%-d %B, %C%y")
+            ));
+        } else {
+            txt_buf_tradelist_age.set_text("\nNo tradelist added");
+        }
+        self.tradelist_age.set_buffer(txt_buf_tradelist_age);
+
+        match appdata::util::current_tradelist_path() {
+            Ok(Some(current_trade_list)) => {
+                self.tradelist_processor.process(current_trade_list.into())
+            }
+            Err(e) => {
+                // TODO - Error pop-up dialog if fails.
+                log::error!("Error getting current trade list path: {e}");
+            }
+            Ok(None) => {
+                log::info!("No current trade list found");
+            }
+        }
+    }
+
+    /// Run the application.
+    ///
+    /// Runs the startup tasks and the main event loop.
+    ///
+    /// This function will block until the application is closed.
     pub fn run(&mut self) {
+        self.run_startup();
+        self.gui_main_event_loop();
+    }
+
+    /// The main event loop for the application
+    fn gui_main_event_loop(&mut self) {
         while self.app.wait() {
             if let Some(msg) = self.rcv.recv() {
                 match msg {
                     Message::Quit => {
                         log::info!("Quit");
+                        if let Err(e) = self.state.save(
+                            appdata::util::appdata_path().expect("Failed to get appdata path"),
+                        ) {
+                            log::error!("Failed to save GUI state: {e}");
+                        }
                         self.app.quit();
                     }
                     Message::MenuBar(mb_msg) => self.menu.handle_ev(mb_msg),
@@ -107,6 +159,22 @@ impl MtgoGui {
                         self.app.redraw();
                     }
                     Message::GotFullTradeList(full_trade_list_path) => {
+                        // TODO: Error pop-up dialog if fails.
+                        // Should implement a generic error dialog that can be used for all unexpected errors that cannot be handled programmatically.
+                        appdata::util::copy_tradelist_to_appdata(full_trade_list_path.as_os_str())
+                            .unwrap();
+                        self.state.new_tradelist();
+                        let mut txt_buf_tradelist_age = TextBuffer::default();
+                        if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
+                            txt_buf_tradelist_age.set_text(&format!(
+                                "\n{}",
+                                tradelist_added_date.format("%-d %B, %C%y")
+                            ));
+                        } else {
+                            txt_buf_tradelist_age.set_text("\n\nNo tradelist added");
+                        }
+                        self.tradelist_age.set_buffer(txt_buf_tradelist_age);
+
                         self.tradelist_processor.process(full_trade_list_path);
                     }
                     Message::SetCards(cards) => self.collection.set_cards(cards),
