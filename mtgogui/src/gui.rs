@@ -33,7 +33,6 @@ mod setup;
 /// [MtgoGui] is the main GUI struct that holds all the widgets and state for the application
 pub struct MtgoGui {
     app: app::App,
-    full_tradelist: Option<PathBuf>,
     rcv: app::Receiver<Message>,
     main_win: window::Window,
     menu: McmMenuBar,
@@ -77,7 +76,6 @@ impl MtgoGui {
         });
         Self {
             app,
-            full_tradelist: None,
             rcv: ev_rcv,
             main_win,
             menu,
@@ -92,7 +90,7 @@ impl MtgoGui {
     fn run_startup(&mut self) {
         match appdata::util::current_tradelist_path() {
             Ok(Some(current_trade_list)) => {
-                self.full_tradelist = Some(current_trade_list);
+                self.tradelist_processor.process(current_trade_list.into())
             }
             Err(e) => {
                 // TODO - Error pop-up dialog if fails.
