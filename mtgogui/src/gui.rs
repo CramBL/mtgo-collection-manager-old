@@ -2,6 +2,7 @@ use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
+use crate::appdata::state::GuiState;
 use crate::assets::{self, get_asc_svg, get_icon_search, get_logo};
 use crate::collection::processor::TradelistProcessor;
 use crate::collection::view::table::CollectionTable;
@@ -33,6 +34,7 @@ mod setup;
 /// [MtgoGui] is the main GUI struct that holds all the widgets and state for the application
 pub struct MtgoGui {
     app: app::App,
+    state: GuiState,
     rcv: app::Receiver<Message>,
     main_win: window::Window,
     menu: McmMenuBar,
@@ -76,6 +78,7 @@ impl MtgoGui {
         });
         Self {
             app,
+            state: GuiState::default(), // Placeholder, is overwritten at startup
             rcv: ev_rcv,
             main_win,
             menu,
@@ -88,6 +91,9 @@ impl MtgoGui {
     ///
     /// Runs after all the GUI elements are created. And just before the main event loop starts.
     fn run_startup(&mut self) {
+        self.state =
+            GuiState::load(appdata::util::appdata_path().expect("Failed to get appdata path"))
+                .expect("Failed to load GUI state");
         match appdata::util::current_tradelist_path() {
             Ok(Some(current_trade_list)) => {
                 self.tradelist_processor.process(current_trade_list.into())
@@ -119,6 +125,11 @@ impl MtgoGui {
                 match msg {
                     Message::Quit => {
                         log::info!("Quit");
+                        if let Err(e) = self.state.save(
+                            appdata::util::appdata_path().expect("Failed to get appdata path"),
+                        ) {
+                            log::error!("Failed to save GUI state: {e}");
+                        }
                         self.app.quit();
                     }
                     Message::MenuBar(mb_msg) => self.menu.handle_ev(mb_msg),
@@ -137,6 +148,7 @@ impl MtgoGui {
                         // Should implement a generic error dialog that can be used for all unexpected errors that cannot be handled programmatically.
                         appdata::util::copy_tradelist_to_appdata(full_trade_list_path.as_os_str())
                             .unwrap();
+                        self.state.new_tradelist();
                         self.tradelist_processor.process(full_trade_list_path);
                     }
                     Message::SetCards(cards) => self.collection.set_cards(cards),
