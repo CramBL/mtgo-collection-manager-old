@@ -33,7 +33,7 @@ impl GuiState {
         Ok(())
     }
 
-    /// Load the [GuiState] from the given directory containing a TOML file named [GUI_STATE].
+    /// Load the [GuiState] from the given directory containing a TOML file named [GUI_STATE] or create a default [GuiState] if there's no matching file in the directory.
     ///
     /// # Arguments
     ///
@@ -44,14 +44,24 @@ impl GuiState {
     /// Returns an [io::Error] if the [GuiState] fails to be loaded.
     pub fn load(mut src_dir: PathBuf) -> io::Result<Self> {
         src_dir.push(GUI_STATE);
-        let toml = std::fs::read_to_string(src_dir)?;
-        let gui_state: GuiState = toml::from_str(&toml).expect("Failed to deserialize GUI state");
+        let gui_state = if src_dir.exists() {
+            let toml = std::fs::read_to_string(src_dir)?;
+            toml::from_str(&toml).expect("Failed to deserialize GUI state")
+        } else {
+            log::info!("No GUI state found, creating default GUI state");
+            Self::new()
+        };
         Ok(gui_state)
     }
 
-    /// Assign the current date and time to the [GuiState] tradelist_added_date field.
+    /// Save the current [DateTime<Utc>] as the last time a tradelist was added.
     pub fn new_tradelist(&mut self) {
         self.tradelist_added_date = Utc::now();
+    }
+
+    /// Get the [DateTime<Utc>] of the last time a tradelist was added.
+    pub fn get_tradelist_added_date(&self) -> DateTime<Utc> {
+        self.tradelist_added_date
     }
 }
 
