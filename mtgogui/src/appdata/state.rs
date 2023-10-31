@@ -8,7 +8,7 @@ use super::GUI_STATE;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default, PartialEq, Eq)]
 pub struct GuiState {
-    tradelist_added_date: DateTime<Utc>,
+    tradelist_added_date: Option<DateTime<Utc>>,
 }
 
 impl GuiState {
@@ -56,12 +56,12 @@ impl GuiState {
 
     /// Save the current [DateTime<Utc>] as the last time a tradelist was added.
     pub fn new_tradelist(&mut self) {
-        self.tradelist_added_date = Utc::now();
+        self.tradelist_added_date = Some(Utc::now());
     }
 
     /// Get the [DateTime<Utc>] of the last time a tradelist was added.
-    pub fn get_tradelist_added_date(&self) -> DateTime<Utc> {
-        self.tradelist_added_date
+    pub fn get_tradelist_added_date(&self) -> Option<&DateTime<Utc>> {
+        self.tradelist_added_date.as_ref()
     }
 }
 
@@ -88,11 +88,11 @@ mod tests {
     fn test_gui_state_tradelist_data() {
         let mut gui_state = GuiState::new();
         let now = Utc::now();
-        gui_state.tradelist_added_date = now;
+        gui_state.tradelist_added_date = Some(now);
 
         let after = now + chrono::Duration::seconds(1);
 
-        assert!(gui_state.tradelist_added_date < after);
+        assert!(gui_state.tradelist_added_date.unwrap() < after);
     }
 
     #[test]
@@ -102,13 +102,41 @@ mod tests {
 
         let mut gui_state = GuiState::new();
         let now = Utc::now();
-        gui_state.tradelist_added_date = now;
+        gui_state.tradelist_added_date = Some(now);
 
         gui_state.save(tmpdir_path.clone()).unwrap();
         let gui_state_loaded = GuiState::load(tmpdir_path).unwrap();
 
         assert_eq!(gui_state, gui_state_loaded);
-        assert_eq!(gui_state_loaded.tradelist_added_date, now);
-        assert!(gui_state_loaded.tradelist_added_date < now + chrono::Duration::seconds(1));
+        assert_eq!(gui_state_loaded.tradelist_added_date.unwrap(), now);
+        assert!(
+            gui_state_loaded.tradelist_added_date.unwrap() < now + chrono::Duration::seconds(1)
+        );
+    }
+
+    #[test]
+    fn test_gui_state_tradelist_date_format() {
+        let mut gui_state = GuiState::new();
+        let date = DateTime::<Utc>::UNIX_EPOCH;
+        gui_state.tradelist_added_date = Some(date);
+        let simple_readable_date = date.format("%-d %B, %C%y");
+        eprintln!("date: {simple_readable_date}");
+
+        assert_eq!(
+            gui_state
+                .tradelist_added_date
+                .unwrap()
+                .format("%-d %B, %C%y")
+                .to_string(),
+            simple_readable_date.to_string()
+        );
+        assert_eq!(
+            gui_state
+                .tradelist_added_date
+                .unwrap()
+                .format("%-d %B, %C%y")
+                .to_string(),
+            "1 January, 1970"
+        );
     }
 }
