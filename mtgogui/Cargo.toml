@@ -19,9 +19,14 @@ mtgoupdater = { version = "0.1.0", path = "../mtgoupdater"}
 url = "2.4.1"
 flexi_logger = { version = "0.27", features = ["async", "specfile"] }
 log = "0.4"
+serde = "1.0.190"
+toml = "0.8.6"
+serde_derive = "1.0.190"
+chrono =  { version = "0.4.31", features = ["serde"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
+temp-dir = "0.1.11"
 
 
 [profile.release]
