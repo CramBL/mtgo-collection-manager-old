@@ -13,12 +13,12 @@ use crate::{
     appdata, collection, Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT,
     MIN_APP_HEIGHT, MIN_APP_WIDTH,
 };
-use fltk::enums::{CallbackTrigger, Event, Font, FrameType, Shortcut};
+use fltk::enums::{Align, CallbackTrigger, Event, Font, FrameType, Shortcut};
 use fltk::frame::Frame;
 use fltk::image::{Image, PngImage, TiledImage};
 use fltk::misc::Progress;
 use fltk::prelude::WidgetExt;
-use fltk::text::TextAttr;
+use fltk::text::{TextAttr, TextBuffer, TextDisplay, WrapMode};
 use fltk::window::DoubleWindow;
 use fltk::{app, button, enums::Color, prelude::*, window::Window};
 use fltk::{prelude::*, *};
@@ -40,6 +40,7 @@ pub struct MtgoGui {
     menu: McmMenuBar,
     collection: CollectionTable,
     tradelist_processor: TradelistProcessor,
+    tradelist_age: TextDisplay,
 }
 
 impl Default for MtgoGui {
@@ -61,7 +62,8 @@ impl MtgoGui {
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, &ev_send);
 
         let flx_left_col = setup::setup_left_column_flx_box();
-        setup::set_left_col_box(ev_send.clone());
+
+        let txt_disp_tradelist_age = setup::set_left_col_box(ev_send.clone());
         flx_left_col.end();
 
         let collection = collection::view::set_collection_main_box(ev_send.clone());
@@ -84,6 +86,7 @@ impl MtgoGui {
             menu,
             collection,
             tradelist_processor,
+            tradelist_age: txt_disp_tradelist_age,
         }
     }
 
@@ -94,6 +97,18 @@ impl MtgoGui {
         self.state =
             GuiState::load(appdata::util::appdata_path().expect("Failed to get appdata path"))
                 .expect("Failed to load GUI state");
+
+        let mut txt_buf_tradelist_age = TextBuffer::default();
+        if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
+            txt_buf_tradelist_age.set_text(&format!(
+                "\n{}",
+                tradelist_added_date.format("%-d %B, %C%y")
+            ));
+        } else {
+            txt_buf_tradelist_age.set_text("\nNo tradelist added");
+        }
+        self.tradelist_age.set_buffer(txt_buf_tradelist_age);
+
         match appdata::util::current_tradelist_path() {
             Ok(Some(current_trade_list)) => {
                 self.tradelist_processor.process(current_trade_list.into())
@@ -149,6 +164,17 @@ impl MtgoGui {
                         appdata::util::copy_tradelist_to_appdata(full_trade_list_path.as_os_str())
                             .unwrap();
                         self.state.new_tradelist();
+                        let mut txt_buf_tradelist_age = TextBuffer::default();
+                        if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
+                            txt_buf_tradelist_age.set_text(&format!(
+                                "\n{}",
+                                tradelist_added_date.format("%-d %B, %C%y")
+                            ));
+                        } else {
+                            txt_buf_tradelist_age.set_text("\n\nNo tradelist added");
+                        }
+                        self.tradelist_age.set_buffer(txt_buf_tradelist_age);
+
                         self.tradelist_processor.process(full_trade_list_path);
                     }
                     Message::SetCards(cards) => self.collection.set_cards(cards),
