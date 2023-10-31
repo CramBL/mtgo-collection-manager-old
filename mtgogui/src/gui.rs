@@ -9,8 +9,8 @@ use crate::collection::TableMessage;
 use crate::menubar::McmMenuBar;
 use crate::util::first_file_match_from_dir;
 use crate::{
-    collection, Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, MIN_APP_HEIGHT,
-    MIN_APP_WIDTH,
+    appdata, collection, Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT,
+    MIN_APP_HEIGHT, MIN_APP_WIDTH,
 };
 use fltk::enums::{CallbackTrigger, Event, Font, FrameType, Shortcut};
 use fltk::frame::Frame;
@@ -86,8 +86,36 @@ impl MtgoGui {
         }
     }
 
-    /// Run the main application event loop
+    /// Perform any startup tasks.
+    ///
+    /// Runs after all the GUI elements are created. And just before the main event loop starts.
+    fn run_startup(&mut self) {
+        match appdata::util::current_tradelist_path() {
+            Ok(Some(current_trade_list)) => {
+                self.full_tradelist = Some(current_trade_list);
+            }
+            Err(e) => {
+                // TODO - Error pop-up dialog if fails.
+                log::error!("Error getting current trade list path: {e}");
+            }
+            Ok(None) => {
+                log::info!("No current trade list found");
+            }
+        }
+    }
+
+    /// Run the application.
+    ///
+    /// Runs the startup tasks and the main event loop.
+    ///
+    /// This function will block until the application is closed.
     pub fn run(&mut self) {
+        self.run_startup();
+        self.gui_main_event_loop();
+    }
+
+    /// The main event loop for the application
+    fn gui_main_event_loop(&mut self) {
         while self.app.wait() {
             if let Some(msg) = self.rcv.recv() {
                 match msg {
@@ -107,6 +135,10 @@ impl MtgoGui {
                         self.app.redraw();
                     }
                     Message::GotFullTradeList(full_trade_list_path) => {
+                        // TODO: Error pop-up dialog if fails.
+                        // Should implement a generic error dialog that can be used for all unexpected errors that cannot be handled programmatically.
+                        appdata::util::copy_tradelist_to_appdata(full_trade_list_path.as_os_str())
+                            .unwrap();
                         self.tradelist_processor.process(full_trade_list_path);
                     }
                     Message::SetCards(cards) => self.collection.set_cards(cards),

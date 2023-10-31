@@ -1,4 +1,5 @@
-use super::APP_DATA_DIR;
+use super::{APP_DATA_DIR, CURRENT_FULL_TRADE_LIST};
+use std::ffi::OsStr;
 use std::io;
 use std::path::PathBuf;
 
@@ -28,4 +29,37 @@ pub fn appdata_path() -> io::Result<PathBuf> {
     }
 
     Ok(appdata_dir)
+}
+
+/// Copy the given full trade list to the appdata directory
+///
+/// # Arguments
+///
+/// * `full_trade_list_path` - [OsStr] path to the full trade list
+///
+/// # Errors
+///
+/// * If the full trade list cannot be copied to the appdata directory
+pub fn copy_tradelist_to_appdata(full_trade_list_path: &OsStr) -> io::Result<()> {
+    let mut appdata_dir = crate::appdata::util::appdata_path()?;
+    appdata_dir.push(CURRENT_FULL_TRADE_LIST);
+    std::fs::copy(full_trade_list_path, &appdata_dir)?;
+    Ok(())
+}
+
+/// Get the path to the current full trade list in the appdata directory if it exists.
+/// Returns [None] if the file doesn't exist.
+///
+/// # Errors
+///
+/// * If the path to the appdata directory cannot be determined
+pub fn current_tradelist_path() -> io::Result<Option<PathBuf>> {
+    let mut appdata_dir = crate::appdata::util::appdata_path()?;
+    appdata_dir.push(CURRENT_FULL_TRADE_LIST);
+    if appdata_dir.exists() && appdata_dir.is_file() {
+        Ok(Some(appdata_dir))
+    } else {
+        log::info!("Current full trade list doesn't exist at: {appdata_dir:?}");
+        Ok(None)
+    }
 }
