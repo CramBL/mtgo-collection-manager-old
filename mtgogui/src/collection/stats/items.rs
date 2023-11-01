@@ -12,11 +12,13 @@ pub struct BrowserItems {
 }
 
 impl BrowserItems {
+    const ALTERNATING_BACKGROUND_COLOR: &'static str = r#"@B49"#; // Dark grey
+
     const TITLE_FONT_SIZE: &'static str = r#"@S15"#;
     const TITLE_FONT_BOLD: &'static str = r#"@b"#;
 
     const VALUE_FONT_SIZE: &'static str = r#"@S13"#;
-    const ALTERNATING_BACKGROUND_COLOR: &'static str = r#"@B49"#; // Dark grey
+    const VALUE_FONT_TYPE: &'static str = r#"@F13"#;
 
     fn title_format(&self) -> &str {
         if self.item_index % 2 == 0 {
@@ -49,10 +51,15 @@ impl BrowserItems {
                 font_size = Self::TITLE_FONT_SIZE,
                 background_color = Self::ALTERNATING_BACKGROUND_COLOR
             ),
-            value_format: format!("{font_size}", font_size = Self::VALUE_FONT_SIZE),
-            alt_value_format: format!(
-                "{font_size}{background_color}",
+            value_format: format!(
+                "{font_size}{font_type}",
                 font_size = Self::VALUE_FONT_SIZE,
+                font_type = Self::VALUE_FONT_TYPE
+            ),
+            alt_value_format: format!(
+                "{font_size}{font_type}{background_color}",
+                font_size = Self::VALUE_FONT_SIZE,
+                font_type = Self::VALUE_FONT_TYPE,
                 background_color = Self::ALTERNATING_BACKGROUND_COLOR
             ),
         }
@@ -60,7 +67,7 @@ impl BrowserItems {
 
     pub fn add_item(&mut self, title: &str, value: &str) {
         let formatted_item = format!(
-            "{title_format}{title}\t{value_format} {value}",
+            "{title_format}{title}\t{value_format}@.{value}",
             title_format = self.title_format(),
             value_format = self.value_format(),
             title = title,
@@ -72,7 +79,7 @@ impl BrowserItems {
 
     pub fn add_item_unique_total(&mut self, title: &str, unique_total_pair: UniqueTotal) {
         let formatted_item = format!(
-            "{title_format}{title}\t{value_format} {unique} ({total})",
+            "{title_format}{title}\t{value_format}@.{unique} ({total})",
             title_format = self.title_format(),
             value_format = self.value_format(),
             title = title,

@@ -101,13 +101,13 @@ impl CollectionStats {
             "Total value".to_string(),
             if total_gb_value > total_scryfall_value {
                 vec![
-                    format!("@C2 {:.2} tix @Goatbots", total_gb_value),
-                    format!("@C3 {:.2} tix @Cardhoarder", total_scryfall_value),
+                    format!("@C2@.{:.2} tix @Goatbots", total_gb_value),
+                    format!("@C3@.{:.2} tix @Cardhoarder", total_scryfall_value),
                 ]
             } else {
                 vec![
-                    format!("@C3 {:.2} tix @Goatbots", total_gb_value),
-                    format!("@C2 {:.2} tix @Cardhoarder", total_scryfall_value),
+                    format!("@C3@.{:.2} tix @Goatbots", total_gb_value),
+                    format!("@C2@.{:.2} tix @Cardhoarder", total_scryfall_value),
                 ]
             },
         ));
