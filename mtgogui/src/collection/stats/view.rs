@@ -25,12 +25,17 @@ impl StatsView {
         self.browser.clear();
         let mut browser_items = BrowserItems::new();
         browser_items.add_item("dek-File added", stats.file_from());
-        browser_items.add_item_unique_total("Total cards", stats.total_cards());
+        browser_items.add_item_unique_total("Total items", stats.total_cards());
         browser_items
             .add_multi_value_item(stats.take_total_value().expect("No total value stat set"));
         browser_items.add_item("Most expensive item", stats.most_expensive_item());
         browser_items.add_item_unique_total("Cards > 5 tix", stats.cards_over_5_tix());
         browser_items.add_item_unique_total("Cards < 0.1 tix", stats.cards_under_a_tenth_tix());
+        browser_items.add_multi_value_item(
+            stats
+                .take_rarity_distribution()
+                .expect("No rarity distribution stat set"),
+        );
 
         for item in browser_items.drain() {
             self.browser.add(&item);
