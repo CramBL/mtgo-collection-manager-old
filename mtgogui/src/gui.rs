@@ -142,12 +142,7 @@ impl MtgoGui {
                         self.app.quit();
                     }
                     Message::MenuBar(mb_msg) => self.menu.handle_ev(mb_msg),
-                    Message::Example => {
-                        log::info!("Example");
-                        let cards: Vec<mtgoupdater::mtgo_card::MtgoCard> =
-                            mtgoupdater::internal_only::get_example_card_collection();
-                        self.collection.set_cards(cards);
-                    }
+
                     Message::Table(t_m) => {
                         self.collection.handle_ev(t_m);
                         self.app.redraw();

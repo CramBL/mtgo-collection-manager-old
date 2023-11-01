@@ -53,7 +53,6 @@ pub const MENU_BAR_HEIGHT: i32 = 25;
 #[derive(Debug, Clone)]
 pub enum Message {
     Quit,
-    Example,
     MenuBar(menubar::MenubarMessage),
     Table(collection::TableMessage),
     GotFullTradeList(Box<Path>),

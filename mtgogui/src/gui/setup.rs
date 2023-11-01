@@ -50,18 +50,6 @@ pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
     search_box_grid_row.set_widget(&mut frame, 0, 0);
     search_box_grid_row.set_widget(&mut search_input, 0, 1..4);
 
-    if cfg!(debug_assertions) {
-        let mut btn_example = button::Button::new(0, 0, 100, 5, "Example");
-        btn_example.set_callback({
-            move |b| {
-                ev_send.send(Message::Example);
-
-                b.set_label("Getting example...");
-            }
-        });
-        search_box_grid_row.set_widget(&mut btn_example, 2, 0..4);
-    }
-
     search_box_grid_row.end();
 }
 
