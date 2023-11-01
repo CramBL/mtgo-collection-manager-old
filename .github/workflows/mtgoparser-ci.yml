@@ -51,10 +51,9 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-12
           - windows-2022
         compiler:
-          - llvm-15.0.3 # Latest supported on non-arm apple targets
+          - llvm-16.0.6
           - gcc-13
         generator:
           - "Ninja Multi-Config"
@@ -79,17 +78,20 @@ jobs:
             gcov_executable: gcov
             enable_ipo: On
 
+          - os: macos-12
+            compiler: llvm-15.0.3
+            enable_ipo: Off
+
           - os: ubuntu-22.04
             compiler: gcc-13
             gcov_executable: "llvm-cov gcov" # simply putting "gcov" errors on Ubuntu with a segfault (exit -11 = SIGSEGV) as it's the wrong gcov version
             enable_ipo: On
 
-          - compiler: llvm-15.0.3
+          - compiler: llvm-16.0.6
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
-          - os: macos-12
-            enable_ipo: Off
+
 
           # Set up preferred package generators, for given build configurations
           - build_type: Release
