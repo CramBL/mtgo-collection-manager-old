@@ -1,6 +1,6 @@
 use std::vec::Drain;
 
-use super::util::UniqueTotal;
+use super::util::{MultiValueStat, UniqueTotal};
 
 pub struct BrowserItems {
     item_index: usize,
@@ -80,6 +80,33 @@ impl BrowserItems {
             total = unique_total_pair.total()
         );
         self.formatted_items.push(formatted_item);
+        self.item_index += 1;
+    }
+
+    pub fn add_multi_value_item(&mut self, mut stat: MultiValueStat) {
+        let mut first_item = format!(
+            "{title_format}{title}\t{value_format}",
+            title_format = self.title_format(),
+            value_format = self.value_format(),
+            title = stat.title()
+        );
+
+        let values = stat.take_values();
+        let mut value_iter = values.iter();
+        if let Some(first_value) = value_iter.next() {
+            first_item.push_str(first_value);
+        }
+        self.formatted_items.push(first_item);
+        // Now add any remaining values
+        for value in value_iter {
+            let formatted_item = format!(
+                "{title_format} \t{value_format}{value}",
+                title_format = self.title_format(),
+                value_format = self.value_format(),
+                value = value
+            );
+            self.formatted_items.push(formatted_item);
+        }
         self.item_index += 1;
     }
 
