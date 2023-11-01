@@ -8,7 +8,7 @@ pub struct CollectionStats {
     file_from: String,
     total_cards: UniqueTotal,
     total_value: Option<MultiValueStat>,
-    most_expensive_item: String,
+    most_expensive_item: Option<MultiValueStat>,
     cards_under_a_tenth_tix: UniqueTotal,
     cards_over_5_tix: UniqueTotal,
     rarity_distribution: Option<MultiValueStat>,
@@ -21,7 +21,7 @@ impl CollectionStats {
             file_from: String::new(),
             total_value: None,
             total_cards: UniqueTotal::default(),
-            most_expensive_item: String::new(),
+            most_expensive_item: None,
             cards_under_a_tenth_tix: UniqueTotal::default(),
             cards_over_5_tix: UniqueTotal::default(),
             rarity_distribution: None,
@@ -68,22 +68,38 @@ impl CollectionStats {
             })
             .unwrap_or_else(|| panic!("No cards in collection!"));
 
-        let description = if gb_most_expensive.goatbots_price
+        let descriptions: Vec<String> = if gb_most_expensive.goatbots_price
             > scryfall_most_expensive.scryfall_price.unwrap_or(0.)
         {
-            format!(
-                "{name} ({price} tix @Goatbots)",
-                name = gb_most_expensive.name.as_ref(),
-                price = gb_most_expensive.goatbots_price
-            )
+            vec![
+                gb_most_expensive.name.to_string(),
+                format!(
+                    "@C2@.{price} tix @Goatbots",
+                    price = gb_most_expensive.goatbots_price
+                ),
+                format!(
+                    "@C3@.{price} tix @Cardhoarder",
+                    price = scryfall_most_expensive.scryfall_price.unwrap_or_default()
+                ),
+            ]
         } else {
-            format!(
-                "{name} ({price} tix @Cardhoarder)",
-                name = scryfall_most_expensive.name.as_ref(),
-                price = scryfall_most_expensive.scryfall_price.unwrap()
-            )
+            vec![
+                scryfall_most_expensive.name.to_string(),
+                format!(
+                    "@C3@.{price} tix @Goatbots",
+                    price = gb_most_expensive.goatbots_price
+                ),
+                format!(
+                    "@C2@.{price} tix @Cardhoarder",
+                    price = scryfall_most_expensive.scryfall_price.unwrap_or_default()
+                ),
+            ]
         };
-        self.set_most_expensive_item(&description);
+
+        self.most_expensive_item = Some(MultiValueStat::new(
+            "Most expensive item".to_string(),
+            descriptions,
+        ));
     }
 
     fn calc_total_value(&mut self, cards: &[MtgoCard]) {
@@ -190,10 +206,6 @@ impl CollectionStats {
         self.total_cards = UniqueTotal::new(total_unique_cards, total_card_quantity);
     }
 
-    pub fn set_most_expensive_item(&mut self, most_expensive_item: &str) {
-        self.most_expensive_item = most_expensive_item.to_string();
-    }
-
     pub fn set_cards_under_a_tenth_tix(
         &mut self,
         cards_under_tenth_tix_unique: usize,
@@ -220,10 +232,6 @@ impl CollectionStats {
         self.total_cards
     }
 
-    pub fn most_expensive_item(&self) -> &str {
-        &self.most_expensive_item
-    }
-
     pub fn cards_under_a_tenth_tix(&self) -> UniqueTotal {
         self.cards_under_a_tenth_tix
     }
@@ -238,6 +246,10 @@ impl CollectionStats {
 
     pub fn take_rarity_distribution(&mut self) -> Option<MultiValueStat> {
         self.rarity_distribution.take()
+    }
+
+    pub fn take_most_expensive_item(&mut self) -> Option<MultiValueStat> {
+        self.most_expensive_item.take()
     }
 }
 
