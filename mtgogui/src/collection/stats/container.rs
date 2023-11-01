@@ -2,6 +2,7 @@ use mtgoupdater::mtgo_card::MtgoCard;
 
 use super::util::{MultiValueStat, UniqueTotal};
 
+/// Container for collection stats
 #[derive(Debug, Clone)]
 pub struct CollectionStats {
     file_from: String,
@@ -13,6 +14,7 @@ pub struct CollectionStats {
 }
 
 impl CollectionStats {
+    /// Create a new empty [CollectionStats] container
     pub fn new() -> Self {
         Self {
             file_from: String::new(),
@@ -24,6 +26,15 @@ impl CollectionStats {
         }
     }
 
+    /// Create a new [CollectionStats] from a list of cards
+    ///
+    /// # Arguments
+    ///
+    /// * `cards` - A borrowed slice of cards to create stats from
+    ///
+    /// # Returns
+    ///
+    /// A new [CollectionStats] container
     pub fn from_cards(cards: &[MtgoCard]) -> Self {
         let mut stats = Self::new();
 
@@ -88,10 +99,17 @@ impl CollectionStats {
 
         stats.total_value = Some(MultiValueStat::new(
             "Total value".to_string(),
-            vec![
-                format!("{:.2} tix @Goatbots", total_gb_value),
-                format!("{:.2} tix @Cardhoarder", total_scryfall_value),
-            ],
+            if total_gb_value > total_scryfall_value {
+                vec![
+                    format!("@C2 {:.2} tix @Goatbots", total_gb_value),
+                    format!("@C3 {:.2} tix @Cardhoarder", total_scryfall_value),
+                ]
+            } else {
+                vec![
+                    format!("@C3 {:.2} tix @Goatbots", total_gb_value),
+                    format!("@C2 {:.2} tix @Cardhoarder", total_scryfall_value),
+                ]
+            },
         ));
 
         stats.set_total_cards(total_cards_unique, total_cards_quantity as usize);

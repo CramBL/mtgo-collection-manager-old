@@ -49,9 +49,9 @@ impl BrowserItems {
                 font_size = Self::TITLE_FONT_SIZE,
                 background_color = Self::ALTERNATING_BACKGROUND_COLOR
             ),
-            value_format: format!("{font_size}@.", font_size = Self::VALUE_FONT_SIZE),
+            value_format: format!("{font_size}", font_size = Self::VALUE_FONT_SIZE),
             alt_value_format: format!(
-                "{font_size}{background_color}@.",
+                "{font_size}{background_color}",
                 font_size = Self::VALUE_FONT_SIZE,
                 background_color = Self::ALTERNATING_BACKGROUND_COLOR
             ),
@@ -60,7 +60,7 @@ impl BrowserItems {
 
     pub fn add_item(&mut self, title: &str, value: &str) {
         let formatted_item = format!(
-            "{title_format}{title}\t{value_format}{value}",
+            "{title_format}{title}\t{value_format} {value}",
             title_format = self.title_format(),
             value_format = self.value_format(),
             title = title,
@@ -72,7 +72,7 @@ impl BrowserItems {
 
     pub fn add_item_unique_total(&mut self, title: &str, unique_total_pair: UniqueTotal) {
         let formatted_item = format!(
-            "{title_format}{title}\t{value_format}{unique} ({total})",
+            "{title_format}{title}\t{value_format} {unique} ({total})",
             title_format = self.title_format(),
             value_format = self.value_format(),
             title = title,
