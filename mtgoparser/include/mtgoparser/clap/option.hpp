@@ -20,25 +20,23 @@ enum class Opt : uint8_t { Flag, NeedValue };
 // Struct for defining options
 struct Option
 {
+  using T_opt_sv = std::optional<std::string_view>;
+  using T_alias_array = std::array<T_opt_sv, clap::MAX_ALIAS_COUNT>;
+  using T_alias_array_opt = std::optional<T_alias_array>;
+
   std::string_view name_;
   Opt opt_type_;
   // Array should be optional, will then be std::nullopt instead of empty array if there's no aliases
-  std::optional<std::array<std::optional<std::string_view>, clap::MAX_ALIAS_COUNT>> aliases_;
+  T_alias_array_opt aliases_;
 
 
-  template<std::convertible_to<std::string_view> T_Name,
-    std::convertible_to<std::optional<std::string_view>>... T_Alias>
+  template<std::convertible_to<std::string_view> T_Name, std::convertible_to<T_opt_sv>... T_Alias>
   [[nodiscard]] constexpr explicit Option(T_Name name, Opt opt_type, T_Alias... aliases) noexcept
-    : name_{ name }, opt_type_{ opt_type }
+    : name_{ name }, opt_type_{ opt_type }, aliases_{ T_alias_array{ T_opt_sv{ aliases }... } }
   {
     // Just to improve compiler error
     static_assert(
       sizeof...(aliases) <= clap::MAX_ALIAS_COUNT, "Too many aliases provided in initialization of struct `Option`");
-
-    // MSVC raises error C2664 if this is initialized in a member initializer
-    // NOLINTBEGIN
-    aliases_ = { aliases... };
-    // NOLINTEND
   }
 
   [[nodiscard]] constexpr bool has_alias() const
