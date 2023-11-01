@@ -1,11 +1,12 @@
 use mtgoupdater::mtgo_card::MtgoCard;
 
-use super::util::UniqueTotal;
+use super::util::{MultiValueStat, UniqueTotal};
 
 #[derive(Debug, Clone)]
 pub struct CollectionStats {
     file_from: String,
     total_cards: UniqueTotal,
+    total_value: Option<MultiValueStat>,
     most_expensive_item: String,
     cards_under_a_tenth_tix: UniqueTotal,
     cards_over_5_tix: UniqueTotal,
@@ -15,6 +16,7 @@ impl CollectionStats {
     pub fn new() -> Self {
         Self {
             file_from: String::new(),
+            total_value: None,
             total_cards: UniqueTotal::default(),
             most_expensive_item: String::new(),
             cards_under_a_tenth_tix: UniqueTotal::default(),
@@ -74,6 +76,24 @@ impl CollectionStats {
             }
         }
 
+        let total_gb_value = cards
+            .iter()
+            .map(|card| card.goatbots_price as f64 * card.quantity as f64)
+            .sum::<f64>();
+        let total_scryfall_value = cards.iter().fold(0., |acc, card| {
+            acc + card
+                .scryfall_price
+                .map_or(0., |price| price as f64 * card.quantity as f64)
+        });
+
+        stats.total_value = Some(MultiValueStat::new(
+            "Total value".to_string(),
+            vec![
+                format!("{:.2} tix @Goatbots", total_gb_value),
+                format!("{:.2} tix @Cardhoarder", total_scryfall_value),
+            ],
+        ));
+
         stats.set_total_cards(total_cards_unique, total_cards_quantity as usize);
         stats.set_cards_under_a_tenth_tix(
             cards_under_a_tenth_tix_unique,
@@ -132,6 +152,10 @@ impl CollectionStats {
 
     pub fn cards_over_5_tix(&self) -> UniqueTotal {
         self.cards_over_5_tix
+    }
+
+    pub fn take_total_value(&mut self) -> Option<MultiValueStat> {
+        self.total_value.take()
     }
 }
 
