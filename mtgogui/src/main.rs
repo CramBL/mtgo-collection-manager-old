@@ -7,6 +7,8 @@ use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
 use assets::{get_asc_svg, get_icon_search, get_logo};
+
+use collection::stats::container::CollectionStats;
 use flexi_logger::{Cleanup, Criterion, Duplicate, Naming};
 use flexi_logger::{FileSpec, Logger, WriteMode};
 use fltk::enums::{CallbackTrigger, Event, Font, FrameType, Shortcut};
@@ -56,6 +58,7 @@ pub enum Message {
     Table(collection::TableMessage),
     GotFullTradeList(Box<Path>),
     SetCards(Vec<MtgoCard>),
+    SetCollectionStats(CollectionStats),
 }
 
 /// Conversion from [menubar::MenubarMessage] to [Message]
