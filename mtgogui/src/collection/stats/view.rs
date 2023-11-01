@@ -16,19 +16,21 @@ impl StatsView {
         browser.set_column_char('\t');
 
         browser
-            .set_tooltip("Values in the pattern of 'X_NUM (Y_NUM)' shows the number of different cards in 'X_NUM' and the total quantity in 'Y_NUM'. i.e if you have 4x of one card, it will show '1 (4)'");
+            .set_tooltip("Values in the pattern of 'X_NUM (Y_NUM)' shows the number of different cards in 'X_NUM' and the total quantity in 'Y_NUM'.\ni.e if you have 4x of one card, it will show '1 (4)'");
 
         Self { browser }
     }
 
-    pub fn set_stats(&mut self, stats: CollectionStats) {
+    pub fn set_stats(&mut self, mut stats: CollectionStats) {
         self.browser.clear();
         let mut browser_items = BrowserItems::new();
-        browser_items.add_item("dek-File added:", stats.file_from());
-        browser_items.add_item_unique_total("Total cards:", stats.total_cards());
-        browser_items.add_item("Most expensive item:", stats.most_expensive_item());
-        browser_items.add_item_unique_total("Cards < 0.1 tix:", stats.cards_under_a_tenth_tix());
-        browser_items.add_item_unique_total("Cards > 5 tix:", stats.cards_over_5_tix());
+        browser_items.add_item("dek-File added", stats.file_from());
+        browser_items.add_item_unique_total("Total cards", stats.total_cards());
+        browser_items
+            .add_multi_value_item(stats.take_total_value().expect("No total value stat set"));
+        browser_items.add_item("Most expensive item", stats.most_expensive_item());
+        browser_items.add_item_unique_total("Cards > 5 tix", stats.cards_over_5_tix());
+        browser_items.add_item_unique_total("Cards < 0.1 tix", stats.cards_under_a_tenth_tix());
 
         for item in browser_items.drain() {
             self.browser.add(&item);
