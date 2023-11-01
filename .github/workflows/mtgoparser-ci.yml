@@ -77,7 +77,7 @@ jobs:
             build_type: Debug
             compiler: gcc-13
             gcov_executable: gcov
-            enable_ipo: On
+            enable_ipo: Off
             generator: "Ninja Multi-Config"
             packaging_maintainer_mode: Off
             build_shared: Off
