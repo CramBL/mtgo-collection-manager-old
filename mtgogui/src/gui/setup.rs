@@ -17,7 +17,7 @@ use fltk_grid::Grid;
 use crate::{
     assets::{self, get_icon_search},
     collection::TableMessage,
-    Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MIN_APP_HEIGHT, MIN_APP_WIDTH,
+    Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, MIN_APP_HEIGHT, MIN_APP_WIDTH,
 };
 
 /// Sets up the left column of the application
@@ -77,7 +77,10 @@ pub(super) fn setup_main_window() -> DoubleWindow {
 ///
 /// The left column [Flex] box of the application
 pub(super) fn setup_left_column_flx_box() -> Flex {
-    let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
+    let mut flx_left_col = Flex::default()
+        .with_pos(0, 35)
+        .with_size(400, DEFAULT_APP_HEIGHT - MENU_BAR_HEIGHT)
+        .column();
     flx_left_col.set_align(enums::Align::LeftTop);
     flx_left_col
 }

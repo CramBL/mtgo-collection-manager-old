@@ -5,7 +5,7 @@ use crate::{
         view::table::{column::SortStates, CollectionTable, SortToggle},
         TableMessage,
     },
-    Message,
+    Message, DEFAULT_APP_HEIGHT, MENU_BAR_HEIGHT,
 };
 use fltk::{
     app, button,
@@ -34,7 +34,7 @@ const TABLE_WIDTH: i32 = 790;
 pub fn set_collection_main_box(ev_send: app::Sender<Message>) -> table::CollectionTable {
     let mut flx_table = Flex::default()
         .with_pos(400, 35)
-        .with_size(1000, 600)
+        .with_size(1000, DEFAULT_APP_HEIGHT - MENU_BAR_HEIGHT)
         .column();
     flx_table.set_align(enums::Align::LeftTop);
 
