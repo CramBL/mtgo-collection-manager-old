@@ -1,8 +1,13 @@
 use fltk::{
-    app, button,
-    enums::{self, Align, CallbackTrigger, Color},
-    frame, input,
-    prelude::{DisplayExt, GroupExt, ImageExt, InputExt, WidgetBase, WidgetExt, WindowExt},
+    app,
+    browser::Browser,
+    button,
+    enums::{self, Align, CallbackTrigger, Color, Font, FrameType},
+    frame::{self, Frame},
+    input,
+    prelude::{
+        BrowserExt, DisplayExt, GroupExt, ImageExt, InputExt, WidgetBase, WidgetExt, WindowExt,
+    },
     text::{TextBuffer, TextDisplay, WrapMode},
     window::{DoubleWindow, Window},
 };
@@ -20,7 +25,7 @@ use crate::{
 /// # Arguments
 ///
 /// * `ev_send` - Sender to send messages to the main thread
-pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) -> TextDisplay {
+pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
     let mut search_box_grid_row = Grid::new(0, 0, 400, 30, "");
     if cfg!(debug_assertions) {
         // Show box edges and coordinates
@@ -45,18 +50,8 @@ pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) -> TextDisplay {
     search_box_grid_row.set_widget(&mut frame, 0, 0);
     search_box_grid_row.set_widget(&mut search_input, 0, 1..4);
 
-    let mut frame_tradelist_age = frame::Frame::new(0, 0, 0, 10, "Tradelist set:");
-    let mut txt_disp_tradelist_age = TextDisplay::default();
-    txt_disp_tradelist_age.set_align(Align::Center | Align::Inside);
-    txt_disp_tradelist_age.wrap_mode(WrapMode::AtBounds, 0);
-
-    search_box_grid_row.set_widget(&mut frame_tradelist_age, 1, 0);
-    search_box_grid_row.set_widget(&mut txt_disp_tradelist_age, 1, 1..4);
-
-    search_box_grid_row.end();
-
     if cfg!(debug_assertions) {
-        let mut btn_example = button::Button::new(0, 0, 100, 25, "Example");
+        let mut btn_example = button::Button::new(0, 0, 100, 5, "Example");
         btn_example.set_callback({
             move |b| {
                 ev_send.send(Message::Example);
@@ -64,8 +59,10 @@ pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) -> TextDisplay {
                 b.set_label("Getting example...");
             }
         });
+        search_box_grid_row.set_widget(&mut btn_example, 2, 0..4);
     }
-    txt_disp_tradelist_age
+
+    search_box_grid_row.end();
 }
 
 /// Sets up the main window of the application
@@ -95,4 +92,14 @@ pub(super) fn setup_left_column_flx_box() -> Flex {
     let mut flx_left_col = Flex::default().with_pos(0, 35).with_size(400, 600).column();
     flx_left_col.set_align(enums::Align::LeftTop);
     flx_left_col
+}
+
+pub(super) fn setup_left_column_grid_box() -> Grid {
+    let mut grid = Grid::new(0, 0, 400, 600, "");
+    grid.set_layout(10, 4);
+    if cfg!(debug_assertions) {
+        // Show box edges and coordinates
+        grid.show_grid(true);
+    }
+    grid
 }
