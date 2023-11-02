@@ -17,7 +17,8 @@ namespace mtgo_preprocessor::run {
 using cfg = config::Config;
 
 
-[[nodiscard]] int parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths)
+[[nodiscard]] auto parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths)
+  -> outcome::result<Success, ErrorStr>
 {
   // Get card definitions as a map
   auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(paths.card_defs_path);
@@ -64,9 +65,9 @@ using cfg = config::Config;
     }
 
   } else {
-    return -1;
+    return fmt::format("This error should be unreachable...");
   }
-  return 0;
+  return outcome::success();
 }
 
 struct JsonAndDestinationDir
@@ -74,6 +75,7 @@ struct JsonAndDestinationDir
   std::string_view json;
   std::string_view dir;
 };
+
 void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
 {
   const std::string mtgo_cards_json_fname = "mtgo-cards.json";
@@ -92,10 +94,9 @@ void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
   if (auto scryfall_path = cfg::get()->OptionValue(config::option::scryfall_path)) {
     if (auto scryfall_vec = scryfall::ReadJsonVector(scryfall_path.value())) {
       collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
-
       return 0;
     } else {
-      spdlog::error("Expected a vector of scryfall card data");
+      spdlog::error("Expected a vector of scryfall card data: {}", scryfall_vec.error());
       return -1;
     }
   } else {
@@ -140,9 +141,10 @@ void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
 
     if (!(card_defs_path.has_value() && price_hist_path.has_value())) { return -1; }
 
-    if (parse_goatbots_data(mtgo_collection,
-          GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() })
-        != 0) {
+    if (auto res = parse_goatbots_data(mtgo_collection,
+          GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
+        res.has_error()) {
+      spdlog::error("{}", res.error());
       return -1;
     }
     spdlog::info("extract Goatbots info complete");
