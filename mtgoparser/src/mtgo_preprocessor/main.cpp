@@ -35,6 +35,47 @@ const auto path_trade_list_medium_3000cards = "../test/test-data/mtgo/Full Trade
 const auto path_goatbots_card_defs_full = "../test/test-data/goatbots/card-definitions-2023-10-02-full.json";
 const auto path_goatbots_price_hist_full = "../test/test-data/goatbots/price-history-2023-10-02-full.json";
 
+// Run the example with `--debug --mtgoupdater-json-out`
+int example()
+{
+  auto mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
+  spdlog::info("got mtgo cards");
+  auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
+
+  auto scryfall_vec = scryfall::ReadJsonVector(path_mtgogetter_out_scryfall_full);
+  if (scryfall_vec) {
+    spdlog::info("got scryfall vec");
+  } else {
+    spdlog::error("{}", scryfall_vec.error());
+  }
+
+  auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(path_goatbots_card_defs_full);
+  spdlog::info("got card defs");
+  assert(card_defs.has_value());
+
+  auto price_hist = goatbots::ReadJsonMap<goatbots::price_hist_map_t>(path_goatbots_price_hist_full);
+  spdlog::info("got price hist");
+  assert(price_hist.has_value());
+
+  if (card_defs.has_value() && price_hist.has_value()) {
+    mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
+    spdlog::info("extracted Goatbots info");
+  } else {
+    return -1;
+  }
+
+  if (scryfall_vec) {
+    mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
+    spdlog::info("extracted Scryfall info");
+  } else {
+    spdlog::error("Extraction failed due to missing scryfall info");
+    return -1;
+  }
+
+  auto pretty_json_str = mtgo_collection.ToJsonPretty();
+  fmt::print("{}", pretty_json_str);
+  return 0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -63,37 +104,7 @@ int main(int argc, char *argv[])
     if (cfg::get()->CmdSet(config::commands::run)) { return mtgo_preprocessor::run::run(); }
 
     if (cfg::get()->FlagSet(config::option::debug) && cfg::get()->FlagSet(config::option::mtgoupdater_json_out)) {
-      auto mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
-      spdlog::info("got mtgo cards");
-      auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
-
-      auto scryfall_vec = scryfall::ReadJsonVector(path_mtgogetter_out_scryfall_full);
-      spdlog::info("got scryfall vec");
-      assert(scryfall_vec.has_value());
-
-      auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(path_goatbots_card_defs_full);
-      spdlog::info("got card defs");
-      assert(card_defs.has_value());
-
-      auto price_hist = goatbots::ReadJsonMap<goatbots::price_hist_map_t>(path_goatbots_price_hist_full);
-      spdlog::info("got price hist");
-      assert(price_hist.has_value());
-
-      if (card_defs.has_value() && price_hist.has_value()) {
-        mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
-        spdlog::info("extracted Goatbots info");
-      } else {
-        return -1;
-      }
-      if (scryfall_vec.has_value()) {
-        mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
-        spdlog::info("extracted Scryfall info");
-      } else {
-        return -1;
-      }
-
-      auto pretty_json_str = mtgo_collection.ToJsonPretty();
-      fmt::print("{}", pretty_json_str);
+      return example();
     }
   } catch (...) {
     const std::exception_ptr eptr = std::current_exception();
