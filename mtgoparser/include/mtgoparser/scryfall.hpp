@@ -4,6 +4,7 @@
 
 #include <boost/outcome.hpp>
 #include <boost/outcome/result.hpp>
+
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
 
@@ -99,13 +100,22 @@ namespace outcome = BOOST_OUTCOME_V2_NAMESPACE;
 // about 43000 cards as of 2023-09-11
 const uint32_t RESERVE_APPROX_MAX_SCRYFALL_CARDS = 50000;
 
-using scryfall_card_vec = std::vector<scryfall::Card>;
+using ScryfallCardVec = std::vector<scryfall::Card>;
+using ErrorStr = std::string;
 
+/**
+ * @brief Decodes a file as Scryfall bulk data JSON.
+ *
+ * @param path_json Path to Scryfall bulk data JSON file.
+ *
+ * @return On success: `outcome::success(ScryfallCardVec)` - A vector of Scryfall cards.
+ * @return On failure: `outcome::failure(ErrorStr)`        - A string containing an error message.
+ */
 [[nodiscard]] auto inline ReadJsonVector(const std::filesystem::path &path_json)
-  -> outcome::result<scryfall_card_vec, std::string>
+  -> outcome::result<ScryfallCardVec, ErrorStr>
 {
   // Instantiate and pre-allocate map
-  scryfall_card_vec scryfall_vec{};
+  ScryfallCardVec scryfall_vec{};
   scryfall_vec.reserve(RESERVE_APPROX_MAX_SCRYFALL_CARDS);
 
   // Read file into buffer and decode to populate map

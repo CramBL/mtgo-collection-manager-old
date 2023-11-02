@@ -88,11 +88,12 @@ int main(int argc, char *argv[])
       } else {
         return -1;
       }
+
       if (scryfall_vec) {
         mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
         spdlog::info("extracted Scryfall info");
       } else {
-        spdlog::error("Extracted failed due to missing scryfall info");
+        spdlog::error("Extraction failed due to missing scryfall info");
         return -1;
       }
 
