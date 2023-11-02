@@ -12,7 +12,7 @@ To automate some tasks regarding effective management of [MTGO](https://www.mtgo
 # Table of contents
 - [Table of contents](#table-of-contents)
   - [Features? Make an issue if you have suggestions.](#features-make-an-issue-if-you-have-suggestions)
-    - [Feature Ideas:](#feature-ideas)
+    - [Most recent demo](#most-recent-demo)
 - [Contributing](#contributing)
   - [Quickstart](#quickstart)
     - [Unix-like (with Make)](#unix-like-with-make)
@@ -25,10 +25,10 @@ To automate some tasks regarding effective management of [MTGO](https://www.mtgo
 
 ## Features? Make an issue if you have suggestions.
 If you have a great idea, make a feature request via an issue, thanks!
-### Feature Ideas:
-* **Price alerts** certain sites already have price alerts, but they are kind of crappy and hard to maintain. So better and smarter price alerts is a place to start.
-* **Auto fetch users full MTGO collection** might be difficult. MTGO's local user files are a giant mess, it's solvable for sure, but might break quite often depending on how MTGO files are actually managed long term. Could be difficult to handle multiple accounts as well.
-* **[A million data driven features]** like giving alerts when a card with a historically stable price suddenly spikes, and stuff like that.
+
+### Most recent demo
+The first time MTGO Collection Manager is started, a full trade list file is needed to start tracking price data etc. The initial processing takes a few seconds as a bunch of different downloads takes place to establish the basic data needed to parse and display data about the provided collection, along with price history from *Goatbots* and *Cardhoarder*. Parsing all the data is practically instantaneous as evident by subsequent launches of the app. If new data is available for the given collection, it is downloaded on startup (options and improvements are coming). The system time is used to determine if new data is available before attempting to download and parse it.
+![Demo](.github/most-recent-demo.gif)
 
 # Contributing
 There's scripts for building and testing all projects described in the [Quickstart](#quickstart) section below.

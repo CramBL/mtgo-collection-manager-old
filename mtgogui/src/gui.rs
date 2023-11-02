@@ -5,6 +5,7 @@ use std::sync::OnceLock;
 use crate::appdata::state::GuiState;
 use crate::assets::{self, get_asc_svg, get_icon_search, get_logo};
 use crate::collection::processor::TradelistProcessor;
+use crate::collection::stats::view::StatsView;
 use crate::collection::view::table::CollectionTable;
 use crate::collection::TableMessage;
 use crate::menubar::McmMenuBar;
@@ -39,8 +40,8 @@ pub struct MtgoGui {
     main_win: window::Window,
     menu: McmMenuBar,
     collection: CollectionTable,
+    collection_stats: StatsView,
     tradelist_processor: TradelistProcessor,
-    tradelist_age: TextDisplay,
 }
 
 impl Default for MtgoGui {
@@ -55,6 +56,7 @@ impl MtgoGui {
         let app = app::App::default();
         let theme = WidgetTheme::new(ThemeType::Dark);
         theme.apply();
+        misc::Tooltip::set_text_color(Color::Black);
 
         let (ev_send, ev_rcv) = app::channel();
         let mut main_win: DoubleWindow = setup::setup_main_window();
@@ -63,7 +65,10 @@ impl MtgoGui {
 
         let flx_left_col = setup::setup_left_column_flx_box();
 
-        let txt_disp_tradelist_age = setup::set_left_col_box(ev_send.clone());
+        setup::set_left_col_box(ev_send.clone());
+
+        let collection_stats = StatsView::default();
+
         flx_left_col.end();
 
         let collection = collection::view::set_collection_main_box(ev_send.clone());
@@ -85,8 +90,8 @@ impl MtgoGui {
             main_win,
             menu,
             collection,
+            collection_stats,
             tradelist_processor,
-            tradelist_age: txt_disp_tradelist_age,
         }
     }
 
@@ -97,17 +102,6 @@ impl MtgoGui {
         self.state =
             GuiState::load(appdata::util::appdata_path().expect("Failed to get appdata path"))
                 .expect("Failed to load GUI state");
-
-        let mut txt_buf_tradelist_age = TextBuffer::default();
-        if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
-            txt_buf_tradelist_age.set_text(&format!(
-                "\n{}",
-                tradelist_added_date.format("%-d %B, %C%y")
-            ));
-        } else {
-            txt_buf_tradelist_age.set_text("\nNo tradelist added");
-        }
-        self.tradelist_age.set_buffer(txt_buf_tradelist_age);
 
         match appdata::util::current_tradelist_path() {
             Ok(Some(current_trade_list)) => {
@@ -148,12 +142,7 @@ impl MtgoGui {
                         self.app.quit();
                     }
                     Message::MenuBar(mb_msg) => self.menu.handle_ev(mb_msg),
-                    Message::Example => {
-                        log::info!("Example");
-                        let cards: Vec<mtgoupdater::mtgo_card::MtgoCard> =
-                            mtgoupdater::internal_only::get_example_card_collection();
-                        self.collection.set_cards(cards);
-                    }
+
                     Message::Table(t_m) => {
                         self.collection.handle_ev(t_m);
                         self.app.redraw();
@@ -164,20 +153,21 @@ impl MtgoGui {
                         appdata::util::copy_tradelist_to_appdata(full_trade_list_path.as_os_str())
                             .unwrap();
                         self.state.new_tradelist();
-                        let mut txt_buf_tradelist_age = TextBuffer::default();
-                        if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
-                            txt_buf_tradelist_age.set_text(&format!(
-                                "\n{}",
-                                tradelist_added_date.format("%-d %B, %C%y")
-                            ));
-                        } else {
-                            txt_buf_tradelist_age.set_text("\n\nNo tradelist added");
-                        }
-                        self.tradelist_age.set_buffer(txt_buf_tradelist_age);
 
                         self.tradelist_processor.process(full_trade_list_path);
                     }
                     Message::SetCards(cards) => self.collection.set_cards(cards),
+                    Message::SetCollectionStats(mut stats) => {
+                        if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
+                            stats.set_file_from(&format!(
+                                "{}",
+                                tradelist_added_date.format("%-d %B, %C%y")
+                            ));
+                        } else {
+                            log::error!("No tradelist added date found");
+                        }
+                        self.collection_stats.set_stats(stats)
+                    }
                 }
             }
         }

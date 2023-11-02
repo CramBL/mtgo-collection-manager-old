@@ -245,7 +245,7 @@ pub fn fill_card_row(table: &mut SmartTable, row_idx: i32, card: &MtgoCard) {
     CollectionTable::COL_GOATBOTS.fill(table, row_idx, &format!("{:8.3}", card.goatbots_price));
     CollectionTable::COL_CARDHOARDER.fill(table, row_idx, &{
         if let Some(p) = card.scryfall_price {
-            p.to_string()
+            format!("{p:8.3}")
         } else {
             "N/A".into()
         }

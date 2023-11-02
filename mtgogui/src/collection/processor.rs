@@ -9,6 +9,7 @@ use fltk::{app::Sender, enums::Color};
 
 use crate::{
     appdata::{update::AppData, APP_DATA_DIR},
+    collection::stats::container::CollectionStats,
     menubar::util::ProgressUpdate,
     menubar::{McmMenuBar, MenubarMessage},
     util::{first_file_match_from_dir, RelativeSize},
@@ -123,7 +124,9 @@ impl TradelistProcessor {
                             )));
 
                             fadeout_progress_bar(sender.clone());
-
+                            sender.send(Message::SetCollectionStats(CollectionStats::from_cards(
+                                &cards,
+                            )));
                             sender.send(Message::SetCards(cards));
                         }
                         Err(e) => {

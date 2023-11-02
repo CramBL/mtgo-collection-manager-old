@@ -73,7 +73,13 @@ constexpr auto Collection::Size() const noexcept -> std::size_t { return cards_.
 void inline Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
   const goatbots::price_hist_map_t &price_hist) noexcept
 {
+
   for (auto &card : this->cards_) {
+    if (card.id_ == 1) {
+      // Event Tickets have value 1 per definition
+      card.goatbots_price_ = 1.0;
+      continue;
+    }
     // Extract set, rarity, and foil from goatbots card definitions
     if (auto res = card_defs.find(card.id_); res != card_defs.end()) {
       card.set_ = res->second.cardset;
@@ -111,6 +117,11 @@ void inline Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfa
   for (auto &c : cards_) {
     // Skip if it is foil as scryfall API doesn't have foil prices
     if (c.foil_) { continue; }
+    if (c.id_ == 1) {
+      // Event ticket
+      c.scryfall_price_ = 1.0;
+      continue;
+    }
 
     while (scry_it != scry_end && (*scry_it).mtgo_id <= c.id_) {
       if ((*scry_it).mtgo_id == c.id_ && (*scry_it).prices.tix.has_value()

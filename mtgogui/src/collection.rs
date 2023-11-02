@@ -1,4 +1,5 @@
 pub mod processor;
+pub mod stats;
 pub mod view;
 
 use crate::Message;
