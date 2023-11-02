@@ -1,6 +1,9 @@
 use std::vec::Drain;
 
-use super::util::{MultiValueStat, UniqueTotal};
+use super::{
+    container::CollectionStats,
+    util::{MultiValueStat, UniqueTotal},
+};
 
 pub struct BrowserItems {
     item_index: usize,
@@ -119,5 +122,40 @@ impl BrowserItems {
 
     pub fn drain(&mut self) -> Drain<'_, String> {
         self.formatted_items.drain(..)
+    }
+}
+
+/// Converts a [CollectionStats] into a [BrowserItems] that can be displayed in a [Browser](fltk::browser::Browser)
+///
+/// # Errors
+///
+/// Returns an error if any of the stats in [CollectionStats] are missing
+impl TryFrom<CollectionStats> for BrowserItems {
+    type Error = String;
+
+    fn try_from(mut stats: CollectionStats) -> Result<Self, Self::Error> {
+        let mut browser_items = BrowserItems::new();
+        browser_items.add_item("dek-File added", stats.file_from());
+        browser_items.add_item_unique_total("Total items", stats.total_cards());
+
+        if let Some(tot_stat_val) = stats.take_total_value() {
+            browser_items.add_multi_value_item(tot_stat_val);
+        } else {
+            return Err("No total value stat set".into());
+        }
+
+        if let Some(most_expensive_item_stat_val) = stats.take_most_expensive_item() {
+            browser_items.add_multi_value_item(most_expensive_item_stat_val);
+        } else {
+            return Err("No most expensive item stat set".into());
+        }
+        browser_items.add_item_unique_total("Cards > 5 tix", stats.cards_over_5_tix());
+        browser_items.add_item_unique_total("Cards < 0.1 tix", stats.cards_under_a_tenth_tix());
+        if let Some(rarity_dist_stat_val) = stats.take_rarity_distribution() {
+            browser_items.add_multi_value_item(rarity_dist_stat_val);
+        } else {
+            return Err("No rarity distribution stat set".into());
+        }
+        Ok(browser_items)
     }
 }

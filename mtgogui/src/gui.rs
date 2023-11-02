@@ -166,7 +166,14 @@ impl MtgoGui {
                         } else {
                             log::error!("No tradelist added date found");
                         }
-                        self.collection_stats.set_stats(stats)
+                        match stats.try_into() {
+                            Ok(browser_items) => {
+                                self.collection_stats.set_items(browser_items);
+                            }
+                            Err(e) => {
+                                log::error!("Failed to convert stats to browser items: {e}");
+                            }
+                        }
                     }
                 }
             }
