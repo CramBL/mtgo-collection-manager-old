@@ -1,14 +1,20 @@
 #pragma once
 
 #include "mtgoparser/io.hpp"
+
+#include <boost/outcome.hpp>
+#include <boost/outcome/result.hpp>
 #include <glaze/glaze.hpp>
-#include <optional>
 #include <spdlog/spdlog.h>
+
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
 
 namespace scryfall {
+
+
 struct Prices
 {
   using opt_str = std::optional<std::string>;
@@ -50,8 +56,8 @@ struct Card
     std::string _released_at = "",
     std::string _rarity = "",
     Prices _prices = scryfall::Prices{})
-    : mtgo_id{ _mtgo_id }, name{ std::move(_name) },
-      released_at{ std::move(_released_at) }, rarity{ std::move(_rarity) }, prices{ std::move(_prices) }
+    : mtgo_id{ _mtgo_id }, name{ std::move(_name) }, released_at{ std::move(_released_at) },
+      rarity{ std::move(_rarity) }, prices{ std::move(_prices) }
   {}
 
   [[nodiscard]] inline constexpr bool operator==(const Card &other) const
@@ -88,12 +94,15 @@ template<> struct glz::meta<scryfall::Card>
 };
 
 namespace scryfall {
+namespace outcome = BOOST_OUTCOME_V2_NAMESPACE;
+
 // about 43000 cards as of 2023-09-11
 const uint32_t RESERVE_APPROX_MAX_SCRYFALL_CARDS = 50000;
 
 using scryfall_card_vec = std::vector<scryfall::Card>;
 
-[[nodiscard]] auto inline ReadJsonVector(const std::filesystem::path &path_json) -> std::optional<scryfall_card_vec>
+[[nodiscard]] auto inline ReadJsonVector(const std::filesystem::path &path_json)
+  -> outcome::result<scryfall_card_vec, std::string>
 {
   // Instantiate and pre-allocate map
   scryfall_card_vec scryfall_vec{};
@@ -101,11 +110,10 @@ using scryfall_card_vec = std::vector<scryfall::Card>;
 
   // Read file into buffer and decode to populate map
   if (auto err_code = glz::read_json(scryfall_vec, io_util::read_to_str_buf(path_json))) {
-    // Handle error
-    spdlog::error("{}", glz::format_error(err_code, std::string{}));
-    return std::nullopt;
+    // Return error as a string
+    return outcome::failure(glz::format_error(err_code, std::string{}));
   }
 
-  return scryfall_vec;
+  return outcome::success(scryfall_vec);
 }
 }// namespace scryfall

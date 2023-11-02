@@ -68,8 +68,11 @@ int main(int argc, char *argv[])
       auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
 
       auto scryfall_vec = scryfall::ReadJsonVector(path_mtgogetter_out_scryfall_full);
-      spdlog::info("got scryfall vec");
-      assert(scryfall_vec.has_value());
+      if (scryfall_vec) {
+        spdlog::info("got scryfall vec");
+      } else {
+        spdlog::error("{}", scryfall_vec.error());
+      }
 
       auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(path_goatbots_card_defs_full);
       spdlog::info("got card defs");
@@ -85,10 +88,11 @@ int main(int argc, char *argv[])
       } else {
         return -1;
       }
-      if (scryfall_vec.has_value()) {
+      if (scryfall_vec) {
         mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
         spdlog::info("extracted Scryfall info");
       } else {
+        spdlog::error("Extracted failed due to missing scryfall info");
         return -1;
       }
 
