@@ -1,8 +1,10 @@
 use std::vec::Drain;
 
+use crate::appdata::metadata::MetaData;
+
 use super::{
     container::CollectionStats,
-    util::{MultiValueStat, UniqueTotal},
+    util::{CategoryStat, MultiValueStat, UniqueTotal},
 };
 
 pub struct BrowserItems {
@@ -68,6 +70,11 @@ impl BrowserItems {
         }
     }
 
+    /// Append the contents of `other` to `self`
+    pub fn append(&mut self, other: &mut Self) {
+        self.formatted_items.append(&mut other.formatted_items);
+    }
+
     pub fn add_item(&mut self, title: &str, value: &str) {
         let formatted_item = format!(
             "{title_format}{title}\t{value_format}@.{value}",
@@ -80,6 +87,7 @@ impl BrowserItems {
         self.item_index += 1;
     }
 
+    // TODO: Add good way to supply format strings for the arguments
     pub fn add_item_unique_total(&mut self, title: &str, unique_total_pair: UniqueTotal) {
         let formatted_item = format!(
             "{title_format}{title}\t{value_format}@.{unique} ({total})",
@@ -93,6 +101,7 @@ impl BrowserItems {
         self.item_index += 1;
     }
 
+    // TODO: Add good way to supply format strings for the arguments
     pub fn add_multi_value_item(&mut self, mut stat: MultiValueStat) {
         let mut first_item = format!(
             "{title_format}{title}\t{value_format}",
@@ -114,6 +123,27 @@ impl BrowserItems {
                 title_format = self.title_format(),
                 value_format = self.value_format(),
                 value = value
+            );
+            self.formatted_items.push(formatted_item);
+        }
+        self.item_index += 1;
+    }
+
+    pub fn add_category_item(&mut self, mut cat: CategoryStat) {
+        let cat_title = format!(
+            "@_{title_format}{title}\t{value_format}",
+            title_format = self.title_format(),
+            value_format = self.value_format(),
+            title = cat.title()
+        );
+
+        self.formatted_items.push(cat_title);
+
+        for (description, value) in cat.take_value_pairs() {
+            let formatted_item = format!(
+                //@S13@c@.
+                "@S13@r@.{description}   \t{value_format}@.{value}",
+                value_format = self.value_format(),
             );
             self.formatted_items.push(formatted_item);
         }
@@ -157,5 +187,32 @@ impl TryFrom<CollectionStats> for BrowserItems {
             return Err("No rarity distribution stat set".into());
         }
         Ok(browser_items)
+    }
+}
+
+impl TryFrom<MetaData> for BrowserItems {
+    type Error = String;
+
+    fn try_from(value: MetaData) -> Result<Self, Self::Error> {
+        log::info!("Converting metadata to browser items");
+        let mut items = BrowserItems::new();
+
+        let last_updated = CategoryStat::new(
+            "Prices updated".into(),
+            vec![
+                (
+                    "Goatbots".into(),
+                    value.goatbots_prices_updated_at().to_string(),
+                ),
+                (
+                    "Cardhoarder".into(),
+                    value.scryfall_bulk_data_updated_at().to_string(),
+                ),
+            ],
+        );
+        log::info!("Adding last updated category item");
+        items.add_category_item(last_updated);
+
+        Ok(items)
     }
 }
