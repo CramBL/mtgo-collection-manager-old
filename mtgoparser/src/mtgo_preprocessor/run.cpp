@@ -1,18 +1,17 @@
 #include "mtgo_preprocessor/run.hpp"
 #include "mtgo_preprocessor/config.hpp"
 
-#include "mtgoparser/clap.hpp"
 #include "mtgoparser/goatbots.hpp"
 #include "mtgoparser/io.hpp"
 #include "mtgoparser/mtgo.hpp"
 #include "mtgoparser/mtgo/xml.hpp"
 #include "mtgoparser/scryfall.hpp"
 
-#include <boost/outcome.hpp>
 #include <boost/outcome/result.hpp>
-#include <fmt/format.h>
+#include <boost/outcome/success_failure.hpp>
+#include <fmt/core.h>
 #include <spdlog/spdlog.h>
-#include <toml++/toml.hpp>
+#include <toml++/impl/value.hpp>
 
 #include <cassert>
 #include <fstream>
