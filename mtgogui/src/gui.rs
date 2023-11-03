@@ -118,42 +118,7 @@ impl MtgoGui {
             }
         };
 
-        let tradelist_added_date_str: Option<String> =
-            if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
-                Some(format!("{}", tradelist_added_date.format("%-d %B, %C%y")))
-            } else {
-                log::warn!("No tradelist added date found");
-                None
-            };
-
-        let mut metadata_browser_items = BrowserItems::new();
-        metadata_browser_items.add_item(
-            "dek-File added",
-            tradelist_added_date_str
-                .as_deref()
-                .unwrap_or("No tradelist added"),
-        );
-
-        log::info!("Loading metadata");
-        match MetaData::load(appdata_dir) {
-            Ok(metadata) => {
-                let mut items: BrowserItems = match metadata.try_into() {
-                    Ok(browser_items) => browser_items,
-                    Err(e) => {
-                        return Err(format!("Failed to convert metadata to browser items: {e}"))
-                    }
-                };
-                metadata_browser_items.append(&mut items);
-            }
-
-            Err(e) => {
-                // On startup this is a warning, as this is generated from MTGO Getter download data.
-                //  if it fails after MTGO Getter has been running, it is an error.
-                log::warn!("Failed to load metadata: {e}");
-            }
-        };
-
-        self.metadata.set_items(metadata_browser_items);
+        self.set_metadata_browser_view(appdata_dir.clone())?;
 
         log::info!("Processing current tradelist");
         match appdata::util::current_tradelist_path() {
@@ -216,15 +181,7 @@ impl MtgoGui {
                         self.tradelist_processor.process(full_trade_list_path);
                     }
                     Message::SetCards(cards) => self.collection.set_cards(cards),
-                    Message::SetCollectionStats(mut stats) => {
-                        if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
-                            stats.set_file_from(&format!(
-                                "{}",
-                                tradelist_added_date.format("%-d %B, %C%y")
-                            ));
-                        } else {
-                            log::error!("No tradelist added date found");
-                        }
+                    Message::SetCollectionStats(stats) => {
                         match stats.try_into() {
                             Ok(browser_items) => {
                                 self.collection_stats.set_items(browser_items);
@@ -233,9 +190,63 @@ impl MtgoGui {
                                 log::error!("Failed to convert stats to browser items: {e}");
                             }
                         }
+                        match appdata::util::appdata_path() {
+                            Ok(appdata_dir) => {
+                                let _ = self.set_metadata_browser_view(appdata_dir).map_err(|e| {
+                                    log::error!("Failed to set metadata browser view: {e}");
+                                });
+                            }
+                            Err(e) => {
+                                log::error!("Failed to get appdata path: {e}");
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+// Utility functions
+
+impl MtgoGui {
+    fn set_metadata_browser_view(&mut self, appdata_dir: PathBuf) -> Result<(), String> {
+        let tradelist_added_date_str: Option<String> =
+            if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
+                Some(format!("{}", tradelist_added_date.format("%-d %B, %C%y")))
+            } else {
+                log::warn!("No tradelist added date found");
+                None
+            };
+
+        let mut metadata_browser_items = BrowserItems::new();
+        metadata_browser_items.add_item(
+            "dek-File added",
+            tradelist_added_date_str
+                .as_deref()
+                .unwrap_or("No tradelist added"),
+        );
+
+        log::info!("Loading metadata");
+        match MetaData::load(appdata_dir) {
+            Ok(metadata) => {
+                let mut items: BrowserItems = match metadata.try_into() {
+                    Ok(browser_items) => browser_items,
+                    Err(e) => {
+                        return Err(format!("Failed to convert metadata to browser items: {e}"))
+                    }
+                };
+                metadata_browser_items.append(&mut items);
+            }
+
+            Err(e) => {
+                // On startup this is a warning, as this is generated from MTGO Getter download data.
+                //  if it fails after MTGO Getter has been running, it is an error.
+                log::warn!("Failed to load metadata: {e}");
+            }
+        };
+
+        self.metadata.set_items(metadata_browser_items);
+        Ok(())
     }
 }
