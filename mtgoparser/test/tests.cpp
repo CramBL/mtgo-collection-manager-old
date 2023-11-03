@@ -273,7 +273,7 @@ TEST_CASE("Parse state_log.toml")
 {
   const auto path_state_log = "../../../test/test-data/mtgogetter-out/state_log.toml";
   auto state_log = io_util::read_state_log(path_state_log);
-  std::string_view title = state_log["Title"].value_or("");
+  std::string_view title = state_log["title"].value_or("");
 
   INFO("state_log has title: " << title);
   CHECK(title == "log for MTGO Getter state, such as updated_at timestamps");
