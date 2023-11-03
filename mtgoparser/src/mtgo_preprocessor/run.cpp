@@ -1,15 +1,24 @@
 #include "mtgo_preprocessor/run.hpp"
 #include "mtgo_preprocessor/config.hpp"
 
-#include "mtgoparser/clap.hpp"
 #include "mtgoparser/goatbots.hpp"
+#include "mtgoparser/io.hpp"
 #include "mtgoparser/mtgo.hpp"
+#include "mtgoparser/mtgo/xml.hpp"
 #include "mtgoparser/scryfall.hpp"
 
-#include <cassert>
+#include <boost/outcome/result.hpp>
+#include <boost/outcome/success_failure.hpp>
+#include <fmt/core.h>
 #include <spdlog/spdlog.h>
+#include <toml++/impl/value.hpp>
 
+#include <cassert>
+#include <fstream>
 #include <optional>
+#include <string>
+#include <string_view>
+#include <utility>
 
 
 namespace mtgo_preprocessor::run {
@@ -48,15 +57,15 @@ using cfg = config::Config;
         log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("");
       if (goatbots::set_id_in_card_defs(next_released_set_mtgo_code, card_defs.value())) {
         // clear the set from the statelog
-        toml::value<std::string> *name = log["scryfall"]["Next_released_mtgo_set"]["Name"].as_string();
+        toml::value<std::string> *name = log["scryfall"]["next_released_mtgo_set"]["name"].as_string();
         *name = "";
-        toml::value<std::string> *released_at = log["scryfall"]["Next_released_mtgo_set"]["Released_at"].as_string();
+        toml::value<std::string> *released_at = log["scryfall"]["next_released_mtgo_set"]["released_at"].as_string();
         *released_at = "";
-        toml::value<std::string> *mtgo_code = log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].as_string();
+        toml::value<std::string> *mtgo_code = log["scryfall"]["next_released_mtgo_set"]["mtgo_code"].as_string();
         *mtgo_code = "";
         std::ofstream replace_state_log(log_fullpath);
         if (replace_state_log.is_open()) {
-          replace_state_log << log << std::endl;
+          replace_state_log << log << '\n';
           replace_state_log.close();
         } else {
           spdlog::error("Could not open state_log for writing at: {}", log_fullpath);
@@ -82,7 +91,7 @@ void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
   const std::string fullpath = std::string(jsonAndDir.dir) + mtgo_cards_json_fname;
   std::ofstream mtgo_cards_outfile(fullpath);
   if (mtgo_cards_outfile.is_open()) {
-    mtgo_cards_outfile << jsonAndDir.json << std::endl;
+    mtgo_cards_outfile << jsonAndDir.json << '\n';
     mtgo_cards_outfile.close();
   }
 }

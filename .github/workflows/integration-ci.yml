@@ -27,7 +27,7 @@ jobs:
             enable_ipo: On
 
           - os: ubuntu-22.04
-            compiler: llvm-16.0.6
+            compiler: llvm-17.0.2
             generator: "Ninja Multi-Config"
             enable_ipo: On
 
@@ -42,7 +42,7 @@ jobs:
             enable_ipo: On
 
           - os: windows-2022
-            compiler: llvm-16.0.6
+            compiler: llvm-17.0.2
             generator: "Ninja Multi-Config"
             enable_ipo: On
 
@@ -67,8 +67,8 @@ jobs:
 
       - name: Setup Mold linker for Linux 🐧 builds
         if: runner.os == 'Linux'
-        uses: rui314/setup-mold@v1    
-        
+        uses: rui314/setup-mold@v1
+
 ####                                              ####
 #🍎 MacOS 🍎 build -> test -> pack -> upload   🍎🍎#
 ####                                              ####

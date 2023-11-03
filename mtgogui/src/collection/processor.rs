@@ -39,6 +39,7 @@ impl TradelistProcessor {
         // TODO: Some basic verification that we actually got a trade list and not some random non-sense.
         let trade_list_processor_thread =
             std::thread::Builder::new().name("Trade List Processor".to_string());
+        log::info!("Spawning Trade List Processor thread");
         let _handle = trade_list_processor_thread
             .spawn({
                 let sender = self.event_sender.clone();

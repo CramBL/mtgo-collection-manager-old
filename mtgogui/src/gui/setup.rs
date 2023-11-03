@@ -20,19 +20,19 @@ use crate::{
     Message, DEFAULT_APP_HEIGHT, DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, MIN_APP_HEIGHT, MIN_APP_WIDTH,
 };
 
-/// Sets up the left column of the application
+/// Sets up the search box of the application and returns it as a [Grid].
 ///
 /// # Arguments
 ///
 /// * `ev_send` - Sender to send messages to the main thread
-pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
+pub(super) fn set_search_box(ev_send: app::Sender<Message>) -> Grid {
     let mut search_box_grid_row = Grid::new(0, 0, 400, 30, "");
     if cfg!(debug_assertions) {
         // Show box edges and coordinates
         search_box_grid_row.show_grid(true);
     }
-    search_box_grid_row.set_layout(10, 4);
-    let mut frame = frame::Frame::new(0, 0, 0, 10, "");
+    search_box_grid_row.set_layout(1, 4);
+    let mut frame = frame::Frame::new(0, 0, 0, 1, "");
     frame.draw(|f| {
         let mut icon = get_icon_search();
         icon.scale(f.w(), f.h(), true, false);
@@ -51,6 +51,7 @@ pub(super) fn set_left_col_box(ev_send: app::Sender<Message>) {
     search_box_grid_row.set_widget(&mut search_input, 0, 1..4);
 
     search_box_grid_row.end();
+    search_box_grid_row
 }
 
 /// Sets up the main window of the application

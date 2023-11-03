@@ -5,7 +5,6 @@ use super::util::{MultiValueStat, UniqueTotal};
 /// Container for collection stats
 #[derive(Debug, Clone)]
 pub struct CollectionStats {
-    file_from: String,
     total_cards: UniqueTotal,
     total_value: Option<MultiValueStat>,
     most_expensive_item: Option<MultiValueStat>,
@@ -18,7 +17,6 @@ impl CollectionStats {
     /// Create a new empty [CollectionStats] container
     pub fn new() -> Self {
         Self {
-            file_from: String::new(),
             total_value: None,
             total_cards: UniqueTotal::default(),
             most_expensive_item: None,
@@ -198,10 +196,6 @@ impl CollectionStats {
         )
     }
 
-    pub fn set_file_from(&mut self, file_from: &str) {
-        self.file_from = file_from.to_string();
-    }
-
     pub fn set_total_cards(&mut self, total_unique_cards: usize, total_card_quantity: usize) {
         self.total_cards = UniqueTotal::new(total_unique_cards, total_card_quantity);
     }
@@ -222,10 +216,6 @@ impl CollectionStats {
     ) {
         self.cards_over_5_tix =
             UniqueTotal::new(cards_over_5_tix_unique, cards_over_5_tix_quantity);
-    }
-
-    pub fn file_from(&self) -> &str {
-        &self.file_from
     }
 
     pub fn total_cards(&self) -> UniqueTotal {

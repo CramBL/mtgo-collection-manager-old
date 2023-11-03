@@ -44,9 +44,18 @@ impl GuiState {
     /// Returns an [io::Error] if the [GuiState] fails to be loaded.
     pub fn load(mut src_dir: PathBuf) -> io::Result<Self> {
         src_dir.push(GUI_STATE);
-        let gui_state = if src_dir.exists() {
+        let gui_state = if src_dir.try_exists()? {
             let toml = std::fs::read_to_string(src_dir)?;
-            toml::from_str(&toml).expect("Failed to deserialize GUI state")
+            match toml::from_str(&toml) {
+                Ok(gui_state) => gui_state,
+                Err(e) => {
+                    log::warn!("Failed to deserialize GUI state: {e}");
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        format!("Failed to deserialize GUI state: {e}"),
+                    ));
+                }
+            }
         } else {
             log::info!("No GUI state found, creating default GUI state");
             Self::new()

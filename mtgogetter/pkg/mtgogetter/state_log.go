@@ -12,8 +12,8 @@ import (
 )
 
 type goatbots struct {
-	Card_definitions_updated_at time.Time
-	Prices_updated_at           time.Time
+	Card_definitions_updated_at time.Time `toml:"card_definitions_updated_at"`
+	Prices_updated_at           time.Time `toml:"prices_updated_at"`
 }
 
 // Method for the goatbots struct to check if the price data is up to date.
@@ -96,8 +96,8 @@ func (g *goatbots) UpdateCardDefinitionsTimestamp(stateLogPath string) error {
 
 type scryfall struct {
 	// Bulk data is updated every 12 hours
-	Bulk_data_updated_at   time.Time
-	Next_released_mtgo_set ScryfallSet
+	Bulk_data_updated_at   time.Time   `toml:"bulk_data_updated_at"`
+	Next_released_mtgo_set ScryfallSet `toml:"next_released_mtgo_set"`
 }
 
 // Method for the scryfall struct to check if the bulk data is up to date.
@@ -166,7 +166,7 @@ func (s *scryfall) IsRecentSetOut() bool {
 }
 
 type StateLog struct {
-	Title    string
+	Title    string   `toml:"title"`
 	Goatbots goatbots `toml:"goatbots"`
 	Scryfall scryfall `toml:"scryfall"`
 }

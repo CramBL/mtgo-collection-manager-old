@@ -166,25 +166,38 @@ pub fn set_drag_and_drop_callback(table: &mut SmartTable, ev_sender: Sender<Mess
                     let path_str = app::event_text();
                     log::info!("path: {path_str}");
                     let path = std::path::PathBuf::from(&path_str);
-                    if path.exists() {
-                        // Path exists, ship it.
-                        ev_sender.send(Message::GotFullTradeList(path.into()));
-                    } else {
-                        // Doesn't exist? Try to parse it to a file path
-                        if let Ok(url) = url::Url::parse(&path_str) {
-                            // Extract the path component from the URI
-                            if let Ok(path_buf) = url.to_file_path() {
-                                if path_buf.exists() {
-                                    log::info!("All good after URL parsing");
-                                    // Ship it
-                                    ev_sender.send(Message::GotFullTradeList(path_buf.into()));
-                                }
+                    match path.try_exists() {
+                        Ok(path_exists) => {
+                            if path_exists {
+                                // Path exists, ship it.
+                                ev_sender.send(Message::GotFullTradeList(path.into()));
                             } else {
-                                log::info!("Failed to extract the path from the URI.");
+                                // Doesn't exist? Try to parse it to a file path
+                                match url::Url::parse(&path_str) {
+                                    Ok(path_url) => // Extract the path component from the URI
+                                    if let Ok(path_buf) = path_url.to_file_path() {
+                                        match path_buf.try_exists() {
+                                            Ok(path_exists) => {
+                                                if path_exists {
+                                                    log::info!("All good after URL parsing");
+                                                    // Ship it
+                                                    ev_sender.send(Message::GotFullTradeList(
+                                                        path_buf.into(),
+                                                    ));
+                                                } else {
+                                                    log::info!("URL parsing succeeded, but the path doesn't exist.");
+                                                }
+                                            }
+                                            Err(e) => log::error!("Checking if path exists failed: {e}"),
+                                        }
+                                    } else {
+                                        log::error!("Failed to parse URI to path: {path_url}");
+                                    },
+                                    Err(e) => log::info!("Failed to parse URI from drag and drop: {e}"),
+                                }
                             }
-                        } else {
-                            log::info!("Failed to parse URI from drag and drop.");
                         }
+                        Err(e) => log::error!("Checking if path exists failed: {e}"),
                     }
 
                     dnd = false;

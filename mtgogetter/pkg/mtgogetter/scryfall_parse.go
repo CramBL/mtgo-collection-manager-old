@@ -39,9 +39,9 @@ type ScryfallSetBlob struct {
 }
 
 type ScryfallSet struct {
-	Name        string `json:"name"`
-	Released_at string `json:"released_at"`
-	Mtgo_code   string `json:"mtgo_code"` // Such as RTR for Return to Ravnica
+	Name        string `json:"name" toml:"name"`
+	Released_at string `json:"released_at" toml:"released_at"`
+	Mtgo_code   string `json:"mtgo_code" toml:"mtgo_code"` // Such as RTR for Return to Ravnica
 }
 
 type ScryfallCard struct {

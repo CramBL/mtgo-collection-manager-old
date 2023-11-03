@@ -7,7 +7,12 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include <mtgoparser/mtgo.hpp>
+#include <mtgoparser/mtgo/card.hpp>
+#include <mtgoparser/mtgo/xml.hpp>
+
+#include <cstddef>
 #include <utility>
+#include <vector>
 
 // Goes to top of project and into the shared 'test/test-data' directory
 const auto path_trade_list_small_5cards = "../../../test/test-data/mtgo/Full Trade List-small-5cards.dek";
