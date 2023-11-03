@@ -165,7 +165,6 @@ impl TryFrom<CollectionStats> for BrowserItems {
 
     fn try_from(mut stats: CollectionStats) -> Result<Self, Self::Error> {
         let mut browser_items = BrowserItems::new();
-        browser_items.add_item("dek-File added", stats.file_from());
         browser_items.add_item_unique_total("Total items", stats.total_cards());
 
         if let Some(tot_stat_val) = stats.take_total_value() {
