@@ -50,7 +50,7 @@ jobs:
           - ubuntu-22.04
           - windows-2022
         compiler:
-          - llvm-17 #- llvm-15.0.3 # Latest supported on non-arm apple targets
+          - llvm-17.0.2 # Latest version as of 2023-11-3
           - gcc-13
         generator:
           - "Ninja Multi-Config"
@@ -92,7 +92,7 @@ jobs:
             gcov_executable: "llvm-cov gcov" # simply putting "gcov" errors on Ubuntu with a segfault (exit -11 = SIGSEGV) as it's the wrong gcov version
             enable_ipo: On
 
-          - compiler: llvm-17
+          - compiler: llvm-17.0.2
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
