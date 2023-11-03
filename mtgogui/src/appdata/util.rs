@@ -20,7 +20,15 @@ pub fn appdata_path() -> io::Result<PathBuf> {
     }
     log::info!("Path to appdata dir: {appdata_dir:?}");
 
-    if !appdata_dir.exists() {
+    let is_exists = match appdata_dir.try_exists() {
+        Ok(is_exists) => is_exists,
+        Err(e) => {
+            log::warn!("Failed to check if app data path exists: {e}");
+            return Err(e);
+        }
+    };
+
+    if !is_exists {
         log::info!("App data path doesn't exist! - {appdata_dir:?}");
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
@@ -56,7 +64,7 @@ pub fn copy_tradelist_to_appdata(full_trade_list_path: &OsStr) -> io::Result<()>
 pub fn current_tradelist_path() -> io::Result<Option<PathBuf>> {
     let mut appdata_dir = crate::appdata::util::appdata_path()?;
     appdata_dir.push(CURRENT_FULL_TRADE_LIST);
-    if appdata_dir.exists() && appdata_dir.is_file() {
+    if appdata_dir.try_exists()? && appdata_dir.is_file() {
         Ok(Some(appdata_dir))
     } else {
         log::info!("Current full trade list doesn't exist at: {appdata_dir:?}");
