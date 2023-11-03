@@ -8,24 +8,23 @@
 #include "mtgo_preprocessor/run.hpp"
 #include "mtgo_preprocessor/setup.hpp"
 
-#include "mtgoparser/clap.hpp"
 #include "mtgoparser/goatbots.hpp"
-#include "mtgoparser/io.hpp"
 #include "mtgoparser/mtgo.hpp"
+#include "mtgoparser/mtgo/xml.hpp"
 #include "mtgoparser/scryfall.hpp"
-
 
 #include <internal_use_only/config.hpp>
 #include <spdlog/spdlog.h>
 
+#include <fmt/format.h>
 
-#include <algorithm>
 #include <cassert>
 #include <exception>
-#include <fstream>
 #include <optional>
 #include <string_view>
-#include <type_traits>
+#include <utility>
+#include <vector>
+
 
 using cfg = config::Config;
 

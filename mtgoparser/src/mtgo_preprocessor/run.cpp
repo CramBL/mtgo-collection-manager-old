@@ -3,13 +3,23 @@
 
 #include "mtgoparser/clap.hpp"
 #include "mtgoparser/goatbots.hpp"
+#include "mtgoparser/io.hpp"
 #include "mtgoparser/mtgo.hpp"
+#include "mtgoparser/mtgo/xml.hpp"
 #include "mtgoparser/scryfall.hpp"
 
-#include <cassert>
+#include <boost/outcome.hpp>
+#include <boost/outcome/result.hpp>
+#include <fmt/format.h>
 #include <spdlog/spdlog.h>
+#include <toml++/toml.hpp>
 
+#include <cassert>
+#include <fstream>
 #include <optional>
+#include <string>
+#include <string_view>
+#include <utility>
 
 
 namespace mtgo_preprocessor::run {
@@ -56,7 +66,7 @@ using cfg = config::Config;
         *mtgo_code = "";
         std::ofstream replace_state_log(log_fullpath);
         if (replace_state_log.is_open()) {
-          replace_state_log << log << std::endl;
+          replace_state_log << log << '\n';
           replace_state_log.close();
         } else {
           spdlog::error("Could not open state_log for writing at: {}", log_fullpath);
@@ -82,7 +92,7 @@ void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
   const std::string fullpath = std::string(jsonAndDir.dir) + mtgo_cards_json_fname;
   std::ofstream mtgo_cards_outfile(fullpath);
   if (mtgo_cards_outfile.is_open()) {
-    mtgo_cards_outfile << jsonAndDir.json << std::endl;
+    mtgo_cards_outfile << jsonAndDir.json << '\n';
     mtgo_cards_outfile.close();
   }
 }
