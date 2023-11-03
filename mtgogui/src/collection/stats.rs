@@ -5,6 +5,6 @@ use fltk::{
 use mtgoupdater::mtgo_card::MtgoCard;
 
 pub mod container;
-mod items;
+pub mod items;
 mod util;
 pub mod view;
