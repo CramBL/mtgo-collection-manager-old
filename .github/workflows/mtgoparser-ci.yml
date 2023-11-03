@@ -12,7 +12,7 @@ on:
       - develop
 
 env:
-  CLANG_TIDY_VERSION: "16.0.6"
+  CLANG_VERSION_MACOS: "15.0.3"
   VERBOSE: 1
   EXCLUDE_BOOST_LIBS: "serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
 
@@ -48,10 +48,9 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-12
           - windows-2022
         compiler:
-          - llvm-16.0.6 #- llvm-15.0.3 # Latest supported on non-arm apple targets
+          - llvm-17 #- llvm-15.0.3 # Latest supported on non-arm apple targets
           - gcc-13
         generator:
           - "Ninja Multi-Config"
@@ -72,21 +71,30 @@ jobs:
           # Add appropriate variables for gcov version required. This will intentionally break
           # if you try to use a compiler that does not have gcov set
           - os: macos-12
+            build_type: Debug
             compiler: gcc-13
             gcov_executable: gcov
-            enable_ipo: On
+            enable_ipo: Off
+            generator: "Ninja Multi-Config"
+            packaging_maintainer_mode: Off
+            build_shared: Off
+
+          - os: macos-12
+            build_type: Debug
+            compiler: llvm-15.0.3
+            enable_ipo: Off
+            generator: "Ninja Multi-Config"
+            packaging_maintainer_mode: Off
+            build_shared: Off
 
           - os: ubuntu-22.04
             compiler: gcc-13
             gcov_executable: "llvm-cov gcov" # simply putting "gcov" errors on Ubuntu with a segfault (exit -11 = SIGSEGV) as it's the wrong gcov version
             enable_ipo: On
 
-          - compiler: llvm-16.0.6
+          - compiler: llvm-17
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
-
-          - os: macos-12
-            enable_ipo: Off
 
           # Set up preferred package generators, for given build configurations
           - build_type: Release
@@ -140,13 +148,6 @@ jobs:
 
 
     steps:
-      - name: Check 🔬 for llvm version mismatches
-        if: ${{ contains(matrix.compiler, 'llvm') && !contains(matrix.compiler, env.CLANG_TIDY_VERSION) }}
-        uses: actions/github-script@v3
-        with:
-          script: |
-            core.setFailed('There is a mismatch between configured llvm compiler and clang-tidy version chosen')
-
       - uses: actions/checkout@v3
 
       - name: ⚙️ Setup Cache
@@ -162,8 +163,24 @@ jobs:
         with:
           envFile: '.github/constants.env'
 
+      - name: ⚙️ Setup C++ Tools - MacOS 🍎
+        if: runner.os == 'macOS'
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ matrix.compiler }}
+          vcvarsall: false
+          cmake: true
+          ninja: true
+          vcpkg: false
+          ccache: true
+          clangtidy: 15.0.3
+          cppcheck: true
+          gcovr: true
+          opencppcoverage: true
 
-      - name: ⚙️ Setup C++ Tools
+
+      - name: ⚙️ Setup C++ Tools - 💻 Windows & Linux 🐧
+        if: runner.os == 'Linux' || runner.os == 'Windows'
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
@@ -174,8 +191,6 @@ jobs:
           vcpkg: false
           ccache: true
           clangtidy: true
-
-
           cppcheck: true
 
           gcovr: true
