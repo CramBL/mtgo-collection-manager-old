@@ -66,9 +66,10 @@ impl MtgoGui {
 
         let menu = McmMenuBar::new(DEFAULT_APP_WIDTH, MENU_BAR_HEIGHT, &ev_send);
 
-        let flx_left_col = setup::setup_left_column_flx_box();
+        let mut flx_left_col = setup::setup_left_column_flx_box();
 
-        setup::set_left_col_box(ev_send.clone());
+        let search_box = setup::set_search_box(ev_send.clone());
+        flx_left_col.fixed(&search_box, 30);
 
         let collection_stats = StatsView::default();
         let metadata = StatsView::default();
