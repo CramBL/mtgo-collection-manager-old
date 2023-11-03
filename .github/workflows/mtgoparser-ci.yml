@@ -12,11 +12,9 @@ on:
       - develop
 
 env:
-  #CLANG_TIDY_VERSION: "15.0.3"
   CLANG_TIDY_VERSION: "16.0.6"
   VERBOSE: 1
   EXCLUDE_BOOST_LIBS: "serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
-
 
 jobs:
   # JOB to run change detection
@@ -53,8 +51,7 @@ jobs:
           - macos-12
           - windows-2022
         compiler:
-          #- llvm-15.0.3 # Latest supported on non-arm apple targets
-          - llvm-16.0.6
+          - llvm-16.0.6 #- llvm-15.0.3 # Latest supported on non-arm apple targets
           - gcc-13
         generator:
           - "Ninja Multi-Config"
@@ -84,7 +81,7 @@ jobs:
             gcov_executable: "llvm-cov gcov" # simply putting "gcov" errors on Ubuntu with a segfault (exit -11 = SIGSEGV) as it's the wrong gcov version
             enable_ipo: On
 
-          - compiler: llvm-15.0.3
+          - compiler: llvm-16.0.6
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
