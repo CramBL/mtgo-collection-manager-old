@@ -2,9 +2,11 @@ use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
+use crate::appdata::metadata::{self, MetaData};
 use crate::appdata::state::GuiState;
 use crate::assets::{self, get_asc_svg, get_icon_search, get_logo};
 use crate::collection::processor::TradelistProcessor;
+use crate::collection::stats::items::BrowserItems;
 use crate::collection::stats::view::StatsView;
 use crate::collection::view::table::CollectionTable;
 use crate::collection::TableMessage;
@@ -41,6 +43,7 @@ pub struct MtgoGui {
     menu: McmMenuBar,
     collection: CollectionTable,
     collection_stats: StatsView,
+    metadata: StatsView,
     tradelist_processor: TradelistProcessor,
 }
 
@@ -68,6 +71,7 @@ impl MtgoGui {
         setup::set_left_col_box(ev_send.clone());
 
         let collection_stats = StatsView::default();
+        let metadata = StatsView::default();
 
         flx_left_col.end();
 
@@ -91,6 +95,7 @@ impl MtgoGui {
             menu,
             collection,
             collection_stats,
+            metadata,
             tradelist_processor,
         }
     }
@@ -98,23 +103,71 @@ impl MtgoGui {
     /// Perform any startup tasks.
     ///
     /// Runs after all the GUI elements are created. And just before the main event loop starts.
-    fn run_startup(&mut self) {
-        self.state =
-            GuiState::load(appdata::util::appdata_path().expect("Failed to get appdata path"))
-                .expect("Failed to load GUI state");
+    fn run_startup(&mut self) -> Result<(), String> {
+        let appdata_dir = match appdata::util::appdata_path() {
+            Ok(appdata_dir) => appdata_dir,
+            Err(e) => return Err(format!("Failed to get appdata path: {e}")),
+        };
 
+        self.state = match GuiState::load(appdata_dir.clone()) {
+            Ok(state) => state,
+            Err(e) => {
+                log::warn!("Failed to load GUI state: {e}");
+                GuiState::default()
+            }
+        };
+
+        let tradelist_added_date_str: Option<String> =
+            if let Some(tradelist_added_date) = self.state.get_tradelist_added_date() {
+                Some(format!("{}", tradelist_added_date.format("%-d %B, %C%y")))
+            } else {
+                log::warn!("No tradelist added date found");
+                None
+            };
+
+        let mut metadata_browser_items = BrowserItems::new();
+        metadata_browser_items.add_item(
+            "dek-File added",
+            tradelist_added_date_str
+                .as_deref()
+                .unwrap_or("No tradelist added"),
+        );
+
+        log::info!("Loading metadata");
+        match MetaData::load(appdata_dir) {
+            Ok(metadata) => {
+                let mut items: BrowserItems = match metadata.try_into() {
+                    Ok(browser_items) => browser_items,
+                    Err(e) => {
+                        return Err(format!("Failed to convert metadata to browser items: {e}"))
+                    }
+                };
+                metadata_browser_items.append(&mut items);
+            }
+
+            Err(e) => {
+                // On startup this is a warning, as this is generated from MTGO Getter download data.
+                //  if it fails after MTGO Getter has been running, it is an error.
+                log::warn!("Failed to load metadata: {e}");
+            }
+        };
+
+        self.metadata.set_items(metadata_browser_items);
+
+        log::info!("Processing current tradelist");
         match appdata::util::current_tradelist_path() {
             Ok(Some(current_trade_list)) => {
                 self.tradelist_processor.process(current_trade_list.into())
             }
             Err(e) => {
                 // TODO - Error pop-up dialog if fails.
-                log::error!("Error getting current trade list path: {e}");
+                return Err(format!("Failed to get current tradelist path: {e}"));
             }
             Ok(None) => {
                 log::info!("No current trade list found");
             }
         }
+        Ok(())
     }
 
     /// Run the application.
@@ -123,7 +176,12 @@ impl MtgoGui {
     ///
     /// This function will block until the application is closed.
     pub fn run(&mut self) {
-        self.run_startup();
+        log::info!("Running startup");
+        if let Err(e) = self.run_startup() {
+            log::error!("Failed to run startup: {e}");
+            self.app.quit();
+        }
+        log::info!("Running main event loop");
         self.gui_main_event_loop();
     }
 
