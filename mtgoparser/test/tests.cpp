@@ -283,17 +283,17 @@ TEST_CASE("Parse state_log.toml")
   {
 
     std::optional<toml::date_time> card_defs_updated_at =
-      state_log["goatbots"]["Card_definitions_updated_at"].value<toml::date_time>();
+      state_log["goatbots"]["card_definitions_updated_at"].value<toml::date_time>();
     REQUIRE(card_defs_updated_at.has_value());
 
-    INFO("state_log.goatbots.Card_definitions_updated_at: " << card_defs_updated_at.value());
+    INFO("state_log.goatbots.card_definitions_updated_at: " << card_defs_updated_at.value());
     CHECK(
       card_defs_updated_at.value() == toml::date_time{ { 2023, 10, 21 }, { 22, 29, 53 }, {} });// "2023-10-21T22:29:53Z"
 
     std::optional<toml::date_time> prices_updated_at =
-      state_log["goatbots"]["Prices_updated_at"].value<toml::date_time>();
+      state_log["goatbots"]["prices_updated_at"].value<toml::date_time>();
     REQUIRE(prices_updated_at.has_value());
-    INFO("state_log.goatbots.Prices_updated_at: " << prices_updated_at.value());
+    INFO("state_log.goatbots.prices_updated_at: " << prices_updated_at.value());
     CHECK(
       prices_updated_at.value() == toml::date_time{ { 2023, 10, 14 }, { 15, 24, 21 }, {} });// "2023-10-14T15:24:21Z"
   }
@@ -302,41 +302,41 @@ TEST_CASE("Parse state_log.toml")
   {
     // check scryfall values
     std::optional<toml::date_time> bulk_updated_at =
-      state_log["scryfall"]["Bulk_data_updated_at"].value<toml::date_time>();
+      state_log["scryfall"]["bulk_data_updated_at"].value<toml::date_time>();
     REQUIRE(bulk_updated_at.has_value());
-    INFO("state_log.scryfall.Bulk_data_updated_at: " << bulk_updated_at.value());
+    INFO("state_log.scryfall.bulk_data_updated_at: " << bulk_updated_at.value());
     CHECK(bulk_updated_at.value() == toml::date_time{ { 1970, 1, 1 }, { 0, 0, 0 }, {} });//"1970-01-01T00:00:00Z"
 
     // check scryfall next released set
-    std::string_view next_released_set_name = state_log["scryfall"]["Next_released_mtgo_set"]["Name"].value_or("");
+    std::string_view next_released_set_name = state_log["scryfall"]["next_released_mtgo_set"]["name"].value_or("");
     CHECK(next_released_set_name == "The Lost Caverns of Ixalan");
 
     std::string_view next_released_set_date_str =
-      state_log["scryfall"]["Next_released_mtgo_set"]["Released_at"].value_or("");
+      state_log["scryfall"]["next_released_mtgo_set"]["released_at"].value_or("");
     CHECK(next_released_set_date_str == "2023-12-11");
 
     std::string_view next_released_set_mtgo_code =
-      state_log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("");
+      state_log["scryfall"]["next_released_mtgo_set"]["mtgo_code"].value_or("");
     CHECK(next_released_set_mtgo_code == "lci");
   }
 
   SECTION("Write to state_log")
   {
     // Pretend we found the mtgo_code in the card defs, now we should empty the "next_released_mtgo_set" fields
-    toml::value<std::string> *name = state_log["scryfall"]["Next_released_mtgo_set"]["Name"].as_string();
+    toml::value<std::string> *name = state_log["scryfall"]["next_released_mtgo_set"]["name"].as_string();
     *name = "";
-    toml::value<std::string> *released_at = state_log["scryfall"]["Next_released_mtgo_set"]["Released_at"].as_string();
+    toml::value<std::string> *released_at = state_log["scryfall"]["next_released_mtgo_set"]["released_at"].as_string();
     *released_at = "";
-    toml::value<std::string> *mtgo_code = state_log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].as_string();
+    toml::value<std::string> *mtgo_code = state_log["scryfall"]["next_released_mtgo_set"]["mtgo_code"].as_string();
     *mtgo_code = "";
 
-    std::string name_str = state_log["scryfall"]["Next_released_mtgo_set"]["Name"].value_or("error");
+    std::string name_str = state_log["scryfall"]["next_released_mtgo_set"]["name"].value_or("error");
     CHECK(name_str == "");
 
-    std::string released_at_str = state_log["scryfall"]["Next_released_mtgo_set"]["Released_at"].value_or("error");
+    std::string released_at_str = state_log["scryfall"]["next_released_mtgo_set"]["released_at"].value_or("error");
     CHECK(released_at_str == "");
 
-    std::string mtgo_code_str = state_log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("error");
+    std::string mtgo_code_str = state_log["scryfall"]["next_released_mtgo_set"]["mtgo_code"].value_or("error");
     CHECK(mtgo_code_str == "");
 
     INFO("State log:\n" << state_log << '\n');

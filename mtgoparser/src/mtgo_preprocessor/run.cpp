@@ -48,11 +48,11 @@ using cfg = config::Config;
         log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("");
       if (goatbots::set_id_in_card_defs(next_released_set_mtgo_code, card_defs.value())) {
         // clear the set from the statelog
-        toml::value<std::string> *name = log["scryfall"]["Next_released_mtgo_set"]["Name"].as_string();
+        toml::value<std::string> *name = log["scryfall"]["next_released_mtgo_set"]["name"].as_string();
         *name = "";
-        toml::value<std::string> *released_at = log["scryfall"]["Next_released_mtgo_set"]["Released_at"].as_string();
+        toml::value<std::string> *released_at = log["scryfall"]["next_released_mtgo_set"]["released_at"].as_string();
         *released_at = "";
-        toml::value<std::string> *mtgo_code = log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].as_string();
+        toml::value<std::string> *mtgo_code = log["scryfall"]["next_released_mtgo_set"]["mtgo_code"].as_string();
         *mtgo_code = "";
         std::ofstream replace_state_log(log_fullpath);
         if (replace_state_log.is_open()) {
