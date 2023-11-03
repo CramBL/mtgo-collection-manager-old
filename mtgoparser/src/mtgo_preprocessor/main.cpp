@@ -13,10 +13,9 @@
 #include "mtgoparser/mtgo/xml.hpp"
 #include "mtgoparser/scryfall.hpp"
 
+#include <fmt/core.h>
 #include <internal_use_only/config.hpp>
 #include <spdlog/spdlog.h>
-
-#include <fmt/format.h>
 
 #include <cassert>
 #include <exception>
