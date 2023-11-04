@@ -23,8 +23,82 @@
 
 namespace mtgo_preprocessor::run {
 
+
 using cfg = config::Config;
 
+
+/// Helper functions (not part of the public API)
+namespace helper {
+  struct JsonAndDestinationDir
+  {
+    std::string_view json;
+    std::string_view dir;
+  };
+
+  /// Write the JSON to a file in the appdata directory
+  void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
+  {
+    const std::string mtgo_cards_json_fname = "mtgo-cards.json";
+    const std::string fullpath = std::string(jsonAndDir.dir) + mtgo_cards_json_fname;
+    std::ofstream mtgo_cards_outfile(fullpath);
+    if (mtgo_cards_outfile.is_open()) {
+      mtgo_cards_outfile << jsonAndDir.json << '\n';
+      mtgo_cards_outfile.close();
+    }
+  }
+
+  /// Read the data from the scryfall JSON file into a map.
+  /// Then call the extract function on the collection to get all the useful data.
+  [[nodiscard]] int parse_scryfall_data(mtgo::Collection &collection)
+  {
+    if (auto scryfall_path = cfg::get()->OptionValue(config::option::scryfall_path)) {
+      if (auto scryfall_vec = scryfall::ReadJsonVector(scryfall_path.value())) {
+        collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
+        return 0;
+      } else {
+        spdlog::error("Expected a vector of scryfall card data: {}", scryfall_vec.error());
+        return -1;
+      }
+    } else {
+      spdlog::error("Expected a path to scryfall data");
+      return -1;
+    }
+  }
+
+
+  /// Check if the next released set from the TOML state_log is now in the card definitions
+  ///
+  /// If it is, clear it from the state_log by replacing the values with empty strings.
+  void update_state_log_set(std::string_view appdata_dir, const goatbots::card_defs_map_t &card_defs)
+  {
+    const std::string state_log = "state_log.toml";
+    const std::string log_fullpath = std::string(appdata_dir) + state_log;
+
+    spdlog::info("Getting state_log from {}", log_fullpath);
+
+    decltype(auto) log = io_util::read_state_log(log_fullpath);
+
+    const std::string_view next_released_set_mtgo_code =
+      log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("");
+    if (goatbots::set_id_in_card_defs(next_released_set_mtgo_code, card_defs)) {
+      // clear the set from the statelog
+      toml::value<std::string> *name = log["scryfall"]["next_released_mtgo_set"]["name"].as_string();
+      *name = std::string("");
+      toml::value<std::string> *released_at = log["scryfall"]["next_released_mtgo_set"]["released_at"].as_string();
+      *released_at = std::string("");
+      toml::value<std::string> *mtgo_code = log["scryfall"]["next_released_mtgo_set"]["mtgo_code"].as_string();
+      *mtgo_code = std::string("");
+      std::ofstream replace_state_log(log_fullpath);
+      if (replace_state_log.is_open()) {
+        replace_state_log << log << '\n';
+        replace_state_log.close();
+      } else {
+        spdlog::error("Could not open state_log for writing at: {}", log_fullpath);
+      }
+    }
+  }
+
+}// namespace helper
 
 [[nodiscard]] auto parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths)
   -> outcome::result<Success, ErrorStr>
@@ -48,70 +122,13 @@ using cfg = config::Config;
     //
     // If it is, clear it from the state_log by replacing the values with empty strings.
     if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
-      const std::string state_log = "state_log.toml";
-      const std::string log_fullpath = std::string(appdata_dir.value()) + state_log;
-
-      spdlog::info("Getting state_log from {}", log_fullpath);
-      decltype(auto) log = io_util::read_state_log(log_fullpath);
-      const std::string_view next_released_set_mtgo_code =
-        log["scryfall"]["Next_released_mtgo_set"]["Mtgo_code"].value_or("");
-      if (goatbots::set_id_in_card_defs(next_released_set_mtgo_code, card_defs.value())) {
-        // clear the set from the statelog
-        toml::value<std::string> *name = log["scryfall"]["next_released_mtgo_set"]["name"].as_string();
-        *name = "";
-        toml::value<std::string> *released_at = log["scryfall"]["next_released_mtgo_set"]["released_at"].as_string();
-        *released_at = "";
-        toml::value<std::string> *mtgo_code = log["scryfall"]["next_released_mtgo_set"]["mtgo_code"].as_string();
-        *mtgo_code = "";
-        std::ofstream replace_state_log(log_fullpath);
-        if (replace_state_log.is_open()) {
-          replace_state_log << log << '\n';
-          replace_state_log.close();
-        } else {
-          spdlog::error("Could not open state_log for writing at: {}", log_fullpath);
-        }
-      }
+      helper::update_state_log_set(appdata_dir.value(), card_defs.value());
     }
 
   } else {
     return fmt::format("This error should be unreachable...");
   }
   return outcome::success();
-}
-
-struct JsonAndDestinationDir
-{
-  std::string_view json;
-  std::string_view dir;
-};
-
-void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
-{
-  const std::string mtgo_cards_json_fname = "mtgo-cards.json";
-  const std::string fullpath = std::string(jsonAndDir.dir) + mtgo_cards_json_fname;
-  std::ofstream mtgo_cards_outfile(fullpath);
-  if (mtgo_cards_outfile.is_open()) {
-    mtgo_cards_outfile << jsonAndDir.json << '\n';
-    mtgo_cards_outfile.close();
-  }
-}
-
-/// Read the data from the scryfall JSON file into a map.
-/// Then call the extract function on the collection to get all the useful data.
-[[nodiscard]] int parse_scryfall_data(mtgo::Collection &collection)
-{
-  if (auto scryfall_path = cfg::get()->OptionValue(config::option::scryfall_path)) {
-    if (auto scryfall_vec = scryfall::ReadJsonVector(scryfall_path.value())) {
-      collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
-      return 0;
-    } else {
-      spdlog::error("Expected a vector of scryfall card data: {}", scryfall_vec.error());
-      return -1;
-    }
-  } else {
-    spdlog::error("Expected a path to scryfall data");
-    return -1;
-  }
 }
 
 
@@ -163,7 +180,7 @@ void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
   if (!cfg::get()->FlagSet(config::option::scryfall_path)) {
     spdlog::error("Update all needs a path to a scryfall json-data file");
   } else {
-    if (parse_scryfall_data(mtgo_collection) != 0) {
+    if (helper::parse_scryfall_data(mtgo_collection) != 0) {
       spdlog::error("Error parsing scryfall data");
       return -1;
     }
@@ -176,7 +193,7 @@ void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
   // If the app data directory is set, save it there
   if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
     // Write the json to a file in the appdata directory
-    write_json_to_appdata_dir(JsonAndDestinationDir{ .json = json, .dir = appdata_dir.value() });
+    helper::write_json_to_appdata_dir(helper::JsonAndDestinationDir{ .json = json, .dir = appdata_dir.value() });
   }
 
   // Print the MTGO collection JSON to stdout
