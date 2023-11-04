@@ -3,10 +3,12 @@
 #include <mtgoparser/clap.hpp>
 #include <mtgoparser/clap/option.hpp>
 
+// Define the command-line options and commands
 namespace config {
-
 using clap::Opt::NeedValue;
 
+
+// Define the command-line options
 namespace option {
   constexpr clap::Option mtgoupdater_json_out{ "--collection-json-out", clap::Opt::Flag };
   constexpr clap::Option help{ "-h", clap::Opt::Flag, "--help" };
@@ -33,13 +35,27 @@ namespace option {
     app_data_dir);
 }// namespace option
 
+// Define the commands for the command-line parser
 namespace commands {
   constexpr clap::Command run{ "run", true };
 }
 
+/**
+ * @brief Singleton class that holds the Command-line argument parser (CLAP) for `MTGO Preprocessor`.
+ *
+ * Parses the command-line arguments and stores the results in a singleton config object.
+ *
+ * @note The singleton is initialized at compile-time and parsed at run-time.
+ *
+ */
 class Config
 {
 public:
+  /**
+   * @brief Get the singleton config object.
+   *
+   * @return Config*
+   */
   static auto get() -> decltype(auto)
   {
     static constinit auto config = clap::init_clap(option::opt_array, clap::def_cmds(commands::run));
