@@ -88,6 +88,7 @@ namespace helper {
       *released_at = std::string("");
       toml::value<std::string> *mtgo_code = log["scryfall"]["next_released_mtgo_set"]["mtgo_code"].as_string();
       *mtgo_code = std::string("");
+
       std::ofstream replace_state_log(log_fullpath);
       if (replace_state_log.is_open()) {
         replace_state_log << log << '\n';
@@ -132,20 +133,21 @@ namespace helper {
 }
 
 
-[[nodiscard]] int update()
+[[nodiscard]] auto update() -> outcome::result<Success, ErrorStr>
 {
   // Parse collection
 
   // Not possible if no full trade list path is supplied
   if (!cfg::get()->FlagSet(config::option::fulltradelist_path)) {
-    spdlog::error("Update all needs a path to a full trade list file");
-    return -1;
+    return outcome::failure("Update all needs a path to a full trade list XML file");
   }
 
   // Get cards from full trade list XML
   auto fulltradelist_path = cfg::get()->OptionValue(config::option::fulltradelist_path);
   assert(fulltradelist_path.has_value());
-  if (!fulltradelist_path.has_value()) { return -1; }
+  if (!fulltradelist_path.has_value()) {
+    return outcome::failure("Full Trade List path has no value. This error should be unreachable...");
+  }
   auto mtgo_cards = mtgo::xml::parse_dek_xml(fulltradelist_path.value());
   auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
 
@@ -156,6 +158,7 @@ namespace helper {
     if (!cfg::get()->FlagSet(config::option::card_defs_path)) {
       spdlog::error("Update all needs a path to a card definition file");
     }
+    return outcome::failure("Update all needs a path to a card definition and price history file");
   } else {
 
     // Get card definitions as a map
@@ -165,13 +168,16 @@ namespace helper {
     auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
     assert(price_hist_path.has_value());
 
-    if (!(card_defs_path.has_value() && price_hist_path.has_value())) { return -1; }
+    if (!(card_defs_path.has_value() && price_hist_path.has_value())) {
+      return outcome::failure(
+        "Failed retrieving price history and card definition path from config. This error should be unreachable...");
+    }
 
     if (auto res = parse_goatbots_data(mtgo_collection,
           GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
         res.has_error()) {
-      spdlog::error("{}", res.error());
-      return -1;
+
+      return outcome::failure(res.error());
     }
     spdlog::info("extract Goatbots info complete");
   }
@@ -180,10 +186,7 @@ namespace helper {
   if (!cfg::get()->FlagSet(config::option::scryfall_path)) {
     spdlog::error("Update all needs a path to a scryfall json-data file");
   } else {
-    if (helper::parse_scryfall_data(mtgo_collection) != 0) {
-      spdlog::error("Error parsing scryfall data");
-      return -1;
-    }
+    if (helper::parse_scryfall_data(mtgo_collection) != 0) { return outcome::failure("Failed parsing scryfall data"); }
     spdlog::info("extract Scryfall info completed");
   }
 
@@ -198,13 +201,13 @@ namespace helper {
 
   // Print the MTGO collection JSON to stdout
   fmt::print("{}", json);
-  return 0;
+  return outcome::success();
 }
 
-[[nodiscard]] int run()
+[[nodiscard]] auto run() -> outcome::result<Success, ErrorStr>
 {
   if (cfg::get()->FlagSet(config::option::update)) { return update(); }
-  return 0;
+  return outcome::success();
 }
 
 }// namespace mtgo_preprocessor::run

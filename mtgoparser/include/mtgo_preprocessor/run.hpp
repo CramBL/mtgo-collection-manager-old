@@ -11,12 +11,16 @@ namespace mtgo_preprocessor::run {
 
 namespace outcome = BOOST_OUTCOME_V2_NAMESPACE;
 
+using Success = void;
+using ErrorStr = std::string;
+
 /**
  * @brief Entry point when `MTGO Preprocessor` is run with the `run` command.
  *
- * @return int
+ * @return On success: `Success` (void)
+ * @return On failure: `ErrorStr` (std::string)
  */
-[[nodiscard]] int run();
+[[nodiscard]] auto run() -> outcome::result<Success, ErrorStr>;
 
 
 /**
@@ -27,11 +31,12 @@ namespace outcome = BOOST_OUTCOME_V2_NAMESPACE;
  *    - Goatbots card definition JSON
  *    - Goatbots price history JSON
  *
- * @return int
+ * @return On success: `Success` (void)
+ * @return On failure: `ErrorStr` (std::string)
  *
  * @note Executed if the run command and update option is set.
  */
-[[nodiscard]] int update();
+[[nodiscard]] auto update() -> outcome::result<Success, ErrorStr>;
 
 /**
  * @brief Specifies the paths to the Goatbots card definition and price history JSON files.
@@ -48,8 +53,6 @@ struct GoatbotsPaths
   std::string_view price_hist_path;
 };
 
-using Success = void;
-using ErrorStr = std::string;
 
 /**
  * @brief Parse goatbots data from specified paths to card definition and price history JSON files.
