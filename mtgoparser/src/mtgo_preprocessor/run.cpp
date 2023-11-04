@@ -105,16 +105,16 @@ namespace helper {
   -> outcome::result<Success, ErrorStr>
 {
   // Get card definitions as a map
-  auto card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(paths.card_defs_path);
-  assert(card_defs.has_value());
+  auto res_card_defs = goatbots::ReadJsonMap<goatbots::card_defs_map_t>(paths.card_defs_path);
+  if (res_card_defs.has_error()) { return outcome::failure(res_card_defs.error()); }
 
   // Get price history as a map
-  auto price_hist = goatbots::ReadJsonMap<goatbots::price_hist_map_t>(paths.price_hist_path);
-  assert(price_hist.has_value());
+  auto res_price_hist = goatbots::ReadJsonMap<goatbots::price_hist_map_t>(paths.price_hist_path);
+  if (res_price_hist.has_error()) { return outcome::failure(res_price_hist.error()); }
 
   // Extract data from the maps
-  if (price_hist.has_value() && card_defs.has_value()) {
-    mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
+  if (res_price_hist.has_value() && res_card_defs.has_value()) {
+    mtgo_collection.ExtractGoatbotsInfo(res_card_defs.value(), res_price_hist.value());
 
     spdlog::info("GB Extraction complete, checking state_log");
 
@@ -122,7 +122,7 @@ namespace helper {
     //
     // If it is, clear it from the state_log by replacing the values with empty strings.
     if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
-      if (auto res = helper::update_state_log_set(appdata_dir.value(), card_defs.value()); res.has_error()) {
+      if (auto res = helper::update_state_log_set(appdata_dir.value(), res_card_defs.value()); res.has_error()) {
         return outcome::failure(res.error());
       }
     }
