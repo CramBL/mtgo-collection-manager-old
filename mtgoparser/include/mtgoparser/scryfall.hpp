@@ -16,6 +16,11 @@
 namespace scryfall {
 
 
+/**
+ * @brief Prices of an item (card, booster, avatar etc.) as described by Scryfall data.
+ *
+ * @note The prices are optional because not all cards have all prices.
+ */
 struct Prices
 {
   using opt_str = std::optional<std::string>;
@@ -44,6 +49,9 @@ struct Prices
   std::optional<std::string> tix;
 };
 
+/**
+ * @brief A card as described by Scryfall data.
+ */
 struct Card
 {
   uint32_t mtgo_id{};
@@ -57,8 +65,8 @@ struct Card
     std::string _released_at = "",
     std::string _rarity = "",
     Prices _prices = scryfall::Prices{})
-    : mtgo_id{ _mtgo_id }, name{ std::move(_name) },
-      released_at{ std::move(_released_at) }, rarity{ std::move(_rarity) }, prices{ std::move(_prices) }
+    : mtgo_id{ _mtgo_id }, name{ std::move(_name) }, released_at{ std::move(_released_at) },
+      rarity{ std::move(_rarity) }, prices{ std::move(_prices) }
   {}
 
   [[nodiscard]] inline constexpr bool operator==(const Card &other) const
