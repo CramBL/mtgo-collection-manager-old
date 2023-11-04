@@ -115,6 +115,7 @@ function Test-All {
     Test-Mtgogetter
     Test-Mtgoparser
     Test-Mtgoupdater
+    Test-Mtgogui
     Write-Host "================================= "
     Write-Host "=== Done testing all targets === "
     Write-Host "================================= "

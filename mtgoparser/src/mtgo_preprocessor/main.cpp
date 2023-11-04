@@ -19,7 +19,6 @@
 
 #include <cassert>
 #include <exception>
-#include <optional>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -99,7 +98,12 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    if (cfg::get()->CmdSet(config::commands::run)) { return mtgo_preprocessor::run::run(); }
+    if (cfg::get()->CmdSet(config::commands::run)) {
+      if (auto res = mtgo_preprocessor::run::run(); res.has_error()) {
+        spdlog::error("{}", res.error());
+        return -1;
+      }
+    }
 
     if (cfg::get()->FlagSet(config::option::debug) && cfg::get()->FlagSet(config::option::mtgoupdater_json_out)) {
       return example();

@@ -16,6 +16,11 @@
 namespace scryfall {
 
 
+/**
+ * @brief Prices of an item (card, booster, avatar etc.) as described by Scryfall data.
+ *
+ * @note The prices are optional because not all cards have all prices.
+ */
 struct Prices
 {
   using opt_str = std::optional<std::string>;
@@ -44,6 +49,9 @@ struct Prices
   std::optional<std::string> tix;
 };
 
+/**
+ * @brief A card as described by Scryfall data.
+ */
 struct Card
 {
   uint32_t mtgo_id{};

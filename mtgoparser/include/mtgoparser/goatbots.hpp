@@ -3,6 +3,8 @@
 #include "mtgoparser/io.hpp"
 
 #include <boost/implicit_cast.hpp>
+#include <boost/outcome.hpp>
+#include <boost/outcome/result.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
@@ -12,8 +14,13 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
+#include <utility>
 
 namespace goatbots {
+
+namespace outcome = BOOST_OUTCOME_V2_NAMESPACE;
+using ErrorStr = std::string;
 
 // Try to only allocate once, so reserve more than card count
 const uint32_t RESERVE_APPROX_CARD_COUNT = 80000;
@@ -38,7 +45,8 @@ using card_defs_map_t = boost::unordered_flat_map<uint32_t, CardDefinition>;
 template<class T>
 concept goatbots_json = std::disjunction<std::is_same<T, price_hist_map_t>, std::is_same<T, card_defs_map_t>>::value;
 
-template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(const std::filesystem::path &path_json) -> std::optional<T>
+template<goatbots_json T>
+[[nodiscard]] auto ReadJsonMap(const std::filesystem::path &path_json) -> outcome::result<T, ErrorStr>
 {
   // Instantiate and pre-allocate map
   T json_map{};
@@ -46,13 +54,11 @@ template<goatbots_json T> [[nodiscard]] auto ReadJsonMap(const std::filesystem::
 
   // Read file into buffer and decode to populate map
   if (auto err_code = glz::read_json(json_map, io_util::read_to_str_buf(path_json))) {
-    // Handle error
-    spdlog::error(
-      "Reading JSON from {} failed with {}", path_json.string(), glz::format_error(err_code, std::string{}));
-    return std::nullopt;
+    return outcome::failure(fmt::format(
+      "Reading JSON from {} failed with {}", path_json.string(), glz::format_error(err_code, std::string{})));
   }
 
-  return json_map;
+  return outcome::success(std::move(json_map));
 }
 
 // Check if an MTGO set ID such as `RTR` is present in the card definitions

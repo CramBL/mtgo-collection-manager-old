@@ -17,6 +17,10 @@
 #include <vector>
 
 namespace mtgo {
+
+/**
+ * @brief An MTGO Collection.
+ */
 class Collection
 {
   // Member variables
@@ -28,11 +32,38 @@ class Collection
   std::optional<uint32_t> total_quantity_ = std::nullopt;
 
 public:
+  // Constructors
+
+  /**
+   * @brief Construct a new Collection object from an owned (R-value) vector of cards (`mtgo::Card`).
+   *
+   * @param cards
+   */
   [[nodiscard]] explicit Collection(std::vector<Card> &&cards) noexcept : cards_{ std::move(cards) } {}
+
+  /**
+   * @brief Construct a new Collection object from a JSON string containing a vector of cards (`mtgo::Card`) as JSON.
+   *
+   * @param json_str
+   */
   [[nodiscard]] explicit Collection(const std::string &json_str) noexcept
     : cards_{ glz::read_json<std::vector<Card>>(json_str).value() }
   {}
+
+  /**
+   * @brief Get the size of the collection, i.e. the number of unique cards in the collection.
+   *
+   * @return `std::size_t` number of unique cards in the collection.
+   */
   [[nodiscard]] constexpr auto Size() const noexcept -> std::size_t;
+
+  /**
+   * @brief Get the total number of cards in the collection.
+   *
+   * @note If you want to get the total number of unique cards in the collection, use `Size()`.
+   *
+   * @return `uint32_t` total quantity of cards in the collection.
+   */
   [[nodiscard]] auto TotalCards() -> uint32_t
   {
     // The first time anything related to card quantities is needed/called this function is called to avoid doing

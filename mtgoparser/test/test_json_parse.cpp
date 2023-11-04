@@ -26,12 +26,11 @@ TEST_CASE("CardDefinition structs are correctly deserialized from Goatbots JSON"
   using goatbots::card_defs_map_t;
   using goatbots::CardDefinition;
 
-  std::optional<card_defs_map_t> card_defs_opt =
-    goatbots::ReadJsonMap<card_defs_map_t>(path_goatbots_card_defs_small_5cards);
+  auto card_defs_res = goatbots::ReadJsonMap<card_defs_map_t>(path_goatbots_card_defs_small_5cards);
 
-  REQUIRE(card_defs_opt.has_value());
-  if (!card_defs_opt.has_value()) { return; }// Make the compiler shut up
-  const auto card_defs = card_defs_opt.value();
+  REQUIRE(card_defs_res.has_value());
+  if (!card_defs_res.has_value()) { return; }// Make the compiler shut up
+  const auto card_defs = card_defs_res.value();
 
   SECTION("Sanity tests - Card definitions")
   {
@@ -60,13 +59,12 @@ TEST_CASE("CardDefinition structs are correctly deserialized from Goatbots JSON"
 TEST_CASE("Card prices are correctly deserialized from Goatbots JSON", "[prices_from_goatbots_json]")
 {
   using goatbots::price_hist_map_t;
-  std::optional<price_hist_map_t> prices_opt =
-    goatbots::ReadJsonMap<price_hist_map_t>(path_goatbots_price_hist_small_5cards);
+  auto prices_res = goatbots::ReadJsonMap<price_hist_map_t>(path_goatbots_price_hist_small_5cards);
 
-  REQUIRE(prices_opt.has_value());
-  if (!prices_opt.has_value()) { return; }// Make the compiler shut up
+  REQUIRE(prices_res.has_value());
+  if (!prices_res.has_value()) { return; }// Make the compiler shut up
 
-  const auto prices = prices_opt.value();
+  const auto prices = prices_res.value();
 
   SECTION("Sanity tests - Card prices")
   {
@@ -194,11 +192,11 @@ TEST_CASE("Full JSON - CardDefinition structs deserialized from Goatbots JSON an
   using goatbots::card_defs_map_t;
   using goatbots::CardDefinition;
 
-  std::optional<card_defs_map_t> card_defs_opt = goatbots::ReadJsonMap<card_defs_map_t>(path_goatbots_card_defs_full);
+  auto card_defs_res = goatbots::ReadJsonMap<card_defs_map_t>(path_goatbots_card_defs_full);
 
-  REQUIRE(card_defs_opt.has_value());
+  REQUIRE(card_defs_res.has_value());
   // if (!card_defs_opt.has_value()) { return; }// Make the compiler shut up
-  const card_defs_map_t card_defs = card_defs_opt.value();
+  const card_defs_map_t card_defs = card_defs_res.value();
 
   SECTION("Sanity checks - card definitions")
   {

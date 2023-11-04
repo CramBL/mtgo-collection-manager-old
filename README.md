@@ -6,6 +6,11 @@
 MTGO Collection Manager
 </h1>
 
+[![integraton-ci](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/integration-ci.yml/badge.svg)](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/integration-ci.yml)
+[![mtgogetter-ci](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgogetter-ci.yml/badge.svg)](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgogetter-ci.yml)
+[![mtgoparser-ci](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgoparser-ci.yml/badge.svg)](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgoparser-ci.yml)
+[![mtgoupdater-ci](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgoupdater-ci.yml/badge.svg)](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgoupdater-ci.yml)
+
 ## Purpose
 To automate some tasks regarding effective management of [MTGO](https://www.mtgo.com/en/mtgo) collection, that are too cumbersome for anyone to actually do them manually.
 
