@@ -42,15 +42,6 @@ public:
   [[nodiscard]] explicit Collection(std::vector<Card> &&cards) noexcept : cards_{ std::move(cards) } {}
 
   /**
-   * @brief Construct a new Collection object from a const vector& of cards (`mtgo::Card`).
-   *
-   * @note This will copy the vector.
-   *
-   * @param cards
-   */
-  [[nodiscard]] explicit Collection(const std::vector<Card> &cards) noexcept : cards_{ cards } {}
-
-  /**
    * @brief Construct a new Collection object from a JSON string containing a vector of cards (`mtgo::Card`) as JSON.
    *
    * @param json_str
