@@ -12,10 +12,18 @@
 
 namespace mtg {
 
+// Denote the rarity of an MTG item.
 enum class Rarity : uint8_t { Common, Uncommon, Rare, Mythic, Booster };
 
 namespace util {
 
+  /**
+   * @brief Convert a string-like value to a Rarity enum.
+   *
+   * @tparam T The type of the string-like value
+   * @param val the string-like value to convert
+   * @return `mtg::Rarity` enum
+   */
   template<typename T> constexpr auto rarity_from_t(T val) -> mtg::Rarity
   {
     if constexpr (std::convertible_to<T, std::string_view>) {
@@ -36,6 +44,12 @@ namespace util {
     return Rarity::Booster;
   }
 
+  /**
+   * @brief Convert a Rarity enum to a string.
+   *
+   * @param rarity The Rarity enum to convert
+   * @return std::string representation of the Rarity enum.
+   */
   auto inline rarity_as_string(Rarity rarity) -> std::string
   {
     switch (rarity) {
