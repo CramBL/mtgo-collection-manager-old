@@ -15,7 +15,7 @@
 
 namespace mtgo_preprocessor::setup {
 
-auto setup(std::vector<std::string_view> &args) -> outcome::result<void, std::string>
+[[nodiscard]] auto setup(std::vector<std::string_view> &args) -> outcome::result<void, std::string>
 {
   // https://github.com/gabime/spdlog/wiki/0.-FAQ#switch-the-default-logger-to-stderr
   spdlog::set_default_logger(spdlog::stderr_color_st("rename_default_logger_to_keep_format"));

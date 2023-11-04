@@ -67,7 +67,8 @@ namespace helper {
   /// Check if the next released set from the TOML state_log is now in the card definitions
   ///
   /// If it is, clear it from the state_log by replacing the values with empty strings.
-  void update_state_log_set(std::string_view appdata_dir, const goatbots::card_defs_map_t &card_defs)
+  [[nodiscard]] auto update_state_log_set(std::string_view appdata_dir, const goatbots::card_defs_map_t &card_defs)
+    -> outcome::result<void, std::string>
   {
     const std::string state_log = "state_log.toml";
     const std::string log_fullpath = std::string(appdata_dir) + state_log;
@@ -92,9 +93,10 @@ namespace helper {
         replace_state_log << log << '\n';
         replace_state_log.close();
       } else {
-        spdlog::error("Could not open state_log for writing at: {}", log_fullpath);
+        return outcome::failure(fmt::format("Failed to open state_log for writing: {}", log_fullpath));
       }
     }
+    return outcome::success();
   }
 
 }// namespace helper
@@ -114,18 +116,19 @@ namespace helper {
   if (price_hist.has_value() && card_defs.has_value()) {
     mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
 
-    spdlog::info("GB Extraction complete");
+    spdlog::info("GB Extraction complete, checking state_log");
 
-    spdlog::info("checking state_log");
     // Check if the next released set from the TOML state_log is now in the card definitions
     //
     // If it is, clear it from the state_log by replacing the values with empty strings.
     if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
-      helper::update_state_log_set(appdata_dir.value(), card_defs.value());
+      if (auto res = helper::update_state_log_set(appdata_dir.value(), card_defs.value()); res.has_error()) {
+        return outcome::failure(res.error());
+      }
     }
 
   } else {
-    return fmt::format("This error should be unreachable...");
+    return outcome::failure("Price history or card definitions missing, this should be unreachable...");
   }
   return outcome::success();
 }
