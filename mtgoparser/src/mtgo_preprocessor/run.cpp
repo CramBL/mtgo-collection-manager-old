@@ -49,19 +49,17 @@ namespace helper {
 
   /// Read the data from the scryfall JSON file into a map.
   /// Then call the extract function on the collection to get all the useful data.
-  [[nodiscard]] int parse_scryfall_data(mtgo::Collection &collection)
+  [[nodiscard]] auto parse_scryfall_data(mtgo::Collection &collection) -> outcome::result<void, std::string>
   {
     if (auto scryfall_path = cfg::get()->OptionValue(config::option::scryfall_path)) {
       if (auto scryfall_vec = scryfall::ReadJsonVector(scryfall_path.value())) {
         collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
-        return 0;
+        return outcome::success();
       } else {
-        spdlog::error("Expected a vector of scryfall card data: {}", scryfall_vec.error());
-        return -1;
+        return outcome::failure(fmt::format("Expected a vector of scryfall card data: {}", scryfall_vec.error()));
       }
     } else {
-      spdlog::error("Expected a path to scryfall data");
-      return -1;
+      return outcome::failure("No scryfall path specified");
     }
   }
 
@@ -186,7 +184,9 @@ namespace helper {
   if (!cfg::get()->FlagSet(config::option::scryfall_path)) {
     spdlog::error("Update all needs a path to a scryfall json-data file");
   } else {
-    if (helper::parse_scryfall_data(mtgo_collection) != 0) { return outcome::failure("Failed parsing scryfall data"); }
+    if (auto res = helper::parse_scryfall_data(mtgo_collection); res.has_error()) {
+      return outcome::failure(res.error());
+    }
     spdlog::info("extract Scryfall info completed");
   }
 
