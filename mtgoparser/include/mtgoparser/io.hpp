@@ -4,6 +4,7 @@
 #include <toml++/toml.hpp>
 // NOLINTEND
 
+#include <boost/implicit_cast.hpp>
 #include <boost/outcome.hpp>
 #include <boost/outcome/result.hpp>
 
@@ -112,7 +113,8 @@ namespace fs = std::filesystem;
 
     std::string final_fname = fmt::format("{}_{}.{}", fpath.stem().string(), now_utc_iso8601_timestamp, ext);
 
-    fs::path fpath_with_time = fpath.has_parent_path() ? fpath.parent_path() / final_fname : final_fname;
+    fs::path fpath_with_time =
+      fpath.has_parent_path() ? fpath.parent_path() / final_fname : boost::implicit_cast<fs::path>(final_fname);
 
     // Open the file
     std::ofstream file(fpath_with_time, std::ios::binary | std::ios::out);
