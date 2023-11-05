@@ -10,9 +10,11 @@
 #include <fmt/core.h>
 
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <ios>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace io_util {
@@ -70,9 +72,11 @@ namespace fs = std::filesystem;
 }
 
 /**
- * @brief Save a string buffer to a file with an ISO 8601 timestamp appended to the file name.
+ * @brief Save a string buffer to a file with a UTC ISO 8601 timestamp appended to the file name.
  *
  * Any directories in the path that do not exist will be created.
+ * The timestamp is in the format %Y-%m-%dT%H%M%SZ without sub-second precision.
+ *  e.g. `2023-11-05T152700Z`.
  *
  * @param buf The string buffer to save
  *
@@ -83,7 +87,7 @@ namespace fs = std::filesystem;
  * @return On success: The path to the saved file
  * @return On failure: The error message
  */
-[[nodiscard]] inline auto save_with_timestamp(auto buf, const fs::path &fpath, auto ext)
+[[nodiscard]] inline auto save_with_timestamp(const auto &buf, const fs::path &fpath, const auto &ext)
   -> outcome::result<fs::path, std::string>
 {
   try {
@@ -93,24 +97,39 @@ namespace fs = std::filesystem;
       fs::create_directories(fpath.parent_path());
     }
     // Get the current time
-    auto now = std::chrono::system_clock::now();
-    std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+    const auto now = std::chrono::system_clock::now();
 
-    // Convert to a tm struct in UTC (std::gmtime converts to UTC) and %Y-%m-%dT%H-%M-%SZ is ISO 8601
-    const auto now_utc_iso8601 = std::put_time(std::gmtime_s(&now_time_t), "%Y-%m-%dT%H-%M-%SZ");
+    // Convert to a timestamp in UTC and %Y-%m-%dT%H:%M:%SZ which is ISO 8601
+    // using formatter: https://en.cppreference.com/w/cpp/chrono/system_clock/formatter
+    std::string tmp_iso8601_timestamp = std::format("{:%FT%TZ}", now);
 
-    // Convert the tm struct to a string
-    std::ostringstream ss;
-    ss << now_utc_iso8601;
-    std::string timestamp = ss.str();
+    // It has sub-second precision, so remove the decimal point and everything after it, then add a 'Z' to indicate UTC
+    std::string now_utc_iso8601_timestamp = tmp_iso8601_timestamp.substr(0, tmp_iso8601_timestamp.find('.')) + 'Z';
+    // Erase-remove idiom to remove colons from timestamp as they are not allowed in Windows file names
+    now_utc_iso8601_timestamp.erase(
+      std::remove(now_utc_iso8601_timestamp.begin(), now_utc_iso8601_timestamp.end(), ':'),
+      now_utc_iso8601_timestamp.end());
 
-    fs::path fpath_with_time = fpath.parent_path() / fmt::format("{}_{}.{}", fpath.stem().string(), timestamp, ext);
+    std::string final_fname = fmt::format("{}_{}.{}", fpath.stem().string(), now_utc_iso8601_timestamp, ext);
+
+    fs::path fpath_with_time = fpath.has_parent_path() ? fpath.parent_path() / final_fname : final_fname;
 
     // Open the file
-    std::ofstream file(fpath_with_time, std::ios::out | std::ios::binary);
+    std::ofstream file(fpath_with_time, std::ios::binary | std::ios::out);
 
-    // Write the buffer to the file
-    file.write(buf.data(), static_cast<std::streamsize>(buf.size()));
+    if (file.bad()) {
+      return outcome::failure(fmt::format("Bad operation during opening of file: {}", fpath_with_time.string()));
+    }
+
+    if (file.is_open()) {
+      // Write the buffer to the file
+      file.write(buf.data(), static_cast<std::streamsize>(buf.size()));
+      // Close the file
+      file.close();
+    } else {
+      return outcome::failure(fmt::format("Expected file to be open: {}", fpath_with_time.string()));
+    }
+
 
     // Return the file name
     return outcome::success(fpath_with_time);
