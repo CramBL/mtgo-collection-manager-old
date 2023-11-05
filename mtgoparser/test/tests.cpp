@@ -12,6 +12,7 @@
 #include <mtgoparser/util.hpp>
 
 
+#include <regex>
 #include <string_view>
 #include <utility>
 
@@ -373,10 +374,43 @@ TEST_CASE("Parse state_log.toml")
 
 TEST_CASE("io_util::save_with_timestamp")
 {
+  // Regular expression pattern for ISO 8601 timestamp without sub-second precision and without colons.
+  // e.g. 2023-11-05T152700Z
+  std::regex iso8601_pattern(R"(\d{4}-\d{2}-\d{2}T\d{2}\d{2}\d{2}Z)");
+
+  SECTION("Check regex validation")
+  {
+    // Check the ISO 8601 timestamp regex is okay
+    std::string timestamp_ok_str = "This is a string containing an ISO 8601 timestamp 2023-11-05T092102Z.";
+
+    // Check that a non-IS0 8601 timestamp is not matched
+    std::string timestamp_not_ok_str = "This is a string containing a non-ISO 8601 timestamp 2023-11-05T09:21:02.";
+    // And more variations that should not match
+    std::string timestamp_not_ok_str2 = "This string lacks a timestamp.";
+    std::string timestamp_not_ok_str3 = "This string's timestamp is missing the Z at the end 2023-11-05T09:21:02";
+    std::string timestamp_not_ok_str4 = "This string's timestamp is missing the T in the middle 2023-11-05 09:21:02Z";
+    std::string timestamp_not_ok_str5 = "This string's timestamp is missing the T and Z 2023-11-05 09:21:02";
+    std::string timestamp_not_ok_colons_str =
+      "This is a string containing an ISO 8601 timestamp BUT WITH COLONS 2023-11-05T09:21:02Z.";
+
+
+    // Require that the string matches the pattern
+    REQUIRE(std::regex_search(timestamp_ok_str, iso8601_pattern));
+
+    // Check that the string does not match the pattern
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str2, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str3, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str4, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str5, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_colons_str, iso8601_pattern));
+  }
+
+
   SECTION("Save to current directory")
   {
     // Save a file "test_tmp_file_<timestamp>.txt" to the current directory
-    const std::string fname{ "test_tmp_file" };
+    const std::string fname{ "TEST_TMP_FILE" };
     const std::string test_file_contents = "test file contents";
     const std::string extension = "txt";
 
@@ -386,14 +420,20 @@ TEST_CASE("io_util::save_with_timestamp")
     // Save file
     auto res = io_util::save_with_timestamp(test_file_contents, test_file_path, extension);
 
+    if (res.has_error()) { FAIL("Error saving file: " << res.error()); }
+
     // Check that file was saved
     REQUIRE(res.has_value());
     auto created_file_path = res.value();
 
     // Check that file name contains the original file name
     auto created_filename = created_file_path.filename().string();
-    CHECK_THAT(created_filename, ContainsSubstring(fname));
+    INFO("created_filename: " << created_filename);
+    INFO("At path: " << created_file_path.string());
 
+    CHECK_THAT(created_filename, ContainsSubstring(fname));
+    // Check that file name contains the ISO 8601 timestamp
+    CHECK(std::regex_search(created_filename, iso8601_pattern));
 
     // Check that file exists
     CHECK(std::filesystem::exists(created_file_path));
@@ -429,7 +469,12 @@ TEST_CASE("io_util::save_with_timestamp")
 
     // Check that file name contains the original file name
     auto created_filename = created_file_path.filename().string();
+    INFO("created_filename: " << created_filename);
+    INFO("At path: " << created_file_path.string());
+
     CHECK_THAT(created_filename, ContainsSubstring(fname));
+    // Check that file name contains the ISO 8601 timestamp
+    CHECK(std::regex_search(created_filename, iso8601_pattern));
 
     // Check that file exists
     CHECK(std::filesystem::exists(created_file_path));
@@ -453,7 +498,7 @@ TEST_CASE("io_util::save_with_timestamp")
     const std::string extension = "json";
     const std::string test_file_contents =
       R"([{"id":110465,"quantity":1,"name":"Tranquil Cove","set":"MOM","rarity":"C","foil":true,"goatbots_price":0.004}])";
-    const std::filesystem::path test_file_path = "../test_adjacent_dir" + fname;
+    const std::filesystem::path test_file_path = "../test_adjacent_dir/" + fname;
 
     // Save file
     auto res = io_util::save_with_timestamp(test_file_contents, test_file_path, extension);
@@ -464,7 +509,12 @@ TEST_CASE("io_util::save_with_timestamp")
 
     // Check that file name contains the original file name
     auto created_filename = created_file_path.filename().string();
+    INFO("created_filename: " << created_filename);
+    INFO("At path: " << created_file_path.string());
+
     CHECK_THAT(created_filename, ContainsSubstring(fname));
+    // Check that file name contains the ISO 8601 timestamp
+    CHECK(std::regex_search(created_filename, iso8601_pattern));
 
     // Check that file exists
     CHECK(std::filesystem::exists(created_file_path));
