@@ -14,12 +14,12 @@
 #include <toml++/impl/value.hpp>
 
 #include <cassert>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
-
 
 namespace mtgo_preprocessor::run {
 
@@ -36,14 +36,16 @@ namespace helper {
   };
 
   /// Write the JSON to a file in the appdata directory
-  void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
+  auto write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir) -> outcome::result<void, std::string>
   {
-    const std::string mtgo_cards_json_fname = "mtgo-cards.json";
-    const std::string fullpath = std::string(jsonAndDir.dir) + mtgo_cards_json_fname;
-    std::ofstream mtgo_cards_outfile(fullpath);
-    if (mtgo_cards_outfile.is_open()) {
-      mtgo_cards_outfile << jsonAndDir.json << '\n';
-      mtgo_cards_outfile.close();
+    const std::string fname{ "mtgo-cards" };
+    const std::string ext{ ".json" };
+    std::filesystem::path save_path = std::string(jsonAndDir.dir) + "/collection-history/" + fname;
+    spdlog::info("Saving preprocessed JSON to {}", save_path.string());
+    if (auto res = io_util::save_with_timestamp(jsonAndDir.json, save_path, ext); res.has_error()) {
+      return outcome::failure(res.error());
+    } else {
+      return outcome::success();
     }
   }
 
@@ -199,7 +201,11 @@ namespace helper {
   // If the app data directory is set, save it there
   if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
     // Write the json to a file in the appdata directory
-    helper::write_json_to_appdata_dir(helper::JsonAndDestinationDir{ .json = json, .dir = appdata_dir.value() });
+    if (auto res =
+          helper::write_json_to_appdata_dir(helper::JsonAndDestinationDir{ .json = json, .dir = appdata_dir.value() });
+        res.has_error()) {
+      spdlog::error("{}", res.error());// This is bad, but not fatal.
+    }
   }
 
   // Print the MTGO collection JSON to stdout
