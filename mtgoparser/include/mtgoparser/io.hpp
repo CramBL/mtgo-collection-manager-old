@@ -102,7 +102,7 @@ namespace fs = std::filesystem;
 
     // Convert to a timestamp in UTC and %Y-%m-%dT%H:%M:%SZ which is ISO 8601
     // using formatter: https://en.cppreference.com/w/cpp/chrono/system_clock/formatter
-    std::string tmp_iso8601_timestamp = std::format("{:%FT%TZ}", now);
+    std::string tmp_iso8601_timestamp = std::vformat("{:%FT%TZ}", std::make_format_args(now));
 
     // It has sub-second precision, so remove the decimal point and everything after it, then add a 'Z' to indicate UTC
     std::string now_utc_iso8601_timestamp = tmp_iso8601_timestamp.substr(0, tmp_iso8601_timestamp.find('.')) + 'Z';
