@@ -69,7 +69,10 @@ namespace helper {
   {
     const std::string fname{ "mtgo-cards" };
     const std::string ext{ ".json" };
-    const std::filesystem::path save_path = std::string(jsonAndDir.dir) + "/collection-history/" + fname;
+    std::filesystem::path save_path = jsonAndDir.dir;
+    save_path.append("collection-history");
+    save_path.append(fname);
+
     spdlog::info("Saving preprocessed JSON to {}", save_path.string());
 
     // Check if the state_log in the appdata has changed
@@ -84,6 +87,10 @@ namespace helper {
 
       std::filesystem::path log_fullpath_collection_history = jsonAndDir.dir;
       log_fullpath_collection_history.append("collection-history");
+      // If the collection-history directory does not exist, create it
+      if (!std::filesystem::exists(log_fullpath_collection_history)) {
+        std::filesystem::create_directory(log_fullpath_collection_history);
+      }
       log_fullpath_collection_history.append(state_log);
 
       std::filesystem::copy_file(
