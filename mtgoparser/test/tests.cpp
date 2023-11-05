@@ -532,4 +532,213 @@ TEST_CASE("io_util::save_with_timestamp")
   }
 }
 
+TEST_CASE("io_util::is_files_equal")
+{
+  SECTION("Check two files are identical")
+  {
+    SECTION("Compare two identical files in current directory")
+    {
+      // Create two identical files
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+
+      // save files to current directory
+      {
+        std::ofstream test_fileA(fnameA);
+        std::ofstream test_fileB(fnameB);
+
+        // write some data to the files
+        test_fileA << "test file contents";
+        test_fileB << "test file contents";
+      }
+
+      // Check that files are equal
+      auto cmp_res = io_util::is_files_equal(fnameA, fnameB);
+      CHECK(cmp_res.has_value());
+      CHECK(cmp_res.value());
+
+      // Clean up by removing the files
+      std::filesystem::remove(fnameA);
+      std::filesystem::remove(fnameB);
+    }
+
+    SECTION("Compare two identical files in different subdirectories")
+    {
+      // Create two identical files in two different directories
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+      const std::string dirA{ "test_ident_dirA" };
+      const std::string dirB{ "test_ident_dirB" };
+      const std::string test_file_contents =
+        R"([{"id":110465,"quantity":1,"name":"Tranquil Cove","set":"MOM","rarity":"C","foil":true,"goatbots_price":0.004}])";
+
+      // Make the directories
+      std::filesystem::create_directory(dirA);
+      std::filesystem::create_directory(dirB);
+
+      // Paths to the files
+      const std::filesystem::path pathA = dirA + "/" + fnameA;
+      const std::filesystem::path pathB = dirB + "/" + fnameB;
+
+      // Save the files
+      {
+        std::ofstream test_fileA(pathA);
+        std::ofstream test_fileB(pathB);
+
+        // write some data to the files
+        test_fileA << test_file_contents;
+        test_fileB << test_file_contents;
+      }
+
+      // Check that files are equal
+      auto cmp_res = io_util::is_files_equal(pathA, pathB);
+      CHECK(cmp_res.has_value());
+      CHECK(cmp_res.value());
+
+      // Clean up by removing the files and directories
+      std::filesystem::remove_all(dirA);
+      std::filesystem::remove_all(dirB);
+    }
+
+    SECTION("Compare two identical files - one in parent directory, one in current directory")
+    {
+      // Create two identical files in two different directories
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+      const std::string dirA{ "test_ident_dirA" };
+
+      const std::string contents{ "contents'~~ _[@]... log. test content///DEe`2èøøæ" };
+
+      // Make the directories
+      std::filesystem::create_directory(dirA);
+
+      // Paths to the files
+      const std::filesystem::path pathA = dirA + "/" + fnameA;
+      const std::filesystem::path pathB = fnameB;
+
+      // Save the files
+      {
+        std::ofstream test_fileA(pathA);
+        std::ofstream test_fileB(pathB);
+
+        // write some data to the files
+        test_fileA << contents;
+        test_fileB << contents;
+      }
+
+      // Check that files are equal
+      auto cmp_res = io_util::is_files_equal(pathA, pathB);
+      CHECK(cmp_res.has_value());
+      CHECK(cmp_res.value());
+
+      // Clean up by removing the files and directories
+      std::filesystem::remove_all(dirA);
+      std::filesystem::remove(fnameB);
+    }
+  }
+
+  SECTION("Check two files are NOT identical")
+  {
+    SECTION("Compare two files in the current directory with different contents")
+    {
+      // Create two files
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+
+      // save files to current directory
+      {
+        std::ofstream test_fileA(fnameA);
+        std::ofstream test_fileB(fnameB);
+
+        // write some not-identical data to the files
+        test_fileA << "test file contents";
+        test_fileB << "test file contènts";// è instead of e
+      }
+
+      // Check that files are NOT equal
+      auto cmp_res = io_util::is_files_equal(fnameA, fnameB);
+      CHECK(cmp_res.has_value());
+      CHECK_FALSE(cmp_res.value());
+
+      // Clean up by removing the files
+      std::filesystem::remove(fnameA);
+      std::filesystem::remove(fnameB);
+    }
+
+    SECTION("Compare two files in two subdirectories with different contents")
+    {
+      // Create two files in two different directories
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+      const std::string dirA{ "test_ident_dirA" };
+      const std::string dirB{ "test_ident_dirB" };
+      const std::string test_file_contents =
+        R"([{"id":110465,"quantity":1,"name":"Tranquil Cove","set":"MOM","rarity":"C","foil":true,"goatbots_price":0.004}])";
+
+      // Make the directories
+      std::filesystem::create_directory(dirA);
+      std::filesystem::create_directory(dirB);
+
+      // Paths to the files
+      const std::filesystem::path pathA = dirA + "/" + fnameA;
+      const std::filesystem::path pathB = dirB + "/" + fnameB;
+
+      // Save the files
+      {
+        std::ofstream test_fileA(pathA);
+        std::ofstream test_fileB(pathB);
+
+        // write some not-identical data to the files
+        test_fileA << test_file_contents;
+        test_fileB << test_file_contents + "extra stuff";
+      }
+
+      // Check that files are NOT equal
+      auto cmp_res = io_util::is_files_equal(pathA, pathB);
+      CHECK(cmp_res.has_value());
+      CHECK_FALSE(cmp_res.value());
+
+      // Clean up by removing the files and directories
+      std::filesystem::remove_all(dirA);
+      std::filesystem::remove_all(dirB);
+    }
+
+    SECTION("Compare two NOT identical files - one in parent directory, one in current directory")
+    {
+      // Create two files in two different directories
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+      const std::string dirA{ "test_ident_dirA" };
+
+      const std::string contents{ "contents'~~ _[@]... log. test content///DEe`2èøøæ" };
+
+      // Make the directories
+      std::filesystem::create_directory(dirA);
+
+      // Paths to the files
+      const std::filesystem::path pathA = dirA + "/" + fnameA;
+      const std::filesystem::path pathB = fnameB;
+
+      // Save the files
+      {
+        std::ofstream test_fileA(pathA);
+        std::ofstream test_fileB(pathB);
+
+        // write some not-identical data to the files
+        test_fileA << contents + '+';
+        test_fileB << contents;
+      }
+
+      // Check that files are NOT equal
+      auto cmp_res = io_util::is_files_equal(pathA, pathB);
+      CHECK(cmp_res.has_value());
+      CHECK_FALSE(cmp_res.value());
+
+      // Clean up by removing the files and directories
+      std::filesystem::remove_all(dirA);
+      std::filesystem::remove(fnameB);
+    }
+  }
+}
+
 // NOLINTEND
