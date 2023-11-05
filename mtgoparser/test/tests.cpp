@@ -3,6 +3,7 @@
 #include "mtgoparser/clap/option.hpp"
 #include "mtgoparser/io.hpp"
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 #include <fmt/core.h>
 #include <mtgoparser/clap.hpp>
 #include <mtgoparser/io.hpp>
@@ -13,6 +14,8 @@
 
 #include <string_view>
 #include <utility>
+
+using Catch::Matchers::ContainsSubstring;
 
 using clap::Opt::Flag;
 using clap::Opt::NeedValue;
@@ -365,6 +368,117 @@ TEST_CASE("Parse state_log.toml")
         FAIL("Opening file for reading failed.");
       }
     }
+  }
+}
+
+TEST_CASE("io_util::save_with_timestamp")
+{
+  SECTION("Save to current directory")
+  {
+    // Save a file "test_tmp_file_<timestamp>.txt" to the current directory
+    const std::string fname{ "test_tmp_file" };
+    const std::string test_file_contents = "test file contents";
+    const std::string extension = "txt";
+
+    // Make it a path
+    const std::filesystem::path test_file_path = fname;
+
+    // Save file
+    auto res = io_util::save_with_timestamp(test_file_contents, test_file_path, extension);
+
+    // Check that file was saved
+    REQUIRE(res.has_value());
+    auto created_file_path = res.value();
+
+    // Check that file name contains the original file name
+    auto created_filename = created_file_path.filename().string();
+    CHECK_THAT(created_filename, ContainsSubstring(fname));
+
+
+    // Check that file exists
+    CHECK(std::filesystem::exists(created_file_path));
+
+    {
+      // Check that file contents are correct
+      std::ifstream test_file(created_file_path);
+      std::string test_file_contents_read;
+      std::getline(test_file, test_file_contents_read);
+      CHECK(test_file_contents_read == test_file_contents);
+    }
+
+    // Clean up by removing the file
+    std::filesystem::remove(created_file_path);
+    CHECK(std::filesystem::exists(test_file_path) == false);
+  }
+
+  SECTION("Save to sub-directory")
+  {
+    // Save a file "test_tmp_file_<timestamp>.txt" to the sub-directory "test_dir"
+    const std::string fname{ "test_tmp_file" };
+    const std::string extension = "json";
+    const std::string test_file_contents =
+      R"([{"id":110465,"quantity":1,"name":"Tranquil Cove","set":"MOM","rarity":"C","foil":true,"goatbots_price":0.004}])";
+    const std::filesystem::path test_file_path = "test_dir/" + fname;
+
+    // Save file
+    auto res = io_util::save_with_timestamp(test_file_contents, test_file_path, extension);
+
+    // Check that file was saved
+    REQUIRE(res.has_value());
+    auto created_file_path = res.value();
+
+    // Check that file name contains the original file name
+    auto created_filename = created_file_path.filename().string();
+    CHECK_THAT(created_filename, ContainsSubstring(fname));
+
+    // Check that file exists
+    CHECK(std::filesystem::exists(created_file_path));
+
+    {
+      // Check that file contents are correct
+      std::ifstream test_file(created_file_path);
+      std::string test_file_contents_read;
+      std::getline(test_file, test_file_contents_read);
+      CHECK(test_file_contents_read == test_file_contents);
+    }
+
+    // Clean up by removing the file and directory
+    std::filesystem::remove_all("test_dir");
+  }
+
+  SECTION("Save to adjacent directory")
+  {
+    // Save a file "test_tmp_file_<timestamp>.txt" to a directory adjacent to the current directory "test_adjacent_dir"
+    const std::string fname{ "test_tmp_file" };
+    const std::string extension = "json";
+    const std::string test_file_contents =
+      R"([{"id":110465,"quantity":1,"name":"Tranquil Cove","set":"MOM","rarity":"C","foil":true,"goatbots_price":0.004}])";
+    const std::filesystem::path test_file_path = "../test_adjacent_dir" + fname;
+
+    // Save file
+    auto res = io_util::save_with_timestamp(test_file_contents, test_file_path, extension);
+
+    // Check that file was saved
+    REQUIRE(res.has_value());
+    auto created_file_path = res.value();
+
+    // Check that file name contains the original file name
+    auto created_filename = created_file_path.filename().string();
+    CHECK_THAT(created_filename, ContainsSubstring(fname));
+
+    // Check that file exists
+    CHECK(std::filesystem::exists(created_file_path));
+
+    {
+      // Check that file contents are correct
+      std::ifstream test_file(created_file_path);
+      std::string test_file_contents_read;
+      std::getline(test_file, test_file_contents_read);
+      CHECK(test_file_contents_read == test_file_contents);
+    }
+
+    // Clean up by removing the file and directory
+    std::filesystem::remove(created_file_path);
   }
 }
 
