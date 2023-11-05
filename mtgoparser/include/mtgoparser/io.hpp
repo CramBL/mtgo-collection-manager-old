@@ -100,9 +100,18 @@ namespace fs = std::filesystem;
     // Get the current time
     const auto now = std::chrono::system_clock::now();
 
+
     // Convert to a timestamp in UTC and %Y-%m-%dT%H:%M:%SZ which is ISO 8601
     // using formatter: https://en.cppreference.com/w/cpp/chrono/system_clock/formatter
+
+    // Apple clang is behind on C++20 support, so std::format is not consteval yet, meaning we can use it as is for
+    // runtime formatting.
+#if defined(__APPLE__) && defined(__llvm__) && __clang_major__ == 15
+    std::string tmp_iso8601_timestamp = std::format("{:%FT%TZ}", now);
+#else
+    // std::vformat is the way to specify a runtime format string in C++20
     std::string tmp_iso8601_timestamp = std::vformat("{:%FT%TZ}", std::make_format_args(now));
+#endif
 
     // It has sub-second precision, so remove the decimal point and everything after it, then add a 'Z' to indicate UTC
     std::string now_utc_iso8601_timestamp = tmp_iso8601_timestamp.substr(0, tmp_iso8601_timestamp.find('.')) + 'Z';
