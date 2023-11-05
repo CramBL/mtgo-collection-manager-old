@@ -36,6 +36,11 @@ jobs:
             generator: "Ninja Multi-Config"
             enable_ipo: Off
 
+          - os: macos-13
+            compiler: gcc-13
+            generator: "Ninja Multi-Config"
+            enable_ipo: Off
+
           - os: windows-2022
             compiler: msvc
             generator: "Visual Studio 17 2022"
