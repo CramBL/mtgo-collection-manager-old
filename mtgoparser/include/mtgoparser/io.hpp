@@ -97,7 +97,7 @@ namespace fs = std::filesystem;
     std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
 
     // Convert to a tm struct in UTC (std::gmtime converts to UTC) and %Y-%m-%dT%H-%M-%SZ is ISO 8601
-    const auto now_utc_iso8601 = std::put_time(std::gmtime(&now_time_t), "%Y-%m-%dT%H-%M-%SZ");
+    const auto now_utc_iso8601 = std::put_time(std::gmtime_s(&now_time_t), "%Y-%m-%dT%H-%M-%SZ");
 
     // Convert the tm struct to a string
     std::ostringstream ss;
