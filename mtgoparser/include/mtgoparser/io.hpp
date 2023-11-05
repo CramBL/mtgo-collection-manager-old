@@ -23,6 +23,9 @@ namespace io_util {
 namespace outcome = BOOST_OUTCOME_V2_NAMESPACE;
 namespace fs = std::filesystem;
 
+// For failure cases, return a string describing the error
+using ErrorStr = std::string;
+
 [[nodiscard]] inline auto read_to_str_buf(const fs::path &fpath) -> std::string
 {
   // Open the stream to 'lock' the file.
@@ -78,6 +81,7 @@ namespace fs = std::filesystem;
  * Any directories in the path that do not exist will be created.
  * The timestamp is in the format %Y-%m-%dT%H%M%SZ without sub-second precision.
  *  e.g. `2023-11-05T152700Z`.
+ * A file called `my_file.txt` will be saved as `my_file_2023-11-05T152700Z.txt`.
  *
  * @param buf The string buffer to save
  *
@@ -89,7 +93,7 @@ namespace fs = std::filesystem;
  * @return On failure: The error message
  */
 [[nodiscard]] inline auto save_with_timestamp(const auto &buf, const fs::path &fpath, const auto &ext)
-  -> outcome::result<fs::path, std::string>
+  -> outcome::result<fs::path, ErrorStr>
 {
   try {
     // If the path is not to the current directory
@@ -151,6 +155,50 @@ namespace fs = std::filesystem;
   } catch (const std::exception &e) {
     return outcome::failure(fmt::format("Failed to save file from path: {}, err: {}", fpath.string(), e.what()));
   }
+}
+
+/**
+ * @brief Check if two files are equal by comparing their contents.
+ *
+ * @param fpathA First file path
+ * @param fpathB Second file path
+ *
+ * @return On success: `true` if the files are equal, `false` if they are not equal.
+ * @return On failure: The error message from a failure to open or seek to the end of one of the files.
+ */
+[[nodiscard]] inline auto is_files_equal(const fs::path &fpathA, const fs::path &fpathB)
+  -> outcome::result<bool, ErrorStr>
+{
+  // Adapted from: https://stackoverflow.com/a/37575457
+
+  // Open the files and seek to the end
+  std::ifstream fA(fpathA, std::ifstream::binary | std::ifstream::ate);
+  std::ifstream fB(fpathB, std::ifstream::binary | std::ifstream::ate);
+
+  // If there was a problem opening the files
+  if (fA.fail() || fB.fail()) {
+    std::string error_msg = "Error encountered opening and seeking to end of: ";
+    if (fA.fail() && fB.fail()) {
+      error_msg += fmt::format("{} and {}", fpathA.string(), fpathB.string());
+    } else if (fA.fail()) {
+      error_msg += fpathA.string();
+    } else {
+      error_msg += fpathB.string();
+    }
+    return outcome::failure(error_msg);
+  }
+
+  if (fA.tellg() != fB.tellg()) {
+    return outcome::success(false);// size mismatch
+  }
+
+  // seek back to beginning and use std::equal to compare contents
+  fA.seekg(0, std::ifstream::beg);
+  fB.seekg(0, std::ifstream::beg);
+
+  using buf_iter = std::istreambuf_iterator<char>;
+
+  return outcome::success(std::equal(buf_iter(fA.rdbuf()), buf_iter(), buf_iter(fB.rdbuf())));
 }
 
 }// namespace io_util
