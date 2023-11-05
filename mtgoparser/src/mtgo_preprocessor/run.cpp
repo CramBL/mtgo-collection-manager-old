@@ -29,6 +29,35 @@ using cfg = config::Config;
 
 /// Helper functions (not part of the public API)
 namespace helper {
+
+  /// Check if the state_log in the collection-history is different from the one in the appdata directory
+  ///
+  /// If there is no state_log in the collection-history, returns true.
+  [[nodiscard]] auto has_state_log_changed(std::string_view appdata_dir_path) -> bool
+  {
+    const std::string state_log = "state_log.toml";
+    std::filesystem::path history_log_fullpath = appdata_dir_path;
+    history_log_fullpath.append("collection-history");
+    history_log_fullpath.append(state_log);
+
+    spdlog::info("Getting state_log from {}", history_log_fullpath.string());
+
+    if (std::filesystem::exists(history_log_fullpath)) {
+      std::filesystem::path appdata_log_fullpath = appdata_dir_path;
+      appdata_log_fullpath.append(state_log);
+
+      if (auto cmp_res = io_util::is_files_equal(appdata_log_fullpath, history_log_fullpath); cmp_res.has_error()) {
+        spdlog::error("{}", cmp_res.error());
+        return false;
+      } else {
+        return !cmp_res.value();
+      }
+    } else {
+      return true;
+    }
+  }
+
+
   struct JsonAndDestinationDir
   {
     std::string_view json;
@@ -42,6 +71,29 @@ namespace helper {
     const std::string ext{ ".json" };
     const std::filesystem::path save_path = std::string(jsonAndDir.dir) + "/collection-history/" + fname;
     spdlog::info("Saving preprocessed JSON to {}", save_path.string());
+
+    // Check if the state_log in the appdata has changed
+    // If it has, save a copy of the new state_log to the collection-history directory
+    //  and save the JSON to the appdata directory
+    if (has_state_log_changed(jsonAndDir.dir)) {
+      spdlog::info("State log has changed, saving new file");
+      // Save the state_log to the collection-history directory as well
+      const std::string state_log = "state_log.toml";
+      std::filesystem::path appdata_log_fullpath = jsonAndDir.dir;
+      appdata_log_fullpath.append(state_log);
+
+      std::filesystem::path log_fullpath_collection_history = jsonAndDir.dir;
+      log_fullpath_collection_history.append("collection-history");
+      log_fullpath_collection_history.append(state_log);
+
+      std::filesystem::copy_file(
+        appdata_log_fullpath, log_fullpath_collection_history, std::filesystem::copy_options::overwrite_existing);
+
+    } else {
+      spdlog::info("State log has not changed, return without saving new file");
+      return outcome::success();
+    }
+
     if (auto res = io_util::save_with_timestamp(jsonAndDir.json, save_path, ext); res.has_error()) {
       return outcome::failure(res.error());
     } else {
