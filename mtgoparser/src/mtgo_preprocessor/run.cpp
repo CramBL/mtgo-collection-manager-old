@@ -104,8 +104,8 @@ namespace helper {
   [[nodiscard]] auto check_goatbots_path_args() -> outcome::result<Success, ErrorStr>
   {
     // First check if the arguments are set
-    bool arg_set_card_defs_path = cfg::get()->FlagSet(config::option::card_defs_path);
-    bool arg_set_price_hist_path = cfg::get()->FlagSet(config::option::price_hist_path);
+    const bool arg_set_card_defs_path = cfg::get()->FlagSet(config::option::card_defs_path);
+    const bool arg_set_price_hist_path = cfg::get()->FlagSet(config::option::price_hist_path);
 
     if (!arg_set_card_defs_path && !arg_set_price_hist_path) {
       return outcome::failure("Card definitions and price history path options not provided");
@@ -116,8 +116,8 @@ namespace helper {
     if (!arg_set_price_hist_path) { return outcome::failure("Price history path option not provided"); }
 
     // Check if they have values
-    auto card_defs_path = cfg::get()->OptionValue(config::option::card_defs_path);
-    auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
+    const auto card_defs_path = cfg::get()->OptionValue(config::option::card_defs_path);
+    const auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
 
     if (!card_defs_path.has_value() && !price_hist_path.has_value()) {
       return outcome::failure("Missing card definitions and price history path from arguments");
