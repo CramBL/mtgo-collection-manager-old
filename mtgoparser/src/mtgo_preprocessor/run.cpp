@@ -101,7 +101,11 @@ namespace helper {
     return outcome::success();
   }
 
-  [[nodiscard]] auto check_goatbots_path_args() -> outcome::result<Success, ErrorStr>
+  /// Check if the arguments for the Goatbots card definitions and price history paths are set.
+  /// If they are, check if they have values.
+  ///
+  /// On success: return `GoatbotsPaths` (struct with the paths)
+  [[nodiscard]] auto get_goatbots_path_args() -> outcome::result<GoatbotsPaths, ErrorStr>
   {
     // First check if the arguments are set
     const bool arg_set_card_defs_path = cfg::get()->FlagSet(config::option::card_defs_path);
@@ -116,8 +120,8 @@ namespace helper {
     if (!arg_set_price_hist_path) { return outcome::failure("Price history path option not provided"); }
 
     // Check if they have values
-    const auto card_defs_path = cfg::get()->OptionValue(config::option::card_defs_path);
-    const auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
+    auto card_defs_path = cfg::get()->OptionValue(config::option::card_defs_path);
+    auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
 
     if (!card_defs_path.has_value() && !price_hist_path.has_value()) {
       return outcome::failure("Missing card definitions and price history path from arguments");
@@ -127,7 +131,8 @@ namespace helper {
 
     if (!price_hist_path.has_value()) { return outcome::failure("Missing price history path from arguments"); }
 
-    return outcome::success();
+    return outcome::success(
+      GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
   }
 
 }// namespace helper
@@ -184,20 +189,10 @@ namespace helper {
   auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
 
 
-  if (auto arg_validation = helper::check_goatbots_path_args(); arg_validation.has_error()) {
-    return outcome::failure(arg_validation.error());
+  if (auto goatbots_path_args = helper::get_goatbots_path_args(); goatbots_path_args.has_error()) {
+    return outcome::failure(goatbots_path_args.error());
   } else {
-
-    // Get card definitions as a map
-    auto card_defs_path = cfg::get()->OptionValue(config::option::card_defs_path);
-    assert(card_defs_path.has_value());
-    // Get price history as a map
-    auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
-    assert(price_hist_path.has_value());
-
-    if (auto res = parse_goatbots_data(mtgo_collection,
-          GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
-        res.has_error()) {
+    if (auto res = parse_goatbots_data(mtgo_collection, goatbots_path_args.value()); res.has_error()) {
 
       return outcome::failure(res.error());
     }
