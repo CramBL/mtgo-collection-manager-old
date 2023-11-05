@@ -40,7 +40,7 @@ namespace helper {
   {
     const std::string fname{ "mtgo-cards" };
     const std::string ext{ ".json" };
-    std::filesystem::path save_path = std::string(jsonAndDir.dir) + "/collection-history/" + fname;
+    const std::filesystem::path save_path = std::string(jsonAndDir.dir) + "/collection-history/" + fname;
     spdlog::info("Saving preprocessed JSON to {}", save_path.string());
     if (auto res = io_util::save_with_timestamp(jsonAndDir.json, save_path, ext); res.has_error()) {
       return outcome::failure(res.error());
@@ -101,6 +101,35 @@ namespace helper {
     return outcome::success();
   }
 
+  [[nodiscard]] auto check_goatbots_path_args() -> outcome::result<Success, ErrorStr>
+  {
+    // First check if the arguments are set
+    bool arg_set_card_defs_path = cfg::get()->FlagSet(config::option::card_defs_path);
+    bool arg_set_price_hist_path = cfg::get()->FlagSet(config::option::price_hist_path);
+
+    if (!arg_set_card_defs_path && !arg_set_price_hist_path) {
+      return outcome::failure("Card definitions and price history path options not provided");
+    }
+
+    if (!arg_set_card_defs_path) { return outcome::failure("Card definitions path option not provided"); }
+
+    if (!arg_set_price_hist_path) { return outcome::failure("Price history path option not provided"); }
+
+    // Check if they have values
+    auto card_defs_path = cfg::get()->OptionValue(config::option::card_defs_path);
+    auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
+
+    if (!card_defs_path.has_value() && !price_hist_path.has_value()) {
+      return outcome::failure("Missing card definitions and price history path from arguments");
+    }
+
+    if (!card_defs_path.has_value()) { return outcome::failure("Missing card definitions path from arguments"); }
+
+    if (!price_hist_path.has_value()) { return outcome::failure("Missing price history path from arguments"); }
+
+    return outcome::success();
+  }
+
 }// namespace helper
 
 [[nodiscard]] auto parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths)
@@ -154,14 +183,9 @@ namespace helper {
   auto mtgo_cards = mtgo::xml::parse_dek_xml(fulltradelist_path.value());
   auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
 
-  if (!cfg::get()->FlagSet(config::option::card_defs_path) || !cfg::get()->FlagSet(config::option::price_hist_path)) {
-    if (!cfg::get()->FlagSet(config::option::price_hist_path)) {
-      spdlog::error("Update all needs a path to a price history file");
-    }
-    if (!cfg::get()->FlagSet(config::option::card_defs_path)) {
-      spdlog::error("Update all needs a path to a card definition file");
-    }
-    return outcome::failure("Update all needs a path to a card definition and price history file");
+
+  if (auto arg_validation = helper::check_goatbots_path_args(); arg_validation.has_error()) {
+    return outcome::failure(arg_validation.error());
   } else {
 
     // Get card definitions as a map
@@ -170,11 +194,6 @@ namespace helper {
     // Get price history as a map
     auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
     assert(price_hist_path.has_value());
-
-    if (!(card_defs_path.has_value() && price_hist_path.has_value())) {
-      return outcome::failure(
-        "Failed retrieving price history and card definition path from config. This error should be unreachable...");
-    }
 
     if (auto res = parse_goatbots_data(mtgo_collection,
           GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
