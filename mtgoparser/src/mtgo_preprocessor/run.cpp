@@ -244,8 +244,9 @@ namespace helper {
   if (!fulltradelist_path.has_value()) {
     return outcome::failure("Full Trade List path has no value. This error should be unreachable...");
   }
-  auto mtgo_cards = mtgo::xml::parse_dek_xml(fulltradelist_path.value());
-  auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
+  auto res_mtgo_cards = mtgo::xml::parse_dek_xml(fulltradelist_path.value());
+  if (res_mtgo_cards.has_error()) { return outcome::failure(res_mtgo_cards.error()); }
+  auto mtgo_collection = mtgo::Collection(std::move(res_mtgo_cards.value()));
 
 
   if (auto goatbots_path_args = helper::get_goatbots_path_args(); goatbots_path_args.has_error()) {

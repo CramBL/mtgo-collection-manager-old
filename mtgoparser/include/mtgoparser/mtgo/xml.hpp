@@ -5,9 +5,9 @@
 #include "mtgoparser/util.hpp"
 
 #include <cstddef>
+#include <fmt/core.h>
 #include <rapidxml/rapidxml.hpp>
 #include <rapidxml/rapidxml_utils.hpp>
-#include <spdlog/spdlog.h>
 
 #include <boost/outcome.hpp>
 #include <boost/outcome/result.hpp>
@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace mtgo::xml {
@@ -71,9 +72,11 @@ const std::size_t APPROX_DECK_CARDS = 1024;
  * @note The XML file should be an MTGO `Full Trade List.dek`-file.
  *
  * @param path_xml A path to the XML file.
- * @return std::vector<Card> A vector of `Card`s.
+ * @return `outcome::result<std::vector<Card>, ErrorStr>` A `std::vector<Card>` if parsing was successful, otherwise an
+ * `ErrorStr`.
  */
-[[nodiscard]] auto inline parse_dek_xml(const std::filesystem::path &path_xml) noexcept -> std::vector<Card>
+[[nodiscard]] auto inline parse_dek_xml(const std::filesystem::path &path_xml) noexcept
+  -> outcome::result<std::vector<Card>, ErrorStr>
 {
   std::vector<char> buf = io_util::read_to_char_buf(path_xml);
   rapidxml::xml_document<> doc;
@@ -94,11 +97,11 @@ const std::size_t APPROX_DECK_CARDS = 1024;
     if (auto res_card_inst = card_from_xml(node); res_card_inst.has_value()) {
       cards.emplace_back(std::move(res_card_inst.value()));
     } else {
-      spdlog::error("Decoding card from XML failed: {}", res_card_inst.error());
+      return outcome::failure(fmt::format("Decoding card from XML failed: {}", res_card_inst.error()));
     }
   }
 
-  return cards;
+  return outcome::success(std::move(cards));
 }
 
 

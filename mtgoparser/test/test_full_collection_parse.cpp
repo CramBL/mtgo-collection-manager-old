@@ -41,7 +41,9 @@ TEST_CASE("Parse small collection")
     REQUIRE(price_hist.has_value());
     CHECK(price_hist.value().size() == 5);
 
-    auto mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+    auto res_mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+    REQUIRE(res_mtgo_cards.has_value());
+    auto mtgo_cards = std::move(res_mtgo_cards.value());
     CHECK(mtgo_cards.size() == 5);
 
     auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
@@ -78,7 +80,9 @@ TEST_CASE("Parse small collection")
     REQUIRE(price_hist.has_value());
     CHECK(price_hist.value().size() == 76070);
 
-    auto mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
+    auto res_mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
+    REQUIRE(res_mtgo_cards.has_value());
+    auto mtgo_cards = std::move(res_mtgo_cards.value());
     CHECK(mtgo_cards.size() == 3000);
 
     auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));

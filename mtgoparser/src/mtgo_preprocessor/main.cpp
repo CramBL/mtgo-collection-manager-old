@@ -36,8 +36,9 @@ const auto path_goatbots_price_hist_full = "../test/test-data/goatbots/price-his
 int example()
 {
   auto mtgo_cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
+  assert(mtgo_cards.has_value());
   spdlog::info("got mtgo cards");
-  auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
+  auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards.value()));
 
   auto scryfall_vec = scryfall::ReadJsonVector(path_mtgogetter_out_scryfall_full);
   if (scryfall_vec) {
