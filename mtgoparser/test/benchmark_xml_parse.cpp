@@ -29,10 +29,10 @@ const auto path_trade_list_medium_3000cards = "../../../test/test-data/mtgo/Full
 // To run hidden tests specify the [.] tag i.e. ./build/test/benchmark_xml_parse [.]
 TEST_CASE("parse_dek_xml", "[.xml-parse-bench]")// .(dot) prefix hides the test by default
 {
-  REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_small_5cards).size() == 5);
-  REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_small_50cards).size() == 50);
-  REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_small_500cards).size() == 500);
-  REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards).size() == 3000);
+  REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_small_5cards).value().size() == 5);
+  REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_small_50cards).value().size() == 50);
+  REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_small_500cards).value().size() == 500);
+  REQUIRE(mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards).value().size() == 3000);
 
   BENCHMARK("small - 5 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_small_5cards); };
   BENCHMARK("small - 50 cards") { return mtgo::xml::parse_dek_xml(path_trade_list_small_50cards); };

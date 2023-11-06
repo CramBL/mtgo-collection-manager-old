@@ -3,10 +3,15 @@
 #include <optional>
 #include <string_view>
 
+#include <boost/outcome.hpp>
+#include <boost/outcome/result.hpp>
 
 #include <boost/implicit_cast.hpp>
 
 namespace util {
+
+namespace outcome = BOOST_OUTCOME_V2_NAMESPACE;
+using ErrorStr = std::string;
 
 /**
  * @brief Check if two string-like values are the matching.
@@ -61,19 +66,20 @@ requires std::convertible_to<SA, std::string_view> &&(std::convertible_to<Ss, st
  * @tparam T_uint The type of the unsigned integer.
  * @param sv The `string_view` to convert.
  *
- * @return std::optional<T_uint> The converted unsigned integer. `std::nullopt` if the conversion fails.
+ * @return `outcome::result<T_uint, ErrorStr>` containing the converted value if the conversion succeeds.
+ * @return `outcome::failure(ErrorStr)` if the conversion fails.
  *
  * @note The conversion fails if the `string_view` contains non-digit characters.
  *
  */
-template<typename T_uint> [[nodiscard]] inline auto sv_to_uint(std::string_view sv) -> std::optional<T_uint>
+template<typename T_uint> [[nodiscard]] inline auto sv_to_uint(std::string_view sv) -> outcome::result<T_uint, ErrorStr>
 {
   T_uint value{};
 
   if (std::from_chars(sv.data(), sv.data() + sv.size(), value).ec == std::errc{}) {
-    return value;
+    return outcome::success(value);
   } else {
-    return std::nullopt;
+    return outcome::failure(fmt::format("Failed to convert string_view `{}` to uint", sv));
   }
 }
 }// namespace util

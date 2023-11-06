@@ -22,7 +22,11 @@ const auto path_trade_list_medium_3000cards = "../../../test/test-data/mtgo/Full
 
 TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
 {
-  std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+  auto res_cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+
+  REQUIRE(res_cards.has_value());
+
+  std::vector<mtgo::Card> cards = std::move(res_cards.value());
 
   SECTION("Sanity tests - small 5 cards")
   {
@@ -56,14 +60,19 @@ TEST_CASE("Card structs can be deserialized from XML", "[cards_from_xml]")
         std::make_pair(path_trade_list_small_500cards, 500),
         std::make_pair(path_trade_list_medium_3000cards, 3000));
 
-    CHECK(mtgo::xml::parse_dek_xml(get<0>(test_file_card_count_pair)).size() == get<1>(test_file_card_count_pair));
+    CHECK(
+      mtgo::xml::parse_dek_xml(get<0>(test_file_card_count_pair)).value().size() == get<1>(test_file_card_count_pair));
   }
 }
 
 
 TEST_CASE("Deserialized cards throws with misuse", "[cards_from_xml]")
 {
-  std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+  auto res_cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+
+  REQUIRE(res_cards.has_value());
+
+  std::vector<mtgo::Card> cards = std::move(res_cards.value());
 
   SECTION("Throws out-of-bounds")
   {
@@ -80,7 +89,12 @@ TEST_CASE("MTGO collection")
     SECTION("Small collection")
     {
       // From cards vector
-      std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+      auto res_cards = mtgo::xml::parse_dek_xml(path_trade_list_small_5cards);
+
+      REQUIRE(res_cards.has_value());
+
+      std::vector<mtgo::Card> cards = std::move(res_cards.value());
+
       auto collection = mtgo::Collection(std::move(cards));
       REQUIRE(collection.Size() == 5);
 
@@ -95,7 +109,12 @@ TEST_CASE("MTGO collection")
     SECTION("Medium collection - 3000 cards")
     {
       // From cards vector
-      std::vector<mtgo::Card> cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
+      auto res_cards = mtgo::xml::parse_dek_xml(path_trade_list_medium_3000cards);
+
+      REQUIRE(res_cards.has_value());
+
+      std::vector<mtgo::Card> cards = std::move(res_cards.value());
+
       auto collection = mtgo::Collection(std::move(cards));
       REQUIRE(collection.Size() == 3000);
 

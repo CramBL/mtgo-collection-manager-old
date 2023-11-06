@@ -139,7 +139,7 @@ TEST_CASE("MTGO card - Initialize and use of")
   {
     // Test constructors, assignments, initializations with different types
     unsigned short int id_1 = 1;
-    mtgo::Card mtgo_card = mtgo::Card(id_1, util::sv_to_uint<uint16_t>("1").value_or(123), "name", "set", "Common");
+    mtgo::Card mtgo_card = mtgo::Card(id_1, util::sv_to_uint<uint16_t>("1").value(), "name", "set", "Common");
     CHECK(mtgo_card.id_ == 1);
     CHECK(mtgo_card.quantity_ == 1);
     CHECK(mtgo_card.name_ == "name");
@@ -152,7 +152,7 @@ TEST_CASE("MTGO card - Initialize and use of")
 
     unsigned int id2 = 1;
     mtgo::Card mtgo_card2 =
-      mtgo::Card(id2, util::sv_to_uint<uint16_t>("1").value_or(9), "name", "set", "C", true, 1.0, 2.0);
+      mtgo::Card(id2, util::sv_to_uint<uint16_t>("1").value(), "name", "set", "C", true, 1.0, 2.0);
     CHECK(mtgo_card2.id_ == 1);
     CHECK(mtgo_card2.quantity_ == 1);
     CHECK(mtgo_card2.name_ == "name");
@@ -171,7 +171,7 @@ TEST_CASE("MTGO card - Initialize and use of")
     std::string_view name = "name";
     std::string_view set = "set";
     std::string_view rarity = "common";
-    mtgo::Card mtgo_card3 = mtgo::Card(id, util::sv_to_uint<uint16_t>(quantity).value_or(0), name, set, rarity);
+    mtgo::Card mtgo_card3 = mtgo::Card(id, util::sv_to_uint<uint16_t>(quantity).value(), name, set, rarity);
 
     // check equality with mtgo_card2
     CHECK(mtgo_card3 != mtgo_card2);
