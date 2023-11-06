@@ -75,6 +75,44 @@ using ErrorStr = std::string;
   return toml::parse_file(str_fpath);
 }
 
+
+/**
+ * @brief Get the current time as a UTC ISO 8601 timestamp %Y-%m-%dT%H%M%SZ without sub-second precision.
+ *
+ * e.g. `2023-11-05T152700Z`
+ *
+ * @return `std::string` The timestamp
+ */
+[[nodiscard]] inline auto now_utc_iso8601_timestamp() -> std::string
+{
+  // Convert to a timestamp in UTC and %Y-%m-%dT%H:%M:%SZ which is ISO 8601
+  // using formatter: https://en.cppreference.com/w/cpp/chrono/system_clock/formatter
+
+  // Get the current time
+  const auto now = std::chrono::system_clock::now();
+
+  // Apple clang is behind on C++20 support, so use std::put_time instead of std::format
+#if defined(__APPLE__) && defined(__llvm__) && __clang_major__ == 15
+  auto now_time_t = std::chrono::system_clock::to_time_t(now);
+
+  // Convert to ISO 8601 format
+  std::ostringstream oss;
+  oss << std::put_time(std::gmtime(&now_time_t), "%Y-%m-%dT%H%M%SZ");
+  std::string now_utc_iso8601_timestamp = oss.str();
+#else
+  // std::vformat is the way to specify a runtime format string in C++20
+  std::string tmp_iso8601_timestamp = std::vformat("{:%FT%TZ}", std::make_format_args(now));
+  // It has sub-second precision, so remove the decimal point and everything after it, then add a 'Z' to indicate UTC
+  std::string now_utc_iso8601_timestamp = tmp_iso8601_timestamp.substr(0, tmp_iso8601_timestamp.find('.')) + 'Z';
+  // Erase-remove idiom to remove colons from timestamp as they are not allowed in Windows file names
+  now_utc_iso8601_timestamp.erase(std::remove(now_utc_iso8601_timestamp.begin(), now_utc_iso8601_timestamp.end(), ':'),
+    now_utc_iso8601_timestamp.end());
+#endif
+
+  return now_utc_iso8601_timestamp;
+}
+
+
 /**
  * @brief Save a string buffer to a file with a UTC ISO 8601 timestamp appended to the file name.
  *
@@ -101,31 +139,9 @@ using ErrorStr = std::string;
       // Create directories if they don't exist
       fs::create_directories(fpath.parent_path());
     }
-    // Get the current time
-    const auto now = std::chrono::system_clock::now();
 
-
-    // Convert to a timestamp in UTC and %Y-%m-%dT%H:%M:%SZ which is ISO 8601
-    // using formatter: https://en.cppreference.com/w/cpp/chrono/system_clock/formatter
-
-    // Apple clang is behind on C++20 support, so use std::put_time instead of std::format
-#if defined(__APPLE__) && defined(__llvm__) && __clang_major__ == 15
-    auto now_time_t = std::chrono::system_clock::to_time_t(now);
-
-    // Convert to ISO 8601 format
-    std::ostringstream oss;
-    oss << std::put_time(std::gmtime(&now_time_t), "%Y-%m-%dT%H%M%SZ");
-    std::string now_utc_iso8601_timestamp = oss.str();
-#else
-    // std::vformat is the way to specify a runtime format string in C++20
-    std::string tmp_iso8601_timestamp = std::vformat("{:%FT%TZ}", std::make_format_args(now));
-    // It has sub-second precision, so remove the decimal point and everything after it, then add a 'Z' to indicate UTC
-    std::string now_utc_iso8601_timestamp = tmp_iso8601_timestamp.substr(0, tmp_iso8601_timestamp.find('.')) + 'Z';
-    // Erase-remove idiom to remove colons from timestamp as they are not allowed in Windows file names
-    now_utc_iso8601_timestamp.erase(
-      std::remove(now_utc_iso8601_timestamp.begin(), now_utc_iso8601_timestamp.end(), ':'),
-      now_utc_iso8601_timestamp.end());
-#endif
+    // Get the current time as a UTC ISO 8601 timestamp %Y-%m-%dT%H%M%SZ without sub-second precision
+    std::string now_utc_iso8601_timestamp = io_util::now_utc_iso8601_timestamp();
 
     std::string final_fname = fmt::format("{}_{}.{}", fpath.stem().string(), now_utc_iso8601_timestamp, ext);
 
