@@ -16,7 +16,12 @@
 namespace clap {
 
 
-// The command-line argument parser class
+/**
+ * @brief The main Command-Line Argument Parser (CLAP) class.
+ *
+ * @tparam N_opts The number of defined options.
+ * @tparam N_cmds The number of defined commands.
+ */
 template<size_t N_opts, size_t N_cmds> class Clap
 {
   // User-defined options and commands
@@ -30,16 +35,30 @@ template<size_t N_opts, size_t N_cmds> class Clap
 
 
 public:
+  /**
+   * @brief Construct a new Clap object with the given options and commands.
+   *
+   * @param opts_arr A `clap::OptionArray` with the defined options.
+   * @param cmds_arr A `clap::CommandArray` with the defined commands.
+   */
   [[nodiscard]] constexpr explicit Clap(clap::OptionArray<N_opts> opts_arr,
     clap::CommandArray<N_cmds> cmds_arr) noexcept
     : options_{ opts_arr }, commands_{ cmds_arr }, set_options_{ std::nullopt }, set_cmd_{ std::nullopt }
   {}
 
+  /**
+   * @brief A default constructor that does not define any options or commands.
+   */
   [[nodiscard]] constexpr explicit Clap(std::optional<clap::OptionArray<N_opts>> opts_arr = std::nullopt,
     std::optional<clap::CommandArray<N_cmds>> cmds_arr = std::nullopt) noexcept
     : options_{ opts_arr }, commands_{ cmds_arr }, set_options_{ std::nullopt }, set_cmd_{ std::nullopt }
   {}
 
+  /**
+   * @brief Returns the number of defined options.
+   *
+   * @return std::size_t The number of defined options.
+   */
   [[nodiscard]] constexpr std::size_t option_count() const
   {
     if constexpr (N_opts == 0) {
@@ -49,6 +68,11 @@ public:
     }
   }
 
+  /**
+   * @brief Returns the number of defined commands.
+   *
+   * @return std::size_t The number of defined commands.
+   */
   [[nodiscard]] constexpr std::size_t command_count() const
   {
     if constexpr (N_cmds == 0) {
@@ -58,6 +82,9 @@ public:
     }
   }
 
+  /**
+   * @brief Prints the names of the defined options to stdout.
+   */
   void PrintOptions() const
   {
     if constexpr (N_opts == 0) {
@@ -67,6 +94,9 @@ public:
     }
   }
 
+  /**
+   * @brief Prints the names of the defined commands to stdout.
+   */
   void PrintCommands() const
   {
     if constexpr (N_cmds == 0) {
@@ -76,9 +106,11 @@ public:
     }
   }
 
-  // Print help text when invoked with an option equivelant to "-h" or "help" in many command-line apps
-  //
-  // For long help (usually "--help") use PrintLongHelp
+  /**
+   * @brief Prints a short help text to stdout.
+   *
+   * @note This is usually invoked with an option equivelant to "-h" or "help" in most command-line apps.
+   */
   void PrintShortHelp() const
   {
     spdlog::warn("TODO: Add description fields to Options and Commands");
@@ -102,7 +134,12 @@ public:
 
   // TODO: Long help
 
-  // Returns the number of arguments that failed validation (check that it's 0 to not run over errors)
+  /**
+   * @brief Parse the command-line arguments.
+   *
+   * @param args The command-line arguments to parse.
+   * @return size_t The number of arguments that failed validation (check that it's 0 to not run over errors)
+   */
   [[nodiscard]] auto Parse(const std::vector<std::string_view> &args) noexcept -> size_t
   {
     if (this->is_clap_parsed) {
@@ -115,6 +152,11 @@ public:
   }
 
 
+  /**
+   * @brief Print the arguments that were set.
+   *
+   * @note This is useful for debugging.
+   */
   void PrintArgs() const
   {
     if (this->set_cmd_.has_value()) {
@@ -130,10 +172,20 @@ public:
     }
   }
 
-  // Lookup if a flag is set by an Option instant, return if it's set or not
+  /**
+   * @brief Lookup if a flag is set by supplying a partial or fully equivelant `Option` struct, and return if it is set.
+   *
+   * @param opt_inst A reference to the `Option` struct to lookup.
+   * @return true If the flag is set.
+   */
   [[nodiscard]] constexpr auto FlagSet(const clap::Option &opt_inst) const -> bool { return FlagSet(opt_inst.name_); }
 
-  // Lookup if a flag is set by name, return if it's set or not
+  /**
+   * @brief Lookup if a flag is set by name, return if it's set or not.
+   *
+   * @param flag_name The name of the flag.
+   * @return true If the flag is set.
+   */
   [[nodiscard]] constexpr auto FlagSet(std::string_view flag_name) const -> bool
   {
     if constexpr (N_opts == 0) {
@@ -155,13 +207,23 @@ public:
   }
 
 
-  // Lookup option by supplying a partial or fully equivelant `Option` struct, and if it is set, get the value.
+  /**
+   * @brief Lookup option by supplying a partial or fully equivelant `Option` struct, and if it is set, get the value.
+   *
+   * @param opt_inst A reference to the `Option` struct to lookup.
+   * @return `std::optional<std::string_view>` The value of the option if it is set, `std::nullopt` otherwise.
+   */
   [[nodiscard]] auto OptionValue(const clap::Option &opt_inst) const -> std::optional<std::string_view>
   {
     return OptionValue(opt_inst.name_);// :)
   }
 
-  // Lookup option by name (or alias) and if it is set, get the value.
+  /**
+   * @brief Lookup option by name (or alias) and if it is set, get the value.
+   *
+   * @param opt_name The name of the option.
+   * @return `std::optional<std::string_view>` The value of the option if it is set, `std::nullopt` otherwise.
+   */
   [[nodiscard]] auto OptionValue(std::string_view opt_name) const -> std::optional<std::string_view>
   {
     if constexpr (N_opts == 0) {
@@ -195,10 +257,20 @@ public:
     }
   }
 
-  // Lookup command by supplying a partial or fully equivelant `Command` struct, and return if it is set.
+  /**
+   * @brief Lookup command by supplying a partial or fully equivelant `Command` struct, and return if it is set.
+   *
+   * @param cmd_inst A reference to the `Command` struct to lookup.
+   * @return true If the command is set.
+   */
   [[nodiscard]] constexpr auto CmdSet(const clap::Command &cmd_inst) const -> bool { return CmdSet(cmd_inst.name_); }
 
-  // Lookup command by name, and return if it is set or not
+  /**
+   * @brief Lookup command by name and return if it is set.
+   *
+   * @param cmd_name The name of the command.
+   * @return true If the command is set.
+   */
   [[nodiscard]] constexpr auto CmdSet(std::string_view cmd_name) const -> bool
   {
     if constexpr (N_cmds == 0) {
@@ -208,10 +280,19 @@ public:
     }
   }
 
+  /**
+   * @brief Returns if the command-line arguments have been parsed.
+   *
+   * @note This can be used to make sure that the command-line arguments are parsed before accessing the set
+   * options/commands.
+   *
+   * @return true If the command-line arguments have been parsed.
+   */
   [[nodiscard]] auto isClapParsed() const noexcept -> bool { return this->is_clap_parsed; }
 
-  // Helpers
+  // Private helpers
 private:
+  // Store the option and its value in the set_options_ vector
   void store_option_value(clap::Option opt, std::optional<std::string_view> opt_val)
   {
     if (!this->set_options_.has_value()) {
@@ -222,6 +303,8 @@ private:
     }
   }
 
+  // Find a command by name and move it to the set_cmd_ member variable to indicate that it is has been set from the
+  // command-line.
   [[nodiscard]] auto find_command(std::string_view cmd) -> size_t
   {
     if (auto found_cmd = this->commands_.value().find(cmd)) {
@@ -239,6 +322,7 @@ private:
   }
 
 
+  // Parse the command-line arguments
   [[nodiscard]] auto parse_args(const std::vector<std::string_view> &args) noexcept -> size_t
   {
 
