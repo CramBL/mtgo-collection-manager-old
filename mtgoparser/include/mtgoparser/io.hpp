@@ -141,9 +141,9 @@ using ErrorStr = std::string;
     }
 
     // Get the current time as a UTC ISO 8601 timestamp %Y-%m-%dT%H%M%SZ without sub-second precision
-    std::string now_utc_iso8601_timestamp = io_util::now_utc_iso8601_timestamp();
+    std::string now_timestamp = io_util::now_utc_iso8601_timestamp();
 
-    std::string final_fname = fmt::format("{}_{}.{}", fpath.stem().string(), now_utc_iso8601_timestamp, ext);
+    std::string final_fname = fmt::format("{}_{}.{}", fpath.stem().string(), now_timestamp, ext);
 
     fs::path fpath_with_time =
       fpath.has_parent_path() ? fpath.parent_path() / final_fname : boost::implicit_cast<fs::path>(final_fname);
