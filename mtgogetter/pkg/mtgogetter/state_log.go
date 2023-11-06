@@ -133,8 +133,6 @@ func (s *scryfall) IsSetMatch(set *ScryfallSet) bool {
 }
 
 // Next set is the set released at the closest date from now IF the current `next set` is empty.
-//
-// TODO: The next set gets emptied everytime that set is found in the card definition data (meaning it is now on MTGO and time to update what is the next set)
 func (s *scryfall) UpdateNextSet(set *ScryfallSet, stateLogPath string) error {
 
 	state_log_accesor, err := GetStateLogAccessor(stateLogPath)
