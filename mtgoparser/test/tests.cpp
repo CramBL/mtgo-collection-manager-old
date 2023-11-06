@@ -3,6 +3,7 @@
 #include "mtgoparser/clap/option.hpp"
 #include "mtgoparser/io.hpp"
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 #include <fmt/core.h>
 #include <mtgoparser/clap.hpp>
 #include <mtgoparser/io.hpp>
@@ -11,8 +12,11 @@
 #include <mtgoparser/util.hpp>
 
 
+#include <regex>
 #include <string_view>
 #include <utility>
+
+using Catch::Matchers::ContainsSubstring;
 
 using clap::Opt::Flag;
 using clap::Opt::NeedValue;
@@ -364,6 +368,375 @@ TEST_CASE("Parse state_log.toml")
       } else {
         FAIL("Opening file for reading failed.");
       }
+    }
+  }
+}
+
+TEST_CASE("io_util::save_with_timestamp")
+{
+  // Regular expression pattern for ISO 8601 timestamp without sub-second precision and without colons.
+  // e.g. 2023-11-05T152700Z
+  std::regex iso8601_pattern(R"(\d{4}-\d{2}-\d{2}T\d{2}\d{2}\d{2}Z)");
+
+  SECTION("Check regex validation")
+  {
+    // Check the ISO 8601 timestamp regex is okay
+    std::string timestamp_ok_str = "This is a string containing an ISO 8601 timestamp 2023-11-05T092102Z.";
+
+    // Check that a non-IS0 8601 timestamp is not matched
+    std::string timestamp_not_ok_str = "This is a string containing a non-ISO 8601 timestamp 2023-11-05T09:21:02.";
+    // And more variations that should not match
+    std::string timestamp_not_ok_str2 = "This string lacks a timestamp.";
+    std::string timestamp_not_ok_str3 = "This string's timestamp is missing the Z at the end 2023-11-05T09:21:02";
+    std::string timestamp_not_ok_str4 = "This string's timestamp is missing the T in the middle 2023-11-05 09:21:02Z";
+    std::string timestamp_not_ok_str5 = "This string's timestamp is missing the T and Z 2023-11-05 09:21:02";
+    std::string timestamp_not_ok_colons_str =
+      "This is a string containing an ISO 8601 timestamp BUT WITH COLONS 2023-11-05T09:21:02Z.";
+
+
+    // Require that the string matches the pattern
+    REQUIRE(std::regex_search(timestamp_ok_str, iso8601_pattern));
+
+    // Check that the string does not match the pattern
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str2, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str3, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str4, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_str5, iso8601_pattern));
+    CHECK_FALSE(std::regex_search(timestamp_not_ok_colons_str, iso8601_pattern));
+  }
+
+
+  SECTION("Save to current directory")
+  {
+    // Save a file "test_tmp_file_<timestamp>.txt" to the current directory
+    const std::string fname{ "TEST_TMP_FILE" };
+    const std::string test_file_contents = "test file contents";
+    const std::string extension = "txt";
+
+    // Make it a path
+    const std::filesystem::path test_file_path = fname;
+
+    // Save file
+    auto res = io_util::save_with_timestamp(test_file_contents, test_file_path, extension);
+
+    if (res.has_error()) { FAIL("Error saving file: " << res.error()); }
+
+    // Check that file was saved
+    REQUIRE(res.has_value());
+    auto created_file_path = res.value();
+
+    // Check that file name contains the original file name
+    auto created_filename = created_file_path.filename().string();
+    INFO("created_filename: " << created_filename);
+    INFO("At path: " << created_file_path.string());
+
+    CHECK_THAT(created_filename, ContainsSubstring(fname));
+    // Check that file name contains the ISO 8601 timestamp
+    CHECK(std::regex_search(created_filename, iso8601_pattern));
+
+    // Check that file exists
+    CHECK(std::filesystem::exists(created_file_path));
+
+    {
+      // Check that file contents are correct
+      std::ifstream test_file(created_file_path);
+      std::string test_file_contents_read;
+      std::getline(test_file, test_file_contents_read);
+      CHECK(test_file_contents_read == test_file_contents);
+    }
+
+    // Clean up by removing the file
+    std::filesystem::remove(created_file_path);
+    CHECK(std::filesystem::exists(test_file_path) == false);
+  }
+
+  SECTION("Save to sub-directory")
+  {
+    // Save a file "test_tmp_file_<timestamp>.txt" to the sub-directory "test_dir"
+    const std::string fname{ "test_tmp_file" };
+    const std::string extension = "json";
+    const std::string test_file_contents =
+      R"([{"id":110465,"quantity":1,"name":"Tranquil Cove","set":"MOM","rarity":"C","foil":true,"goatbots_price":0.004}])";
+    const std::filesystem::path test_file_path = "test_dir/" + fname;
+
+    // Save file
+    auto res = io_util::save_with_timestamp(test_file_contents, test_file_path, extension);
+
+    // Check that file was saved
+    REQUIRE(res.has_value());
+    auto created_file_path = res.value();
+
+    // Check that file name contains the original file name
+    auto created_filename = created_file_path.filename().string();
+    INFO("created_filename: " << created_filename);
+    INFO("At path: " << created_file_path.string());
+
+    CHECK_THAT(created_filename, ContainsSubstring(fname));
+    // Check that file name contains the ISO 8601 timestamp
+    CHECK(std::regex_search(created_filename, iso8601_pattern));
+
+    // Check that file exists
+    CHECK(std::filesystem::exists(created_file_path));
+
+    {
+      // Check that file contents are correct
+      std::ifstream test_file(created_file_path);
+      std::string test_file_contents_read;
+      std::getline(test_file, test_file_contents_read);
+      CHECK(test_file_contents_read == test_file_contents);
+    }
+
+    // Clean up by removing the file and directory
+    std::filesystem::remove_all("test_dir");
+  }
+
+  SECTION("Save to adjacent directory")
+  {
+    // Save a file "test_tmp_file_<timestamp>.txt" to a directory adjacent to the current directory "test_adjacent_dir"
+    const std::string fname{ "test_tmp_file" };
+    const std::string extension = "json";
+    const std::string test_file_contents =
+      R"([{"id":110465,"quantity":1,"name":"Tranquil Cove","set":"MOM","rarity":"C","foil":true,"goatbots_price":0.004}])";
+    const std::filesystem::path test_file_path = "../test_adjacent_dir/" + fname;
+
+    // Save file
+    auto res = io_util::save_with_timestamp(test_file_contents, test_file_path, extension);
+
+    // Check that file was saved
+    REQUIRE(res.has_value());
+    auto created_file_path = res.value();
+
+    // Check that file name contains the original file name
+    auto created_filename = created_file_path.filename().string();
+    INFO("created_filename: " << created_filename);
+    INFO("At path: " << created_file_path.string());
+
+    CHECK_THAT(created_filename, ContainsSubstring(fname));
+    // Check that file name contains the ISO 8601 timestamp
+    CHECK(std::regex_search(created_filename, iso8601_pattern));
+
+    // Check that file exists
+    CHECK(std::filesystem::exists(created_file_path));
+
+    {
+      // Check that file contents are correct
+      std::ifstream test_file(created_file_path);
+      std::string test_file_contents_read;
+      std::getline(test_file, test_file_contents_read);
+      CHECK(test_file_contents_read == test_file_contents);
+    }
+
+    // Clean up by removing the file and directory
+    std::filesystem::remove(created_file_path);
+  }
+}
+
+TEST_CASE("io_util::is_files_equal")
+{
+  SECTION("Check two files are identical")
+  {
+    SECTION("Compare two identical files in current directory")
+    {
+      // Create two identical files
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+
+      // save files to current directory
+      {
+        std::ofstream test_fileA(fnameA);
+        std::ofstream test_fileB(fnameB);
+
+        // write some data to the files
+        test_fileA << "test file contents";
+        test_fileB << "test file contents";
+      }
+
+      // Check that files are equal
+      auto cmp_res = io_util::is_files_equal(fnameA, fnameB);
+      CHECK(cmp_res.has_value());
+      CHECK(cmp_res.value());
+
+      // Clean up by removing the files
+      std::filesystem::remove(fnameA);
+      std::filesystem::remove(fnameB);
+    }
+
+    SECTION("Compare two identical files in different subdirectories")
+    {
+      // Create two identical files in two different directories
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+      const std::string dirA{ "test_ident_dirA" };
+      const std::string dirB{ "test_ident_dirB" };
+      const std::string test_file_contents =
+        R"([{"id":110465,"quantity":1,"name":"Tranquil Cove","set":"MOM","rarity":"C","foil":true,"goatbots_price":0.004}])";
+
+      // Make the directories
+      std::filesystem::create_directory(dirA);
+      std::filesystem::create_directory(dirB);
+
+      // Paths to the files
+      const std::filesystem::path pathA = dirA + "/" + fnameA;
+      const std::filesystem::path pathB = dirB + "/" + fnameB;
+
+      // Save the files
+      {
+        std::ofstream test_fileA(pathA);
+        std::ofstream test_fileB(pathB);
+
+        // write some data to the files
+        test_fileA << test_file_contents;
+        test_fileB << test_file_contents;
+      }
+
+      // Check that files are equal
+      auto cmp_res = io_util::is_files_equal(pathA, pathB);
+      CHECK(cmp_res.has_value());
+      CHECK(cmp_res.value());
+
+      // Clean up by removing the files and directories
+      std::filesystem::remove_all(dirA);
+      std::filesystem::remove_all(dirB);
+    }
+
+    SECTION("Compare two identical files - one in parent directory, one in current directory")
+    {
+      // Create two identical files in two different directories
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+      const std::string dirA{ "test_ident_dirA" };
+
+      const std::string contents{ "contents'~~ _[@]... log. test content///DEe`2èøøæ" };
+
+      // Make the directories
+      std::filesystem::create_directory(dirA);
+
+      // Paths to the files
+      const std::filesystem::path pathA = dirA + "/" + fnameA;
+      const std::filesystem::path pathB = fnameB;
+
+      // Save the files
+      {
+        std::ofstream test_fileA(pathA);
+        std::ofstream test_fileB(pathB);
+
+        // write some data to the files
+        test_fileA << contents;
+        test_fileB << contents;
+      }
+
+      // Check that files are equal
+      auto cmp_res = io_util::is_files_equal(pathA, pathB);
+      CHECK(cmp_res.has_value());
+      CHECK(cmp_res.value());
+
+      // Clean up by removing the files and directories
+      std::filesystem::remove_all(dirA);
+      std::filesystem::remove(fnameB);
+    }
+  }
+
+  SECTION("Check two files are NOT identical")
+  {
+    SECTION("Compare two files in the current directory with different contents")
+    {
+      // Create two files
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+
+      // save files to current directory
+      {
+        std::ofstream test_fileA(fnameA);
+        std::ofstream test_fileB(fnameB);
+
+        // write some not-identical data to the files
+        test_fileA << "test file contents";
+        test_fileB << "test file contènts";// è instead of e
+      }
+
+      // Check that files are NOT equal
+      auto cmp_res = io_util::is_files_equal(fnameA, fnameB);
+      CHECK(cmp_res.has_value());
+      CHECK_FALSE(cmp_res.value());
+
+      // Clean up by removing the files
+      std::filesystem::remove(fnameA);
+      std::filesystem::remove(fnameB);
+    }
+
+    SECTION("Compare two files in two subdirectories with different contents")
+    {
+      // Create two files in two different directories
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+      const std::string dirA{ "test_ident_dirA" };
+      const std::string dirB{ "test_ident_dirB" };
+      const std::string test_file_contents =
+        R"([{"id":110465,"quantity":1,"name":"Tranquil Cove","set":"MOM","rarity":"C","foil":true,"goatbots_price":0.004}])";
+
+      // Make the directories
+      std::filesystem::create_directory(dirA);
+      std::filesystem::create_directory(dirB);
+
+      // Paths to the files
+      const std::filesystem::path pathA = dirA + "/" + fnameA;
+      const std::filesystem::path pathB = dirB + "/" + fnameB;
+
+      // Save the files
+      {
+        std::ofstream test_fileA(pathA);
+        std::ofstream test_fileB(pathB);
+
+        // write some not-identical data to the files
+        test_fileA << test_file_contents;
+        test_fileB << test_file_contents + "extra stuff";
+      }
+
+      // Check that files are NOT equal
+      auto cmp_res = io_util::is_files_equal(pathA, pathB);
+      CHECK(cmp_res.has_value());
+      CHECK_FALSE(cmp_res.value());
+
+      // Clean up by removing the files and directories
+      std::filesystem::remove_all(dirA);
+      std::filesystem::remove_all(dirB);
+    }
+
+    SECTION("Compare two NOT identical files - one in parent directory, one in current directory")
+    {
+      // Create two files in two different directories
+      const std::string fnameA{ "test_ident_fileA" };
+      const std::string fnameB{ "test_ident_fileB" };
+      const std::string dirA{ "test_ident_dirA" };
+
+      const std::string contents{ "contents'~~ _[@]... log. test content///DEe`2èøøæ" };
+
+      // Make the directories
+      std::filesystem::create_directory(dirA);
+
+      // Paths to the files
+      const std::filesystem::path pathA = dirA + "/" + fnameA;
+      const std::filesystem::path pathB = fnameB;
+
+      // Save the files
+      {
+        std::ofstream test_fileA(pathA);
+        std::ofstream test_fileB(pathB);
+
+        // write some not-identical data to the files
+        test_fileA << contents + '+';
+        test_fileB << contents;
+      }
+
+      // Check that files are NOT equal
+      auto cmp_res = io_util::is_files_equal(pathA, pathB);
+      CHECK(cmp_res.has_value());
+      CHECK_FALSE(cmp_res.value());
+
+      // Clean up by removing the files and directories
+      std::filesystem::remove_all(dirA);
+      std::filesystem::remove(fnameB);
     }
   }
 }

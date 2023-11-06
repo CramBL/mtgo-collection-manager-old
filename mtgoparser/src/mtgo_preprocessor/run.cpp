@@ -14,12 +14,12 @@
 #include <toml++/impl/value.hpp>
 
 #include <cassert>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
-
 
 namespace mtgo_preprocessor::run {
 
@@ -29,6 +29,35 @@ using cfg = config::Config;
 
 /// Helper functions (not part of the public API)
 namespace helper {
+
+  /// Check if the state_log in the collection-history is different from the one in the appdata directory
+  ///
+  /// If there is no state_log in the collection-history, returns true.
+  [[nodiscard]] auto has_state_log_changed(std::string_view appdata_dir_path) -> bool
+  {
+    const std::string state_log = "state_log.toml";
+    std::filesystem::path history_log_fullpath = appdata_dir_path;
+    history_log_fullpath.append("collection-history");
+    history_log_fullpath.append(state_log);
+
+    spdlog::info("Getting state_log from {}", history_log_fullpath.string());
+
+    if (std::filesystem::exists(history_log_fullpath)) {
+      std::filesystem::path appdata_log_fullpath = appdata_dir_path;
+      appdata_log_fullpath.append(state_log);
+
+      if (auto cmp_res = io_util::is_files_equal(appdata_log_fullpath, history_log_fullpath); cmp_res.has_error()) {
+        spdlog::error("{}", cmp_res.error());
+        return false;
+      } else {
+        return !cmp_res.value();
+      }
+    } else {
+      return true;
+    }
+  }
+
+
   struct JsonAndDestinationDir
   {
     std::string_view json;
@@ -36,14 +65,46 @@ namespace helper {
   };
 
   /// Write the JSON to a file in the appdata directory
-  void write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir)
+  auto write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir) -> outcome::result<void, std::string>
   {
-    const std::string mtgo_cards_json_fname = "mtgo-cards.json";
-    const std::string fullpath = std::string(jsonAndDir.dir) + mtgo_cards_json_fname;
-    std::ofstream mtgo_cards_outfile(fullpath);
-    if (mtgo_cards_outfile.is_open()) {
-      mtgo_cards_outfile << jsonAndDir.json << '\n';
-      mtgo_cards_outfile.close();
+    const std::string fname{ "mtgo-cards" };
+    const std::string ext{ ".json" };
+    std::filesystem::path save_path = jsonAndDir.dir;
+    save_path.append("collection-history");
+    save_path.append(fname);
+
+    spdlog::info("Saving preprocessed JSON to {}", save_path.string());
+
+    // Check if the state_log in the appdata has changed
+    // If it has, save a copy of the new state_log to the collection-history directory
+    //  and save the JSON to the appdata directory
+    if (has_state_log_changed(jsonAndDir.dir)) {
+      spdlog::info("State log has changed, saving new file");
+      // Save the state_log to the collection-history directory as well
+      const std::string state_log = "state_log.toml";
+      std::filesystem::path appdata_log_fullpath = jsonAndDir.dir;
+      appdata_log_fullpath.append(state_log);
+
+      std::filesystem::path log_fullpath_collection_history = jsonAndDir.dir;
+      log_fullpath_collection_history.append("collection-history");
+      // If the collection-history directory does not exist, create it
+      if (!std::filesystem::exists(log_fullpath_collection_history)) {
+        std::filesystem::create_directory(log_fullpath_collection_history);
+      }
+      log_fullpath_collection_history.append(state_log);
+
+      std::filesystem::copy_file(
+        appdata_log_fullpath, log_fullpath_collection_history, std::filesystem::copy_options::overwrite_existing);
+
+    } else {
+      spdlog::info("State log has not changed, return without saving new file");
+      return outcome::success();
+    }
+
+    if (auto res = io_util::save_with_timestamp(jsonAndDir.json, save_path, ext); res.has_error()) {
+      return outcome::failure(res.error());
+    } else {
+      return outcome::success();
     }
   }
 
@@ -99,6 +160,40 @@ namespace helper {
     return outcome::success();
   }
 
+  /// Check if the arguments for the Goatbots card definitions and price history paths are set.
+  /// If they are, check if they have values.
+  ///
+  /// On success: return `GoatbotsPaths` (struct with the paths)
+  [[nodiscard]] auto get_goatbots_path_args() -> outcome::result<GoatbotsPaths, ErrorStr>
+  {
+    // First check if the arguments are set
+    const bool arg_set_card_defs_path = cfg::get()->FlagSet(config::option::card_defs_path);
+    const bool arg_set_price_hist_path = cfg::get()->FlagSet(config::option::price_hist_path);
+
+    if (!arg_set_card_defs_path && !arg_set_price_hist_path) {
+      return outcome::failure("Card definitions and price history path options not provided");
+    }
+
+    if (!arg_set_card_defs_path) { return outcome::failure("Card definitions path option not provided"); }
+
+    if (!arg_set_price_hist_path) { return outcome::failure("Price history path option not provided"); }
+
+    // Check if they have values
+    auto card_defs_path = cfg::get()->OptionValue(config::option::card_defs_path);
+    auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
+
+    if (!card_defs_path.has_value() && !price_hist_path.has_value()) {
+      return outcome::failure("Missing card definitions and price history path from arguments");
+    }
+
+    if (!card_defs_path.has_value()) { return outcome::failure("Missing card definitions path from arguments"); }
+
+    if (!price_hist_path.has_value()) { return outcome::failure("Missing price history path from arguments"); }
+
+    return outcome::success(
+      GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
+  }
+
 }// namespace helper
 
 [[nodiscard]] auto parse_goatbots_data(mtgo::Collection &mtgo_collection, GoatbotsPaths paths)
@@ -152,31 +247,11 @@ namespace helper {
   auto mtgo_cards = mtgo::xml::parse_dek_xml(fulltradelist_path.value());
   auto mtgo_collection = mtgo::Collection(std::move(mtgo_cards));
 
-  if (!cfg::get()->FlagSet(config::option::card_defs_path) || !cfg::get()->FlagSet(config::option::price_hist_path)) {
-    if (!cfg::get()->FlagSet(config::option::price_hist_path)) {
-      spdlog::error("Update all needs a path to a price history file");
-    }
-    if (!cfg::get()->FlagSet(config::option::card_defs_path)) {
-      spdlog::error("Update all needs a path to a card definition file");
-    }
-    return outcome::failure("Update all needs a path to a card definition and price history file");
+
+  if (auto goatbots_path_args = helper::get_goatbots_path_args(); goatbots_path_args.has_error()) {
+    return outcome::failure(goatbots_path_args.error());
   } else {
-
-    // Get card definitions as a map
-    auto card_defs_path = cfg::get()->OptionValue(config::option::card_defs_path);
-    assert(card_defs_path.has_value());
-    // Get price history as a map
-    auto price_hist_path = cfg::get()->OptionValue(config::option::price_hist_path);
-    assert(price_hist_path.has_value());
-
-    if (!(card_defs_path.has_value() && price_hist_path.has_value())) {
-      return outcome::failure(
-        "Failed retrieving price history and card definition path from config. This error should be unreachable...");
-    }
-
-    if (auto res = parse_goatbots_data(mtgo_collection,
-          GoatbotsPaths{ .card_defs_path = card_defs_path.value(), .price_hist_path = price_hist_path.value() });
-        res.has_error()) {
+    if (auto res = parse_goatbots_data(mtgo_collection, goatbots_path_args.value()); res.has_error()) {
 
       return outcome::failure(res.error());
     }
@@ -199,7 +274,11 @@ namespace helper {
   // If the app data directory is set, save it there
   if (auto appdata_dir = cfg::get()->OptionValue(config::option::app_data_dir)) {
     // Write the json to a file in the appdata directory
-    helper::write_json_to_appdata_dir(helper::JsonAndDestinationDir{ .json = json, .dir = appdata_dir.value() });
+    if (auto res =
+          helper::write_json_to_appdata_dir(helper::JsonAndDestinationDir{ .json = json, .dir = appdata_dir.value() });
+        res.has_error()) {
+      spdlog::error("{}", res.error());// This is bad, but not fatal.
+    }
   }
 
   // Print the MTGO collection JSON to stdout
