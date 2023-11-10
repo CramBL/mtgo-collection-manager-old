@@ -53,7 +53,7 @@ template<goatbots_json T>
   json_map.reserve(RESERVE_APPROX_CARD_COUNT);
 
   // Read file into buffer and decode to populate map
-  if (auto err_code = glz::read_json(json_map, io_util::read_to_str_buf(path_json))) {
+  if (auto err_code = glz::read_json(json_map, io_util::read_to_str_buf(path_json))) [[unlikely]] {
     return outcome::failure(fmt::format(
       "Reading JSON from {} failed with {}", path_json.string(), glz::format_error(err_code, std::string{})));
   }

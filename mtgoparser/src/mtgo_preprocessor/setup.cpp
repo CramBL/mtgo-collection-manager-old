@@ -22,9 +22,10 @@ namespace mtgo_preprocessor::setup {
   spdlog::set_default_logger(spdlog::stderr_color_st(""));
 
   // Parse (and validate) command-line arguments
-  if (auto errors = config::Config::get()->Parse(args)) {
+  if (auto errors = config::Config::get()->Parse(args)) [[unlikely]] {
     return fmt::format("{} argument(s) failed to validate", errors);
   };
+
   return outcome::success();
 }
 

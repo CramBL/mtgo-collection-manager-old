@@ -28,7 +28,7 @@ using ErrorStr = std::string;
  * @note The string-like values are converted to `std::string_view` before the comparison.
  */
 template<typename SA, typename SB>
-requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
+  requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
 [[nodiscard]] inline constexpr auto is_sv_same(SA a_sv, SB b_sv) -> bool
 {
   return boost::implicit_cast<std::string_view>(a_sv) == boost::implicit_cast<std::string_view>(b_sv);
@@ -51,8 +51,8 @@ requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, st
  * @note The string-like values are converted to `std::string_view` before the comparison.
  */
 template<typename SA, typename... Ss>
-requires std::convertible_to<SA, std::string_view> &&(std::convertible_to<Ss, std::string_view> || ...)
-  [[nodiscard]] inline constexpr auto is_sv_any_of(SA a_sv, Ss... bs_svs) -> bool
+  requires std::convertible_to<SA, std::string_view> && (std::convertible_to<Ss, std::string_view> || ...)
+[[nodiscard]] inline constexpr auto is_sv_any_of(SA a_sv, Ss... bs_svs) -> bool
 {
   return (is_sv_same(a_sv, bs_svs) || ...);
 }
@@ -76,9 +76,9 @@ template<typename T_uint> [[nodiscard]] inline auto sv_to_uint(std::string_view 
 {
   T_uint value{};
 
-  if (std::from_chars(sv.data(), sv.data() + sv.size(), value).ec == std::errc{}) {
+  if (std::from_chars(sv.data(), sv.data() + sv.size(), value).ec == std::errc{}) [[likely]] {
     return outcome::success(value);
-  } else {
+  } else [[unlikely]] {
     return outcome::failure(fmt::format("Failed to convert string_view `{}` to uint", sv));
   }
 }

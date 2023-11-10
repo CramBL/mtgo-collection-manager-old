@@ -151,7 +151,7 @@ using ErrorStr = std::string;
     // Open the file
     std::ofstream file(fpath_with_time, std::ios::binary | std::ios::out);
 
-    if (file.bad()) {
+    if (file.bad()) [[unlikely]] {
       return outcome::failure(fmt::format("Bad operation during opening of file: {}", fpath_with_time.string()));
     }
 
@@ -160,7 +160,7 @@ using ErrorStr = std::string;
       file.write(buf.data(), static_cast<std::streamsize>(buf.size()));
       // Close the file
       file.close();
-    } else {
+    } else [[unlikely]] {
       return outcome::failure(fmt::format("Expected file to be open: {}", fpath_with_time.string()));
     }
 
@@ -192,7 +192,7 @@ using ErrorStr = std::string;
   std::ifstream fB(fpathB, std::ifstream::binary | std::ifstream::ate);
 
   // If there was a problem opening the files
-  if (fA.fail() || fB.fail()) {
+  if (fA.fail() || fB.fail()) [[unlikely]] {
     std::string error_msg = "Error encountered opening and seeking to end of: ";
     if (fA.fail() && fB.fail()) {
       error_msg += fmt::format("{} and {}", fpathA.string(), fpathB.string());

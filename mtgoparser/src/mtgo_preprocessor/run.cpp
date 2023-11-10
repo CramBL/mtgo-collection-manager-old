@@ -234,36 +234,35 @@ namespace helper {
   // Parse collection
 
   // Not possible if no full trade list path is supplied
-  if (!cfg::get()->FlagSet(config::option::fulltradelist_path)) {
+  if (!cfg::get()->FlagSet(config::option::fulltradelist_path)) [[unlikely]] {
     return outcome::failure("Update all needs a path to a full trade list XML file");
   }
 
   // Get cards from full trade list XML
   auto fulltradelist_path = cfg::get()->OptionValue(config::option::fulltradelist_path);
   assert(fulltradelist_path.has_value());
-  if (!fulltradelist_path.has_value()) {
+  if (!fulltradelist_path.has_value()) [[unlikely]] {
     return outcome::failure("Full Trade List path has no value. This error should be unreachable...");
   }
   auto res_mtgo_cards = mtgo::xml::parse_dek_xml(fulltradelist_path.value());
-  if (res_mtgo_cards.has_error()) { return outcome::failure(res_mtgo_cards.error()); }
+  if (res_mtgo_cards.has_error()) [[unlikely]] { return outcome::failure(res_mtgo_cards.error()); }
   auto mtgo_collection = mtgo::Collection(std::move(res_mtgo_cards.value()));
 
 
-  if (auto goatbots_path_args = helper::get_goatbots_path_args(); goatbots_path_args.has_error()) {
+  if (auto goatbots_path_args = helper::get_goatbots_path_args(); goatbots_path_args.has_error()) [[unlikely]] {
     return outcome::failure(goatbots_path_args.error());
-  } else {
-    if (auto res = parse_goatbots_data(mtgo_collection, goatbots_path_args.value()); res.has_error()) {
-
+  } else [[likely]] {
+    if (auto res = parse_goatbots_data(mtgo_collection, goatbots_path_args.value()); res.has_error()) [[unlikely]] {
       return outcome::failure(res.error());
     }
     spdlog::info("extract Goatbots info complete");
   }
 
 
-  if (!cfg::get()->FlagSet(config::option::scryfall_path)) {
+  if (!cfg::get()->FlagSet(config::option::scryfall_path)) [[unlikely]] {
     spdlog::error("Update all needs a path to a scryfall json-data file");
-  } else {
-    if (auto res = helper::parse_scryfall_data(mtgo_collection); res.has_error()) {
+  } else [[likely]] {
+    if (auto res = helper::parse_scryfall_data(mtgo_collection); res.has_error()) [[unlikely]] {
       return outcome::failure(res.error());
     }
     spdlog::info("extract Scryfall info completed");
@@ -277,7 +276,7 @@ namespace helper {
     // Write the json to a file in the appdata directory
     if (auto res =
           helper::write_json_to_appdata_dir(helper::JsonAndDestinationDir{ .json = json, .dir = appdata_dir.value() });
-        res.has_error()) {
+        res.has_error()) [[unlikely]] {
       spdlog::error("{}", res.error());// This is bad, but not fatal.
     }
   }
@@ -289,7 +288,7 @@ namespace helper {
 
 [[nodiscard]] auto run() -> outcome::result<Success, ErrorStr>
 {
-  if (cfg::get()->FlagSet(config::option::update)) { return update(); }
+  if (cfg::get()->FlagSet(config::option::update)) [[likely]] { return update(); }
   return outcome::success();
 }
 

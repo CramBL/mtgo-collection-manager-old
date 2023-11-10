@@ -81,29 +81,30 @@ int main(int argc, char *argv[])
 
     std::vector<std::string_view> args{ argv + 1, argv + argc };
 
-    if (auto res = mtgo_preprocessor::setup::setup(args); res.has_error()) {
+    if (auto res = mtgo_preprocessor::setup::setup(args); res.has_error()) [[unlikely]] {
       spdlog::error("{}", res.error());
       return -1;
     }
 
 
-    if (cfg::get()->FlagSet(config::option::help)) {
+    if (cfg::get()->FlagSet(config::option::help)) [[unlikely]] {
       cfg::get()->PrintShortHelp();
       return 0;
     }
 
     if (cfg::get()->FlagSet(config::option::echo)) { cfg::get()->PrintArgs(); }
 
-    if (cfg::get()->FlagSet("--version")) {
+    if (cfg::get()->FlagSet("--version")) [[unlikely]] {
       fmt::println("v{}", mtgoparser::cmake::project_version);
       return 0;
     }
 
     if (cfg::get()->CmdSet(config::commands::run)) {
-      if (auto res = mtgo_preprocessor::run::run(); res.has_error()) {
+      if (auto res = mtgo_preprocessor::run::run(); res.has_error()) [[unlikely]] {
         spdlog::error("{}", res.error());
         return -1;
       }
+      return 0;
     }
 
     if (cfg::get()->FlagSet(config::option::debug) && cfg::get()->FlagSet(config::option::mtgoupdater_json_out)) {

@@ -127,7 +127,7 @@ using ErrorStr = std::string;
   scryfall_vec.reserve(RESERVE_APPROX_MAX_SCRYFALL_CARDS);
 
   // Read file into buffer and decode to populate map
-  if (auto err_code = glz::read_json(scryfall_vec, io_util::read_to_str_buf(path_json))) {
+  if (auto err_code = glz::read_json(scryfall_vec, io_util::read_to_str_buf(path_json))) [[unlikely]] {
     // Return error as a string
     return outcome::failure(glz::format_error(err_code, std::string{}));
   }
