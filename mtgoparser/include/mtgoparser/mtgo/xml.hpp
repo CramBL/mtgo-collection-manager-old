@@ -34,28 +34,28 @@ using ErrorStr = std::string;
  */
 [[nodiscard]] inline auto card_from_xml(rapidxml::xml_node<> *card_node) noexcept -> outcome::result<Card, ErrorStr>
 {
-  if (card_node == nullptr) { return outcome::failure("card_node is null"); }
+  if (card_node == nullptr) [[unlikely]] { return outcome::failure("card_node is null"); }
 
   auto *first_attr = card_node->first_attribute();
   // 1st attribute (MTGO ID)
   auto res_attr_id = util::sv_to_uint<uint32_t>(first_attr->value());
-  if (res_attr_id.has_error()) { return outcome::failure(res_attr_id.error()); }
+  if (res_attr_id.has_error()) [[unlikely]] { return outcome::failure(res_attr_id.error()); }
 
   // 2nd attribute (quantity)
   auto *second_attr = first_attr->next_attribute();
-  if (second_attr == nullptr) { return outcome::failure("second_attr node (should be quantity) is null"); }
+  if (second_attr == nullptr) [[unlikely]] { return outcome::failure("second_attr node (should be quantity) is null"); }
 
   auto res_quantity = util::sv_to_uint<uint16_t>(second_attr->value());
-  if (res_quantity.has_error()) { return outcome::failure(res_quantity.error()); }
+  if (res_quantity.has_error()) [[unlikely]] { return outcome::failure(res_quantity.error()); }
 
 
   // 3rd attribute (Sideboard, we don't care about this but have to go through it)
   auto *third_attr = second_attr->next_attribute();
-  if (third_attr == nullptr) { return outcome::failure("third_attr node (should be sideboard) is null"); }
+  if (third_attr == nullptr) [[unlikely]] { return outcome::failure("third_attr node (should be sideboard) is null"); }
 
   // 4th attribute (name)
   auto *fourth_attr = third_attr->next_attribute();
-  if (fourth_attr == nullptr) { return outcome::failure("fourth_attr node (should be name) is null"); }
+  if (fourth_attr == nullptr) [[unlikely]] { return outcome::failure("fourth_attr node (should be name) is null"); }
   auto *name = fourth_attr->value();
   // 5th attribute (seems useless)
   // auto annotation = first_attr->next_attribute()->next_attribute()->next_attribute()->next_attribute()->value();
@@ -96,7 +96,7 @@ const std::size_t APPROX_DECK_CARDS = 1024;
     // Iterate through all attributes
     if (auto res_card_inst = card_from_xml(node); res_card_inst.has_value()) {
       cards.emplace_back(std::move(res_card_inst.value()));
-    } else {
+    } else [[unlikely]] {
       return outcome::failure(fmt::format("Decoding card from XML failed: {}", res_card_inst.error()));
     }
   }

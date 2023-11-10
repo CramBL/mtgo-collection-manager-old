@@ -26,7 +26,7 @@ static inline constexpr size_t MAX_ALIAS_COUNT = 3;
  * @note `Flag` is for options that toggle a boolean value.
  * @note `NeedValue` is for options that require a value.
  */
-enum class Opt : uint8_t { Flag, NeedValue };
+enum class [[nodiscard]] Opt : uint8_t{ Flag, NeedValue };
 
 
 /**
@@ -34,7 +34,7 @@ enum class Opt : uint8_t { Flag, NeedValue };
  *
  * @example `constexpr auto my_opt = clap::Option{ "help", clap::Opt::Flag, "h", "help", "H" }`
  */
-struct Option
+struct [[nodiscard]] Option
 {
   using T_opt_sv = std::optional<std::string_view>;
   using T_alias_array = std::array<T_opt_sv, clap::MAX_ALIAS_COUNT>;

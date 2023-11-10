@@ -76,9 +76,9 @@ template<typename T_uint> [[nodiscard]] inline auto sv_to_uint(std::string_view 
 {
   T_uint value{};
 
-  if (std::from_chars(sv.data(), sv.data() + sv.size(), value).ec == std::errc{}) {
+  if (std::from_chars(sv.data(), sv.data() + sv.size(), value).ec == std::errc{}) [[likely]] {
     return outcome::success(value);
-  } else {
+  } else [[unlikely]] {
     return outcome::failure(fmt::format("Failed to convert string_view `{}` to uint", sv));
   }
 }

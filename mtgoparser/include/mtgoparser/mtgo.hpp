@@ -89,8 +89,6 @@ public:
 
   void PrettyPrint() const;
 
-  void FromJson(const std::string &json_str);
-
   [[nodiscard]] inline constexpr bool operator==(const Collection &other) const { return this->cards_ == other.cards_; }
   [[nodiscard]] inline constexpr bool operator!=(const Collection &other) const { return !(*this == other); }
 
@@ -106,7 +104,7 @@ void inline Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &car
 {
 
   for (auto &card : this->cards_) {
-    if (card.id_ == 1) {
+    if (card.id_ == 1) [[unlikely]] {
       // Event Tickets have value 1 per definition
       card.goatbots_price_ = 1.0;
       continue;
@@ -116,13 +114,13 @@ void inline Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &car
       card.set_ = res->second.cardset;
       card.rarity_ = mtg::util::rarity_from_t(res->second.rarity);
       card.foil_ = res->second.foil == 1;
-    } else {
+    } else [[unlikely]] {
       spdlog::warn("Card definition key not found: ID={}", card.id_);
     }
     // Extract price from goatbots price history
     if (auto res = price_hist.find(card.id_); res != price_hist.end()) {
       card.goatbots_price_ = res->second;
-    } else {
+    } else [[unlikely]] {
       spdlog::warn("Price history key not found: ID={}", card.id_);
     }
   }
@@ -148,7 +146,7 @@ void inline Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfa
   for (auto &c : cards_) {
     // Skip if it is foil as scryfall API doesn't have foil prices
     if (c.foil_) { continue; }
-    if (c.id_ == 1) {
+    if (c.id_ == 1) [[unlikely]] {
       // Event ticket
       c.scryfall_price_ = 1.0;
       continue;
@@ -172,13 +170,6 @@ void inline Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfa
   return res;
 }
 
-
-void inline Collection::FromJson(const std::string &json_str)
-{
-  if (auto err_code = glz::read_json<std::vector<Card>>(std::ref(cards_), json_str)) {
-    spdlog::error("{}", glz::format_error(err_code, std::string{}));
-  }
-}
 void inline Collection::Print() const
 {
   for (const auto &card : cards_) {

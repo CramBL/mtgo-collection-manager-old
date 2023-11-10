@@ -15,7 +15,7 @@
 
 namespace mtgo {
 
-struct Card
+struct [[nodiscard]] Card
 {
   uint32_t id_;
   uint16_t quantity_;
