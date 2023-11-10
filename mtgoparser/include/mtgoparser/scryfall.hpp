@@ -65,8 +65,8 @@ struct [[nodiscard]] Card
     std::string _released_at = "",
     std::string _rarity = "",
     Prices _prices = scryfall::Prices{})
-    : mtgo_id{ _mtgo_id }, name{ std::move(_name) }, released_at{ std::move(_released_at) },
-      rarity{ std::move(_rarity) }, prices{ std::move(_prices) }
+    : mtgo_id{ _mtgo_id }, name{ std::move(_name) },
+      released_at{ std::move(_released_at) }, rarity{ std::move(_rarity) }, prices{ std::move(_prices) }
   {}
 
   [[nodiscard]] inline constexpr bool operator==(const Card &other) const

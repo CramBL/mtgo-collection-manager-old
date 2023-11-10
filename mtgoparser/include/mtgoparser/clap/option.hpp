@@ -26,7 +26,7 @@ static inline constexpr size_t MAX_ALIAS_COUNT = 3;
  * @note `Flag` is for options that toggle a boolean value.
  * @note `NeedValue` is for options that require a value.
  */
-enum class [[nodiscard]] Opt : uint8_t { Flag, NeedValue };
+enum class [[nodiscard]] Opt : uint8_t{ Flag, NeedValue };
 
 
 /**

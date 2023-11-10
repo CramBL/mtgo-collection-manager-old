@@ -13,7 +13,7 @@
 namespace mtg {
 
 // Denote the rarity of an MTG item.
-enum class [[nodiscard]] Rarity : uint8_t { Common, Uncommon, Rare, Mythic, Booster };
+enum class [[nodiscard]] Rarity : uint8_t{ Common, Uncommon, Rare, Mythic, Booster };
 
 namespace util {
 
