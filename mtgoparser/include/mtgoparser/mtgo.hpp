@@ -89,8 +89,6 @@ public:
 
   void PrettyPrint() const;
 
-  void FromJson(const std::string &json_str);
-
   [[nodiscard]] inline constexpr bool operator==(const Collection &other) const { return this->cards_ == other.cards_; }
   [[nodiscard]] inline constexpr bool operator!=(const Collection &other) const { return !(*this == other); }
 
@@ -172,13 +170,6 @@ void inline Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfa
   return res;
 }
 
-
-void inline Collection::FromJson(const std::string &json_str)
-{
-  if (auto err_code = glz::read_json<std::vector<Card>>(std::ref(cards_), json_str)) {
-    spdlog::error("{}", glz::format_error(err_code, std::string{}));
-  }
-}
 void inline Collection::Print() const
 {
   for (const auto &card : cards_) {
