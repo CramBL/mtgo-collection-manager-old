@@ -80,7 +80,7 @@ pub(crate) fn mtgoparser_bin() -> &'static OsStr {
         let mut path = std::env::current_exe().expect("Failed to get current executable path");
         path.pop();
         path.push("bin");
-        path.push("mtgo_preprocesser");
+        path.push("mtgo_preprocessor");
         if cfg!(windows) {
             path.set_extension(std::env::consts::EXE_EXTENSION);
         }

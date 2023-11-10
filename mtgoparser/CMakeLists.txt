@@ -108,7 +108,7 @@ include(cmake/PackageProject.cmake)
 # Add other targets here, by default we just package one executable
 mtgoparser_package_project(
  TARGETS
- mtgo_preprocesser
+ mtgo_preprocessor
  VERSION 0.1.0
  mtgoparser_options
  mtgoparser_warnings

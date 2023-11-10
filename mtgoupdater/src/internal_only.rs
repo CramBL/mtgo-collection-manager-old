@@ -20,9 +20,9 @@ pub const DEV_MTGOGETTER_BIN: &str = if cfg!(windows) {
     "../mtgogetter/mtgogetter"
 };
 pub const DEV_MTGOPARSER_BIN: &str = if cfg!(windows) {
-    "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser.exe"
+    "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocessor.exe"
 } else {
-    "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser"
+    "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocessor"
 };
 
 /// Runs the MTGO Preprocessor with the `--collection-json-out` flag and returns the stdout
