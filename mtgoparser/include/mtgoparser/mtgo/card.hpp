@@ -15,7 +15,7 @@
 
 namespace mtgo {
 
-struct Card
+struct [[nodiscard]] Card
 {
   uint32_t id_;
   uint16_t quantity_;
@@ -71,7 +71,7 @@ struct Card
 
   // Templated constructor
   template<typename I, typename Q, typename S>
-  requires std::convertible_to<I, uint32_t> && std::convertible_to<Q, uint16_t> && std::convertible_to<S, std::string>
+    requires std::convertible_to<I, uint32_t> && std::convertible_to<Q, uint16_t> && std::convertible_to<S, std::string>
   explicit Card(I id,
     Q quantity,
     S name,

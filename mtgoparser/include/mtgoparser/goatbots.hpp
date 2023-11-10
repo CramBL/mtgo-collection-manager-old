@@ -25,7 +25,7 @@ using ErrorStr = std::string;
 // Try to only allocate once, so reserve more than card count
 const uint32_t RESERVE_APPROX_CARD_COUNT = 80000;
 
-struct CardDefinition
+struct [[nodiscard]] CardDefinition
 {
   std::string name{};
   std::string cardset{};

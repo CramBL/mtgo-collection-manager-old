@@ -18,7 +18,7 @@ namespace clap {
  *
  * @example `constexpr auto my_cmd = clap::Command{ "help", false }`
  */
-struct Command
+struct [[nodiscard]] Command
 {
   std::string_view name_;
   bool is_flag_;

@@ -33,7 +33,7 @@ template<typename T, typename... Args>
  *
  * @tparam T
  */
-template<typename T> struct is_convertible_to_string_view
+template<typename T> struct [[nodiscard]] is_convertible_to_string_view
 {
   static constexpr bool value = std::is_convertible_v<T, std::string_view>;
 };

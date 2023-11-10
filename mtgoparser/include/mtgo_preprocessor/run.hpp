@@ -47,7 +47,7 @@ using ErrorStr = std::string;
  *
  * @note The paths are specified as `std::string_view` to avoid copying the strings.
  */
-struct GoatbotsPaths
+struct [[nodiscard]] GoatbotsPaths
 {
   std::string_view card_defs_path;
   std::string_view price_hist_path;

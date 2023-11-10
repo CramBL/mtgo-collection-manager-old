@@ -58,7 +58,7 @@ namespace helper {
   }
 
 
-  struct JsonAndDestinationDir
+  struct [[nodiscard]] JsonAndDestinationDir
   {
     std::string_view json;
     std::string_view dir;
