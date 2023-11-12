@@ -1,6 +1,7 @@
-use std::fs;
-use std::io;
+use std::fs::File;
+use std::io::{self, Read};
 use std::path::Path;
+use std::{env, fs};
 
 // Convenience macro for printing warnings during the build process
 //
@@ -24,6 +25,8 @@ fn main() {
         return;
     }
 
+    let out_dir = env::var_os("OUT_DIR").unwrap();
+
     // Create the `bin` directory in the release directory if it doesn't exist
     if !Path::new(RELEASE_BIN_PATH).exists() {
         fs::create_dir(RELEASE_BIN_PATH)
@@ -38,6 +41,7 @@ fn main() {
             .current_dir("..")
             .status();
         assert!(cmd_go_getter.is_ok(), "failed to build MTGO Getter");
+
         // Copy mtgogetter.exe to the release directory
         fs::copy(
             Path::new("../mtgogetter/mtgogetter.exe"),
@@ -48,10 +52,15 @@ fn main() {
             Path::new("../mtgogetter/mtgogetter.exe").exists(),
             "Build succeeded but mtgogetter.exe was not found at the expected path ../mtgogetter/mtgogetter.exe"
         );
+
+        let dest_path = Path::new(&out_dir).join("mtgogetter.exe");
+        fs::copy(Path::new("../mtgogetter/mtgogetter.exe"), dest_path)
+            .unwrap_or_else(|_| panic!("Failed to copy mtgogetter.exe to {RELEASE_BIN_PATH}"));
+
         print_warn!("Built MTGO Getter and copied mtgogetter.exe to {RELEASE_BIN_PATH}");
 
         let cmd_ps_make = std::process::Command::new("powershell")
-            .args([".\\wmake.ps1", "build-mtgoparser"])
+            .args([".\\wmake.ps1", "build-mtgoparser-integration"])
             .current_dir("..")
             .status();
         assert!(
@@ -74,16 +83,23 @@ fn main() {
             "Build succeeded but mtgo_preprocessor.exe was not found at the expected path {}",
             MTGO_PREPROCESSOR_BIN_PATH_WINDOWS
         );
+
+        let dest_path = Path::new(&out_dir).join("mtgo_preprocessor.exe");
+        fs::copy(Path::new(MTGO_PREPROCESSOR_BIN_PATH_WINDOWS), dest_path).unwrap_or_else(|_| {
+            panic!("Failed to copy mtgo_preprocessor.exe to {RELEASE_BIN_PATH}")
+        });
     }
 
     if cfg!(target_os = "linux") {
         eprintln!("linux");
-        let cmd_make = std::process::Command::new("make build-mtgoparser")
+        let cmd_make = std::process::Command::new("make build-mtgoparser-integration")
             .current_dir("..")
             .status()
             .expect("failed to execute process");
         assert!(cmd_make.success());
     }
+
+    include_binaries().unwrap_or_else(|_| panic!("Failed to include binaries in build.rs"));
 }
 
 // Copy all files from the source directory to the destination directory
@@ -122,4 +138,45 @@ fn detect_changes() {
     println!("cargo:rerun-if-changed=../mtgogetter/main.go");
     println!("cargo:rerun-if-changed=../mtgogetter/pkg");
     println!("cargo:rerun-if-changed=../mtgogetter/cmd");
+}
+
+fn include_binaries() -> io::Result<()> {
+    let out_dir = env::var_os("OUT_DIR").unwrap();
+    let dest_path = Path::new(&out_dir).join("binaries.rs");
+
+    // Open the file
+    let mtgogetter_bin = Path::new(RELEASE_BIN_PATH).join("mtgogetter.exe");
+    let mut file = File::open(mtgogetter_bin)?;
+
+    // Read the file contents into a vector of bytes
+    let mut raw_mtgogetter = Vec::new();
+    file.read_to_end(raw_mtgogetter.as_mut())?;
+
+    let mtgogetter_size = raw_mtgogetter.len();
+
+    let mtgo_preprocessor_bin = Path::new(RELEASE_BIN_PATH).join("mtgo_preprocessor.exe");
+    let mut file = File::open(mtgo_preprocessor_bin)?;
+
+    // Read the file contents into a vector of bytes
+    let mut raw_mtgo_preprocessor = Vec::new();
+    file.read_to_end(raw_mtgo_preprocessor.as_mut())?;
+
+    let mtgo_preprocessor_size = raw_mtgo_preprocessor.len();
+
+    // format contents
+    let contents = format!(
+        r#"
+        #[cfg(not(debug_assertions))]
+        pub const MTGO_PREPROCESSOR: &[u8; {mtgo_preprocessor_size}] = include_bytes!(r"{mtgo_preprocessor_bin}");
+        #[cfg(not(debug_assertions))]
+        pub const MTGOGETTER: &[u8; {mtgogetter_size}] = include_bytes!(r"{mtgogetter_bin}");
+        "#,
+        mtgo_preprocessor_bin = Path::new(&out_dir).join("mtgo_preprocessor.exe").display(),
+        mtgogetter_bin = Path::new(&out_dir).join("mtgogetter.exe").display(),
+    );
+
+    // Write the file contents
+    fs::write(dest_path, contents)?;
+
+    Ok(())
 }
