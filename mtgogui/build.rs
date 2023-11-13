@@ -1,6 +1,5 @@
-use std::fs::File;
-use std::io::{self, Read};
-use std::path::Path;
+use std::io::{self};
+use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 // Convenience macro for printing warnings during the build process
@@ -12,39 +11,6 @@ macro_rules! print_warn {
     }
 }
 
-const MTGOGETTER_BIN: &str = if cfg!(target_os = "windows") {
-    "mtgogetter.exe"
-} else {
-    "mtgogetter"
-};
-
-const MTGO_PREPROCESSOR_BIN: &str = if cfg!(target_os = "windows") {
-    "mtgo_preprocessor.exe"
-} else {
-    "mtgo_preprocessor"
-};
-
-/// Add `.exe` to the end of the binary name if we're building for Windows
-const MTGO_PREPROCESSOR_BIN_PATH: &str = if cfg!(target_os = "windows") {
-    concat!(
-        "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocessor",
-        ".exe"
-    )
-} else {
-    "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocessor"
-};
-
-const BUILD_SCRIPT_EXE: &str = if cfg!(target_os = "windows") {
-    ".\\wmake.ps1"
-} else {
-    "make"
-};
-
-const RELEASE_BIN_DIR: &str = "target/release/bin";
-
-const BUILD_MTGOGETTER_CMD: &str = "build-mtgogetter";
-const BUILD_MTGOPARSER_CMD: &str = "build-mtgoparser-integration";
-
 fn main() {
     util::detect_changes();
 
@@ -53,20 +19,63 @@ fn main() {
         return;
     }
 
-    let out_dir = env::var_os("OUT_DIR").unwrap();
+    let env_out_dir = env::var_os("OUT_DIR").expect("OUT_DIR not set");
+    let out_dir_path = Path::new(&env_out_dir);
 
-    // Create the `bin` directory in the release directory if it doesn't exist
-    if !Path::new(RELEASE_BIN_DIR).exists() {
-        fs::create_dir(RELEASE_BIN_DIR)
-            .unwrap_or_else(|e| panic!("Failed to create {RELEASE_BIN_DIR}: {e}"));
-    }
+    build::build_all(out_dir_path);
 
-    build::build_all(Path::new(&out_dir));
-
-    include_binaries().unwrap_or_else(|e| panic!("Failed to include binaries in build.rs: {e}"));
+    include_binaries(out_dir_path)
+        .unwrap_or_else(|e| panic!("Failed to include binaries in build.rs: {e}"));
 }
 
+/// Binary name for the MTGO Getter binary
+const MTGOGETTER_BIN: &str = if cfg!(target_os = "windows") {
+    "mtgogetter.exe"
+} else {
+    "mtgogetter"
+};
+
+/// Binary name for the MTGO Preprocessor binary
+const MTGO_PREPROCESSOR_BIN: &str = if cfg!(target_os = "windows") {
+    "mtgo_preprocessor.exe"
+} else {
+    "mtgo_preprocessor"
+};
+
+/// Path to the MTGO Preprocessor binary relative to a subproject of the root project
+const MTGO_PREPROCESSOR_BIN_PATH: &str = if cfg!(target_os = "windows") {
+    // Add `.exe` to the end of the binary name if we're building for Windows
+    concat!(
+        "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocessor",
+        ".exe"
+    )
+} else {
+    "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocessor"
+};
+
+/// Name of the build script executable
+///
+/// This is `make` on Linux and `wmake.ps1` on Windows
+const BUILD_SCRIPT_EXE: &str = if cfg!(target_os = "windows") {
+    ".\\wmake.ps1"
+} else {
+    "make"
+};
+
+/// Command to build the MTGO Getter binary
+const BUILD_MTGOGETTER_CMD: &str = "build-mtgogetter";
+/// Command to build the MTGO Preprocessor binary
+const BUILD_MTGOPARSER_CMD: &str = "build-mtgoparser-integration";
+/// Name of the file that contains the byte arrays for the binaries
+const INCLUDE_BINARIES_FILE: &str = "include_binaries.rs";
+
 mod util {
+    use std::{
+        fs::File,
+        io::{self, Read},
+        path::Path,
+    };
+
     /// Rerun the build script steps if any of these files or directories change
     pub fn detect_changes() {
         // Build script itself
@@ -81,49 +90,60 @@ mod util {
         println!("cargo:rerun-if-changed=../mtgogetter/pkg");
         println!("cargo:rerun-if-changed=../mtgogetter/cmd");
     }
+
+    /// Get the length (size in bytes) of a file
+    ///
+    /// Reads the whole file into memory and returns the length of the vector.
+    /// This is more reliable than using `std::fs::metadata` because it doesn't rely on the file system.
+    pub fn file_len(fpath: &Path) -> io::Result<usize> {
+        const PRE_ALLOC: usize = 1024 * 1024 * 20; // 20 MiB
+        let mut file = File::open(fpath)?;
+        let mut raw_mtgogetter = Vec::with_capacity(PRE_ALLOC);
+        file.read_to_end(raw_mtgogetter.as_mut())?;
+        Ok(raw_mtgogetter.len())
+    }
 }
 
-/// Write the binaries to the OUT_DIR and create a file `binaries.rs` that contains the binaries as byte arrays.
-fn include_binaries() -> io::Result<()> {
-    let out_dir = env::var_os("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join("binaries.rs");
+/// Write the binaries to the OUT_DIR and create a file `include_binaries.rs` that contains the binaries as byte arrays.
+fn include_binaries(out_dir: &Path) -> io::Result<()> {
+    let dest_path = Path::new(&out_dir).join(INCLUDE_BINARIES_FILE);
+    let mtgogetter_path = Path::new(&out_dir).join(MTGOGETTER_BIN);
+    let mtgo_preprocessor_path = Path::new(&out_dir).join(MTGO_PREPROCESSOR_BIN);
 
-    // Open the file
-    let mtgogetter_bin = Path::new(&out_dir).join(MTGOGETTER_BIN);
-    let mut file = File::open(mtgogetter_bin)?;
+    let mtgogetter_size = util::file_len(&mtgogetter_path)?;
 
-    // Read the file contents into a vector of bytes
-    let mut raw_mtgogetter = Vec::new();
-    file.read_to_end(raw_mtgogetter.as_mut())?;
-
-    let mtgogetter_size = raw_mtgogetter.len();
-
-    let mtgo_preprocessor_bin = Path::new(&out_dir).join(MTGO_PREPROCESSOR_BIN);
-    let mut file = File::open(mtgo_preprocessor_bin)?;
-
-    // Read the file contents into a vector of bytes
-    let mut raw_mtgo_preprocessor = Vec::new();
-    file.read_to_end(raw_mtgo_preprocessor.as_mut())?;
-
-    let mtgo_preprocessor_size = raw_mtgo_preprocessor.len();
+    let mtgo_preprocessor_size = util::file_len(&mtgo_preprocessor_path)?;
 
     // format contents
-    let contents = format!(
-        r#"
-        #[cfg(not(debug_assertions))]
-        pub const MTGO_PREPROCESSOR: &[u8; {mtgo_preprocessor_size}] = include_bytes!(r"{mtgo_preprocessor_bin}");
-        #[cfg(not(debug_assertions))]
-        pub const MTGOGETTER: &[u8; {mtgogetter_size}] = include_bytes!(r"{mtgogetter_bin}");
-        {WRITE_TO_BIN_DIR_FN}
-        "#,
-        mtgo_preprocessor_bin = Path::new(&out_dir).join(MTGO_PREPROCESSOR_BIN).display(),
-        mtgogetter_bin = Path::new(&out_dir).join(MTGOGETTER_BIN).display(),
+    let contents = format_include_binaries_rs(
+        mtgo_preprocessor_size,
+        mtgo_preprocessor_path,
+        mtgogetter_size,
+        mtgogetter_path,
     );
 
     // Write the file contents
     fs::write(dest_path, contents)?;
 
     Ok(())
+}
+
+/// Format the contents of the `include_binaries.rs` file
+fn format_include_binaries_rs(
+    mtgo_preprocessor_size: usize,
+    mtgo_preprocessor_path: PathBuf,
+    mtgogetter_size: usize,
+    mtgogetter_path: PathBuf,
+) -> String {
+    format!(
+        r#"
+        #[cfg(not(debug_assertions))]
+        pub const MTGO_PREPROCESSOR: &[u8; {mtgo_preprocessor_size}] = include_bytes!({mtgo_preprocessor_path:?});
+        #[cfg(not(debug_assertions))]
+        pub const MTGOGETTER: &[u8; {mtgogetter_size}] = include_bytes!({mtgogetter_path:?});
+        {WRITE_TO_BIN_DIR_FN}
+        "#
+    )
 }
 
 /// Code to write the binaries to the bin directory
