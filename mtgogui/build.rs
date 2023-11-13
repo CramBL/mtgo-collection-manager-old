@@ -53,6 +53,13 @@ const MTGO_PREPROCESSOR_BIN_PATH: &str = if cfg!(target_os = "windows") {
     "../mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocessor"
 };
 
+// Shell for spawning child processes
+const SHELL: &str = if cfg!(target_os = "windows") {
+    "powershell"
+} else {
+    "sh"
+};
+
 /// Name of the build script executable
 ///
 /// This is `make` on Linux and `wmake.ps1` on Windows
@@ -192,7 +199,7 @@ fn write_binaries_out() -> std::io::Result<()> {
 mod build {
     use crate::{
         BUILD_MTGOGETTER_CMD, BUILD_MTGOPARSER_CMD, BUILD_SCRIPT_EXE, MTGOGETTER_BIN,
-        MTGO_PREPROCESSOR_BIN, MTGO_PREPROCESSOR_BIN_PATH,
+        MTGO_PREPROCESSOR_BIN, MTGO_PREPROCESSOR_BIN_PATH, SHELL,
     };
 
     use std::{error::Error, fs, path::Path};
@@ -212,7 +219,7 @@ mod build {
 
     /// Build MTGO Getter and copy the binary to the OUT_DIR set by cargo
     fn build_mtgogetter(out_dir: &Path) -> Result<()> {
-        let cmd_build_mtgogetter = std::process::Command::new("powershell")
+        let cmd_build_mtgogetter = std::process::Command::new(SHELL)
             .args([BUILD_SCRIPT_EXE, BUILD_MTGOGETTER_CMD])
             .current_dir("..")
             .status()?;
@@ -241,7 +248,7 @@ mod build {
 
     /// Build MTGO Preprocessor and copy the binary to the OUT_DIR set by cargo
     fn build_mtgo_preprocessor(out_dir: &Path) -> Result<()> {
-        let cmd_build_mtgo_preprocessor = std::process::Command::new("powershell")
+        let cmd_build_mtgo_preprocessor = std::process::Command::new(SHELL)
             .args([BUILD_SCRIPT_EXE, BUILD_MTGOPARSER_CMD])
             .current_dir("..")
             .status()?;
