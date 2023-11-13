@@ -273,7 +273,8 @@ function Build-AndPack {
     Write-Host "==> Building and packing all binaries"
     Write-Host "-------------------------------------"
     $BUILD_MODE = "Release"
-    Build-AllIntegration
+    # Only build MTGO GUI as it will build all dependencies in release mode.
+    Build-Mtgogui
     Compress-GuiOnly
     Write-Host "============================================== "
     Write-Host "=== Done building and packing all binaries === "
