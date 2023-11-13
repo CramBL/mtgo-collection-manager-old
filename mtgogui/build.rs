@@ -30,64 +30,12 @@ fn main() {
     // Create the `bin` directory in the release directory if it doesn't exist
     if !Path::new(RELEASE_BIN_PATH).exists() {
         fs::create_dir(RELEASE_BIN_PATH)
-            .unwrap_or_else(|_| panic!("Failed to create {RELEASE_BIN_PATH}"));
+            .unwrap_or_else(|e| panic!("Failed to create {RELEASE_BIN_PATH}: {e}"));
     }
 
     if cfg!(target_os = "windows") {
         print_warn!("Building for windows");
-        // Build MTGO Getter
-        let cmd_go_getter = std::process::Command::new("powershell")
-            .args([".\\wmake.ps1", "build-mtgogetter"])
-            .current_dir("..")
-            .status();
-        assert!(cmd_go_getter.is_ok(), "failed to build MTGO Getter");
-
-        // Copy mtgogetter.exe to the release directory
-        fs::copy(
-            Path::new("../mtgogetter/mtgogetter.exe"),
-            Path::new(RELEASE_BIN_PATH).join("mtgogetter.exe"),
-        )
-        .unwrap_or_else(|_| panic!("Failed to copy mtgogetter.exe to {RELEASE_BIN_PATH}"));
-        assert!(
-            Path::new("../mtgogetter/mtgogetter.exe").exists(),
-            "Build succeeded but mtgogetter.exe was not found at the expected path ../mtgogetter/mtgogetter.exe"
-        );
-
-        let dest_path = Path::new(&out_dir).join("mtgogetter.exe");
-        fs::copy(Path::new("../mtgogetter/mtgogetter.exe"), dest_path)
-            .unwrap_or_else(|_| panic!("Failed to copy mtgogetter.exe to {RELEASE_BIN_PATH}"));
-
-        print_warn!("Built MTGO Getter and copied mtgogetter.exe to {RELEASE_BIN_PATH}");
-
-        let cmd_ps_make = std::process::Command::new("powershell")
-            .args([".\\wmake.ps1", "build-mtgoparser-integration"])
-            .current_dir("..")
-            .status();
-        assert!(
-            cmd_ps_make.is_ok(),
-            "failed to build MTGO Parser/Preprocessor"
-        );
-
-        // Copy the produced binary to the release directory
-        copy_all_from_dir(
-            Path::new(MTGO_PREPROCESSOR_BIN_PATH_WINDOWS)
-                .parent()
-                .unwrap(),
-            Path::new(RELEASE_BIN_PATH),
-        )
-        .unwrap_or_else(|_| {
-            panic!("Failed to copy mtgo_preprocessor.exe and related files to {RELEASE_BIN_PATH}")
-        });
-        assert!(
-            Path::new(MTGO_PREPROCESSOR_BIN_PATH_WINDOWS).exists(),
-            "Build succeeded but mtgo_preprocessor.exe was not found at the expected path {}",
-            MTGO_PREPROCESSOR_BIN_PATH_WINDOWS
-        );
-
-        let dest_path = Path::new(&out_dir).join("mtgo_preprocessor.exe");
-        fs::copy(Path::new(MTGO_PREPROCESSOR_BIN_PATH_WINDOWS), dest_path).unwrap_or_else(|_| {
-            panic!("Failed to copy mtgo_preprocessor.exe to {RELEASE_BIN_PATH}")
-        });
+        windows::build(Path::new(RELEASE_BIN_PATH), Path::new(&out_dir));
     }
 
     if cfg!(target_os = "linux") {
@@ -99,30 +47,34 @@ fn main() {
         assert!(cmd_make.success());
     }
 
-    include_binaries().unwrap_or_else(|_| panic!("Failed to include binaries in build.rs"));
+    include_binaries().unwrap_or_else(|e| panic!("Failed to include binaries in build.rs: {e}"));
 }
 
-// Copy all files from the source directory to the destination directory
-fn copy_all_from_dir(src: &Path, dest: &Path) -> io::Result<()> {
-    // Iterate over the entries in the source directory
-    for entry in fs::read_dir(src)? {
-        let entry = entry?;
-        let source_file = entry.path();
+mod util {
+    use std::{fs, io, path::Path};
 
-        // Create the destination path by appending the file name to the destination directory
-        let dest_file = dest.join(entry.file_name());
+    // Copy all files from the source directory to the destination directory
+    pub fn copy_all_from_dir(src: &Path, dest: &Path) -> io::Result<()> {
+        // Iterate over the entries in the source directory
+        for entry in fs::read_dir(src)? {
+            let entry = entry?;
+            let source_file = entry.path();
 
-        // Copy the file
-        fs::copy(&source_file, &dest_file)?;
+            // Create the destination path by appending the file name to the destination directory
+            let dest_file = dest.join(entry.file_name());
 
-        print_warn!(
-            "Copied: {} to {}",
-            source_file.display(),
-            dest_file.display()
-        );
+            // Copy the file
+            fs::copy(&source_file, &dest_file)?;
+
+            print_warn!(
+                "Copied: {} to {}",
+                source_file.display(),
+                dest_file.display()
+            );
+        }
+
+        Ok(())
     }
-
-    Ok(())
 }
 
 /// Rerun if any of these files or directories change
@@ -140,6 +92,7 @@ fn detect_changes() {
     println!("cargo:rerun-if-changed=../mtgogetter/cmd");
 }
 
+/// Write the binaries to the OUT_DIR and create a file `binaries.rs` that contains the binaries as byte arrays.
 fn include_binaries() -> io::Result<()> {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("binaries.rs");
@@ -179,4 +132,67 @@ fn include_binaries() -> io::Result<()> {
     fs::write(dest_path, contents)?;
 
     Ok(())
+}
+
+mod windows {
+    use super::util;
+    use std::{fs, path::Path};
+
+    const MTGO_PREPROCESSOR_BIN_PATH_WINDOWS: &str =
+        r"..\mtgoparser\build\src\mtgo_preprocessor\Release\mtgo_preprocessor.exe";
+
+    pub fn build(release_bin: &Path, out_dir: &Path) {
+        let cmd_go_getter = std::process::Command::new("powershell")
+            .args([".\\wmake.ps1", "build-mtgogetter"])
+            .current_dir("..")
+            .status();
+        assert!(cmd_go_getter.is_ok(), "failed to build MTGO Getter");
+
+        // Copy mtgogetter.exe to the release directory
+        fs::copy(
+            Path::new("../mtgogetter/mtgogetter.exe"),
+            Path::new(release_bin).join("mtgogetter.exe"),
+        )
+        .unwrap_or_else(|_| panic!("Failed to copy mtgogetter.exe to {release_bin:?}"));
+        assert!(
+            Path::new("../mtgogetter/mtgogetter.exe").exists(),
+            "Build succeeded but mtgogetter.exe was not found at the expected path ../mtgogetter/mtgogetter.exe"
+        );
+
+        let dest_path = Path::new(&out_dir).join("mtgogetter.exe");
+        fs::copy(Path::new("../mtgogetter/mtgogetter.exe"), dest_path)
+            .unwrap_or_else(|_| panic!("Failed to copy mtgogetter.exe to {release_bin:?}"));
+
+        print_warn!("Built MTGO Getter and copied mtgogetter.exe to {release_bin:?}");
+
+        let cmd_ps_make = std::process::Command::new("powershell")
+            .args([".\\wmake.ps1", "build-mtgoparser-integration"])
+            .current_dir("..")
+            .status();
+        assert!(
+            cmd_ps_make.is_ok(),
+            "failed to build MTGO Parser/Preprocessor"
+        );
+
+        // Copy the produced binary to the release directory
+        util::copy_all_from_dir(
+            Path::new(MTGO_PREPROCESSOR_BIN_PATH_WINDOWS)
+                .parent()
+                .unwrap(),
+            release_bin,
+        )
+        .unwrap_or_else(|_| {
+            panic!("Failed to copy mtgo_preprocessor.exe and related files to {release_bin:?}")
+        });
+        assert!(
+            Path::new(MTGO_PREPROCESSOR_BIN_PATH_WINDOWS).exists(),
+            "Build succeeded but mtgo_preprocessor.exe was not found at the expected path {}",
+            MTGO_PREPROCESSOR_BIN_PATH_WINDOWS
+        );
+
+        let dest_path = Path::new(&out_dir).join("mtgo_preprocessor.exe");
+        fs::copy(Path::new(MTGO_PREPROCESSOR_BIN_PATH_WINDOWS), dest_path).unwrap_or_else(|e| {
+            panic!("Failed to copy mtgo_preprocessor.exe to {release_bin:?}: {e}")
+        });
+    }
 }
