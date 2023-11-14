@@ -95,7 +95,7 @@ jobs:
       - name: 📝 Build & Run tests - Linux 🐧
         if: runner.os == 'Linux'
         run: |
-          cat linux-fltk-deps.txt | xargs sudo apt-get -y install
+          source build-util/dev-ubuntu/install-ubuntu-fltk-dev-headers.sh
           make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} BUILD_MODE=Release
           make test
 
