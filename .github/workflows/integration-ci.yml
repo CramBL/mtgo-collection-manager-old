@@ -76,7 +76,7 @@ jobs:
       - name: 📦 Pack - MacOS 🍎
         if: runner.os == 'macOS'
         run: |
-          mkdir -p mtgo-collection-manager/bin
+          mkdir -p mtgo-collection-manager
           cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
           zip -r macos-13-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
 
@@ -103,7 +103,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y install zip
-          mkdir -p mtgo-collection-manager/bin
+          mkdir -p mtgo-collection-manager
           cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
           zip -r ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
 
