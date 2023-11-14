@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# This script is used to build the MTGO Preprocessor binary for release, ready to be included in the MTGO GUI application.
+
 file_boost_exclude_libs_list="build-util/boost-exclude-libs.txt"
 boost_exclude_libs=$(cat ${file_boost_exclude_libs_list})
 
@@ -46,7 +48,7 @@ configure_cmake="cd mtgoparser && cmake -S . -B build \
 println_cyan "Configuring cmake with command:"
 println_yellow "${configure_cmake}\n"
 
-build_mtgo_preprocessor="cmake --build build --config Release" # TODO: Optimize
+build_mtgo_preprocessor="cmake --build build --config Release"
 
 println_cyan "Building MTGO Preprocessor with command:"
 println_yellow "${build_mtgo_preprocessor}\n"
