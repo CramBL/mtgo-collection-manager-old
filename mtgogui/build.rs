@@ -62,17 +62,29 @@ const SHELL: &str = if cfg!(target_os = "windows") {
 
 /// Name of the build script executable
 ///
-/// This is `make` on Linux and `wmake.ps1` on Windows
+/// On windows: `powershell` with the `wmake.ps1` script
+/// On unix: `sh` with the `-c` flag
 const BUILD_SCRIPT_EXE: &str = if cfg!(target_os = "windows") {
     ".\\wmake.ps1"
 } else {
-    "make"
+    "-C"
 };
 
 /// Command to build the MTGO Getter binary
-const BUILD_MTGOGETTER_CMD: &str = "build-mtgogetter";
+const BUILD_MTGOGETTER_CMD: &str = if cfg!(target_os = "windows") {
+    // Arguments for the `wmake.ps1` script
+    "build-mtgogetter"
+} else {
+    // The `sh`-script to run
+    "./build-util/integration/build-mtgogetter.sh"
+};
+
 /// Command to build the MTGO Preprocessor binary
-const BUILD_MTGOPARSER_CMD: &str = "build-mtgoparser-integration";
+const BUILD_MTGOPARSER_CMD: &str = if cfg!(target_os = "windows") {
+    "build-mtgoparser-integration -BUILD_MODE Release"
+} else {
+    "./build-util/integration/build-mtgo-preprocessor.sh"
+};
 /// Name of the file that contains the byte arrays for the binaries
 const INCLUDE_BINARIES_FILE: &str = "include_binaries.rs";
 
@@ -221,13 +233,6 @@ mod build {
     fn build_mtgogetter(out_dir: &Path) -> Result<()> {
         let mut cmd_build_mtgogetter = std::process::Command::new(SHELL);
 
-        let cmd_build_mtgogetter = if cfg!(target_os = "windows") {
-            &mut cmd_build_mtgogetter // No additional flags needed on Windows as we're pointing directly to the `wmake.ps1` script
-        } else {
-            // Use the `-c` flag to run the `make` command in a new shell
-            cmd_build_mtgogetter.arg("-c")
-        };
-
         let cmd_build_mtgogetter = cmd_build_mtgogetter
             .args([BUILD_SCRIPT_EXE, BUILD_MTGOGETTER_CMD])
             .current_dir("..")
@@ -258,13 +263,6 @@ mod build {
     /// Build MTGO Preprocessor and copy the binary to the OUT_DIR set by cargo
     fn build_mtgo_preprocessor(out_dir: &Path) -> Result<()> {
         let mut cmd_build_mtgo_preprocessor = std::process::Command::new(SHELL);
-
-        let cmd_build_mtgo_preprocessor = if cfg!(target_os = "windows") {
-            &mut cmd_build_mtgo_preprocessor // No additional flags needed on Windows as we're pointing directly to the `wmake.ps1` script
-        } else {
-            // Use the `-c` flag to run the `make` command in a new shell
-            cmd_build_mtgo_preprocessor.arg("-c")
-        };
 
         let cmd_build_mtgo_preprocessor = cmd_build_mtgo_preprocessor
             .args([BUILD_SCRIPT_EXE, BUILD_MTGOPARSER_CMD])
