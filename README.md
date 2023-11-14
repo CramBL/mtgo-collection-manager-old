@@ -91,7 +91,7 @@ Build/test a single subproject with the `-{projectname}`-suffix e.g.
 #### Compiling FLTK-rs on Linux
 Compiling FLTK requires some development headers on Linux.
 #### Ubuntu
-Everything should be in [linux-fltk-deps.txt](linux-fltk-deps.txt) which the CI Linux runners install with `cat linux-fltk-deps.txt | xargs sudo apt-get -y install`.
+Everything should be in [ubuntu-fltk-dev-headers.txt](build-util/dev-ubuntu/ubuntu-fltk-dev-headers.txt) which the CI Linux runners install with the minimal [install-ubuntu-fltk-dev-headers.sh](build-util/dev-ubuntu/install-ubuntu-fltk-dev-headers.sh) script, you can invoke that script as well to install needed headers.
 
 Tested on Ubuntu 22.04.3 and Lubuntu 22.04.3.
 
