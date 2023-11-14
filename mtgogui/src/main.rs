@@ -87,14 +87,18 @@ fn main() {
         Flex::debug(true);
     }
 
-    // Write the raw bytes of MTGOGETTER and MTGO_PREPROCESSOR to disk if they don't exist
-    #[cfg(not(debug_assertions))]
-    write_binaries_out().expect("Failed to write binaries out to bin directory");
-
     // Setup logger (has to be done with a let binding to make the logger live long enough)
     let _logger = util::setup_logger();
+
+    // Write the raw bytes of MTGOGETTER and MTGO_PREPROCESSOR to disk if they don't exist
+    #[cfg(not(debug_assertions))]
+    write_binaries_out().unwrap_or_else(|e| {
+        log::error!("Failed to write binaries to bin directory: {e}");
+    });
+
     log::info!("Setup GUI");
     let mut gui = MtgoGui::default();
+
     log::info!("Starting GUI");
     gui.run();
 }
