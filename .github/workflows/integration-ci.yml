@@ -23,32 +23,22 @@ jobs:
         include:
           - os: ubuntu-22.04
             compiler: gcc-13
-            generator: "Ninja Multi-Config"
             enable_ipo: On
 
           - os: ubuntu-22.04
             compiler: llvm-17.0.2
-            generator: "Ninja Multi-Config"
             enable_ipo: On
-
-          - os: macos-13
-            compiler: llvm-15.0.3
-            generator: "Ninja Multi-Config"
-            enable_ipo: Off
 
           - os: macos-13
             compiler: gcc-13
-            generator: "Ninja Multi-Config"
+            enable_ipo: Off
+
+          - os: macos-13
+            compiler: llvm-15.0.3
             enable_ipo: Off
 
           - os: windows-2022
-            compiler: msvc
-            generator: "Visual Studio 17 2022"
-            enable_ipo: On
-
-          - os: windows-2022
             compiler: llvm-17.0.2
-            generator: "Ninja Multi-Config"
             enable_ipo: On
 
 
@@ -86,9 +76,7 @@ jobs:
       - name: 📦 Pack - MacOS 🍎
         if: runner.os == 'macOS'
         run: |
-          mkdir -p mtgo-collection-manager/bin
-          cp mtgogetter/mtgogetter mtgo-collection-manager/bin
-          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser mtgo-collection-manager/bin
+          mkdir -p mtgo-collection-manager
           cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
           zip -r macos-13-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
 
@@ -107,7 +95,7 @@ jobs:
       - name: 📝 Build & Run tests - Linux 🐧
         if: runner.os == 'Linux'
         run: |
-          cat linux-fltk-deps.txt | xargs sudo apt-get -y install
+          source build-util/dev-ubuntu/install-ubuntu-fltk-dev-headers.sh
           make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} BUILD_MODE=Release
           make test
 
@@ -115,9 +103,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y install zip
-          mkdir -p mtgo-collection-manager/bin
-          cp mtgogetter/mtgogetter mtgo-collection-manager/bin
-          cp mtgoparser/build/src/mtgo_preprocessor/Release/mtgo_preprocesser mtgo-collection-manager/bin
+          mkdir -p mtgo-collection-manager
           cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
           zip -r ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
 
@@ -136,7 +122,7 @@ jobs:
       - name: 📝 Build & Run tests - Windows 💻
         if: runner.os == 'Windows'
         run: |
-          .\wmake.ps1 build-integration -MTGOPARSER_IPO ${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR "${{matrix.generator}}" -BUILD_MODE Release
+          .\wmake.ps1 build-integration -MTGOPARSER_IPO ${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR "Ninja Multi-Config" -BUILD_MODE Release
           .\wmake.ps1 test
 
       - name: 📦 Pack - Windows 💻

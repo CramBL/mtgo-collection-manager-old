@@ -9,7 +9,7 @@ param (
 # Default flags
 $MTGOPARSER_BUILD_MODE = "Release"
 $MTGOPARSER_ENABLE_COV = $false
-$MTGOPARSER_EXCLUDE_BOOST_LIBS = "serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
+$MTGOPARSER_EXCLUDE_BOOST_LIBS = Get-Content -Path ".\build-util\boost-exclude-libs.txt" -Raw
 
 # Minimum supported versions
 $RUST_MIN_VERSION = "1.70.0"
@@ -273,8 +273,9 @@ function Build-AndPack {
     Write-Host "==> Building and packing all binaries"
     Write-Host "-------------------------------------"
     $BUILD_MODE = "Release"
-    Build-AllIntegration
-    Compress-MCM
+    # Only build MTGO GUI as it will build all dependencies in release mode.
+    Build-Mtgogui
+    Compress-GuiOnly
     Write-Host "============================================== "
     Write-Host "=== Done building and packing all binaries === "
     Write-Host "===>   ${PACKAGE_NAME}.zip"
@@ -282,6 +283,7 @@ function Build-AndPack {
 }
 
 function Compress-MCM {
+    # Create a temporary directory to hold the binaries (we will zip this folder at the end)
     New-Item -Path .\mtgo-collection-manager -ItemType Directory
     New-Item -Path .\mtgo-collection-manager\bin -ItemType Directory
     Copy-Item -Path .\mtgogetter\mtgogetter.exe -Destination .\mtgo-collection-manager\bin
@@ -301,12 +303,24 @@ function Compress-MCM {
     Remove-Item -Path $tempFolder -Recurse -Force
     # Back to root
     Set-Location ..\..
-    # Copy and rename
+    # Copy and rename the GUI binary
     Copy-Item -Path .\mtgogui\target\release\mtgogui.exe -Destination .\mtgo-collection-manager
     Rename-Item -Path .\mtgo-collection-manager\mtgogui.exe -NewName mtgo-collection-manager.exe
     # Make final archive
     Compress-Archive -Path .\mtgo-collection-manager -DestinationPath ".\${PACKAGE_NAME}.zip"
-    # Cleanup
+    # Cleanup the temporary folder
+    Remove-Item -Path .\mtgo-collection-manager -Recurse
+}
+
+function Compress-GuiOnly {
+    # Create a temporary directory to hold the GUI binary
+    New-Item -Path .\mtgo-collection-manager -ItemType Directory
+    # Copy and rename the GUI binary
+    Copy-Item -Path .\mtgogui\target\release\mtgogui.exe -Destination .\mtgo-collection-manager
+    Rename-Item -Path .\mtgo-collection-manager\mtgogui.exe -NewName mtgo-collection-manager.exe
+    # Make final archive
+    Compress-Archive -Path .\mtgo-collection-manager -DestinationPath ".\${PACKAGE_NAME}.zip"
+    # Cleanup the temporary folder
     Remove-Item -Path .\mtgo-collection-manager -Recurse
 }
 
@@ -329,6 +343,7 @@ $targets = [ordered]@{
     "test-mtgogui"      = { Test-Mtgogui }
     "pack"              = { Build-AndPack }
     "zip-bins"          = { Compress-MCM }
+    "zip-gui"           = { Compress-GuiOnly }
 }
 
 # Check if the specified target exists, and if not, show a list of available targets

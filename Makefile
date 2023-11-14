@@ -5,7 +5,7 @@ MTGOPARSER_BUILD_MODE := Release
 MTGOPARSER_ENABLE_COV := false
 MTGOPARSER_USER_LINKER := On
 MTGOPARSER_LINKER := mold
-MTGOPARSER_EXCLUDE_BOOST_LIBS := "serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
+MTGOPARSER_EXCLUDE_BOOST_LIBS := "$(file < build-util/boost-exclude-libs.txt)"
 
 # Set generator to "Ninja Multi-Config" for unix-like systems.
 ifeq ($(shell uname -s),Linux)
