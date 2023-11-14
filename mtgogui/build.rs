@@ -196,12 +196,32 @@ fn write_binaries_out() -> std::io::Result<()> {
 
     if !mtgogetter_bin.exists() {
         std::fs::write(&mtgogetter_bin, MTGOGETTER)?;
+        let exit_status = std::process::Command::new("chmod")
+                .arg("+x")
+                .arg(format!("{}", mtgogetter_bin.display()))
+                .status()
+                .expect("Failed execute chmod to make mtgogetter executable");
+
+        assert!(
+            exit_status.success(),
+            "failed to make MTGO Getter executable"
+        );
     }
 
     let mtgo_preprocessor_bin = path.join(MTGO_PREPROCESSOR_BIN);
 
     if !mtgo_preprocessor_bin.exists() {
         std::fs::write(&mtgo_preprocessor_bin, MTGO_PREPROCESSOR)?;
+        let exit_status = std::process::Command::new("chmod")
+                .arg("+x")
+                .arg(format!("{}", mtgo_preprocessor_bin.display()))
+                .status()
+                .expect("Failed to execute chmod to make mtgo_preprocessor executable");
+
+        assert!(
+            exit_status.success(),
+            "failed to make MTGO Preprocessor executable"
+        );
     }
 
     Ok(())
