@@ -245,12 +245,29 @@ mod build {
 
     /// Build all binaries and copy them to the OUT_DIR
     pub fn build_all(out_dir: &Path) {
-        build_mtgogetter(out_dir).unwrap_or_else(|e| {
-            panic!("Failed to build MTGO Getter and copy to OUT_DIR: {out_dir:?}: {e}")
-        });
+        // Build MTGO Getter and MTGO Preprocessor in parallel
+        std::thread::scope(|s| {
+            let getter_build_thread = s.spawn(|| {
+                build_mtgogetter(out_dir).unwrap_or_else(|e| {
+                    panic!("Failed to build MTGO Getter and copy to OUT_DIR: {out_dir:?}: {e}")
+                })
+            });
+            let preprocessor_build_thread = s.spawn(|| {
+                build_mtgo_preprocessor(out_dir).unwrap_or_else(|e| {
+                    panic!(
+                        "Failed to build MTGO Preprocessor and copy to OUT_DIR: {out_dir:?}: {e}"
+                    )
+                })
+            });
 
-        build_mtgo_preprocessor(out_dir).unwrap_or_else(|e| {
-            panic!("Failed to build MTGO Preprocessor and copy to OUT_DIR: {out_dir:?}: {e}")
+            // Join the threads, panic if any of them panicked
+            // Join MTGO Getter build thread first because it's much faster
+            getter_build_thread
+                .join()
+                .unwrap_or_else(|e| panic!("Failed to join getter build thread: {e:?}"));
+            preprocessor_build_thread
+                .join()
+                .unwrap_or_else(|e| panic!("Failed to join preprocessor build thread: {e:?}"));
         });
     }
 
