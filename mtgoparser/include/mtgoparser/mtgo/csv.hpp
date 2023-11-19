@@ -1,8 +1,6 @@
 #pragma once
 
-#include <boost/cstdfloat.hpp>
 #include <boost/implicit_cast.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <optional>
 #include <sstream>
@@ -16,47 +14,54 @@
 #define LLVM_ASSUME(expr) ((void)0)
 #endif
 
+namespace mtgo::csv {
+
 
 // Function to split a string_view into a vector of sub-views based on a delimiter
-[[nodiscard]] inline auto constexpr into_token_vec(std::string_view str, char delimiter)
-  -> std::vector<std::string_view>
+[[nodiscard]] inline auto constexpr into_substr_vec(const std::string &str, char delimiter) -> std::vector<std::string>
 {
-  std::vector<std::string_view> sub_views;
+  std::vector<std::string> sub_strs;
   std::size_t start = 0;
   std::size_t end = str.find(delimiter);
 
   while (end != std::string_view::npos) {
-    sub_views.push_back(str.substr(start, end - start));
+    sub_strs.push_back(str.substr(start, end - start));
     start = end + 1;
     end = str.find(delimiter, start);
   }
 
   // Add the last token
-  sub_views.push_back(str.substr(start));
+  sub_strs.push_back(str.substr(start));
 
-  return sub_views;
+  return sub_strs;
 }
 
-using opt_float_t = std::optional<boost::float32_t>;
+using opt_float_t = std::optional<float>;
 
 // Function to parse a string into two floats, handling the case where a hyphen signifies a missing value
-[[nodiscard]] inline auto sv_to_floats(std::string_view str) -> std::pair<opt_float_t, opt_float_t>
+[[nodiscard]] inline auto str_to_floats(const std::string &str) -> std::pair<opt_float_t, opt_float_t>
 {
-
-
   [[maybe_unused]] std::size_t size = str.size();
   LLVM_ASSUME(size < 32);
 
+  std::istringstream ss(str);
 
-  constexpr char delimiter = ';';
-  std::size_t delim_pos = str.find(delimiter);
-  std::string_view gb_price_str = str.substr(0, delim_pos);
-  std::string_view scryfall_opt_str = str.substr(delim_pos + 1);
+  opt_float_t first_val{};
+  opt_float_t second_val{};
 
+  if (ss.peek() == '-') {
+    ss.ignore();
+  } else {
+    ss >> *first_val;
+  }
+  ss.ignore();
+  if (ss.peek() == '-') {
+    ss.ignore();
+  } else {
+    ss >> *second_val;
+  }
 
-  opt_float_t first = gb_price_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt)
-                                          : boost::lexical_cast<float32_t>(gb_price_str);
-  opt_float_t second = scryfall_opt_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt)
-                                               : boost::lexical_cast<float32_t>(scryfall_opt_str);
-  return std::make_pair(first, second);
+  return std::make_pair(first_val, second_val);
 }
+
+}// namespace mtgo::csv
