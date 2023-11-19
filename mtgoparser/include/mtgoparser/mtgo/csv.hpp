@@ -23,7 +23,7 @@ namespace mtgo::csv {
   std::size_t start = 0;
   std::size_t end = str.find(delimiter);
 
-  while (end != std::string_view::npos) {
+  while (end != std::string::npos) {
     sub_strs.push_back(str.substr(start, end - start));
     start = end + 1;
     end = str.find(delimiter, start);
@@ -40,20 +40,23 @@ using opt_float_t = std::optional<float>;
 // Function to parse a string into two floats, handling the case where a hyphen signifies a missing value
 [[nodiscard]] inline auto str_to_floats(const std::string &str) -> std::pair<opt_float_t, opt_float_t>
 {
-  [[maybe_unused]] std::size_t size = str.size();
-  LLVM_ASSUME(size < 32);
-
   constexpr char delimiter = ';';
   const std::size_t delim_pos = str.find(delimiter);
   const std::string gb_price_str = str.substr(0, delim_pos);
+
+  {// Removes the out of bounds checks and exception instructions from the assembly (https://godbolt.org/z/GP5jfPz57)
+    [[maybe_unused]] const std::size_t size = str.size();
+    LLVM_ASSUME(delim_pos < size);
+  }
   const std::string scryfall_opt_str = str.substr(delim_pos + 1);
 
 
-  opt_float_t first = gb_price_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(gb_price_str);
-  opt_float_t second =
+  opt_float_t gb_price =
+    gb_price_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(gb_price_str);
+  opt_float_t scryfall_price =
     scryfall_opt_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(scryfall_opt_str);
 
-  return std::make_pair(first, second);
+  return std::make_pair(gb_price, scryfall_price);
 }
 
 }// namespace mtgo::csv
