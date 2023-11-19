@@ -3,8 +3,7 @@
 #include <boost/implicit_cast.hpp>
 
 #include <optional>
-#include <sstream>
-#include <string_view>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -44,24 +43,17 @@ using opt_float_t = std::optional<float>;
   [[maybe_unused]] std::size_t size = str.size();
   LLVM_ASSUME(size < 32);
 
-  std::istringstream ss(str);
+  constexpr char delimiter = ';';
+  const std::size_t delim_pos = str.find(delimiter);
+  const std::string gb_price_str = str.substr(0, delim_pos);
+  const std::string scryfall_opt_str = str.substr(delim_pos + 1);
 
-  opt_float_t first_val{};
-  opt_float_t second_val{};
 
-  if (ss.peek() == '-') {
-    ss.ignore();
-  } else {
-    ss >> *first_val;
-  }
-  ss.ignore();
-  if (ss.peek() == '-') {
-    ss.ignore();
-  } else {
-    ss >> *second_val;
-  }
+  opt_float_t first = gb_price_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(gb_price_str);
+  opt_float_t second =
+    scryfall_opt_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(scryfall_opt_str);
 
-  return std::make_pair(first_val, second_val);
+  return std::make_pair(first, second);
 }
 
 }// namespace mtgo::csv
