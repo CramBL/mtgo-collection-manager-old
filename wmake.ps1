@@ -165,7 +165,8 @@ function Test-Mtgoparser {
             "test_json_parse.exe",
             "test_xml_parse.exe",
             "test_full_collection_parse.exe",
-            "tests.exe"
+            "tests.exe",
+            "test_csv_parse.exe"
         )
 
         foreach ($testSuite in $testSuites) {
