@@ -165,3 +165,24 @@ catch_discover_tests(
   "test_full_collection_parse."
   OUTPUT_SUFFIX
   .xml)
+
+# Tests of CSV parsing functionality
+add_executable(test_csv_parse test_csv_parse.cpp)
+target_link_libraries(test_csv_parse PRIVATE
+                                     mtgoparser::mtgoparser_warnings
+                                     mtgoparser::mtgoparser_options
+                                     mtgoparser)
+target_link_system_library(test_csv_parse PRIVATE Catch2::Catch2WithMain)
+
+catch_discover_tests(
+  test_csv_parse
+  TEST_PREFIX
+  "test_csv_parse."
+  REPORTER
+  XML
+  OUTPUT_DIR
+  .
+  OUTPUT_PREFIX
+  "test_csv_parse."
+  OUTPUT_SUFFIX
+  .xml)
