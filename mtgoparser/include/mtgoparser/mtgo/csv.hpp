@@ -17,7 +17,7 @@ namespace mtgo::csv {
 
 
 // Function to split a string_view into a vector of sub-views based on a delimiter
-[[nodiscard]] inline auto constexpr into_substr_vec(const std::string &str, char delimiter) -> std::vector<std::string>
+[[nodiscard]] inline auto into_substr_vec(const std::string &str, char delimiter) -> std::vector<std::string>
 {
   std::vector<std::string> sub_strs;
   std::size_t start = 0;

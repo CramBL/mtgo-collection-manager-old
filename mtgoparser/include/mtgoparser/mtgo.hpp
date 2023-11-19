@@ -24,7 +24,6 @@ namespace mtgo {
 class Collection
 {
   // Member variables
-  // TODO: Add timestamp
   std::vector<Card> cards_;
 
   // Memoization
