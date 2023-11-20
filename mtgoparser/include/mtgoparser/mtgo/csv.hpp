@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <optional>
+#include <span>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -92,17 +93,17 @@ using tup_quant_and_prices_t = std::tuple<opt_uint_t, opt_float_t, opt_float_t>;
  * @brief Parse a span of strings of the form "[quantity]goatbots_price;scryfall_price" into a vector of tuples
  * of the form: {quantity, goatbots_price, scryfall_price}.
  *
- * @param span
+ * @param span_of_str
  * @return std::vector<tup_quant_and_prices_t> A vector of tuples of the form: {quantity, goatbots_price,
  * scryfall_price}
  */
-[[nodiscard]] inline auto quant_and_prices_from_span(const std::span<std::string> &span)
+[[nodiscard]] inline auto quant_and_prices_from_span(const std::span<std::string> &span_of_str)
   -> std::vector<tup_quant_and_prices_t>
 {
   std::vector<tup_quant_and_prices_t> quant_and_prices;
-  quant_and_prices.reserve(span.size());
+  quant_and_prices.reserve(span_of_str.size());
 
-  for (const auto &str : span) { quant_and_prices.emplace_back(parse_quant_and_prices(str)); }
+  for (const auto &str : span_of_str) { quant_and_prices.emplace_back(parse_quant_and_prices(str)); }
 
   return quant_and_prices;
 }
