@@ -7,6 +7,9 @@
 
 #include <mtgoparser/mtgo/csv.hpp>
 
+#include <span>
+#include <string>
+#include <string_view>
 #include <utility>
 
 using Catch::Matchers::ContainsSubstring;
@@ -155,6 +158,102 @@ TEST_CASE("mtgo::csv::into_substr_vec & mtgo::csv::str_to_floats")
         }
       }
     }
+  }
+}
+
+TEST_CASE("mtgo::csv::floats_from_span")
+{
+  SECTION("Simple")
+  {
+    std::vector<std::string> row{ "0.72;0.1", "0.78;-", "0.4;0.3" };
+
+    auto floats = mtgo::csv::floats_from_span(std::span(row));
+    REQUIRE(floats.size() == 3);
+  }
+
+  SECTION("On CSV Data with mtgo::csv::into_substr_vec")
+  {
+    const std::string test_csv_data =
+      R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
+120020,1,In the Darkness Bind Them,LTC,R,false,0.72;0.1,0.78;-,0.4;0.3
+106729,1,Razorverge Thicket,ONE,R,false,1.1;0.9,2.0;2.1,0.9;-
+106729,1,Razorverge Thicket,THR,R,false,-;-,2.0;2.1,0.9;-)";
+
+    std::vector<std::string> rows = mtgo::csv::into_substr_vec(test_csv_data, '\n');
+    REQUIRE(rows.size() == 4);
+    auto headers = mtgo::csv::into_substr_vec(rows[0], ',');
+    REQUIRE(headers.size() == 9);
+    auto row1 = mtgo::csv::into_substr_vec(rows.at(1), ',');
+    REQUIRE(row1.size() == 9);
+
+    auto floats = mtgo::csv::floats_from_span(std::span(row1).subspan(6));
+    REQUIRE(floats.size() == 3);
+
+    CHECK(floats.at(0).first.has_value());
+    CHECK(floats.at(0).second.has_value());
+    CHECK(floats.at(0).first.value() == 0.72f);
+    CHECK(floats.at(0).second.value() == 0.1f);
+
+    CHECK(floats.at(1).first.has_value());
+    CHECK_FALSE(floats.at(1).second.has_value());
+    CHECK(floats.at(1).first.value() == 0.78f);
+
+    CHECK(floats.at(2).first.has_value());
+    CHECK(floats.at(2).second.has_value());
+    CHECK(floats.at(2).first.value() == 0.4f);
+    CHECK(floats.at(2).second.value() == 0.3f);
+  }
+
+  SECTION("Parse CSV into row data and back into CSV string")
+  {
+    const std::string test_csv_data =
+      R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
+120020,1,In the Darkness Bind Them,LTC,R,false,0.72;0.1,0.78;-,0.4;0.3)";
+
+    std::vector<std::string> rows = mtgo::csv::into_substr_vec(test_csv_data, '\n');
+    REQUIRE(rows.size() == 2);
+    auto headers = mtgo::csv::into_substr_vec(rows[0], ',');
+    REQUIRE(headers.size() == 9);
+    auto row1 = mtgo::csv::into_substr_vec(rows.at(1), ',');
+    REQUIRE(row1.size() == 9);
+
+    auto floats = mtgo::csv::floats_from_span(std::span(row1).subspan(6));
+    REQUIRE(floats.size() == 3);
+
+    std::string csv_str = fmt::format("{},{},{},{},{},{},{},{},{}\n{},{},{},{},{},{}",
+      headers.at(0),
+      headers.at(1),
+      headers.at(2),
+      headers.at(3),
+      headers.at(4),
+      headers.at(5),
+      headers.at(6),
+      headers.at(7),
+      headers.at(8),
+      row1.at(0),
+      row1.at(1),
+      row1.at(2),
+      row1.at(3),
+      row1.at(4),
+      row1.at(5));
+
+    INFO("csv_str formatted before adding floats:\n" << csv_str);
+
+    for (const auto &[a, b] : floats) {
+      if (a.has_value() && b.has_value()) {
+        csv_str += fmt::format(",{};{}", a.value(), b.value());
+      } else if (a.has_value()) {
+        csv_str += fmt::format(",{};-", a.value());
+      } else if (b.has_value()) {
+        csv_str += fmt::format(",-;{}", b.value());
+      } else {
+        csv_str += ",-;-";
+      }
+    }
+
+    INFO("csv_str formatting complete with floats added:\n" << csv_str);
+
+    CHECK(csv_str == test_csv_data);
   }
 }
 

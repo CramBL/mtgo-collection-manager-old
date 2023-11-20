@@ -59,4 +59,16 @@ using opt_float_t = std::optional<float>;
   return std::make_pair(gb_price, scryfall_price);
 }
 
+[[nodiscard]] inline auto floats_from_span(const std::span<std::string> &span)
+  -> std::vector<std::pair<opt_float_t, opt_float_t>>
+{
+  std::vector<std::pair<opt_float_t, opt_float_t>> floats;
+  floats.reserve(span.size());
+
+  for (const auto &str : span) { floats.push_back(str_to_floats(str)); }
+
+  return floats;
+}
+
+
 }// namespace mtgo::csv
