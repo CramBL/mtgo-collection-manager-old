@@ -278,19 +278,12 @@ TEST_CASE("mtgo::csv::floats_from_span")
 
     INFO("csv_str formatted before adding floats:\n" << csv_str);
 
-    for (const auto &[q, gb, b] : q_gb_sc) {
+    for (const auto &[q, gb, sc] : q_gb_sc) {
 
       std::string quantity = q.has_value() ? fmt::format("[{}]", q.value()) : "";
-
-      if (gb.has_value() && b.has_value()) {
-        csv_str += fmt::format(",{}{};{}", quantity, gb.value(), b.value());
-      } else if (gb.has_value()) {
-        csv_str += fmt::format(",{}{};-", quantity, gb.value());
-      } else if (b.has_value()) {
-        csv_str += fmt::format(",{}-;{}", quantity, b.value());
-      } else {
-        csv_str += ",-;-";
-      }
+      std::string gb_str = gb.has_value() ? fmt::format("{}", gb.value()) : "-";
+      std::string b_str = sc.has_value() ? fmt::format("{}", sc.value()) : "-";
+      csv_str += fmt::format(",{}{};{}", quantity, gb_str, b_str);
     }
 
     INFO("csv_str formatting complete with floats added:\n" << csv_str);
