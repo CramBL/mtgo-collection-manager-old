@@ -1,9 +1,13 @@
 #pragma once
 
+#include "mtgoparser/util.hpp"
+
 #include <boost/implicit_cast.hpp>
 
+#include <cassert>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -24,29 +28,47 @@ namespace mtgo::csv {
   std::size_t end = str.find(delimiter);
 
   while (end != std::string::npos) {
-    sub_strs.push_back(str.substr(start, end - start));
+    sub_strs.emplace_back(str.substr(start, end - start));
     start = end + 1;
     end = str.find(delimiter, start);
   }
 
   // Add the last token
-  sub_strs.push_back(str.substr(start));
+  sub_strs.emplace_back(str.substr(start));
 
   return sub_strs;
 }
 
 using opt_float_t = std::optional<float>;
+using opt_uint_t = std::optional<uint16_t>;
 
-// Function to parse a string into two floats, handling the case where a hyphen signifies a missing value
-[[nodiscard]] inline auto str_to_floats(const std::string &str) -> std::pair<opt_float_t, opt_float_t>
+using tup_quant_and_prices_t = std::tuple<opt_uint_t, opt_float_t, opt_float_t>;
+
+[[nodiscard]] inline auto parse_quant_and_prices(const std::string &str) -> tup_quant_and_prices_t
 {
+
+  opt_uint_t quantity;
+  std::size_t start = 0;
+
+  if (str[0] == '[') [[unlikely]] {
+    start = str.find(']');
+    auto quant = util::sv_to_uint<uint16_t>(str.substr(1, start));
+    {
+      [[maybe_unused]] bool quant_has_value = quant.has_value();
+      assert(quant_has_value);
+      LLVM_ASSUME(quant_has_value);
+    }
+    quantity.emplace(quant.value());
+    ++start;
+  }
+
   constexpr char delimiter = ';';
   const std::size_t delim_pos = str.find(delimiter);
-  const std::string gb_price_str = str.substr(0, delim_pos);
+  const std::string gb_price_str = str.substr(start, delim_pos);
 
   {// Removes the out of bounds checks and exception instructions from the assembly (https://godbolt.org/z/GP5jfPz57)
-    [[maybe_unused]] const std::size_t size = str.size();
-    LLVM_ASSUME(delim_pos < size);
+    [[maybe_unused]] const std::size_t str_size = str.size();
+    LLVM_ASSUME(delim_pos < str_size);
   }
   const std::string scryfall_opt_str = str.substr(delim_pos + 1);
 
@@ -56,18 +78,18 @@ using opt_float_t = std::optional<float>;
   opt_float_t scryfall_price =
     scryfall_opt_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(scryfall_opt_str);
 
-  return std::make_pair(gb_price, scryfall_price);
+  return { quantity, gb_price, scryfall_price };
 }
 
-[[nodiscard]] inline auto floats_from_span(const std::span<std::string> &span)
-  -> std::vector<std::pair<opt_float_t, opt_float_t>>
+[[nodiscard]] inline auto quant_and_prices_from_span(const std::span<std::string> &span)
+  -> std::vector<tup_quant_and_prices_t>
 {
-  std::vector<std::pair<opt_float_t, opt_float_t>> floats;
-  floats.reserve(span.size());
+  std::vector<tup_quant_and_prices_t> quant_and_prices;
+  quant_and_prices.reserve(span.size());
 
-  for (const auto &str : span) { floats.push_back(str_to_floats(str)); }
+  for (const auto &str : span) { quant_and_prices.emplace_back(parse_quant_and_prices(str)); }
 
-  return floats;
+  return quant_and_prices;
 }
 
 
