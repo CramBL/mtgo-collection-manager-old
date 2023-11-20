@@ -4,6 +4,7 @@
 
 #include <boost/implicit_cast.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <optional>
 #include <span>
@@ -103,7 +104,10 @@ using tup_quant_and_prices_t = std::tuple<opt_uint_t, opt_float_t, opt_float_t>;
   std::vector<tup_quant_and_prices_t> quant_and_prices;
   quant_and_prices.reserve(span_of_str.size());
 
-  for (const auto &str : span_of_str) { quant_and_prices.emplace_back(parse_quant_and_prices(str)); }
+  std::transform(
+    span_of_str.begin(), span_of_str.end(), std::back_inserter(quant_and_prices), [](const std::string &str) {
+      return parse_quant_and_prices(str);
+    });
 
   return quant_and_prices;
 }
