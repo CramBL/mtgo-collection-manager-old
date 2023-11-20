@@ -20,7 +20,7 @@
 namespace mtgo::csv {
 
 
-// Function to split a string_view into a vector of sub-views based on a delimiter
+// Splits a string into a vector of sub-strings based on a delimiter
 [[nodiscard]] inline auto into_substr_vec(const std::string &str, char delimiter) -> std::vector<std::string>
 {
   std::vector<std::string> sub_strs;
@@ -44,6 +44,13 @@ using opt_uint_t = std::optional<uint16_t>;
 
 using tup_quant_and_prices_t = std::tuple<opt_uint_t, opt_float_t, opt_float_t>;
 
+/**
+ * @brief Parse a string of the form "[quantity]goatbots_price;scryfall_price" into a tuple of the form: {quantity,
+ * goatbots_price, scryfall_price}.
+ *
+ * @param str
+ * @return tup_quant_and_prices_t
+ */
 [[nodiscard]] inline auto parse_quant_and_prices(const std::string &str) -> tup_quant_and_prices_t
 {
 
@@ -81,6 +88,14 @@ using tup_quant_and_prices_t = std::tuple<opt_uint_t, opt_float_t, opt_float_t>;
   return { quantity, gb_price, scryfall_price };
 }
 
+/**
+ * @brief Parse a span of strings of the form "[quantity]goatbots_price;scryfall_price" into a vector of tuples
+ * of the form: {quantity, goatbots_price, scryfall_price}.
+ *
+ * @param span
+ * @return std::vector<tup_quant_and_prices_t> A vector of tuples of the form: {quantity, goatbots_price,
+ * scryfall_price}
+ */
 [[nodiscard]] inline auto quant_and_prices_from_span(const std::span<std::string> &span)
   -> std::vector<tup_quant_and_prices_t>
 {
