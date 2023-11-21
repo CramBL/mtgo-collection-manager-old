@@ -5,6 +5,7 @@
 
 #include <fmt/core.h>
 
+#include <mtgoparser/mtgo/card_history.hpp>
 #include <mtgoparser/mtgo/csv.hpp>
 
 #include <span>
@@ -289,6 +290,42 @@ TEST_CASE("mtgo::csv::floats_from_span")
     INFO("csv_str formatting complete with floats added:\n" << csv_str);
 
     CHECK(csv_str == test_csv_data);
+  }
+
+  SECTION("Parse CSV into mtgo::CardHistory")
+  {
+    const std::string test_csv_data =
+      R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
+120020,1,In the Darkness Bind Them,LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3)";
+
+    std::vector<std::string> rows = mtgo::csv::into_substr_vec(test_csv_data, '\n');
+    REQUIRE(rows.size() == 2);
+    auto headers = mtgo::csv::into_substr_vec(rows[0], ',');
+    REQUIRE(headers.size() == 9);
+    auto row1 = mtgo::csv::into_substr_vec(rows.at(1), ',');
+    REQUIRE(row1.size() == 9);
+
+    std::vector<mtgo::csv::tup_quant_and_prices_t> q_gb_sc =
+      mtgo::csv::quant_and_prices_from_span(std::span(row1).subspan(6));
+    REQUIRE(q_gb_sc.size() == 3);
+
+    auto id_res = util::sv_to_uint<uint32_t>(row1.at(0));
+    REQUIRE(id_res.has_value());
+
+    mtgo::CardHistory card_history{ id_res.value(),
+      std::move(row1.at(1)),
+      std::move(row1.at(2)),
+      std::move(row1.at(3)),
+      mtg::util::rarity_from_t(row1.at(4)),
+      false,
+      std::move(q_gb_sc) };
+
+    CHECK(card_history.id_ == 120020);
+    CHECK(card_history.name_ == "In the Darkness Bind Them");
+    CHECK(card_history.set_ == "LTC");
+    CHECK(card_history.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_history.foil_ == false);
+    CHECK(card_history.price_history_.size() == 3);
   }
 }
 
