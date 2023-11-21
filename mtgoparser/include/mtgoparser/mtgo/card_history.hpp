@@ -14,6 +14,19 @@ using tup_quant_and_prices_t = std::tuple<opt_uint_t, opt_float_t, opt_float_t>;
 namespace mtgo {
 
 
+/// Helper struct to so that `CardHistory` can be constructed with designated initializers for the fields with matching
+/// types.
+struct [[nodiscard]] QuantityNameSet
+{
+  std::string quantity_;
+  std::string name_;
+  std::string set_;
+};
+
+/**
+ * @brief Holds the history of a card in terms of its price and quantity.
+ *
+ */
 struct [[nodiscard]] CardHistory
 {
   uint32_t id_;
@@ -25,14 +38,12 @@ struct [[nodiscard]] CardHistory
   std::vector<tup_quant_and_prices_t> price_history_;
 
   explicit CardHistory(uint32_t id,
-    std::string &&quantity,
-    std::string &&name,
-    std::string &&set,
+    QuantityNameSet &&qns,
     mtg::Rarity rarity,
     bool foil,
     std::vector<tup_quant_and_prices_t> &&price_history) noexcept
-    : id_(id), quantity_(quantity), name_(std::move(name)), set_(std::move(set)), rarity_(rarity), foil_(foil),
-      price_history_(std::move(price_history))
+    : id_(id), quantity_(qns.quantity_), name_(std::move(qns.name_)), set_(std::move(qns.set_)), rarity_(rarity),
+      foil_(foil), price_history_(std::move(price_history))
   {}
 
   // Move constructor

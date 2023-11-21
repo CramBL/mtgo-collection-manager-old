@@ -312,15 +312,16 @@ TEST_CASE("mtgo::csv::floats_from_span")
     auto id_res = util::sv_to_uint<uint32_t>(row1.at(0));
     REQUIRE(id_res.has_value());
 
-    mtgo::CardHistory card_history{ id_res.value(),
-      std::move(row1.at(1)),
-      std::move(row1.at(2)),
-      std::move(row1.at(3)),
-      mtg::util::rarity_from_t(row1.at(4)),
-      false,
-      std::move(q_gb_sc) };
+    mtgo::QuantityNameSet qns{
+      .quantity_ = std::move(row1.at(1)), .name_ = std::move(row1.at(2)), .set_ = std::move(row1.at(3))
+    };
+
+    mtgo::CardHistory card_history{
+      id_res.value(), std::move(qns), mtg::util::rarity_from_t(row1.at(4)), false, std::move(q_gb_sc)
+    };
 
     CHECK(card_history.id_ == 120020);
+    CHECK(card_history.quantity_ == "1");
     CHECK(card_history.name_ == "In the Darkness Bind Them");
     CHECK(card_history.set_ == "LTC");
     CHECK(card_history.rarity_ == mtg::Rarity::Rare);
