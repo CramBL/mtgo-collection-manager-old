@@ -1,6 +1,7 @@
 
 #include "mtgoparser/mtg.hpp"
 
+#include <array>
 #include <cstdint>
 #include <optional>
 #include <tuple>
@@ -63,17 +64,13 @@ struct [[nodiscard]] CardHistory
   csv_row.reserve(512);
 
   csv_row += std::to_string(card_hist.id_);
-  csv_row += ',';
-  csv_row += card_hist.quantity_;
-  csv_row += ',';
-  csv_row += card_hist.name_;
-  csv_row += ',';
-  csv_row += card_hist.set_;
-  csv_row += ',';
-  csv_row += mtg::util::rarity_as_string<mtg::util::Short>(card_hist.rarity_);
-  csv_row += ',';
+  csv_row += ',' + card_hist.quantity_;
+  csv_row += ',' + card_hist.name_;
+  csv_row += ',' + card_hist.set_;
+  csv_row += ',' + mtg::util::rarity_to_string<mtg::util::Short>(card_hist.rarity_);
 
-  // Reduce branching
+  csv_row += ',';
+  // Reduce branching by using a constexpr array of strings and indexing into it with the bool value.
   constexpr std::array is_foil_str = { "false", "true" };
   csv_row += is_foil_str[boost::implicit_cast<uint8_t>(card_hist.foil_)];
 
