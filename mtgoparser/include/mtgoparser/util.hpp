@@ -84,27 +84,27 @@ template<typename T_uint> [[nodiscard]] inline auto sv_to_uint(std::string_view 
   }
 }
 
-namespace mp {
-
-  /**
-   * @brief Returns true if a type is the same as any of the other types.
-   *
-   * @tparam T The type to compare against.
-   * @tparam CompareToTypes The types to compare with.
-   */
-  template<typename T, typename... CompareToTypes>
-  inline constexpr bool is_t_any = std::disjunction_v<std::is_same<T, CompareToTypes>...>;
-
-
-  /**
-   * @brief Returns true if a type is the same as all of the other types.
-   *
-   * @tparam T The type to compare against.
-   * @tparam CompareToTypes The types to compare with.
-   */
-  template<typename T, typename... CompareToTypes>
-  inline constexpr bool is_t_same = std::conjunction_v<std::is_same<T, CompareToTypes>...>;
-
-}// namespace mp
-
 }// namespace util
+
+namespace util::mp {
+
+/**
+ * @brief Returns true if a type is the same as any of the other types.
+ *
+ * @tparam T The type to compare against.
+ * @tparam CompareToTypes The types to compare with.
+ */
+template<typename T, typename... CompareToTypes>
+inline constexpr bool is_t_any = std::disjunction_v<std::is_same<T, CompareToTypes>...>;
+
+
+/**
+ * @brief Returns true if a type is the same as all of the other types.
+ *
+ * @tparam T The type to compare against.
+ * @tparam CompareToTypes The types to compare with.
+ */
+template<typename T, typename... CompareToTypes>
+inline constexpr bool is_t_same = std::conjunction_v<std::is_same<T, CompareToTypes>...>;
+
+}// namespace util::mp
