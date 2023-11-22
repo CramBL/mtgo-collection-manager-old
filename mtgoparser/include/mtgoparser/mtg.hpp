@@ -14,7 +14,7 @@
 namespace mtg {
 
 // Denote the rarity of an MTG item.
-enum class [[nodiscard]] Rarity : uint8_t{ Common, Uncommon, Rare, Mythic, Booster };
+enum class [[nodiscard]] Rarity : uint8_t { Common, Uncommon, Rare, Mythic, Booster };
 
 namespace util {
 
@@ -49,6 +49,16 @@ namespace util {
   // Tags for choosing format for the rarity_as_string function
   struct Short;// C, U, R, M, B
   struct Full;// Common, Uncommon, Rare, Mythic, Booster
+  struct FullLower;// common, uncommon, rare, mythic, booster
+  struct FullUpper;// COMMON, UNCOMMON, RARE, MYTHIC, BOOSTER
+
+  /**
+   * @brief Concept for the rarity formatter tags.
+   *
+   * @tparam Format The rarity formatter tag.
+   */
+  template<class Format>
+  concept rarity_formatter = ::util::mp::is_t_any<Format, Short, Full, FullLower, FullUpper>;
 
   /**
    * @brief Convert a Rarity enum to a string representation in the specified format (`Short` or `Full`).
@@ -61,40 +71,85 @@ namespace util {
    *
    * @return std::string representation of the Rarity enum.
    */
-  template<typename Format>
-  requires ::util::mp::is_t_any<Format, Short, Full>
-  constexpr auto inline rarity_to_string(Rarity rarity) -> std::string
+  template<rarity_formatter Format> constexpr auto inline rarity_to_string(Rarity rarity) -> std::string
   {
-    using ::util::mp::is_t_any;
-    if constexpr (is_t_any<Format, Short>) {
-      switch (rarity) {
-      case Rarity::Common:
-        [[likely]] return "C";
-      case Rarity::Uncommon:
-        [[likely]] return "U";
-      case Rarity::Rare:
+
+    // Aliases for slightly more readability.
+    using shortFormat = std::is_same<Format, Short>;
+    using fullFormat = std::is_same<Format, Full>;
+    using fullLowerFormat = std::is_same<Format, FullLower>;
+    using fullUpperFormat = std::is_same<Format, FullUpper>;
+
+    switch (rarity) {
+    case Rarity::Common:
+      [[likely]] if constexpr (shortFormat::value) { return "C"; }
+      else if constexpr (fullFormat::value)
+      {
+        return "Common";
+      }
+      else if constexpr (fullLowerFormat::value)
+      {
+        return "common";
+      }
+      else if constexpr (fullUpperFormat::value)
+      {
+        return "COMMON";
+      }
+
+    case Rarity::Uncommon:
+      [[likely]] if constexpr (shortFormat::value) { return "U"; }
+      else if constexpr (fullFormat::value)
+      {
+        return "Uncommon";
+      }
+      else if constexpr (fullLowerFormat::value)
+      {
+        return "uncommon";
+      }
+      else if constexpr (fullUpperFormat::value)
+      {
+        return "UNCOMMON";
+      }
+    case Rarity::Rare:
+      if constexpr (shortFormat::value) {
         return "R";
-      case Rarity::Mythic:
-        [[unlikely]] return "M";
-      case Rarity::Booster:
-        [[unlikely]] return "B";
-      }
-    } else if constexpr (is_t_any<Format, Full>) {
-      switch (rarity) {
-      case Rarity::Common:
-        [[likely]] return "Common";
-      case Rarity::Uncommon:
-        [[likely]] return "Uncommon";
-      case Rarity::Rare:
+      } else if constexpr (fullFormat::value) {
         return "Rare";
-      case Rarity::Mythic:
-        [[unlikely]] return "Mythic";
-      case Rarity::Booster:
-        [[unlikely]] return "Booster";
+      } else if constexpr (fullLowerFormat::value) {
+        return "rare";
+      } else if constexpr (fullUpperFormat::value) {
+        return "RARE";
       }
-    } else {
-      static_assert(is_t_any<Format, Short, Full>, "Format must be either mtg::util::Short or mtg::util::Full");
+    case Rarity::Mythic:
+      [[unlikely]] if constexpr (shortFormat::value) { return "M"; }
+      else if constexpr (fullFormat::value)
+      {
+        return "Mythic";
+      }
+      else if constexpr (fullLowerFormat::value)
+      {
+        return "mythic";
+      }
+      else if constexpr (fullUpperFormat::value)
+      {
+        return "MYTHIC";
+      }
+    case Rarity::Booster:
+      [[unlikely]] if constexpr (shortFormat::value) { return "B"; }
+      else if constexpr (fullFormat::value)
+      {
+        return "Booster";
+      }
+      else if constexpr (fullLowerFormat::value)
+      {
+        return "booster";
+      }
+      else if constexpr (fullUpperFormat::value)
+      {
+        return "BOOSTER";
+      }
     }
+
 
     assert(false);
     // If/when C++23 use: std::unreachable();
