@@ -9,6 +9,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <type_traits>
 
 namespace mtg {
 
@@ -44,26 +45,76 @@ namespace util {
     return Rarity::Booster;
   }
 
+
+  // Tags for choosing format for the rarity_as_string function
+  struct Short;// C, U, R, M, B
+  struct Full;// Common, Uncommon, Rare, Mythic, Booster
+  struct FullLower;// common, uncommon, rare, mythic, booster
+  struct FullUpper;// COMMON, UNCOMMON, RARE, MYTHIC, BOOSTER
+
   /**
-   * @brief Convert a Rarity enum to a string.
+   * @brief Concept for the rarity formatter tags.
    *
-   * @param rarity The Rarity enum to convert
+   * @tparam Format The rarity formatter tag.
+   */
+  template<class Format>
+  concept rarity_formatter = ::util::mp::is_t_any<Format, Short, Full, FullLower, FullUpper>;
+
+  /**
+   * @brief Convert a Rarity enum to a string representation in the specified format (`Short` or `Full`).
+   *
+   * @param rarity The Rarity enum to convert to a string.
+   * @tparam Format The format to use for the string representation (`Short` or `Full`).
+   *
+   * @note The `Short` format uses the first letter of the rarity (e.g. `Rarity::Common` -> "C").
+   * The `Full` format uses the full name of the rarity (e.g. `Rarity::Common` -> "Common").
+   *
    * @return std::string representation of the Rarity enum.
    */
-  auto inline rarity_as_string(Rarity rarity) -> std::string
+  template<rarity_formatter Format> constexpr auto inline rarity_to_string(Rarity rarity) -> std::string
   {
+
+    // Aliases for slightly more readability.
+    using shortFormat = std::is_same<Format, Short>;
+    using fullFormat = std::is_same<Format, Full>;
+    using fullLowerFormat = std::is_same<Format, FullLower>;
+    using fullUpperFormat = std::is_same<Format, FullUpper>;
+
     switch (rarity) {
     case Rarity::Common:
-      [[likely]] return "Common";
+      [[likely]] if constexpr (shortFormat::value) { return "C"; }
+      else if constexpr (fullFormat::value) { return "Common"; }
+      else if constexpr (fullLowerFormat::value) { return "common"; }
+      else if constexpr (fullUpperFormat::value) { return "COMMON"; }
+
     case Rarity::Uncommon:
-      [[likely]] return "Uncommon";
+      [[likely]] if constexpr (shortFormat::value) { return "U"; }
+      else if constexpr (fullFormat::value) { return "Uncommon"; }
+      else if constexpr (fullLowerFormat::value) { return "uncommon"; }
+      else if constexpr (fullUpperFormat::value) { return "UNCOMMON"; }
     case Rarity::Rare:
-      return "Rare";
+      if constexpr (shortFormat::value) {
+        return "R";
+      } else if constexpr (fullFormat::value) {
+        return "Rare";
+      } else if constexpr (fullLowerFormat::value) {
+        return "rare";
+      } else if constexpr (fullUpperFormat::value) {
+        return "RARE";
+      }
     case Rarity::Mythic:
-      [[unlikely]] return "Mythic";
+      [[unlikely]] if constexpr (shortFormat::value) { return "M"; }
+      else if constexpr (fullFormat::value) { return "Mythic"; }
+      else if constexpr (fullLowerFormat::value) { return "mythic"; }
+      else if constexpr (fullUpperFormat::value) { return "MYTHIC"; }
     case Rarity::Booster:
-      [[unlikely]] return "Booster";
+      [[unlikely]] if constexpr (shortFormat::value) { return "B"; }
+      else if constexpr (fullFormat::value) { return "Booster"; }
+      else if constexpr (fullLowerFormat::value) { return "booster"; }
+      else if constexpr (fullUpperFormat::value) { return "BOOSTER"; }
     }
+
+
     assert(false);
     // If/when C++23 use: std::unreachable();
     return "";

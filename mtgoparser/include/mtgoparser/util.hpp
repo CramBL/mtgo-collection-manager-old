@@ -3,6 +3,8 @@
 #include <optional>
 #include <string_view>
 
+#include <fmt/core.h>
+
 #include <boost/outcome.hpp>
 #include <boost/outcome/result.hpp>
 
@@ -57,7 +59,6 @@ requires std::convertible_to<SA, std::string_view> &&(std::convertible_to<Ss, st
   return (is_sv_same(a_sv, bs_svs) || ...);
 }
 
-
 /**
  * @brief Convert a `string_view` to an unsigned integer.
  *
@@ -82,4 +83,57 @@ template<typename T_uint> [[nodiscard]] inline auto sv_to_uint(std::string_view 
     return outcome::failure(fmt::format("Failed to convert string_view `{}` to uint", sv));
   }
 }
+
 }// namespace util
+
+namespace util::mp {
+
+/**
+ * @brief Returns true if a type is the same as any of the other types.
+ *
+ * @tparam T The type to compare against.
+ * @tparam CompareToTypes The types to compare with.
+ */
+template<typename T, typename... CompareToTypes>
+inline constexpr bool is_t_any = std::disjunction_v<std::is_same<T, CompareToTypes>...>;
+
+
+/**
+ * @brief Returns true if a type is the same as all of the other types.
+ *
+ * @tparam T The type to compare against.
+ * @tparam CompareToTypes The types to compare with.
+ */
+template<typename T, typename... CompareToTypes>
+inline constexpr bool is_t_same = std::conjunction_v<std::is_same<T, CompareToTypes>...>;
+
+}// namespace util::mp
+
+namespace util::optimization {
+
+/**
+ * @brief Branchless if statement that returns either `true_val` or `false_val` depending on
+ * `cond`.
+ *
+ * @warning Profile before committing! This function is SLOWER if any of the following are true: The branch is rarely
+ * mispredicted, the values are expensive to evaluate, or the compiler already does a branchless optimization (always
+ * preferred).
+ *
+ * @note The tradeoff is that both `true_val` and `false_val` are evaluated, so if they are
+ * expensive to evaluate then this function is not useful. This function is useful when the values are cheap to evaluate
+ * and the branch is likely to be mispredicted (i.e. there's no clear pattern to the values of `cond`).
+ *
+ * @tparam T Type of the return value.
+ * @param cond The condition to check.
+ * @param true_val The value to return if `cond` is true.
+ * @param false_val The value to return if `cond` is false.
+ * @return T Either `true_val` or `false_val` depending on `cond`.
+ */
+template<typename T> [[nodiscard]] inline constexpr auto branchless_if(bool cond, T false_val, T true_val) -> T
+{
+  std::array ret_vals = { false_val, true_val };
+  return ret_vals[boost::implicit_cast<uint8_t>(cond)];
+}
+
+
+}// namespace util::optimization

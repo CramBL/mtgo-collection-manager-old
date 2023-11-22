@@ -68,7 +68,7 @@ namespace helper {
   auto write_json_to_appdata_dir(JsonAndDestinationDir jsonAndDir) -> outcome::result<void, std::string>
   {
     const std::string fname{ "mtgo-cards" };
-    const std::string ext{ ".json" };
+    const std::string ext{ "json" };
     std::filesystem::path save_path = jsonAndDir.dir;
     save_path.append("collection-history");
     save_path.append(fname);
