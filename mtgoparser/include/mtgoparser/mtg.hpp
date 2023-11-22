@@ -14,7 +14,7 @@
 namespace mtg {
 
 // Denote the rarity of an MTG item.
-enum class [[nodiscard]] Rarity : uint8_t { Common, Uncommon, Rare, Mythic, Booster };
+enum class [[nodiscard]] Rarity : uint8_t{ Common, Uncommon, Rare, Mythic, Booster };
 
 namespace util {
 
@@ -57,7 +57,7 @@ namespace util {
    * @return std::string representation of the Rarity enum.
    */
   template<typename Format>
-    requires std::is_same_v<Format, Short> || std::is_same_v<Format, Full>
+  requires std::is_same_v<Format, Short> || std::is_same_v<Format, Full>
   auto inline rarity_as_string(Rarity rarity) -> std::string
   {
     if constexpr (std::is_same_v<Format, Short>) {
