@@ -423,6 +423,14 @@ TEST_CASE("mtgo::csv::floats_from_span")
       std::string csv_row3 = mtgo::card_history_to_csv_row(std::move(card_history3));
       INFO("csv_row3:\n" << csv_row3);
       CHECK(csv_row3 == rows.at(3));
+
+      std::string serialized_csv = fmt::format("{}\n", rows[0]);
+      serialized_csv += csv_row1 + '\n';
+      serialized_csv += csv_row2 + '\n';
+      serialized_csv += csv_row3;
+
+      INFO("serialized_csv:\n" << serialized_csv);
+      CHECK(serialized_csv == test_csv_data);
     }
   }
 }
