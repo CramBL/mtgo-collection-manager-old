@@ -14,7 +14,7 @@
 namespace mtg {
 
 // Denote the rarity of an MTG item.
-enum class [[nodiscard]] Rarity : uint8_t{ Common, Uncommon, Rare, Mythic, Booster };
+enum class [[nodiscard]] Rarity : uint8_t { Common, Uncommon, Rare, Mythic, Booster };
 
 namespace util {
 
@@ -47,20 +47,26 @@ namespace util {
 
 
   // Tags for choosing format for the rarity_as_string function
-  struct Short;
-  struct Full;
+  struct Short;// C, U, R, M, B
+  struct Full;// Common, Uncommon, Rare, Mythic, Booster
 
   /**
-   * @brief Convert a Rarity enum to a string.
+   * @brief Convert a Rarity enum to a string representation in the specified format (`Short` or `Full`).
    *
-   * @param rarity The Rarity enum to convert
+   * @param rarity The Rarity enum to convert to a string.
+   * @tparam Format The format to use for the string representation (`Short` or `Full`).
+   *
+   * @note The `Short` format uses the first letter of the rarity (e.g. `Rarity::Common` -> "C").
+   * The `Full` format uses the full name of the rarity (e.g. `Rarity::Common` -> "Common").
+   *
    * @return std::string representation of the Rarity enum.
    */
   template<typename Format>
-  requires std::is_same_v<Format, Short> || std::is_same_v<Format, Full>
-  auto inline rarity_as_string(Rarity rarity) -> std::string
+    requires ::util::mp::is_t_any<Format, Short, Full>
+  constexpr auto inline rarity_to_string(Rarity rarity) -> std::string
   {
-    if constexpr (std::is_same_v<Format, Short>) {
+    using ::util::mp::is_t_any;
+    if constexpr (is_t_any<Format, Short>) {
       switch (rarity) {
       case Rarity::Common:
         [[likely]] return "C";
@@ -73,7 +79,7 @@ namespace util {
       case Rarity::Booster:
         [[unlikely]] return "B";
       }
-    } else if constexpr (std::is_same_v<Format, Full>) {
+    } else if constexpr (is_t_any<Format, Full>) {
       switch (rarity) {
       case Rarity::Common:
         [[likely]] return "Common";
@@ -87,8 +93,7 @@ namespace util {
         [[unlikely]] return "Booster";
       }
     } else {
-      static_assert(std::is_same_v<Format, Short> || std::is_same_v<Format, Full>,
-        "Format must be either mtg::util::Short or mtg::util::Full");
+      static_assert(is_t_any<Format, Short, Full>, "Format must be either mtg::util::Short or mtg::util::Full");
     }
 
     assert(false);

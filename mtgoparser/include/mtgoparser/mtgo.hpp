@@ -183,7 +183,7 @@ void inline Collection::Print() const
       card.quantity_,
       card.set_,
       card.foil_,
-      mtg::util::rarity_as_string<mtg::util::Full>(card.rarity_));
+      mtg::util::rarity_to_string<mtg::util::Full>(card.rarity_));
   }
 }
 
@@ -206,7 +206,7 @@ void inline Collection::PrettyPrint() const
       scryfall_price,
       card.quantity_,
       card.foil_,
-      mtg::util::rarity_as_string<mtg::util::Full>(card.rarity_),
+      mtg::util::rarity_to_string<mtg::util::Full>(card.rarity_),
       card.set_);
   }
 }

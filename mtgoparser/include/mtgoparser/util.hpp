@@ -30,7 +30,7 @@ using ErrorStr = std::string;
  * @note The string-like values are converted to `std::string_view` before the comparison.
  */
 template<typename SA, typename SB>
-requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
+  requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, std::string_view>
 [[nodiscard]] inline constexpr auto is_sv_same(SA a_sv, SB b_sv) -> bool
 {
   return boost::implicit_cast<std::string_view>(a_sv) == boost::implicit_cast<std::string_view>(b_sv);
@@ -53,12 +53,11 @@ requires std::convertible_to<SA, std::string_view> && std::convertible_to<SB, st
  * @note The string-like values are converted to `std::string_view` before the comparison.
  */
 template<typename SA, typename... Ss>
-requires std::convertible_to<SA, std::string_view> &&(std::convertible_to<Ss, std::string_view> || ...)
-  [[nodiscard]] inline constexpr auto is_sv_any_of(SA a_sv, Ss... bs_svs) -> bool
+  requires std::convertible_to<SA, std::string_view> && (std::convertible_to<Ss, std::string_view> || ...)
+[[nodiscard]] inline constexpr auto is_sv_any_of(SA a_sv, Ss... bs_svs) -> bool
 {
   return (is_sv_same(a_sv, bs_svs) || ...);
 }
-
 
 /**
  * @brief Convert a `string_view` to an unsigned integer.
@@ -84,4 +83,28 @@ template<typename T_uint> [[nodiscard]] inline auto sv_to_uint(std::string_view 
     return outcome::failure(fmt::format("Failed to convert string_view `{}` to uint", sv));
   }
 }
+
+namespace mp {
+
+  /**
+   * @brief Returns true if a type is the same as any of the other types.
+   *
+   * @tparam T The type to compare against.
+   * @tparam CompareToTypes The types to compare with.
+   */
+  template<typename T, typename... CompareToTypes>
+  inline constexpr bool is_t_any = std::disjunction_v<std::is_same<T, CompareToTypes>...>;
+
+
+  /**
+   * @brief Returns true if a type is the same as all of the other types.
+   *
+   * @tparam T The type to compare against.
+   * @tparam CompareToTypes The types to compare with.
+   */
+  template<typename T, typename... CompareToTypes>
+  inline constexpr bool is_t_same = std::conjunction_v<std::is_same<T, CompareToTypes>...>;
+
+}// namespace mp
+
 }// namespace util
