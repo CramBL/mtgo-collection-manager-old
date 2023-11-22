@@ -70,7 +70,7 @@ struct [[nodiscard]] CardHistory
   csv_row += ',';
   csv_row += card_hist.set_;
   csv_row += ',';
-  csv_row += mtg::util::rarity_as_short_string(card_hist.rarity_);
+  csv_row += mtg::util::rarity_as_string<mtg::util::Short>(card_hist.rarity_);
   csv_row += ',';
 
   // Reduce branching

@@ -9,11 +9,12 @@
 
 #include <cassert>
 #include <cstdint>
+#include <type_traits>
 
 namespace mtg {
 
 // Denote the rarity of an MTG item.
-enum class [[nodiscard]] Rarity : uint8_t{ Common, Uncommon, Rare, Mythic, Booster };
+enum class [[nodiscard]] Rarity : uint8_t { Common, Uncommon, Rare, Mythic, Booster };
 
 namespace util {
 
@@ -44,26 +45,52 @@ namespace util {
     return Rarity::Booster;
   }
 
+
+  // Tags for choosing format for the rarity_as_string function
+  struct Short;
+  struct Full;
+
   /**
    * @brief Convert a Rarity enum to a string.
    *
    * @param rarity The Rarity enum to convert
    * @return std::string representation of the Rarity enum.
    */
+  template<typename Format>
+    requires std::is_same_v<Format, Short> || std::is_same_v<Format, Full>
   auto inline rarity_as_string(Rarity rarity) -> std::string
   {
-    switch (rarity) {
-    case Rarity::Common:
-      [[likely]] return "Common";
-    case Rarity::Uncommon:
-      [[likely]] return "Uncommon";
-    case Rarity::Rare:
-      return "Rare";
-    case Rarity::Mythic:
-      [[unlikely]] return "Mythic";
-    case Rarity::Booster:
-      [[unlikely]] return "Booster";
+    if constexpr (std::is_same_v<Format, Short>) {
+      switch (rarity) {
+      case Rarity::Common:
+        [[likely]] return "C";
+      case Rarity::Uncommon:
+        [[likely]] return "U";
+      case Rarity::Rare:
+        return "R";
+      case Rarity::Mythic:
+        [[unlikely]] return "M";
+      case Rarity::Booster:
+        [[unlikely]] return "B";
+      }
+    } else if constexpr (std::is_same_v<Format, Full>) {
+      switch (rarity) {
+      case Rarity::Common:
+        [[likely]] return "Common";
+      case Rarity::Uncommon:
+        [[likely]] return "Uncommon";
+      case Rarity::Rare:
+        return "Rare";
+      case Rarity::Mythic:
+        [[unlikely]] return "Mythic";
+      case Rarity::Booster:
+        [[unlikely]] return "Booster";
+      }
+    } else {
+      static_assert(std::is_same_v<Format, Short> || std::is_same_v<Format, Full>,
+        "Format must be either mtg::util::Short or mtg::util::Full");
     }
+
     assert(false);
     // If/when C++23 use: std::unreachable();
     return "";
