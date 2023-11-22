@@ -327,6 +327,13 @@ TEST_CASE("mtgo::csv::floats_from_span")
     CHECK(card_history.rarity_ == mtg::Rarity::Rare);
     CHECK(card_history.foil_ == false);
     CHECK(card_history.price_history_.size() == 3);
+
+    SECTION("mtgo::card_history_to_csv_row")
+    {
+      std::string csv_row = mtgo::card_history_to_csv_row(std::move(card_history));
+      INFO("csv_row:\n" << csv_row);
+      CHECK(csv_row == rows.at(1));
+    }
   }
 }
 
