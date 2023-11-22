@@ -71,8 +71,7 @@ struct [[nodiscard]] CardHistory
 
   csv_row += ',';
   // Reduce branching by using a constexpr array of strings and indexing into it with the bool value.
-  constexpr std::array is_foil_str = { "false", "true" };
-  csv_row += is_foil_str[boost::implicit_cast<uint8_t>(card_hist.foil_)];
+  csv_row += util::optimization::branchless_if(card_hist.foil_, "false", "true");
 
   for (auto &&[quantity, gb_price, scry_price] : card_hist.price_history_) {
     csv_row += ',';
