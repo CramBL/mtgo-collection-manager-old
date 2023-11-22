@@ -328,11 +328,101 @@ TEST_CASE("mtgo::csv::floats_from_span")
     CHECK(card_history.foil_ == false);
     CHECK(card_history.price_history_.size() == 3);
 
-    SECTION("mtgo::card_history_to_csv_row")
+    SECTION("mtgo::card_history_to_csv_row - 1 row")
     {
       std::string csv_row = mtgo::card_history_to_csv_row(std::move(card_history));
       INFO("csv_row:\n" << csv_row);
       CHECK(csv_row == rows.at(1));
+    }
+  }
+
+  SECTION("Parse CSV into mtgo::CardHistory with 3 rows")
+  {
+    using mtgo::csv::into_substr_vec;
+    using mtgo::csv::quant_and_prices_from_span;
+    using mtgo::csv::tup_quant_and_prices_t;
+    using mtgo::QuantityNameSet;
+    using mtgo::CardHistory;
+    using mtgo::card_history_to_csv_row;
+    using util::sv_to_uint;
+
+    const std::string test_csv_data =
+      R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
+120020,1,In the Darkness Bind Them,LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3
+106729,1,Razorverge Thicket,ONE,R,false,[1]1.1;0.9,2;2.1,[11]0.9;-
+106729,1,Razorverge Thicket,THR,R,false,-;-,[2]2;2.1,[0]0.9;-)";
+
+    std::vector<std::string> rows = into_substr_vec(test_csv_data, '\n');
+    REQUIRE(rows.size() == 4);
+
+    auto headers = into_substr_vec(rows[0], ',');
+    REQUIRE(headers.size() == 9);
+    auto row1 = into_substr_vec(rows.at(1), ',');
+    REQUIRE(row1.size() == 9);
+
+    std::vector<tup_quant_and_prices_t> q_gb_sc1 = quant_and_prices_from_span(std::span(row1).subspan(6));
+    REQUIRE(q_gb_sc1.size() == 3);
+
+    auto id_res1 = sv_to_uint<uint32_t>(row1.at(0));
+    REQUIRE(id_res1.has_value());
+
+    mtgo::QuantityNameSet qns1{
+      .quantity_ = std::move(row1.at(1)), .name_ = std::move(row1.at(2)), .set_ = std::move(row1.at(3))
+    };
+
+    mtgo::CardHistory card_history1{
+      id_res1.value(), std::move(qns1), mtg::util::rarity_from_t(row1.at(4)), false, std::move(q_gb_sc1)
+    };
+
+    CHECK(card_history1.id_ == 120020);
+    CHECK(card_history1.quantity_ == "1");
+    CHECK(card_history1.name_ == "In the Darkness Bind Them");
+    CHECK(card_history1.set_ == "LTC");
+    CHECK(card_history1.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_history1.foil_ == false);
+    CHECK(card_history1.price_history_.size() == 3);
+
+    // Row 2
+    auto row2 = into_substr_vec(rows.at(2), ',');
+    REQUIRE(row2.size() == 9);
+    auto q_gb_sc2 = quant_and_prices_from_span(std::span(row2).subspan(6));
+    REQUIRE(q_gb_sc2.size() == 3);
+    auto id_res2 = sv_to_uint<uint32_t>(row2.at(0));
+    REQUIRE(id_res2.has_value());
+    QuantityNameSet qns2{
+      .quantity_ = std::move(row2.at(1)), .name_ = std::move(row2.at(2)), .set_ = std::move(row2.at(3))
+    };
+    CardHistory card_history2{
+      id_res2.value(), std::move(qns2), mtg::util::rarity_from_t(row2.at(4)), false, std::move(q_gb_sc2)
+    };
+
+    // Row 3
+    auto row3 = into_substr_vec(rows.at(3), ',');
+    REQUIRE(row3.size() == 9);
+    auto q_gb_sc3 = quant_and_prices_from_span(std::span(row3).subspan(6));
+    REQUIRE(q_gb_sc3.size() == 3);
+    auto id_res3 = sv_to_uint<uint32_t>(row3.at(0));
+    REQUIRE(id_res3.has_value());
+    QuantityNameSet qns3{
+      .quantity_ = std::move(row3.at(1)), .name_ = std::move(row3.at(2)), .set_ = std::move(row3.at(3))
+    };
+    CardHistory card_history3{
+      id_res3.value(), std::move(qns3), mtg::util::rarity_from_t(row3.at(4)), false, std::move(q_gb_sc3)
+    };
+
+    SECTION("mtgo::card_history_to_csv_row - 3 rows")
+    {
+      std::string csv_row1 = mtgo::card_history_to_csv_row(std::move(card_history1));
+      INFO("csv_row1:\n" << csv_row1);
+      CHECK(csv_row1 == rows.at(1));
+
+      std::string csv_row2 = mtgo::card_history_to_csv_row(std::move(card_history2));
+      INFO("csv_row2:\n" << csv_row2);
+      CHECK(csv_row2 == rows.at(2));
+
+      std::string csv_row3 = mtgo::card_history_to_csv_row(std::move(card_history3));
+      INFO("csv_row3:\n" << csv_row3);
+      CHECK(csv_row3 == rows.at(3));
     }
   }
 }
