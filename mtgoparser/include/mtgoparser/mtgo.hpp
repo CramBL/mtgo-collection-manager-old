@@ -157,7 +157,7 @@ void inline Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfa
     while (scry_it != scry_end && (*scry_it).mtgo_id <= c.id_) {
       if ((*scry_it).mtgo_id == c.id_ && (*scry_it).prices.tix.has_value()
           && (!(*scry_it).prices.tix.value().empty())) {
-        c.scryfall_price_ = std::stod((*scry_it).prices.tix.value());
+        c.scryfall_price_ = std::stof((*scry_it).prices.tix.value());
       }
       ++scry_it;
     }
