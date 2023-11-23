@@ -152,7 +152,7 @@ TEST_CASE("MTGO card - Initialize and use of")
 
     unsigned int id2 = 1;
     mtgo::Card mtgo_card2 =
-      mtgo::Card(id2, util::sv_to_uint<uint16_t>("1").value(), "name", "set", "C", true, 1.0, 2.0);
+      mtgo::Card(id2, util::sv_to_uint<uint16_t>("1").value(), "name", "set", "C", true, 1.0f, 2.0f);
     CHECK(mtgo_card2.id_ == 1);
     CHECK(mtgo_card2.quantity_ == 1);
     CHECK(mtgo_card2.name_ == "name");
@@ -197,8 +197,8 @@ TEST_CASE("MTGO card - Initialize and use of")
 
     uint16_t ids = 1;
     uint16_t quantities = 1;
-    mtgo::Card mtgo_card = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0, 2.0);
-    mtgo::Card mtgo_card2 = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0, 2.0);
+    mtgo::Card mtgo_card = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0f, 2.0f);
+    mtgo::Card mtgo_card2 = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0f, 2.0f);
 
     // Move constructor
     mtgo::Card mtgo_card3(std::move(mtgo_card));
@@ -208,7 +208,7 @@ TEST_CASE("MTGO card - Initialize and use of")
 
     // Move assignment
     uint16_t id_tmp = 2;
-    auto mtgo_card_tmp = mtgo::Card(id_tmp, quantities, "name", "set", "common", true, 1.0, 2.0);
+    auto mtgo_card_tmp = mtgo::Card(id_tmp, quantities, "name", "set", "common", true, 1.0f, 2.0f);
     mtgo_card3 = std::move(mtgo_card_tmp);
     CHECK(mtgo_card3 != mtgo_card2);// ID should differ
     // Check that mtgo_card_tmp is now invalid (commented out as it triggered warning in CI)
