@@ -35,7 +35,7 @@ struct [[nodiscard]] Card
     std::string set = "",
     std::string rarity = "C",
     bool foil = false,
-    float goatbots_price = 0,
+    float goatbots_price = 0.0f,
     std::optional<float> scryfall_price = {}) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ std::move(name) }, set_{ std::move(set) },
       rarity_{ mtg::util::rarity_from_t(std::move(rarity)) }, foil_{ foil }, goatbots_price_{ goatbots_price },
@@ -49,7 +49,7 @@ struct [[nodiscard]] Card
     const char *set = "",
     const char *rarity = "C",
     bool foil = false,
-    float goatbots_price = 0,
+    float goatbots_price = 0.0f,
     std::optional<float> scryfall_price = {}) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ mtg::util::rarity_from_t(rarity) },
       foil_{ foil }, goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
@@ -63,7 +63,7 @@ struct [[nodiscard]] Card
     std::string_view set,
     std::string_view rarity,
     bool foil = false,
-    float goatbots_price = 0,
+    float goatbots_price = 0.0f,
     std::optional<float> scryfall_price = {}) noexcept
     : id_{ id }, quantity_{ quantity }, name_{ name }, set_{ set }, rarity_{ mtg::util::rarity_from_t(rarity) },
       foil_{ foil }, goatbots_price_{ goatbots_price }, scryfall_price_{ scryfall_price }
@@ -78,7 +78,7 @@ struct [[nodiscard]] Card
     S set,
     S rarity,
     bool foil = false,
-    float goatbots_price = 0,
+    float goatbots_price = 0.0f,
     std::optional<float> scryfall_price = {}) noexcept
     : id_{ boost::implicit_cast<uint32_t>(id) }, quantity_{ boost::implicit_cast<uint16_t>(quantity) }, name_{ name },
       set_{ set }, rarity_{ mtg::util::rarity_from_t(rarity) }, foil_{ foil }, goatbots_price_{ goatbots_price },
