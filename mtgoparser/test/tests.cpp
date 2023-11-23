@@ -159,9 +159,9 @@ TEST_CASE("MTGO card - Initialize and use of")
     CHECK(mtgo_card2.set_ == "set");
     CHECK(mtgo_card2.rarity_ == mtg::Rarity::Common);
     CHECK(mtgo_card2.foil_ == true);
-    CHECK(mtgo_card2.goatbots_price_ == 1.0);
+    CHECK(mtgo_card2.goatbots_price_ == 1.0f);
     REQUIRE(mtgo_card2.scryfall_price_.has_value());
-    REQUIRE(mtgo_card2.scryfall_price_.value() == 2.0);
+    REQUIRE(mtgo_card2.scryfall_price_.value() == 2.0f);
 
     CHECK(mtgo_card != mtgo_card2);
 
