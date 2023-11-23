@@ -10,17 +10,17 @@
 using Catch::Matchers::ContainsSubstring;
 
 #include "mtgoparser/goatbots.hpp"
-#include "mtgoparser/mtgo.hpp"
-#include "mtgoparser/scryfall.hpp"
 #include "mtgoparser/io.hpp"
+#include "mtgoparser/mtgo.hpp"
 #include "mtgoparser/mtgo/history_aggregator.hpp"
+#include "mtgoparser/scryfall.hpp"
 
+#include <filesystem>
+#include <fstream>
 #include <optional>
 #include <string>
 #include <utility>
 #include <vector>
-#include <fstream>
-#include <filesystem>
 
 // Used by the first section (small collection)
 // Goes to top of project and into the shared 'test/test-data' directory
@@ -109,8 +109,8 @@ TEST_CASE("Parse small collection")
       auto json_str2 = mtgo_collection.ToJson();
 
       // Save to files
-      const std::string fname {"mtgo_cards_2023-11-05T152700Z"};
-      const std::string fname2{"mtgo_cards_2023-11-05T152800Z"};
+      const std::string fname{ "mtgo_cards_2023-11-05T152700Z" };
+      const std::string fname2{ "mtgo_cards_2023-11-05T152800Z" };
 
       const std::string sub_dir{ "collection-history-full-collection-parse" };
       std::filesystem::create_directory(sub_dir);
@@ -166,7 +166,7 @@ TEST_CASE("Parse small collection")
       CHECK(collection_history.Size() == 3000);
 
       // Save the aggregate to a CSV file
-      const std::string csv_fname{ "mtgo_cards_csv_" + last_timestamp + ".csv"};
+      const std::string csv_fname{ "mtgo_cards_csv_" + last_timestamp + ".csv" };
       const std::filesystem::path csv_fpath{ sub_dir + "/" + csv_fname };
       INFO("Saving CSV file to: " << csv_fpath.string());
 

@@ -49,18 +49,18 @@ struct [[nodiscard]] CardHistory
   {}
 
   // Constructor from mtgo::Card with no unavailable price history
-  [[nodiscard]] explicit CardHistory(mtgo::Card && card) noexcept
-    : id_(card.id_), quantity_(std::to_string(card.quantity_)), name_(std::move(card.name_)), set_(std::move(card.set_)),
-      rarity_(card.rarity_), foil_(card.foil_), price_history_(std::vector<tup_quant_and_prices_t>{std::make_tuple(opt_uint_t{ card.quantity_ }, opt_float_t{ card.goatbots_price_ }, card.scryfall_price_)})
-  {
-  }
+  [[nodiscard]] explicit CardHistory(mtgo::Card &&card) noexcept
+    : id_(card.id_), quantity_(std::to_string(card.quantity_)), name_(std::move(card.name_)),
+      set_(std::move(card.set_)), rarity_(card.rarity_), foil_(card.foil_),
+      price_history_(std::vector<tup_quant_and_prices_t>{
+        std::make_tuple(opt_uint_t{ card.quantity_ }, opt_float_t{ card.goatbots_price_ }, card.scryfall_price_) })
+  {}
 
   // Constructor from mtgo::Card with unavailable price history
-  [[nodiscard]] explicit CardHistory(mtgo::Card && card, std::vector<tup_quant_and_prices_t> &&price_history) noexcept
-    : id_(card.id_), quantity_(std::to_string(card.quantity_)), name_(std::move(card.name_)), set_(std::move(card.set_)),
-      rarity_(card.rarity_), foil_(card.foil_), price_history_(std::move(price_history))
-  {
-  }
+  [[nodiscard]] explicit CardHistory(mtgo::Card &&card, std::vector<tup_quant_and_prices_t> &&price_history) noexcept
+    : id_(card.id_), quantity_(std::to_string(card.quantity_)), name_(std::move(card.name_)),
+      set_(std::move(card.set_)), rarity_(card.rarity_), foil_(card.foil_), price_history_(std::move(price_history))
+  {}
 
   // Move constructor
   [[nodiscard]] CardHistory(CardHistory &&other) noexcept
@@ -99,15 +99,17 @@ struct [[nodiscard]] CardHistory
   return csv_row;
 }
 
-[[nodiscard]] inline auto card_history_with_prev_unavailable(mtgo::Card&& card, std::size_t num_prev_timestamps) noexcept -> mtgo::CardHistory
+[[nodiscard]] inline auto card_history_with_prev_unavailable(mtgo::Card &&card,
+  std::size_t num_prev_timestamps) noexcept -> mtgo::CardHistory
 {
   std::vector<tup_quant_and_prices_t> price_history;
-  price_history.reserve(num_prev_timestamps+1);
+  price_history.reserve(num_prev_timestamps + 1);
   for (std::size_t i = 0; i < num_prev_timestamps; ++i) {
     price_history.emplace_back(std::make_tuple(std::nullopt, std::nullopt, std::nullopt));
   }
   // Add the available prices
-  price_history.emplace_back(std::make_tuple(opt_uint_t{ card.quantity_ }, opt_float_t{ card.goatbots_price_ }, card.scryfall_price_));
+  price_history.emplace_back(
+    std::make_tuple(opt_uint_t{ card.quantity_ }, opt_float_t{ card.goatbots_price_ }, card.scryfall_price_));
   return CardHistory{ std::move(card), std::move(price_history) };
 }
 

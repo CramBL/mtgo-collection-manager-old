@@ -743,126 +743,125 @@ TEST_CASE("io_util::is_files_equal")
 
 TEST_CASE("io_util::get_files_with_timestamp")
 {
-  SECTION("2 files year differs") {
-    // Create two files with different timestamps
-  const std::string newer_timestamp{ "2023-11-14T113236Z" };
-  const std::string older_timestamp{ "2022-11-14T113236Z" };
-  const std::string newer{ "mtgo-cards_" + newer_timestamp };
-  const std::string older{ "mtgo-cards_" + older_timestamp };
-  const std::string sub_dir{ "collection-history" };
-
-  std::filesystem::create_directory(sub_dir);
-
-  // Paths to the files
-  const std::filesystem::path newer_path = sub_dir + "/" + newer;
-  const std::filesystem::path older_path = sub_dir + "/" + older;
-
-  // Save the files
+  SECTION("2 files year differs")
   {
-    std::ofstream test_fileA(newer_path);
-    std::ofstream test_fileB(older_path);
-  }
-
-  // Get the files sorted by timestamp
-  auto files = io_util::get_files_with_timestamp(sub_dir);
-  CHECK(files.at(0).fpath_ == older_path);
-  CHECK(files.at(0).timestamp_ == older_timestamp);
-  CHECK(files.at(1).fpath_ == newer_path);
-  CHECK(files.at(1).timestamp_ == newer_timestamp);
-
-  // Clean up by removing the files and directory
-  std::filesystem::remove_all(sub_dir);
-
-  }
-
-  SECTION("2 files - day and time differs") {
     // Create two files with different timestamps
-  const std::string newer_timestamp{ "2023-11-17T075106Z" };
-  const std::string older_timestamp{ "2023-11-14T113236Z" };
-  const std::string newer{ "mtgo-cards_" + newer_timestamp };
-  const std::string older{ "mtgo-cards_" + older_timestamp };
-  const std::string sub_dir{ "collection-history" };
+    const std::string newer_timestamp{ "2023-11-14T113236Z" };
+    const std::string older_timestamp{ "2022-11-14T113236Z" };
+    const std::string newer{ "mtgo-cards_" + newer_timestamp };
+    const std::string older{ "mtgo-cards_" + older_timestamp };
+    const std::string sub_dir{ "collection-history" };
 
-  std::filesystem::create_directory(sub_dir);
+    std::filesystem::create_directory(sub_dir);
 
-  // Paths to the files
-  const std::filesystem::path newer_path = sub_dir + "/" + newer;
-  const std::filesystem::path older_path = sub_dir + "/" + older;
+    // Paths to the files
+    const std::filesystem::path newer_path = sub_dir + "/" + newer;
+    const std::filesystem::path older_path = sub_dir + "/" + older;
 
-  // Save the files
+    // Save the files
+    {
+      std::ofstream test_fileA(newer_path);
+      std::ofstream test_fileB(older_path);
+    }
+
+    // Get the files sorted by timestamp
+    auto files = io_util::get_files_with_timestamp(sub_dir);
+    CHECK(files.at(0).fpath_ == older_path);
+    CHECK(files.at(0).timestamp_ == older_timestamp);
+    CHECK(files.at(1).fpath_ == newer_path);
+    CHECK(files.at(1).timestamp_ == newer_timestamp);
+
+    // Clean up by removing the files and directory
+    std::filesystem::remove_all(sub_dir);
+  }
+
+  SECTION("2 files - day and time differs")
   {
-    std::ofstream test_fileA(newer_path);
-    std::ofstream test_fileB(older_path);
-  }
-
-  // Get the files sorted by timestamp
-  auto files = io_util::get_files_with_timestamp(sub_dir);
-  CHECK(files.at(0).fpath_ == older_path);
-  CHECK(files.at(0).timestamp_ == older_timestamp);
-  CHECK(files.at(1).fpath_ == newer_path);
-  CHECK(files.at(1).timestamp_ == newer_timestamp);
-
-  // Clean up by removing the files and directory
-  std::filesystem::remove_all(sub_dir);
-
-  }
-
-  SECTION("5 files - all different") {
     // Create two files with different timestamps
-  const std::string oldest_timestamp{ "2022-11-05T075106Z" };
-  const std::string second_timestamp{ "2023-01-00T003236Z" };
-  const std::string third_timestamp{ "2023-09-14T113236Z" };
-  const std::string fourth_timestamp{ "2023-11-14T113236Z" };
-  const std::string fifth_timestamp{ "2023-11-14T123236Z" };
-  const std::string oldest{ "mtgo-cards_" + oldest_timestamp };
-  const std::string second{ "mtgo-cards_" + second_timestamp };
-  const std::string third{ "mtgo-cards_" + third_timestamp };
-  const std::string fourth{ "mtgo-cards_" + fourth_timestamp };
-  const std::string fifth{ "mtgo-cards_" + fifth_timestamp };
-  const std::string sub_dir{ "collection-history" };
+    const std::string newer_timestamp{ "2023-11-17T075106Z" };
+    const std::string older_timestamp{ "2023-11-14T113236Z" };
+    const std::string newer{ "mtgo-cards_" + newer_timestamp };
+    const std::string older{ "mtgo-cards_" + older_timestamp };
+    const std::string sub_dir{ "collection-history" };
 
-  std::filesystem::create_directory(sub_dir);
+    std::filesystem::create_directory(sub_dir);
 
-  // Paths to the files
-  const std::filesystem::path oldest_path = sub_dir + "/" + oldest;
-  const std::filesystem::path second_path = sub_dir + "/" + second;
-  const std::filesystem::path third_path = sub_dir + "/" + third;
-  const std::filesystem::path fourth_path = sub_dir + "/" + fourth;
-  const std::filesystem::path fifth_path = sub_dir + "/" + fifth;
+    // Paths to the files
+    const std::filesystem::path newer_path = sub_dir + "/" + newer;
+    const std::filesystem::path older_path = sub_dir + "/" + older;
 
-  // Save the files
+    // Save the files
+    {
+      std::ofstream test_fileA(newer_path);
+      std::ofstream test_fileB(older_path);
+    }
+
+    // Get the files sorted by timestamp
+    auto files = io_util::get_files_with_timestamp(sub_dir);
+    CHECK(files.at(0).fpath_ == older_path);
+    CHECK(files.at(0).timestamp_ == older_timestamp);
+    CHECK(files.at(1).fpath_ == newer_path);
+    CHECK(files.at(1).timestamp_ == newer_timestamp);
+
+    // Clean up by removing the files and directory
+    std::filesystem::remove_all(sub_dir);
+  }
+
+  SECTION("5 files - all different")
   {
-    std::ofstream file_oldest(oldest_path);
-    std::ofstream file_second(second_path);
-    std::ofstream file_third(third_path);
-    std::ofstream file_fourth(fourth_path);
-    std::ofstream file_fifth(fifth_path);
+    // Create two files with different timestamps
+    const std::string oldest_timestamp{ "2022-11-05T075106Z" };
+    const std::string second_timestamp{ "2023-01-00T003236Z" };
+    const std::string third_timestamp{ "2023-09-14T113236Z" };
+    const std::string fourth_timestamp{ "2023-11-14T113236Z" };
+    const std::string fifth_timestamp{ "2023-11-14T123236Z" };
+    const std::string oldest{ "mtgo-cards_" + oldest_timestamp };
+    const std::string second{ "mtgo-cards_" + second_timestamp };
+    const std::string third{ "mtgo-cards_" + third_timestamp };
+    const std::string fourth{ "mtgo-cards_" + fourth_timestamp };
+    const std::string fifth{ "mtgo-cards_" + fifth_timestamp };
+    const std::string sub_dir{ "collection-history" };
+
+    std::filesystem::create_directory(sub_dir);
+
+    // Paths to the files
+    const std::filesystem::path oldest_path = sub_dir + "/" + oldest;
+    const std::filesystem::path second_path = sub_dir + "/" + second;
+    const std::filesystem::path third_path = sub_dir + "/" + third;
+    const std::filesystem::path fourth_path = sub_dir + "/" + fourth;
+    const std::filesystem::path fifth_path = sub_dir + "/" + fifth;
+
+    // Save the files
+    {
+      std::ofstream file_oldest(oldest_path);
+      std::ofstream file_second(second_path);
+      std::ofstream file_third(third_path);
+      std::ofstream file_fourth(fourth_path);
+      std::ofstream file_fifth(fifth_path);
+    }
+
+    // Get the files sorted by timestamp
+    auto files = io_util::get_files_with_timestamp(sub_dir);
+
+    CHECK(files.at(0).fpath_ == oldest_path);
+    CHECK(files.at(0).timestamp_ == oldest_timestamp);
+
+    CHECK(files.at(1).fpath_ == second_path);
+    CHECK(files.at(1).timestamp_ == second_timestamp);
+
+    CHECK(files.at(2).fpath_ == third_path);
+    CHECK(files.at(2).timestamp_ == third_timestamp);
+
+    CHECK(files.at(3).fpath_ == fourth_path);
+    CHECK(files.at(3).timestamp_ == fourth_timestamp);
+
+    CHECK(files.at(4).fpath_ == fifth_path);
+    CHECK(files.at(4).timestamp_ == fifth_timestamp);
+
+
+    // Clean up by removing the files and directory
+    std::filesystem::remove_all(sub_dir);
   }
-
-  // Get the files sorted by timestamp
-  auto files = io_util::get_files_with_timestamp(sub_dir);
-
-  CHECK(files.at(0).fpath_ == oldest_path);
-  CHECK(files.at(0).timestamp_ == oldest_timestamp);
-
-  CHECK(files.at(1).fpath_ == second_path);
-  CHECK(files.at(1).timestamp_ == second_timestamp);
-
-  CHECK(files.at(2).fpath_ == third_path);
-  CHECK(files.at(2).timestamp_ == third_timestamp);
-
-  CHECK(files.at(3).fpath_ == fourth_path);
-  CHECK(files.at(3).timestamp_ == fourth_timestamp);
-
-  CHECK(files.at(4).fpath_ == fifth_path);
-  CHECK(files.at(4).timestamp_ == fifth_timestamp);
-
-
-  // Clean up by removing the files and directory
-  std::filesystem::remove_all(sub_dir);
-
-  }
-
 }
 
 // NOLINTEND

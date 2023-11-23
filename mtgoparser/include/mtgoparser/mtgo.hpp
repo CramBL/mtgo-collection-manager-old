@@ -92,7 +92,7 @@ public:
   [[nodiscard]] inline constexpr bool operator!=(const Collection &other) const { return !(*this == other); }
 
   // Begin/end iterators
-  [[nodiscard]] inline auto TakeCards() noexcept -> std::vector<Card>&& { return std::move(this->cards_); }
+  [[nodiscard]] inline auto TakeCards() noexcept -> std::vector<Card> && { return std::move(this->cards_); }
 
 private:
   // Helpers

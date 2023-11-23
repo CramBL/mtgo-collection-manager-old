@@ -228,8 +228,8 @@ struct [[nodiscard]] FileWithTimestamp
 };
 
 /**
- * @brief Get a list of files with an underscord followed by an ISO 8601 timestamp as suffix in a directory sorted by age (oldest first).
- * The timestamp is in the format %Y-%m-%dT%H%M%SZ without sub-second precision.
+ * @brief Get a list of files with an underscord followed by an ISO 8601 timestamp as suffix in a directory sorted by
+ * age (oldest first). The timestamp is in the format %Y-%m-%dT%H%M%SZ without sub-second precision.
  *
  * @param dir_path The path to the directory
  *
@@ -252,7 +252,8 @@ struct [[nodiscard]] FileWithTimestamp
         std::string timestamp = fname.substr(fname.find_last_of('_') + 1);
 
         // Add the file to the vector
-        files_with_timestamp.emplace_back(FileWithTimestamp{ .fpath_ = entry.path(), .timestamp_ = std::move(timestamp) });
+        files_with_timestamp.emplace_back(
+          FileWithTimestamp{ .fpath_ = entry.path(), .timestamp_ = std::move(timestamp) });
       }
     }
   }

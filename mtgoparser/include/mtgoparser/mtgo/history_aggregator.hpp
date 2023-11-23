@@ -26,12 +26,13 @@
 
 namespace mtgo {
 
-  struct [[nodiscard]] CardHistoryAggregate {
-    mtgo::CardHistory card_history_;
-    // The newest quantity is the last time the quantity changed
-    // Used to determine if the history should include a quantity update
-    uint16_t newest_quantity_;
-  };
+struct [[nodiscard]] CardHistoryAggregate
+{
+  mtgo::CardHistory card_history_;
+  // The newest quantity is the last time the quantity changed
+  // Used to determine if the history should include a quantity update
+  uint16_t newest_quantity_;
+};
 
 class CollectionHistory
 {
@@ -42,22 +43,22 @@ class CollectionHistory
 public:
   [[nodiscard]] explicit CollectionHistory() = default;
 
-  [[nodiscard]] explicit CollectionHistory(std::vector<mtgo::CardHistory> &&card_histories, std::string&& timestamp) noexcept
+  [[nodiscard]] explicit CollectionHistory(std::vector<mtgo::CardHistory> &&card_histories,
+    std::string &&timestamp) noexcept
   {
     for (auto &&card_history : card_histories) {
       uint16_t newest_quantity = 0;
       for (auto [quantity, price, foil_price] : card_history.price_history_) {
-        if (quantity.has_value()) {
-          newest_quantity = quantity.value();
-        }
+        if (quantity.has_value()) { newest_quantity = quantity.value(); }
       }
-      this->card_histories_.emplace_back(CardHistoryAggregate{ .card_history_{std::move(card_history)},
-                                                               .newest_quantity_ = newest_quantity });
+      this->card_histories_.emplace_back(
+        CardHistoryAggregate{ .card_history_{ std::move(card_history) }, .newest_quantity_ = newest_quantity });
     }
     this->timestamps_.emplace_back(std::move(timestamp));
   }
 
-  void addCollectionPriceHistory(mtgo::Collection&& collection, std::string&& timestamp) {
+  void addCollectionPriceHistory(mtgo::Collection &&collection, std::string &&timestamp)
+  {
 
     auto cards = collection.TakeCards();
 
@@ -67,19 +68,20 @@ public:
       });
 
       if (it != card_histories_.end()) {
-        if (card.quantity_ != it->newest_quantity_)
-        {
+        if (card.quantity_ != it->newest_quantity_) {
           it->newest_quantity_ = card.quantity_;
-          it->card_history_.price_history_.emplace_back(std::make_tuple(card.quantity_, card.goatbots_price_, card.scryfall_price_));
+          it->card_history_.price_history_.emplace_back(
+            std::make_tuple(card.quantity_, card.goatbots_price_, card.scryfall_price_));
         } else {
           // Quantity has not changed, but price history should still be added
-          it->card_history_.price_history_.emplace_back(std::make_tuple(std::nullopt, card.goatbots_price_, card.scryfall_price_));
+          it->card_history_.price_history_.emplace_back(
+            std::make_tuple(std::nullopt, card.goatbots_price_, card.scryfall_price_));
         }
       } else {
         // Add the card history
-        this->card_histories_.emplace_back(
-          CardHistoryAggregate{ .card_history_{ card_history_with_prev_unavailable(std::move(card), this->timestamps_.size()) },
-                                                                 .newest_quantity_ = card.quantity_ });
+        this->card_histories_.emplace_back(CardHistoryAggregate{
+          .card_history_{ card_history_with_prev_unavailable(std::move(card), this->timestamps_.size()) },
+          .newest_quantity_ = card.quantity_ });
       }
     }
     this->timestamps_.emplace_back(std::move(timestamp));
@@ -87,16 +89,15 @@ public:
 
   [[nodiscard]] inline auto Size() const noexcept -> std::size_t { return card_histories_.size(); }
 
-  [[nodiscard]] inline auto ToCsvStr() noexcept -> std::string {
+  [[nodiscard]] inline auto ToCsvStr() noexcept -> std::string
+  {
     std::string csv_str;
     static constexpr std::size_t prealloc_10_mib = 1024 * 1024 * 10;
     csv_str.reserve(prealloc_10_mib);
 
     // Write the header
     csv_str += "id,quantity,name,set,rarity,foil";
-    for (auto &&timestamp : this->timestamps_) {
-      csv_str += ',' + timestamp;
-    }
+    for (auto &&timestamp : this->timestamps_) { csv_str += ',' + timestamp; }
 
     // Write the card histories
     for (auto &&card_hist : this->card_histories_) {
@@ -106,7 +107,6 @@ public:
 
     return csv_str;
   }
-
 };
 
 }// namespace mtgo
