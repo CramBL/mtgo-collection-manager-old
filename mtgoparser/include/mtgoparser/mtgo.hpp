@@ -150,7 +150,7 @@ void inline Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfa
     if (c.foil_) { continue; }
     if (c.id_ == 1) [[unlikely]] {
       // Event ticket
-      c.scryfall_price_ = 1.0;
+      c.scryfall_price_ = 1.0f;
       continue;
     }
 
