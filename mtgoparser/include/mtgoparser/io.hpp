@@ -217,4 +217,52 @@ using ErrorStr = std::string;
   return outcome::success(std::equal(buf_iter(fA.rdbuf()), buf_iter(), buf_iter(fB.rdbuf())));
 }
 
+
+/**
+ * @brief Holds a file path and a timestamp associated with the file.
+ */
+struct [[nodiscard]] FileWithTimestamp
+{
+  fs::path fpath_;
+  std::string timestamp_;
+};
+
+/**
+ * @brief Get a list of files with an underscord followed by an ISO 8601 timestamp as suffix in a directory sorted by age (oldest first).
+ * The timestamp is in the format %Y-%m-%dT%H%M%SZ without sub-second precision.
+ *
+ * @param dir_path The path to the directory
+ *
+ * @return A vector of `FileWithTimestamp` sorted by age (oldest first).
+ */
+[[nodiscard]] inline auto get_files_with_timestamp(const fs::path &dir_path) -> std::vector<FileWithTimestamp>
+{
+  std::vector<FileWithTimestamp> files_with_timestamp{};
+
+  // Iterate over the files in the directory
+  for (const auto &entry : fs::directory_iterator(dir_path)) {
+    // If the file is a regular file
+    if (entry.is_regular_file()) {
+      // Get the file name
+      const auto &fname = entry.path().filename().string();
+
+      // If the file name ends with a timestamp
+      if (fname.ends_with('Z')) {
+        // Get the timestamp
+        std::string timestamp = fname.substr(fname.find_last_of('_') + 1);
+
+        // Add the file to the vector
+        files_with_timestamp.emplace_back(FileWithTimestamp{ .fpath_ = entry.path(), .timestamp_ = std::move(timestamp) });
+      }
+    }
+  }
+
+  // Sort the files by timestamp (oldest first)
+  std::sort(files_with_timestamp.begin(), files_with_timestamp.end(), [](const auto &a, const auto &b) {
+    return a.timestamp_ < b.timestamp_;
+  });
+
+  return files_with_timestamp;
+}
+
 }// namespace io_util
