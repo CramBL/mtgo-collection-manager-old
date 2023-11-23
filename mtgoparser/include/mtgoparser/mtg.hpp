@@ -71,7 +71,7 @@ namespace util {
    *
    * @return std::string representation of the Rarity enum.
    */
-  template<rarity_formatter Format> constexpr auto inline rarity_to_string(Rarity rarity) -> std::string
+  template<rarity_formatter Format> auto inline rarity_to_string(Rarity rarity) -> std::string
   {
 
     // Aliases for slightly more readability.
