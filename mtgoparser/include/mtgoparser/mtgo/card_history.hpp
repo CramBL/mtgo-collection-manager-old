@@ -120,7 +120,6 @@ struct [[nodiscard]] CardHistory
 
 [[nodiscard]] inline auto csv_row_to_card_history(std::string &&csv_row) -> CardHistory
 {
-
   constexpr char delimiter = ',';
 
   auto sub_strs = mtgo::csv::into_substr_vec(std::move(csv_row), delimiter);

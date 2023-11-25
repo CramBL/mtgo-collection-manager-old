@@ -130,7 +130,6 @@ TEST_CASE("Parse small collection")
 
       SECTION("mtgo::csv_to_collection_history")
       {
-
         std::string to_csv_str = collection_history.ToCsvStr();
         CHECK(to_csv_str == collection_history.ToCsvStr());
 
