@@ -460,6 +460,7 @@ TEST_CASE("CSV-data to CardHistory & CollectionHistory")
     CHECK(card_hist3.rarity_ == mtg::Rarity::Rare);
     CHECK(card_hist3.foil_ == false);
     CHECK(card_hist3.price_history_.size() == 3);
+  }
 
     SECTION("mtgo::csv_to_collection_history")
     {
@@ -503,10 +504,8 @@ TEST_CASE("CSV-data to CardHistory & CollectionHistory")
 
         CHECK(collection_history.Size() == 3);
       }
-
-      CHECK(collection_history.Size() == 3);
     }
-  }
+
 }
 
 // NOLINTEND
