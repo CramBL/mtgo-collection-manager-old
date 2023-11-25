@@ -475,7 +475,7 @@ TEST_CASE("CSV-data to CardHistory & CollectionHistory")
       CHECK(card_hist1.foil_ == false);
       CHECK(card_hist1.price_history_.size() == 3);
       auto card_hist_1_copy = mtgo::csv_row_to_card_history(std::move(row_1_copy));
-      CHECK(card_hist1 == card_hist_1_copy); // Test equality operator
+      CHECK(card_hist1 == card_hist_1_copy);// Test equality operator
 
       auto card_hist2 = mtgo::csv_row_to_card_history(std::move(rows.at(2)));
       CHECK(card_hist2.id_ == 106729);
@@ -485,7 +485,7 @@ TEST_CASE("CSV-data to CardHistory & CollectionHistory")
       CHECK(card_hist2.rarity_ == mtg::Rarity::Rare);
       CHECK(card_hist2.foil_ == false);
       CHECK(card_hist2.price_history_.size() == 3);
-      CHECK(card_hist2 != card_hist1); // Test inequality operator
+      CHECK(card_hist2 != card_hist1);// Test inequality operator
 
       auto card_hist3 = mtgo::csv_row_to_card_history(std::move(rows.at(3)));
       CHECK(card_hist3.id_ == 106729);
@@ -498,11 +498,10 @@ TEST_CASE("CSV-data to CardHistory & CollectionHistory")
 
       SECTION("mtgo::csv_to_collection_history")
       {
-        std::string csv_to_hist_string = local_test_csv_data; // Copy the test data
+        std::string csv_to_hist_string = local_test_csv_data;// Copy the test data
         auto collection_history = mtgo::csv_to_collection_history(std::move(csv_to_hist_string));
 
         CHECK(collection_history.Size() == 3);
-
       }
 
       CHECK(collection_history.Size() == 3);

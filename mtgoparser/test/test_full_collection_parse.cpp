@@ -132,7 +132,7 @@ TEST_CASE("Parse small collection")
       {
 
         std::string to_csv_str = collection_history.ToCsvStr();
-        CHECK( to_csv_str == collection_history.ToCsvStr() );
+        CHECK(to_csv_str == collection_history.ToCsvStr());
 
         // Deserialize the CSV string back into a CollectionHistory
         auto new_collection_history = mtgo::csv_to_collection_history(std::move(to_csv_str));
@@ -141,7 +141,7 @@ TEST_CASE("Parse small collection")
         CHECK(new_collection_history.ToCsvStr() == collection_history.ToCsvStr());
       }
       // Clean up by removing the files and directory
-    std::filesystem::remove_all(sub_dir);
+      std::filesystem::remove_all(sub_dir);
     }
   }
 }
