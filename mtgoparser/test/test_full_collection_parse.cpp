@@ -9,11 +9,11 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 using Catch::Matchers::ContainsSubstring;
 
-#include "mtgoparser/goatbots.hpp"
-#include "mtgoparser/io.hpp"
-#include "mtgoparser/mtgo.hpp"
-#include "mtgoparser/mtgo/history_aggregator.hpp"
-#include "mtgoparser/scryfall.hpp"
+#include <mtgoparser/goatbots.hpp>
+#include <mtgoparser/io.hpp>
+#include <mtgoparser/mtgo.hpp>
+#include <mtgoparser/scryfall.hpp>
+#include <mtgoparser/mtgo/history_aggregator.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -56,9 +56,9 @@ TEST_CASE("Parse small collection")
     REQUIRE(mtgo_collection.Size() == 5);
 
     mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
-    mtgo_collection.PrettyPrint();
+    // mtgo_collection.PrettyPrint();
     mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
-    mtgo_collection.PrettyPrint();
+    // mtgo_collection.PrettyPrint();
 
     CHECK(mtgo_collection.TotalCards() == 457);
 
@@ -96,7 +96,7 @@ TEST_CASE("Parse small collection")
 
     mtgo_collection.ExtractGoatbotsInfo(card_defs.value(), price_hist.value());
     mtgo_collection.ExtractScryfallInfo(std::move(scryfall_vec.value()));
-    mtgo_collection.PrettyPrint();
+    // mtgo_collection.PrettyPrint();
 
     auto pretty_json_str = mtgo_collection.ToJsonPretty();
     REQUIRE(mtgo_collection == mtgo::Collection(pretty_json_str));
@@ -175,7 +175,7 @@ TEST_CASE("Parse small collection")
         auto csv_string = collection_history.ToCsvStr();
         INFO("CSV string: " << csv_string);
         csv_file << collection_history.ToCsvStr();
-        fmt::println("CSV string:\n{}", csv_string);
+        // fmt::println("CSV string:\n{}", csv_string);
       }
 
       // Clean up by removing the files and directory
@@ -196,6 +196,14 @@ TEST_CASE("Parse small collection")
         INFO("CSV file name: " << new_csv_fpath.filename().string());
         CHECK(new_csv_fpath.filename().string() == "mtgo_cards_2023-11-05T152800Z.csv");
         CHECK(new_csv_fpath.extension().string() == ".csv");
+
+        SECTION("mtgo::csv_to_collection_history")
+        {
+          // Parse the CSV file back into a CollectionHistory
+          auto csv_str = io_util::read_to_str_buf(new_csv_fpath);
+          auto new_collection_history = mtgo::csv_to_collection_history(std::move(csv_str));
+          //CHECK(new_collection_history.Size() == 3000);
+        }
 
         // Clean up by removing the files and directory
         std::filesystem::remove_all(sub_dir);
