@@ -11,6 +11,8 @@ MTGO Collection Manager
 [![mtgoparser-ci](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgoparser-ci.yml/badge.svg)](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgoparser-ci.yml)
 [![mtgoupdater-ci](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgoupdater-ci.yml/badge.svg)](https://github.com/CramBL/mtgo-collection-manager/actions/workflows/mtgoupdater-ci.yml)
 
+[![CodeFactor](https://www.codefactor.io/repository/github/crambl/mtgo-collection-manager/badge)](https://www.codefactor.io/repository/github/crambl/mtgo-collection-manager)
+
 ## Purpose
 To automate some tasks regarding effective management of [MTGO](https://www.mtgo.com/en/mtgo) collection, that are too cumbersome for anyone to actually do them manually.
 

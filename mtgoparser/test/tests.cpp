@@ -26,7 +26,6 @@ constinit auto static_clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option(
 
 TEST_CASE("Test basic CLAP")
 {
-
   char argv0[] = "mtgo_preprocessor";
   char argv1[] = "--version";
 
@@ -56,7 +55,6 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Alias version cmd - Show version")
   {
-
     auto clap_alias_version = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", Flag, "-V")));
 
     CHECK(clap_alias_version.Parse(arg_vec) == 0);
@@ -71,7 +69,6 @@ TEST_CASE("Test basic CLAP")
 
 TEST_CASE("Test CLAP with options and values")
 {
-
   char argv0[] = "mtgo_preprocessor";
   char arg_version[] = "--version";
   char arg_save_as[] = "--save-as";
@@ -134,7 +131,6 @@ TEST_CASE("Test CLAP with options and values")
 
 TEST_CASE("MTGO card - Initialize and use of")
 {
-
   SECTION("Initialize")
   {
     // Test constructors, assignments, initializations with different types
@@ -152,16 +148,16 @@ TEST_CASE("MTGO card - Initialize and use of")
 
     unsigned int id2 = 1;
     mtgo::Card mtgo_card2 =
-      mtgo::Card(id2, util::sv_to_uint<uint16_t>("1").value(), "name", "set", "C", true, 1.0, 2.0);
+      mtgo::Card(id2, util::sv_to_uint<uint16_t>("1").value(), "name", "set", "C", true, 1.0f, 2.0f);
     CHECK(mtgo_card2.id_ == 1);
     CHECK(mtgo_card2.quantity_ == 1);
     CHECK(mtgo_card2.name_ == "name");
     CHECK(mtgo_card2.set_ == "set");
     CHECK(mtgo_card2.rarity_ == mtg::Rarity::Common);
     CHECK(mtgo_card2.foil_ == true);
-    CHECK(mtgo_card2.goatbots_price_ == 1.0);
+    CHECK(mtgo_card2.goatbots_price_ == 1.0f);
     REQUIRE(mtgo_card2.scryfall_price_.has_value());
-    REQUIRE(mtgo_card2.scryfall_price_.value() == 2.0);
+    REQUIRE(mtgo_card2.scryfall_price_.value() == 2.0f);
 
     CHECK(mtgo_card != mtgo_card2);
 
@@ -197,8 +193,8 @@ TEST_CASE("MTGO card - Initialize and use of")
 
     uint16_t ids = 1;
     uint16_t quantities = 1;
-    mtgo::Card mtgo_card = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0, 2.0);
-    mtgo::Card mtgo_card2 = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0, 2.0);
+    mtgo::Card mtgo_card = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0f, 2.0f);
+    mtgo::Card mtgo_card2 = mtgo::Card(ids, quantities, "name", "set", "common", true, 1.0f, 2.0f);
 
     // Move constructor
     mtgo::Card mtgo_card3(std::move(mtgo_card));
@@ -208,7 +204,7 @@ TEST_CASE("MTGO card - Initialize and use of")
 
     // Move assignment
     uint16_t id_tmp = 2;
-    auto mtgo_card_tmp = mtgo::Card(id_tmp, quantities, "name", "set", "common", true, 1.0, 2.0);
+    auto mtgo_card_tmp = mtgo::Card(id_tmp, quantities, "name", "set", "common", true, 1.0f, 2.0f);
     mtgo_card3 = std::move(mtgo_card_tmp);
     CHECK(mtgo_card3 != mtgo_card2);// ID should differ
     // Check that mtgo_card_tmp is now invalid (commented out as it triggered warning in CI)
@@ -285,7 +281,6 @@ TEST_CASE("Parse state_log.toml")
   // Check goatbots values
   SECTION("Goatbots state_log data")
   {
-
     std::optional<toml::date_time> card_defs_updated_at =
       state_log["goatbots"]["card_definitions_updated_at"].value<toml::date_time>();
     REQUIRE(card_defs_updated_at.has_value());
@@ -738,6 +733,129 @@ TEST_CASE("io_util::is_files_equal")
       std::filesystem::remove_all(dirA);
       std::filesystem::remove(fnameB);
     }
+  }
+}
+
+TEST_CASE("io_util::get_files_with_timestamp")
+{
+  SECTION("2 files year differs")
+  {
+    // Create two files with different timestamps
+    const std::string newer_timestamp{ "2023-11-14T113236Z" };
+    const std::string older_timestamp{ "2022-11-14T113236Z" };
+    const std::string newer{ "mtgo-cards_" + newer_timestamp };
+    const std::string older{ "mtgo-cards_" + older_timestamp };
+    const std::string sub_dir{ "collection-history" };
+
+    std::filesystem::create_directory(sub_dir);
+
+    // Paths to the files
+    const std::filesystem::path newer_path = sub_dir + "/" + newer;
+    const std::filesystem::path older_path = sub_dir + "/" + older;
+
+    // Save the files
+    {
+      std::ofstream test_fileA(newer_path);
+      std::ofstream test_fileB(older_path);
+    }
+
+    // Get the files sorted by timestamp
+    auto files = io_util::get_files_with_timestamp(sub_dir);
+    CHECK(files.at(0).fpath_ == older_path);
+    CHECK(files.at(0).timestamp_ == older_timestamp);
+    CHECK(files.at(1).fpath_ == newer_path);
+    CHECK(files.at(1).timestamp_ == newer_timestamp);
+
+    // Clean up by removing the files and directory
+    std::filesystem::remove_all(sub_dir);
+  }
+
+  SECTION("2 files - day and time differs")
+  {
+    // Create two files with different timestamps
+    const std::string newer_timestamp{ "2023-11-17T075106Z" };
+    const std::string older_timestamp{ "2023-11-14T113236Z" };
+    const std::string newer{ "mtgo-cards_" + newer_timestamp };
+    const std::string older{ "mtgo-cards_" + older_timestamp };
+    const std::string sub_dir{ "collection-history" };
+
+    std::filesystem::create_directory(sub_dir);
+
+    // Paths to the files
+    const std::filesystem::path newer_path = sub_dir + "/" + newer;
+    const std::filesystem::path older_path = sub_dir + "/" + older;
+
+    // Save the files
+    {
+      std::ofstream test_fileA(newer_path);
+      std::ofstream test_fileB(older_path);
+    }
+
+    // Get the files sorted by timestamp
+    auto files = io_util::get_files_with_timestamp(sub_dir);
+    CHECK(files.at(0).fpath_ == older_path);
+    CHECK(files.at(0).timestamp_ == older_timestamp);
+    CHECK(files.at(1).fpath_ == newer_path);
+    CHECK(files.at(1).timestamp_ == newer_timestamp);
+
+    // Clean up by removing the files and directory
+    std::filesystem::remove_all(sub_dir);
+  }
+
+  SECTION("5 files - all different")
+  {
+    // Create two files with different timestamps
+    const std::string oldest_timestamp{ "2022-11-05T075106Z" };
+    const std::string second_timestamp{ "2023-01-00T003236Z" };
+    const std::string third_timestamp{ "2023-09-14T113236Z" };
+    const std::string fourth_timestamp{ "2023-11-14T113236Z" };
+    const std::string fifth_timestamp{ "2023-11-14T123236Z" };
+    const std::string oldest{ "mtgo-cards_" + oldest_timestamp };
+    const std::string second{ "mtgo-cards_" + second_timestamp };
+    const std::string third{ "mtgo-cards_" + third_timestamp };
+    const std::string fourth{ "mtgo-cards_" + fourth_timestamp };
+    const std::string fifth{ "mtgo-cards_" + fifth_timestamp };
+    const std::string sub_dir{ "collection-history" };
+
+    std::filesystem::create_directory(sub_dir);
+
+    // Paths to the files
+    const std::filesystem::path oldest_path = sub_dir + "/" + oldest;
+    const std::filesystem::path second_path = sub_dir + "/" + second;
+    const std::filesystem::path third_path = sub_dir + "/" + third;
+    const std::filesystem::path fourth_path = sub_dir + "/" + fourth;
+    const std::filesystem::path fifth_path = sub_dir + "/" + fifth;
+
+    // Save the files
+    {
+      std::ofstream file_oldest(oldest_path);
+      std::ofstream file_second(second_path);
+      std::ofstream file_third(third_path);
+      std::ofstream file_fourth(fourth_path);
+      std::ofstream file_fifth(fifth_path);
+    }
+
+    // Get the files sorted by timestamp
+    auto files = io_util::get_files_with_timestamp(sub_dir);
+
+    CHECK(files.at(0).fpath_ == oldest_path);
+    CHECK(files.at(0).timestamp_ == oldest_timestamp);
+
+    CHECK(files.at(1).fpath_ == second_path);
+    CHECK(files.at(1).timestamp_ == second_timestamp);
+
+    CHECK(files.at(2).fpath_ == third_path);
+    CHECK(files.at(2).timestamp_ == third_timestamp);
+
+    CHECK(files.at(3).fpath_ == fourth_path);
+    CHECK(files.at(3).timestamp_ == fourth_timestamp);
+
+    CHECK(files.at(4).fpath_ == fifth_path);
+    CHECK(files.at(4).timestamp_ == fifth_timestamp);
+
+
+    // Clean up by removing the files and directory
+    std::filesystem::remove_all(sub_dir);
   }
 }
 

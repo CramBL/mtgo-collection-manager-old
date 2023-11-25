@@ -39,7 +39,7 @@ struct [[nodiscard]] CardDefinition
   [[nodiscard]] inline constexpr bool operator!=(const CardDefinition &other) const { return !(*this == other); }
 };
 
-using price_hist_map_t = boost::unordered_flat_map<uint32_t, double>;
+using price_hist_map_t = boost::unordered_flat_map<uint32_t, float>;
 using card_defs_map_t = boost::unordered_flat_map<uint32_t, CardDefinition>;
 
 template<class T>

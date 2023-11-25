@@ -7,6 +7,7 @@
 
 #include <mtgoparser/mtgo/card_history.hpp>
 #include <mtgoparser/mtgo/csv.hpp>
+#include <mtgoparser/mtgo/history_aggregator.hpp>
 
 #include <span>
 #include <string>
@@ -15,22 +16,22 @@
 
 using Catch::Matchers::ContainsSubstring;
 
+const std::string global_test_csv_data =
+  R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
+120020,1,"In the Darkness Bind Them",LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3
+106729,1,"Razorverge Thicket",ONE,R,false,[1]1.1;0.9,2;2.1,[11]0.9;-
+106729,1,"Razorverge Thicket",THR,R,false,-;-,[2]2;2.1,[0]0.9;-)";
+
 
 TEST_CASE("mtgo::csv::into_substr_vec")
 {
-  const std::string test_csv_data =
-    R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
-120020,1,In the Darkness Bind Them,LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3
-106729,1,Razorverge Thicket,ONE,R,false,[1]1.1;0.9,2;2.1,[11]0.9;-
-106729,1,Razorverge Thicket,THR,R,false,-;-,[2]2;2.1,[0]0.9;-)";
-
-  std::vector<std::string> rows = mtgo::csv::into_substr_vec(test_csv_data, '\n');
+  std::vector<std::string> rows = mtgo::csv::into_lines_vec(global_test_csv_data);
   REQUIRE(rows.size() == 4);
 
   CHECK(rows.at(0) == "id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z");
-  CHECK(rows.at(1) == "120020,1,In the Darkness Bind Them,LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3");
-  CHECK(rows.at(2) == "106729,1,Razorverge Thicket,ONE,R,false,[1]1.1;0.9,2;2.1,[11]0.9;-");
-  CHECK(rows.at(3) == "106729,1,Razorverge Thicket,THR,R,false,-;-,[2]2;2.1,[0]0.9;-");
+  CHECK(rows.at(1) == "120020,1,\"In the Darkness Bind Them\",LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3");
+  CHECK(rows.at(2) == "106729,1,\"Razorverge Thicket\",ONE,R,false,[1]1.1;0.9,2;2.1,[11]0.9;-");
+  CHECK(rows.at(3) == "106729,1,\"Razorverge Thicket\",THR,R,false,-;-,[2]2;2.1,[0]0.9;-");
 
 
   auto headers = mtgo::csv::into_substr_vec(rows[0], ',');
@@ -115,13 +116,8 @@ TEST_CASE("mtgo::csv::str_to_floats")
 
 TEST_CASE("mtgo::csv::into_substr_vec & mtgo::csv::str_to_floats")
 {
-  const std::string test_csv_data =
-    R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
-120020,1,In the Darkness Bind Them,LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3
-106729,1,Razorverge Thicket,ONE,R,false,[1]1.1;0.9,2;2.1,[11]0.9;-
-106729,1,Razorverge Thicket,THR,R,false,-;-,[2]2;2.1,[0]0.9;-)";
 
-  std::vector<std::string> rows = mtgo::csv::into_substr_vec(test_csv_data, '\n');
+  std::vector<std::string> rows = mtgo::csv::into_lines_vec(global_test_csv_data);
   REQUIRE(rows.size() == 4);
 
   auto headers = mtgo::csv::into_substr_vec(rows[0], ',');
@@ -207,13 +203,8 @@ TEST_CASE("mtgo::csv::floats_from_span")
 
   SECTION("On CSV Data with mtgo::csv::into_substr_vec")
   {
-    const std::string test_csv_data =
-      R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
-120020,1,In the Darkness Bind Them,LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3
-106729,1,Razorverge Thicket,ONE,R,false,[1]1.1;0.9,2;2.1,[11]0.9;-
-106729,1,Razorverge Thicket,THR,R,false,-;-,[2]2;2.1,[0]0.9;-)";
 
-    std::vector<std::string> rows = mtgo::csv::into_substr_vec(test_csv_data, '\n');
+    std::vector<std::string> rows = mtgo::csv::into_lines_vec(global_test_csv_data);
     REQUIRE(rows.size() == 4);
     auto headers = mtgo::csv::into_substr_vec(rows[0], ',');
     REQUIRE(headers.size() == 9);
@@ -246,11 +237,11 @@ TEST_CASE("mtgo::csv::floats_from_span")
 
   SECTION("Parse CSV into row data and back into CSV string")
   {
-    const std::string test_csv_data =
+    const std::string local_test_csv_data =
       R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
-120020,1,In the Darkness Bind Them,LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3)";
+120020,1,"In the Darkness Bind Them",LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3)";
 
-    std::vector<std::string> rows = mtgo::csv::into_substr_vec(test_csv_data, '\n');
+    std::vector<std::string> rows = mtgo::csv::into_lines_vec(local_test_csv_data);
     REQUIRE(rows.size() == 2);
     auto headers = mtgo::csv::into_substr_vec(rows[0], ',');
     REQUIRE(headers.size() == 9);
@@ -259,6 +250,8 @@ TEST_CASE("mtgo::csv::floats_from_span")
 
     auto q_gb_sc = mtgo::csv::quant_and_prices_from_span(std::span(row1).subspan(6));
     REQUIRE(q_gb_sc.size() == 3);
+
+    std::string card_name = '\"' + row1.at(2) + '\"';// Should be quoted
 
     std::string csv_str = fmt::format("{},{},{},{},{},{},{},{},{}\n{},{},{},{},{},{}",
       headers.at(0),
@@ -272,7 +265,7 @@ TEST_CASE("mtgo::csv::floats_from_span")
       headers.at(8),
       row1.at(0),
       row1.at(1),
-      row1.at(2),
+      card_name,
       row1.at(3),
       row1.at(4),
       row1.at(5));
@@ -289,16 +282,16 @@ TEST_CASE("mtgo::csv::floats_from_span")
 
     INFO("csv_str formatting complete with floats added:\n" << csv_str);
 
-    CHECK(csv_str == test_csv_data);
+    CHECK(csv_str == local_test_csv_data);
   }
 
   SECTION("Parse CSV into mtgo::CardHistory")
   {
-    const std::string test_csv_data =
+    const std::string local_test_csv_data =
       R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
-120020,1,In the Darkness Bind Them,LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3)";
+120020,1,"In the Darkness Bind Them",LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3)";
 
-    std::vector<std::string> rows = mtgo::csv::into_substr_vec(test_csv_data, '\n');
+    std::vector<std::string> rows = mtgo::csv::into_lines_vec(local_test_csv_data);
     REQUIRE(rows.size() == 2);
     auto headers = mtgo::csv::into_substr_vec(rows[0], ',');
     REQUIRE(headers.size() == 9);
@@ -346,13 +339,7 @@ TEST_CASE("mtgo::csv::floats_from_span")
     using mtgo::card_history_to_csv_row;
     using util::sv_to_uint;
 
-    const std::string test_csv_data =
-      R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
-120020,1,In the Darkness Bind Them,LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3
-106729,1,Razorverge Thicket,ONE,R,false,[1]1.1;0.9,2;2.1,[11]0.9;-
-106729,1,Razorverge Thicket,THR,R,false,-;-,[2]2;2.1,[0]0.9;-)";
-
-    std::vector<std::string> rows = into_substr_vec(test_csv_data, '\n');
+    std::vector<std::string> rows = mtgo::csv::into_lines_vec(global_test_csv_data);
     REQUIRE(rows.size() == 4);
 
     auto headers = into_substr_vec(rows[0], ',');
@@ -430,7 +417,92 @@ TEST_CASE("mtgo::csv::floats_from_span")
       serialized_csv += csv_row3;
 
       INFO("serialized_csv:\n" << serialized_csv);
-      CHECK(serialized_csv == test_csv_data);
+      CHECK(serialized_csv == global_test_csv_data);
+    }
+  }
+}
+
+TEST_CASE("CSV-data to CardHistory & CollectionHistory")
+{
+  const std::string local_test_csv_data =
+    R"(id,quantity,name,set,rarity,foil,2023-11-06T083944Z,2023-11-06T115147Z,2023-11-08T084732Z
+120020,1,"In the Darkness Bind Them",LTC,R,false,[4]0.72;0.1,[8]0.78;-,0.4;0.3
+106729,1,"Razorverge Thicket",ONE,R,false,[1]1.1;0.9,2;2.1,[11]0.9;-
+106729,1,"Haktos the Unscarred",THR,R,false,-;-,[2]2;2.1,[0]0.9;-)";
+
+  SECTION("mtgo::csv_row_to_card_history")
+  {
+    auto rows = mtgo::csv::into_lines_vec(local_test_csv_data);
+
+    auto card_hist1 = mtgo::csv_row_to_card_history(std::move(rows.at(1)));
+    CHECK(card_hist1.id_ == 120020);
+    CHECK(card_hist1.quantity_ == "1");
+    CHECK(card_hist1.name_ == "In the Darkness Bind Them");
+    CHECK(card_hist1.set_ == "LTC");
+    CHECK(card_hist1.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_hist1.foil_ == false);
+    CHECK(card_hist1.price_history_.size() == 3);
+
+    auto card_hist2 = mtgo::csv_row_to_card_history(std::move(rows.at(2)));
+    CHECK(card_hist2.id_ == 106729);
+    CHECK(card_hist2.quantity_ == "1");
+    CHECK(card_hist2.name_ == "Razorverge Thicket");
+    CHECK(card_hist2.set_ == "ONE");
+    CHECK(card_hist2.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_hist2.foil_ == false);
+    CHECK(card_hist2.price_history_.size() == 3);
+
+    auto card_hist3 = mtgo::csv_row_to_card_history(std::move(rows.at(3)));
+    CHECK(card_hist3.id_ == 106729);
+    CHECK(card_hist3.quantity_ == "1");
+    CHECK(card_hist3.name_ == "Haktos the Unscarred");
+    CHECK(card_hist3.set_ == "THR");
+    CHECK(card_hist3.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_hist3.foil_ == false);
+    CHECK(card_hist3.price_history_.size() == 3);
+  }
+
+  SECTION("mtgo::csv_to_collection_history")
+  {
+    auto rows = mtgo::csv::into_lines_vec(local_test_csv_data);
+
+    std::string row_1_copy = rows.at(1);
+    mtgo::CardHistory card_hist1 = mtgo::csv_row_to_card_history(std::move(rows.at(1)));
+    CHECK(card_hist1.id_ == 120020);
+    CHECK(card_hist1.quantity_ == "1");
+    CHECK(card_hist1.name_ == "In the Darkness Bind Them");
+    CHECK(card_hist1.set_ == "LTC");
+    CHECK(card_hist1.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_hist1.foil_ == false);
+    CHECK(card_hist1.price_history_.size() == 3);
+    auto card_hist_1_copy = mtgo::csv_row_to_card_history(std::move(row_1_copy));
+    CHECK(card_hist1 == card_hist_1_copy);// Test equality operator
+
+    auto card_hist2 = mtgo::csv_row_to_card_history(std::move(rows.at(2)));
+    CHECK(card_hist2.id_ == 106729);
+    CHECK(card_hist2.quantity_ == "1");
+    CHECK(card_hist2.name_ == "Razorverge Thicket");
+    CHECK(card_hist2.set_ == "ONE");
+    CHECK(card_hist2.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_hist2.foil_ == false);
+    CHECK(card_hist2.price_history_.size() == 3);
+    CHECK(card_hist2 != card_hist1);// Test inequality operator
+
+    auto card_hist3 = mtgo::csv_row_to_card_history(std::move(rows.at(3)));
+    CHECK(card_hist3.id_ == 106729);
+    CHECK(card_hist3.quantity_ == "1");
+    CHECK(card_hist3.name_ == "Haktos the Unscarred");
+    CHECK(card_hist3.set_ == "THR");
+    CHECK(card_hist3.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_hist3.foil_ == false);
+    CHECK(card_hist3.price_history_.size() == 3);
+
+    SECTION("mtgo::csv_to_collection_history")
+    {
+      std::string csv_to_hist_string = local_test_csv_data;// Copy the test data
+      auto collection_history = mtgo::csv_to_collection_history(std::move(csv_to_hist_string));
+
+      CHECK(collection_history.Size() == 3);
     }
   }
 }

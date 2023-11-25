@@ -91,6 +91,9 @@ public:
   [[nodiscard]] inline constexpr bool operator==(const Collection &other) const { return this->cards_ == other.cards_; }
   [[nodiscard]] inline constexpr bool operator!=(const Collection &other) const { return !(*this == other); }
 
+  // Begin/end iterators
+  [[nodiscard]] inline auto TakeCards() noexcept -> std::vector<Card> && { return std::move(this->cards_); }
+
 private:
   // Helpers
 };
@@ -147,14 +150,14 @@ void inline Collection::ExtractScryfallInfo(std::vector<scryfall::Card> &&scryfa
     if (c.foil_) { continue; }
     if (c.id_ == 1) [[unlikely]] {
       // Event ticket
-      c.scryfall_price_ = 1.0;
+      c.scryfall_price_ = 1.0f;
       continue;
     }
 
     while (scry_it != scry_end && (*scry_it).mtgo_id <= c.id_) {
       if ((*scry_it).mtgo_id == c.id_ && (*scry_it).prices.tix.has_value()
           && (!(*scry_it).prices.tix.value().empty())) {
-        c.scryfall_price_ = std::stod((*scry_it).prices.tix.value());
+        c.scryfall_price_ = std::stof((*scry_it).prices.tix.value());
       }
       ++scry_it;
     }
