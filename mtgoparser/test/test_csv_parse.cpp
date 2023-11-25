@@ -434,7 +434,8 @@ TEST_CASE("CSV-data to CardHistory & CollectionHistory")
     {
       auto rows = mtgo::csv::into_lines_vec(local_test_csv_data);
 
-      auto card_hist1 = mtgo::csv_row_to_card_history(std::move(rows.at(1)));
+      std::string row_1_copy = rows.at(1);
+      mtgo::CardHistory card_hist1 = mtgo::csv_row_to_card_history(std::move(rows.at(1)));
       CHECK(card_hist1.id_ == 120020);
       CHECK(card_hist1.quantity_ == "1");
       CHECK(card_hist1.name_ == "In the Darkness Bind Them");
@@ -442,6 +443,8 @@ TEST_CASE("CSV-data to CardHistory & CollectionHistory")
       CHECK(card_hist1.rarity_ == mtg::Rarity::Rare);
       CHECK(card_hist1.foil_ == false);
       CHECK(card_hist1.price_history_.size() == 3);
+      auto card_hist_1_copy = mtgo::csv_row_to_card_history(std::move(row_1_copy));
+      CHECK(card_hist1 == card_hist_1_copy); // Test equality operator
 
       auto card_hist2 = mtgo::csv_row_to_card_history(std::move(rows.at(2)));
       CHECK(card_hist2.id_ == 106729);
@@ -451,6 +454,7 @@ TEST_CASE("CSV-data to CardHistory & CollectionHistory")
       CHECK(card_hist2.rarity_ == mtg::Rarity::Rare);
       CHECK(card_hist2.foil_ == false);
       CHECK(card_hist2.price_history_.size() == 3);
+      CHECK(card_hist2 != card_hist1); // Test inequality operator
 
       auto card_hist3 = mtgo::csv_row_to_card_history(std::move(rows.at(3)));
       CHECK(card_hist3.id_ == 106729);

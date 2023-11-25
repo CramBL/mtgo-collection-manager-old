@@ -64,8 +64,91 @@ TEST_CASE("Parse small collection")
 
     auto pretty_json_str = mtgo_collection.ToJsonPretty();
     CHECK(mtgo_collection == mtgo::Collection(pretty_json_str));
-  }
 
+    SECTION("Aggregate price history")
+    {
+      // Save the same collection to JSON twice with different timestamps
+      // Then aggregate the two collections
+      auto json_str = mtgo_collection.ToJson();
+      auto json_str2 = mtgo_collection.ToJson();
+
+      // Save to files
+      const std::string fname{ "mtgo_cards_2023-11-05T152700Z" };
+      const std::string fname2{ "mtgo_cards_2023-11-05T152800Z" };
+
+      const std::string sub_dir{ "collection-history-small-collection-parse" };
+      std::filesystem::create_directory(sub_dir);
+
+      const std::filesystem::path fpath{ sub_dir + "/" + fname };
+      const std::filesystem::path fpath2{ sub_dir + "/" + fname2 };
+      INFO("Saving files to: " << fpath.string() << " and " << fpath2.string());
+      INFO("Files extensions: " << fpath.extension().string() << " and " << fpath2.extension().string());
+
+      {
+        std::ofstream test_file(fpath);
+        test_file << json_str;
+        std::ofstream test_file2(fpath2);
+        test_file2 << json_str2;
+      }
+
+      INFO("Saved files to: " << fpath.string() << " and " << fpath2.string());
+
+      // Get the files with timestamps
+      auto json_files = io_util::get_files_with_timestamp(sub_dir);
+      INFO("Got files with timestamps: " << json_files[0].fpath_.string() << " and " << json_files[1].fpath_.string());
+      CHECK(json_files[0].timestamp_ == "2023-11-05T152700Z");
+      CHECK(json_files[1].timestamp_ == "2023-11-05T152800Z");
+
+      // Take a copy of the most recent timestamp for the CSV-file suffix
+      auto last_timestamp = json_files.at(1).timestamp_;
+
+      // Deserialize the files
+      auto new_json_str = io_util::read_to_str_buf(json_files[0].fpath_);
+      auto new_json_str2 = io_util::read_to_str_buf(json_files[1].fpath_);
+
+      // Deserialize the collections
+      auto new_collection = mtgo::Collection(new_json_str);
+      auto new_collection2 = mtgo::Collection(new_json_str2);
+      CHECK(new_collection.Size() == 5);
+      CHECK(new_collection2.Size() == 5);
+
+      // Aggregate the collections
+      auto cards = new_collection.TakeCards();
+
+      // Transform the vector to a vector of CardHistory
+      std::vector<mtgo::CardHistory> card_histories;
+      card_histories.reserve(cards.size());
+      for (auto &&card : cards) { card_histories.emplace_back(std::move(card)); }
+      CHECK(card_histories.size() == 5);
+
+      auto collection_history = mtgo::CollectionHistory(std::move(card_histories), std::move(json_files[0].timestamp_));
+      CHECK(collection_history.Size() == 5);
+
+      // Add the second collection to the aggregate
+      collection_history.addCollectionPriceHistory(std::move(new_collection2), std::move(json_files[1].timestamp_));
+      CHECK(collection_history.Size() == 5);
+
+      SECTION("mtgo::csv_to_collection_history")
+      {
+
+        std::string to_csv_str = collection_history.ToCsvStr();
+        CHECK( to_csv_str == collection_history.ToCsvStr() );
+
+        // Deserialize the CSV string back into a CollectionHistory
+        auto new_collection_history = mtgo::csv_to_collection_history(std::move(to_csv_str));
+        CHECK(new_collection_history.Size() == 5);
+        CHECK(new_collection_history == collection_history);
+        CHECK(new_collection_history.ToCsvStr() == collection_history.ToCsvStr());
+      }
+      // Clean up by removing the files and directory
+    std::filesystem::remove_all(sub_dir);
+    }
+  }
+}
+
+
+TEST_CASE("Parse medium collection")
+{
   const auto path_mtgogetter_out_scryfall_full = "../../../test/test-data/mtgogetter-out/scryfall-20231002-full.json";
   const auto path_trade_list_medium_3000cards = "../../../test/test-data/mtgo/Full Trade List-medium-3000cards.dek";
   const auto path_goatbots_card_defs_full = "../../../test/test-data/goatbots/card-definitions-2023-10-02-full.json";
@@ -148,6 +231,7 @@ TEST_CASE("Parse small collection")
       auto new_collection2 = mtgo::Collection(new_json_str2);
       CHECK(new_collection.Size() == 3000);
       CHECK(new_collection2.Size() == 3000);
+      CHECK(new_collection == new_collection2);
 
       // Aggregate the collections
       auto cards = new_collection.TakeCards();
@@ -203,7 +287,24 @@ TEST_CASE("Parse small collection")
           // Parse the CSV file back into a CollectionHistory
           auto csv_str = io_util::read_to_str_buf(new_csv_fpath);
           auto new_collection_history = mtgo::csv_to_collection_history(std::move(csv_str));
-          //CHECK(new_collection_history.Size() == 3000);
+          CHECK(new_collection_history.Size() == 3000);
+
+          std::string new_csv_str = new_collection_history.ToCsvStr();
+          CHECK(new_csv_str == new_collection_history.ToCsvStr());
+          std::string old_csv_str = collection_history.ToCsvStr();
+          // Check that making a CSV string doesn't change the CollectionHistory
+          if (new_csv_str != old_csv_str) {
+            // TODO: Figure out why the new string has an extra newline at the end of the header line
+            //        but somehow the old string doesn't, and it only shows up when opening the files in Notepad++
+            auto new_num_newlines = std::count(new_csv_str.begin(), new_csv_str.end(), '\n');
+            auto old_num_newlines = std::count(old_csv_str.begin(), old_csv_str.end(), '\n');
+            CHECK(new_num_newlines == old_num_newlines);
+          }
+
+          // Check that the CSV string is the same as the one we parsed
+          auto new_collection_history2 = mtgo::csv_to_collection_history(std::move(new_csv_str));
+          CHECK(new_collection_history2 == new_collection_history);
+          CHECK(new_collection_history2.ToCsvStr() == new_collection_history.ToCsvStr());
         }
 
         // Clean up by removing the files and directory
