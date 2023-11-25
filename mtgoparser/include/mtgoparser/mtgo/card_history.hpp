@@ -1,12 +1,22 @@
+#pragma once
 
 #include "mtgoparser/mtg.hpp"
 #include "mtgoparser/mtgo/card.hpp"
+#include "mtgoparser/util.hpp"
+#include "mtgoparser/mtgo/csv.hpp"
 
 #include <array>
 #include <cstdint>
 #include <optional>
 #include <tuple>
 #include <vector>
+#include <span>
+
+#ifdef __llvm__
+#define LLVM_ASSUME(expr) __builtin_assume(expr)
+#else
+#define LLVM_ASSUME(expr) ((void)0)
+#endif
 
 using opt_float_t = std::optional<float>;
 using opt_uint_t = std::optional<uint16_t>;
@@ -80,7 +90,7 @@ struct [[nodiscard]] CardHistory
 
   csv_row += std::to_string(card_hist.id_);
   csv_row += ',' + card_hist.quantity_;
-  csv_row += ',' + card_hist.name_;
+  csv_row += ",\"" + card_hist.name_ + '\"';
   csv_row += ',' + card_hist.set_;
   csv_row += ',' + mtg::util::rarity_to_string<mtg::util::Short>(card_hist.rarity_);
 
@@ -97,6 +107,40 @@ struct [[nodiscard]] CardHistory
   }
 
   return csv_row;
+}
+
+[[nodiscard]] inline auto csv_row_to_card_history(std::string &&csv_row) -> CardHistory
+{
+
+  constexpr char delimiter = ',';
+
+  auto sub_strs = mtgo::csv::into_substr_vec(std::move(csv_row), delimiter);
+
+  // Parse the card id
+  auto id = util::sv_to_uint<uint32_t>(sub_strs[0]);
+  {
+    [[maybe_unused]] bool id_has_value = id.has_value();
+    assert(id_has_value);
+    LLVM_ASSUME(id_has_value);
+  }
+
+  // Parse the quantity, name, and set
+  auto rarity = mtg::util::rarity_from_t(sub_strs[4]);
+  auto foil = sub_strs[5] == "true";
+
+  // Parse the price history
+  auto price_history = mtgo::csv::quant_and_prices_from_span(std::span(sub_strs).subspan(6));
+
+  return CardHistory{ id.value(), QuantityNameSet{ sub_strs[1], sub_strs[2], sub_strs[3]  }, rarity, foil, std::move(price_history) };
+}
+
+[[nodiscard]] inline auto card_history_with_prev_unavailable(mtgo::Card &&card) noexcept -> mtgo::CardHistory
+{
+  std::vector<tup_quant_and_prices_t> price_history;
+  price_history.reserve(1);
+  price_history.emplace_back(
+    std::make_tuple(opt_uint_t{ card.quantity_ }, opt_float_t{ card.goatbots_price_ }, card.scryfall_price_));
+  return CardHistory{ std::move(card), std::move(price_history) };
 }
 
 [[nodiscard]] inline auto card_history_with_prev_unavailable(mtgo::Card &&card,
