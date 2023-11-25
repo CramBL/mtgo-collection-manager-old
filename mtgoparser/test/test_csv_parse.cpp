@@ -203,7 +203,6 @@ TEST_CASE("mtgo::csv::floats_from_span")
 
   SECTION("On CSV Data with mtgo::csv::into_substr_vec")
   {
-
     std::vector<std::string> rows = mtgo::csv::into_lines_vec(global_test_csv_data);
     REQUIRE(rows.size() == 4);
     auto headers = mtgo::csv::into_substr_vec(rows[0], ',');
@@ -273,7 +272,6 @@ TEST_CASE("mtgo::csv::floats_from_span")
     INFO("csv_str formatted before adding floats:\n" << csv_str);
 
     for (const auto &[q, gb, sc] : q_gb_sc) {
-
       std::string quantity = q.has_value() ? fmt::format("[{}]", q.value()) : "";
       std::string gb_str = gb.has_value() ? fmt::format("{}", gb.value()) : "-";
       std::string b_str = sc.has_value() ? fmt::format("{}", sc.value()) : "-";

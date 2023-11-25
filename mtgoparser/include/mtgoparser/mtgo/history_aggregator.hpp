@@ -80,7 +80,6 @@ public:
 
   void addCollectionPriceHistory(mtgo::Collection &&collection, std::string &&timestamp)
   {
-
     auto cards = collection.TakeCards();
 
     for (auto &&card : cards) {
