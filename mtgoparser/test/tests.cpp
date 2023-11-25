@@ -26,7 +26,6 @@ constinit auto static_clap = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option(
 
 TEST_CASE("Test basic CLAP")
 {
-
   char argv0[] = "mtgo_preprocessor";
   char argv1[] = "--version";
 
@@ -56,7 +55,6 @@ TEST_CASE("Test basic CLAP")
 
   SECTION("Alias version cmd - Show version")
   {
-
     auto clap_alias_version = clap::Clap<1, 0>(clap::OptionArray<1>(clap::Option("--version", Flag, "-V")));
 
     CHECK(clap_alias_version.Parse(arg_vec) == 0);
@@ -71,7 +69,6 @@ TEST_CASE("Test basic CLAP")
 
 TEST_CASE("Test CLAP with options and values")
 {
-
   char argv0[] = "mtgo_preprocessor";
   char arg_version[] = "--version";
   char arg_save_as[] = "--save-as";
@@ -134,7 +131,6 @@ TEST_CASE("Test CLAP with options and values")
 
 TEST_CASE("MTGO card - Initialize and use of")
 {
-
   SECTION("Initialize")
   {
     // Test constructors, assignments, initializations with different types
@@ -285,7 +281,6 @@ TEST_CASE("Parse state_log.toml")
   // Check goatbots values
   SECTION("Goatbots state_log data")
   {
-
     std::optional<toml::date_time> card_defs_updated_at =
       state_log["goatbots"]["card_definitions_updated_at"].value<toml::date_time>();
     REQUIRE(card_defs_updated_at.has_value());
