@@ -68,36 +68,36 @@ function Test-RustInstallation {
 
 
 function Show-Versions {
-    Write-Host "Operating System: $OS_TYPE"
-    Write-Host "Rust : $RUST_VERSION (min. $RUST_MIN_VERSION)"
-    Write-Host "Go   : $GO_VERSION (min. $GO_MIN_VERSION)"
-    Write-Host "C++"
-    Write-Host "  - LLVM: $CLANG_VERSION (min. $LLVM_MIN_VERSION)"
-    Write-Host "  - GCC : $GCC_VERSION (min. $GCC_MIN_VERSION)"
-    Write-Host "CMake: $CMAKE_VERSION (min. $CMAKE_MIN_VERSION)"
-    Write-Host "CMake generator: ${MTGOPARSER_GENERATOR}"
+    Write-Output "Operating System: $OS_TYPE"
+    Write-Output "Rust : $RUST_VERSION (min. $RUST_MIN_VERSION)"
+    Write-Output "Go   : $GO_VERSION (min. $GO_MIN_VERSION)"
+    Write-Output "C++"
+    Write-Output "  - LLVM: $CLANG_VERSION (min. $LLVM_MIN_VERSION)"
+    Write-Output "  - GCC : $GCC_VERSION (min. $GCC_MIN_VERSION)"
+    Write-Output "CMake: $CMAKE_VERSION (min. $CMAKE_MIN_VERSION)"
+    Write-Output "CMake generator: ${MTGOPARSER_GENERATOR}"
     if ($MTGOPARSER_GENERATOR -eq "Ninja Multi-Config") {
         try {
             $NINJA_VERSION = & ninja --version
         } catch {
-            Write-Host "Ninja Multi-Config specified but Ninja not found"
+            Write-Output "Ninja Multi-Config specified but Ninja not found"
             exit 1
         }
-        Write-Host "Ninja: ${NINJA_VERSION}"
+        Write-Output "Ninja: ${NINJA_VERSION}"
     }
 }
 
 function Build-All {
-    Write-Host "----------------------------------"
-    Write-Host "==> Building all targets "
-    Write-Host "----------------------------------"
+    Write-Output "----------------------------------"
+    Write-Output "==> Building all targets "
+    Write-Output "----------------------------------"
     Build-Mtgogetter
     Build-Mtgoparser
     Build-Mtgoupdater
     Build-Mtgogui
-    Write-Host "================================= "
-    Write-Host "=== Done building all targets === "
-    Write-Host "================================= "
+    Write-Output "================================= "
+    Write-Output "=== Done building all targets === "
+    Write-Output "================================= "
 }
 
 # For integration testing, disabling warnings as errors for mtgoparser
@@ -109,21 +109,21 @@ function Build-AllIntegration {
 }
 
 function Test-All {
-    Write-Host "----------------------------------"
-    Write-Host "==> Testing all targets "
-    Write-Host "----------------------------------"
+    Write-Output "----------------------------------"
+    Write-Output "==> Testing all targets "
+    Write-Output "----------------------------------"
     Test-Mtgogetter
     Test-Mtgoparser
     Test-Mtgoupdater
     Test-Mtgogui
-    Write-Host "================================= "
-    Write-Host "=== Done testing all targets === "
-    Write-Host "================================= "
+    Write-Output "================================= "
+    Write-Output "=== Done testing all targets === "
+    Write-Output "================================= "
 }
 
 function Build-Mtgoparser {
     Show-Versions
-    Write-Host "==> Building MTGO Parser..."
+    Write-Output "==> Building MTGO Parser..."
     Set-Location mtgoparser
     cmake -S . -B build -G "${MTGOPARSER_GENERATOR}" -Dmtgoparser_ENABLE_IPO="${MTGOPARSER_IPO}" -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE} -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV} -DBOOST_EXCLUDE_LIBRARIES="${MTGOPARSER_EXCLUDE_BOOST_LIBS}" 2>&1
     if ($LASTEXITCODE -ne 0) {
@@ -133,7 +133,7 @@ function Build-Mtgoparser {
         if ($LASTEXITCODE -ne 0) {
             Write-Error "!!! ERROR while building MTGO Parser: code ${LASTEXITCODE}"
         } else {
-            Write-Host "=== Done building MTGO Parser ==="
+            Write-Output "=== Done building MTGO Parser ==="
         }
     }
     Set-Location ..
@@ -142,23 +142,23 @@ function Build-Mtgoparser {
 
 function Build-MtgoparserIntegration {
     Show-Versions
-    Write-Host "==> Building MTGO Parser..."
+    Write-Output "==> Building MTGO Parser..."
     Set-Location mtgoparser
     cmake -S . -B build -G "${MTGOPARSER_GENERATOR}" -Dmtgoparser_DEPLOYING_BINARY=On -Dmtgoparser_ENABLE_IPO="${MTGOPARSER_IPO}" -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE} -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV} -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF -DBOOST_EXCLUDE_LIBRARIES="${MTGOPARSER_EXCLUDE_BOOST_LIBS}"
     cmake --build build --config ${MTGOPARSER_BUILD_MODE}
     Set-Location ..
-    Write-Host "=== Done building MTGO Parser ==="
+    Write-Output "=== Done building MTGO Parser ==="
 }
 
 function Test-Mtgoparser {
     Show-Versions
-    Write-Host "==> Testing MTGO Parser..."
+    Write-Output "==> Testing MTGO Parser..."
     Set-Location mtgoparser\build
     ctest --output-on-failure
 
     if (${LASTEXITCODE} -ne 0) {
         Write-Error "MTGO Parser test failed!"
-        Write-Host "Rerunning each test suite with more details until one fails"
+        Write-Output "Rerunning each test suite with more details until one fails"
         Set-Location test
 
         $testSuites = @(
@@ -179,38 +179,38 @@ function Test-Mtgoparser {
     }
 
     Set-Location -Path $PSScriptRoot
-    Write-Host "=== Done testing MTGO Parser ==="
+    Write-Output "=== Done testing MTGO Parser ==="
 }
 
 function Test-MtgoparserBenchmark {
     Show-Versions
-    Write-Host "==> Running MTGO Parser benchmarks..."
+    Write-Output "==> Running MTGO Parser benchmarks..."
     Set-Location mtgoparser\build\test
     .\Release\benchmark_xml_parse.exe [.]
     Set-Location -Path $PSScriptRoot
-    Write-Host "=== Done running MTGO Parser benchmarks ==="
+    Write-Output "=== Done running MTGO Parser benchmarks ==="
 }
 
 function Build-Mtgogetter {
     Show-Versions
     Test-GoInstallation
-    Write-Host "==> Building MTGO Getter..."
+    Write-Output "==> Building MTGO Getter..."
     go build -C mtgogetter -v
-    Write-Host "=== Done building MTGO Getter ==="
+    Write-Output "=== Done building MTGO Getter ==="
 }
 
 function Test-Mtgogetter {
     Show-Versions
     Test-GoInstallation
-    Write-Host "==> Testing MTGO Getter..."
+    Write-Output "==> Testing MTGO Getter..."
     go test -C mtgogetter -v ./...
-    Write-Host "=== Done testing MTGO Getter ==="
+    Write-Output "=== Done testing MTGO Getter ==="
 }
 
 function Build-Mtgoupdater {
     Show-Versions
     Test-RustInstallation
-    Write-Host "==> Building MTGO Updater..."
+    Write-Output "==> Building MTGO Updater..."
     Set-Location mtgoupdater
     if ($BUILD_MODE -icontains "release") {
         cargo build -r
@@ -218,23 +218,23 @@ function Build-Mtgoupdater {
         cargo build
     }
     Set-Location ..
-    Write-Host "=== Done building MTGO Updater ==="
+    Write-Output "=== Done building MTGO Updater ==="
 }
 
 function Test-Mtgoupdater {
     Show-Versions
     Test-RustInstallation
-    Write-Host "==> Testing MTGO Updater..."
+    Write-Output "==> Testing MTGO Updater..."
     Set-Location mtgoupdater
 	cargo test -- --nocapture
     Set-Location ..
-    Write-Host "=== Done testing MTGO Updater ==="
+    Write-Output "=== Done testing MTGO Updater ==="
 }
 
 function Build-Mtgogui {
     Show-Versions
     Test-RustInstallation
-    Write-Host "==> Building MTGO GUI..."
+    Write-Output "==> Building MTGO GUI..."
     Set-Location mtgogui
     if ($BUILD_MODE -icontains "release") {
         cargo build -r
@@ -242,45 +242,45 @@ function Build-Mtgogui {
         cargo build
     }
     Set-Location ..
-    Write-Host "=== Done testing MTGO GUI ==="
+    Write-Output "=== Done testing MTGO GUI ==="
 }
 
 function Test-Mtgogui {
     Show-Versions
     Test-RustInstallation
-    Write-Host "==> Building MTGO GUI..."
+    Write-Output "==> Building MTGO GUI..."
     Set-Location mtgogui
     cargo test -- --nocapture
     Set-Location ..
-    Write-Host "=== Done testing MTGO GUI ==="
+    Write-Output "=== Done testing MTGO GUI ==="
 }
 
 function Build-Clean {
     Remove-Item -Path "mtgoparser/build" -Force -Recurse
-    Write-Host "mtgoparser cleaned"
+    Write-Output "mtgoparser cleaned"
     Set-Location mtgoupdater
     cargo clean
-    Write-Host "mtgoupdater cleaned"
+    Write-Output "mtgoupdater cleaned"
     Set-Location ..\mtgogetter
     go clean
-    Write-Host "mtgogetter cleaned"
+    Write-Output "mtgogetter cleaned"
     Set-Location ..\mtgogui
     cargo clean
     Set-Location -Path $PSScriptRoot
 }
 
 function Build-AndPack {
-    Write-Host "-------------------------------------"
-    Write-Host "==> Building and packing all binaries"
-    Write-Host "-------------------------------------"
+    Write-Output "-------------------------------------"
+    Write-Output "==> Building and packing all binaries"
+    Write-Output "-------------------------------------"
     $BUILD_MODE = "Release"
     # Only build MTGO GUI as it will build all dependencies in release mode.
     Build-Mtgogui
     Compress-GuiOnly
-    Write-Host "============================================== "
-    Write-Host "=== Done building and packing all binaries === "
-    Write-Host "===>   ${PACKAGE_NAME}.zip"
-    Write-Host "============================================== "
+    Write-Output "============================================== "
+    Write-Output "=== Done building and packing all binaries === "
+    Write-Output "===>   ${PACKAGE_NAME}.zip"
+    Write-Output "============================================== "
 }
 
 function Compress-MCM {
@@ -354,7 +354,7 @@ if ($targets.Contains($target)) {
 } elseif ($target -eq "default") {
     & $targets["all"]
 } else {
-    Write-Host "Available targets:"
-    $targets.Keys | ForEach-Object { Write-Host "  $_" }
+    Write-Output "Available targets:"
+    $targets.Keys | ForEach-Object { Write-Output "  $_" }
 }
 
