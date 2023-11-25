@@ -37,6 +37,17 @@ struct [[nodiscard]] CardHistoryAggregate
   // The newest quantity is the last time the quantity changed
   // Used to determine if the history should include a quantity update
   uint16_t newest_quantity_;
+
+  // Equality operators
+  [[nodiscard]] inline auto operator==(const CardHistoryAggregate &other) const noexcept -> bool
+  {
+    return this->card_history_ == other.card_history_ && this->newest_quantity_ == other.newest_quantity_;
+  }
+
+  [[nodiscard]] inline auto operator!=(const CardHistoryAggregate &other) const noexcept -> bool
+  {
+    return !(*this == other);
+  }
 };
 
 class CollectionHistory
@@ -99,6 +110,11 @@ public:
 
   [[nodiscard]] inline auto Size() const noexcept -> std::size_t { return card_histories_.size(); }
 
+  /**
+   * @brief Consumes/moves the CardHistory vector and returns the collection history as a CSV string.
+   *
+   * @return std::string The collection history as a CSV string.
+   */
   [[nodiscard]] inline auto ToCsvStr() noexcept -> std::string
   {
     std::string csv_str;
@@ -133,6 +149,17 @@ public:
     // Save the CSV file
     std::ofstream csv_file(fpath);
     csv_file << this->ToCsvStr();
+  }
+
+  // Comparison operators
+  [[nodiscard]] inline auto operator==(const CollectionHistory &other) const noexcept -> bool
+  {
+    return this->timestamps_ == other.timestamps_ && this->card_histories_ == other.card_histories_;
+  }
+
+  [[nodiscard]] inline auto operator!=(const CollectionHistory &other) const noexcept -> bool
+  {
+    return !(*this == other);
   }
 };
 
