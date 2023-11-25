@@ -23,10 +23,10 @@
 
 namespace mtgo::csv {
 
-
-// Splits a string into a vector of sub-strings based on a delimiter
-[[nodiscard]] inline auto into_substr_vec(const std::string &str, char delimiter) -> std::vector<std::string>
+// Splits a string into a vector of sub-strings based on newline separation
+[[nodiscard]] inline auto into_lines_vec(const std::string &str) -> std::vector<std::string>
 {
+  char delimiter = '\n';
   std::vector<std::string> sub_strs;
   std::size_t start = 0;
   std::size_t end = str.find(delimiter);
@@ -41,6 +41,55 @@ namespace mtgo::csv {
   sub_strs.emplace_back(str.substr(start));
 
   return sub_strs;
+}
+
+/**
+ * @brief Split a string into a vector of substrings, using the delimiter as the separator.
+ *
+ * @note Quoted substrings are supported. For example, the string: "a,"b,c",d" will be split into: "a", "b,c", "d".
+ *
+ * @param str The string to split
+ * @param delimiter The character to use as the separator
+ * @return std::vector<std::string> A vector of substrings
+ */
+[[nodiscard]] inline auto into_substr_vec(const std::string &str, char delimiter) -> std::vector<std::string>
+{
+  // Iterate through the string, and save the start and end indices of each substring
+  std::vector<std::pair<std::size_t, std::size_t>> substr_indices{};
+
+  bool in_quotes = false;
+  bool is_quoted_val = false;
+
+  std::size_t start = 0;
+
+  static_assert('"' == '\"'); // Just so you know :)
+
+  for (std::size_t i = 0; i < str.size(); ++i) {
+    if (str[i] == '\"') {
+      in_quotes = !in_quotes;
+      is_quoted_val = true;
+    } else if (str[i] == delimiter && !in_quotes) {
+      std::size_t end = i;
+      // If the last substring was a quoted value, remove the quotes by incrementing the start index and decrementing the end index
+      if (is_quoted_val) {
+        substr_indices.emplace_back(start + 1, end - 1);
+        is_quoted_val = false;
+      } else {
+        substr_indices.emplace_back(start, end);
+      }
+      start = i + 1;
+    }
+  }
+  substr_indices.emplace_back(start, str.size());
+
+  // Create a vector of substrings from the indices
+  std::vector<std::string> substr_vec{};
+  substr_vec.reserve(substr_indices.size());
+  std::transform(substr_indices.begin(), substr_indices.end(), std::back_inserter(substr_vec), [&](auto &&pair) {
+    return str.substr(pair.first, pair.second - pair.first);
+  });
+
+  return substr_vec;
 }
 
 using opt_float_t = std::optional<float>;
@@ -75,7 +124,7 @@ using tup_quant_and_prices_t = std::tuple<opt_uint_t, opt_float_t, opt_float_t>;
 
   constexpr char delimiter = ';';
   const std::size_t delim_pos = str.find(delimiter);
-  const std::string gb_price_str = str.substr(start, delim_pos);
+  const std::string gb_price_str = str.substr(start, delim_pos - start);
 
   {// Removes the out of bounds checks and exception instructions from the assembly (https://godbolt.org/z/GP5jfPz57)
     [[maybe_unused]] const std::size_t str_size = str.size();
@@ -85,9 +134,9 @@ using tup_quant_and_prices_t = std::tuple<opt_uint_t, opt_float_t, opt_float_t>;
 
 
   opt_float_t gb_price =
-    gb_price_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(gb_price_str);
+    gb_price_str[0] == '-' ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(gb_price_str);
   opt_float_t scryfall_price =
-    scryfall_opt_str == "-" ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(scryfall_opt_str);
+    scryfall_opt_str[0] == '-' ? boost::implicit_cast<opt_float_t>(std::nullopt) : std::stof(scryfall_opt_str);
 
   return { quantity, gb_price, scryfall_price };
 }
