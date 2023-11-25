@@ -18,9 +18,9 @@
     4. Zip all the aggregate CSV files into a single zip file
 */
 
+#include "mtgoparser/mtgo.hpp"
 #include "mtgoparser/mtgo/card_history.hpp"
 #include "mtgoparser/mtgo/csv.hpp"
-#include "mtgoparser/mtgo.hpp"
 
 #include <algorithm>
 #include <filesystem>
@@ -75,7 +75,7 @@ public:
 
   [[nodiscard]] explicit CollectionHistory(std::vector<CardHistoryAggregate> &&card_histories,
     std::vector<std::string> &&timestamps) noexcept
-    :timestamps_(std::move(timestamps)), card_histories_(std::move(card_histories))
+    : timestamps_(std::move(timestamps)), card_histories_(std::move(card_histories))
   {}
 
   void addCollectionPriceHistory(mtgo::Collection &&collection, std::string &&timestamp)
@@ -184,7 +184,8 @@ public:
     for (auto [quantity, price, foil_price] : card_hist.price_history_) {
       if (quantity.has_value()) { newest_quantity = quantity.value(); }
     }
-    card_histories.emplace_back(CardHistoryAggregate{ .card_history_{ std::move(card_hist) }, .newest_quantity_ = newest_quantity });
+    card_histories.emplace_back(
+      CardHistoryAggregate{ .card_history_{ std::move(card_hist) }, .newest_quantity_ = newest_quantity });
   }
 
   return CollectionHistory(std::move(card_histories), std::move(timestamps));

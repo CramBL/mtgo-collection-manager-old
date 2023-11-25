@@ -2,15 +2,15 @@
 
 #include "mtgoparser/mtg.hpp"
 #include "mtgoparser/mtgo/card.hpp"
-#include "mtgoparser/util.hpp"
 #include "mtgoparser/mtgo/csv.hpp"
+#include "mtgoparser/util.hpp"
 
 #include <array>
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <tuple>
 #include <vector>
-#include <span>
 
 #ifdef __llvm__
 #define LLVM_ASSUME(expr) __builtin_assume(expr)
@@ -140,7 +140,9 @@ struct [[nodiscard]] CardHistory
   // Parse the price history
   auto price_history = mtgo::csv::quant_and_prices_from_span(std::span(sub_strs).subspan(6));
 
-  return CardHistory{ id.value(), QuantityNameSet{ sub_strs[1], sub_strs[2], sub_strs[3]  }, rarity, foil, std::move(price_history) };
+  return CardHistory{
+    id.value(), QuantityNameSet{ sub_strs[1], sub_strs[2], sub_strs[3] }, rarity, foil, std::move(price_history)
+  };
 }
 
 [[nodiscard]] inline auto card_history_with_prev_unavailable(mtgo::Card &&card) noexcept -> mtgo::CardHistory

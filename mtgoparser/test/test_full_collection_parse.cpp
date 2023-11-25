@@ -12,8 +12,8 @@ using Catch::Matchers::ContainsSubstring;
 #include <mtgoparser/goatbots.hpp>
 #include <mtgoparser/io.hpp>
 #include <mtgoparser/mtgo.hpp>
-#include <mtgoparser/scryfall.hpp>
 #include <mtgoparser/mtgo/history_aggregator.hpp>
+#include <mtgoparser/scryfall.hpp>
 
 #include <filesystem>
 #include <fstream>
