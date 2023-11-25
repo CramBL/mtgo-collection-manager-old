@@ -12,8 +12,8 @@ using Catch::Matchers::ContainsSubstring;
 #include <mtgoparser/goatbots.hpp>
 #include <mtgoparser/io.hpp>
 #include <mtgoparser/mtgo.hpp>
-#include <mtgoparser/scryfall.hpp>
 #include <mtgoparser/mtgo/history_aggregator.hpp>
+#include <mtgoparser/scryfall.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -203,7 +203,7 @@ TEST_CASE("Parse small collection")
           // Parse the CSV file back into a CollectionHistory
           auto csv_str = io_util::read_to_str_buf(new_csv_fpath);
           auto new_collection_history = mtgo::csv_to_collection_history(std::move(csv_str));
-          //CHECK(new_collection_history.Size() == 3000);
+          // CHECK(new_collection_history.Size() == 3000);
         }
 
         // Clean up by removing the files and directory

@@ -62,7 +62,7 @@ namespace mtgo::csv {
 
   std::size_t start = 0;
 
-  static_assert('"' == '\"'); // Just so you know :)
+  static_assert('"' == '\"');// Just so you know :)
 
   for (std::size_t i = 0; i < str.size(); ++i) {
     if (str[i] == '\"') {
@@ -70,7 +70,8 @@ namespace mtgo::csv {
       is_quoted_val = true;
     } else if (str[i] == delimiter && !in_quotes) {
       std::size_t end = i;
-      // If the last substring was a quoted value, remove the quotes by incrementing the start index and decrementing the end index
+      // If the last substring was a quoted value, remove the quotes by incrementing the start index and decrementing
+      // the end index
       if (is_quoted_val) {
         substr_indices.emplace_back(start + 1, end - 1);
         is_quoted_val = false;
