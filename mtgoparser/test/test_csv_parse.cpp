@@ -462,50 +462,49 @@ TEST_CASE("CSV-data to CardHistory & CollectionHistory")
     CHECK(card_hist3.price_history_.size() == 3);
   }
 
+  SECTION("mtgo::csv_to_collection_history")
+  {
+    auto rows = mtgo::csv::into_lines_vec(local_test_csv_data);
+
+    std::string row_1_copy = rows.at(1);
+    mtgo::CardHistory card_hist1 = mtgo::csv_row_to_card_history(std::move(rows.at(1)));
+    CHECK(card_hist1.id_ == 120020);
+    CHECK(card_hist1.quantity_ == "1");
+    CHECK(card_hist1.name_ == "In the Darkness Bind Them");
+    CHECK(card_hist1.set_ == "LTC");
+    CHECK(card_hist1.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_hist1.foil_ == false);
+    CHECK(card_hist1.price_history_.size() == 3);
+    auto card_hist_1_copy = mtgo::csv_row_to_card_history(std::move(row_1_copy));
+    CHECK(card_hist1 == card_hist_1_copy);// Test equality operator
+
+    auto card_hist2 = mtgo::csv_row_to_card_history(std::move(rows.at(2)));
+    CHECK(card_hist2.id_ == 106729);
+    CHECK(card_hist2.quantity_ == "1");
+    CHECK(card_hist2.name_ == "Razorverge Thicket");
+    CHECK(card_hist2.set_ == "ONE");
+    CHECK(card_hist2.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_hist2.foil_ == false);
+    CHECK(card_hist2.price_history_.size() == 3);
+    CHECK(card_hist2 != card_hist1);// Test inequality operator
+
+    auto card_hist3 = mtgo::csv_row_to_card_history(std::move(rows.at(3)));
+    CHECK(card_hist3.id_ == 106729);
+    CHECK(card_hist3.quantity_ == "1");
+    CHECK(card_hist3.name_ == "Haktos the Unscarred");
+    CHECK(card_hist3.set_ == "THR");
+    CHECK(card_hist3.rarity_ == mtg::Rarity::Rare);
+    CHECK(card_hist3.foil_ == false);
+    CHECK(card_hist3.price_history_.size() == 3);
+
     SECTION("mtgo::csv_to_collection_history")
     {
-      auto rows = mtgo::csv::into_lines_vec(local_test_csv_data);
+      std::string csv_to_hist_string = local_test_csv_data;// Copy the test data
+      auto collection_history = mtgo::csv_to_collection_history(std::move(csv_to_hist_string));
 
-      std::string row_1_copy = rows.at(1);
-      mtgo::CardHistory card_hist1 = mtgo::csv_row_to_card_history(std::move(rows.at(1)));
-      CHECK(card_hist1.id_ == 120020);
-      CHECK(card_hist1.quantity_ == "1");
-      CHECK(card_hist1.name_ == "In the Darkness Bind Them");
-      CHECK(card_hist1.set_ == "LTC");
-      CHECK(card_hist1.rarity_ == mtg::Rarity::Rare);
-      CHECK(card_hist1.foil_ == false);
-      CHECK(card_hist1.price_history_.size() == 3);
-      auto card_hist_1_copy = mtgo::csv_row_to_card_history(std::move(row_1_copy));
-      CHECK(card_hist1 == card_hist_1_copy);// Test equality operator
-
-      auto card_hist2 = mtgo::csv_row_to_card_history(std::move(rows.at(2)));
-      CHECK(card_hist2.id_ == 106729);
-      CHECK(card_hist2.quantity_ == "1");
-      CHECK(card_hist2.name_ == "Razorverge Thicket");
-      CHECK(card_hist2.set_ == "ONE");
-      CHECK(card_hist2.rarity_ == mtg::Rarity::Rare);
-      CHECK(card_hist2.foil_ == false);
-      CHECK(card_hist2.price_history_.size() == 3);
-      CHECK(card_hist2 != card_hist1);// Test inequality operator
-
-      auto card_hist3 = mtgo::csv_row_to_card_history(std::move(rows.at(3)));
-      CHECK(card_hist3.id_ == 106729);
-      CHECK(card_hist3.quantity_ == "1");
-      CHECK(card_hist3.name_ == "Haktos the Unscarred");
-      CHECK(card_hist3.set_ == "THR");
-      CHECK(card_hist3.rarity_ == mtg::Rarity::Rare);
-      CHECK(card_hist3.foil_ == false);
-      CHECK(card_hist3.price_history_.size() == 3);
-
-      SECTION("mtgo::csv_to_collection_history")
-      {
-        std::string csv_to_hist_string = local_test_csv_data;// Copy the test data
-        auto collection_history = mtgo::csv_to_collection_history(std::move(csv_to_hist_string));
-
-        CHECK(collection_history.Size() == 3);
-      }
+      CHECK(collection_history.Size() == 3);
     }
-
+  }
 }
 
 // NOLINTEND
