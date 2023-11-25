@@ -19,6 +19,8 @@
 */
 
 #include "mtgoparser/mtgo/card_history.hpp"
+#include "mtgoparser/mtgo/csv.hpp"
+#include "mtgoparser/mtgo.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -39,7 +41,7 @@ struct [[nodiscard]] CardHistoryAggregate
 
 class CollectionHistory
 {
-
+private:
   std::vector<std::string> timestamps_;
   std::vector<CardHistoryAggregate> card_histories_;
 
@@ -59,6 +61,11 @@ public:
     }
     this->timestamps_.emplace_back(std::move(timestamp));
   }
+
+  [[nodiscard]] explicit CollectionHistory(std::vector<CardHistoryAggregate> &&card_histories,
+    std::vector<std::string> &&timestamps) noexcept
+    :timestamps_(std::move(timestamps)), card_histories_(std::move(card_histories))
+  {}
 
   void addCollectionPriceHistory(mtgo::Collection &&collection, std::string &&timestamp)
   {
@@ -128,5 +135,32 @@ public:
     csv_file << this->ToCsvStr();
   }
 };
+
+
+[[nodiscard]] inline auto csv_to_collection_history(std::string &&csv_str) -> CollectionHistory
+{
+  auto csv_lines = mtgo::csv::into_lines_vec(csv_str);
+
+  // Save the timestamps from the first line
+  auto timestamps = mtgo::csv::into_substr_vec(csv_lines[0], ',');
+  timestamps.erase(timestamps.begin(), timestamps.begin() + 6);
+
+  // Remove the first line
+  csv_lines.erase(csv_lines.begin());
+
+  // Parse the rest of the CSV into std::vector<CardHistoryAggregate>
+  std::vector<CardHistoryAggregate> card_histories;
+  card_histories.reserve(csv_lines.size());
+  for (auto &&csv_line : csv_lines) {
+    auto card_hist = mtgo::csv_row_to_card_history(std::move(csv_line));
+    uint16_t newest_quantity = 0;
+    for (auto [quantity, price, foil_price] : card_hist.price_history_) {
+      if (quantity.has_value()) { newest_quantity = quantity.value(); }
+    }
+    card_histories.emplace_back(CardHistoryAggregate{ .card_history_{ std::move(card_hist) }, .newest_quantity_ = newest_quantity });
+  }
+
+  return CollectionHistory(std::move(card_histories), std::move(timestamps));
+}
 
 }// namespace mtgo
