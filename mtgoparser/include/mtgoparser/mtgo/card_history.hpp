@@ -78,6 +78,15 @@ struct [[nodiscard]] CardHistory
       rarity_(other.rarity_), foil_(other.foil_), price_history_(std::move(other.price_history_))
   {}
 
+  // Comparison operator
+  [[nodiscard]] inline bool operator==(const CardHistory &other) const noexcept
+  {
+    return id_ == other.id_ && quantity_ == other.quantity_ && name_ == other.name_ && set_ == other.set_ &&
+      rarity_ == other.rarity_ && foil_ == other.foil_ && price_history_ == other.price_history_;
+  }
+
+  [[nodiscard]] inline bool operator!=(const CardHistory &other) const noexcept { return !(*this == other); }
+
   // Delete copy && assignment constructor
   CardHistory(const CardHistory &) = delete;
   CardHistory &operator=(const CardHistory &) = delete;
