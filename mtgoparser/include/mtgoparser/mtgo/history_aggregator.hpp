@@ -23,11 +23,11 @@
 #include "mtgoparser/mtgo.hpp"
 
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <string>
 #include <utility>
 #include <vector>
-#include <string>
-#include <fstream>
-#include <filesystem>
 
 namespace mtgo {
 
@@ -125,10 +125,10 @@ public:
    *
    * @param fpath The path to the CSV file to add the timestamp to and then save.
    */
-  inline void SaveAsCsvWithTimestamp(std::filesystem::path& fpath) noexcept
+  inline void SaveAsCsvWithTimestamp(std::filesystem::path &fpath) noexcept
   {
     // Add the the newest timestamp to the filename as suffix
-    fpath.replace_filename(fpath.filename().string() + '_' + this->timestamps_.back() + ".csv" );
+    fpath.replace_filename(fpath.filename().string() + '_' + this->timestamps_.back() + ".csv");
 
     // Save the CSV file
     std::ofstream csv_file(fpath);

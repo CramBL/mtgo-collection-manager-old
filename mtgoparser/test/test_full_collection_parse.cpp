@@ -183,7 +183,8 @@ TEST_CASE("Parse small collection")
 
       SECTION("mtgo::CardAggregator::SaveAsCsvWithTimestamp")
       {
-        // Create the sub_dir again and do the last steps but with the mtgo::CardAggregator::SaveAsCsvWithTimestamp member function
+        // Create the sub_dir again and do the last steps but with the mtgo::CardAggregator::SaveAsCsvWithTimestamp
+        // member function
         std::filesystem::create_directory(sub_dir);
         const std::string new_csv_fname{ "mtgo_cards" };
         std::filesystem::path new_csv_fpath{ sub_dir + "/" + new_csv_fname };
@@ -207,7 +208,6 @@ TEST_CASE("Parse small collection")
 
         // Clean up by removing the files and directory
         std::filesystem::remove_all(sub_dir);
-
       }
     }
   }
