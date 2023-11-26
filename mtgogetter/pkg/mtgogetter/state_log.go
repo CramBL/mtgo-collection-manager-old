@@ -27,10 +27,10 @@ func (g *goatbots) IsPriceUpdated() bool {
 	if utc_now.Before(utc_4am) {
 		utc_4am_yesterday := time.Date(utc_now.Year(), utc_now.Month(), utc_now.Day()-1, 4, 0, 0, 0, time.UTC)
 		return g.Prices_updated_at.After(utc_4am_yesterday)
-	} else {
-		// If the current time is after 4 AM, then we want to check if the prices were updated today
-		return g.Prices_updated_at.After(utc_4am)
 	}
+
+	// If the current time is after 4 AM, then we want to check if the prices were updated today
+	return g.Prices_updated_at.After(utc_4am)
 }
 
 // Method for the goatbots struct to generate a new timestamp for the price data

@@ -31,6 +31,7 @@ To automate some tasks regarding effective management of [MTGO](https://www.mtgo
     - [Most recent demo](#most-recent-demo)
 - [Contributing](#contributing)
   - [Quickstart](#quickstart)
+    - [Docker (with .devcontainer/Dockerfile)](#docker-with-devcontainerdockerfile)
     - [Unix-like (with Make)](#unix-like-with-make)
     - [Windows (with PowerShell)](#windows-with-powershell)
     - [Trouble shooting](#trouble-shooting)
@@ -54,7 +55,20 @@ You're welcome to submit PRs or make issues.
 If you're serious about starting a collaboration, send me a mail at `mbkj@tutamail.com`.
 
 ## Quickstart
-
+### Docker (with [.devcontainer/Dockerfile](.devcontainer/Dockerfile))
+Build the image
+```shell
+docker build -t "mcm-dev:Dockerfile" .devcontainer
+docker run --rm -it mcm-dev:Dockerfile
+```
+Now continuing from the container's shell
+```shell
+cd home
+git clone https://github.com/CramBL/mtgo-collection-manager.git
+cd mtgo-collection-manager
+make all && make test
+```
+The very first build will take a while...
 ### Unix-like (with Make)
 A Makefile lets you build and test any or all of the subprojects.
 

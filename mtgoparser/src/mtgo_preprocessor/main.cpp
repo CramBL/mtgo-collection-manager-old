@@ -78,7 +78,6 @@ int example()
 int main(int argc, char *argv[])
 {
   try {
-
     std::vector<std::string_view> args{ argv + 1, argv + argc };
 
     if (auto res = mtgo_preprocessor::setup::setup(args); res.has_error()) [[unlikely]] {

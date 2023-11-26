@@ -104,7 +104,6 @@ constexpr auto Collection::Size() const noexcept -> std::size_t { return cards_.
 void inline Collection::ExtractGoatbotsInfo(const goatbots::card_defs_map_t &card_defs,
   const goatbots::price_hist_map_t &price_hist) noexcept
 {
-
   for (auto &card : this->cards_) {
     if (card.id_ == 1) [[unlikely]] {
       // Event Tickets have value 1 per definition

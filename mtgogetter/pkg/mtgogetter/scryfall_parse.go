@@ -157,10 +157,10 @@ func NextReleasedScryfallSetFromJsonBytes(byteSlice []byte, targetTime time.Time
 			// that must be the next released set
 			if nextReleasedSet != nil {
 				break
-			} else {
-				// If the first set is already in the past (should be never happen)
-				return nil, fmt.Errorf("the first set in the data was released before the target date: %s", targetTime)
 			}
+
+			// If the first set is already in the past (should be never happen)
+			return nil, fmt.Errorf("the first set in the data was released before the target date: %s", targetTime)
 		}
 
 		// The set was not in the past, so it's now the closest to the date but still unreleased

@@ -73,7 +73,6 @@ namespace util {
    */
   template<rarity_formatter Format> auto inline rarity_to_string(Rarity rarity) -> std::string
   {
-
     // Aliases for slightly more readability.
     using shortFormat = std::is_same<Format, Short>;
     using fullFormat = std::is_same<Format, Full>;

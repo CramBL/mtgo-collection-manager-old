@@ -50,9 +50,9 @@ var DownloadScryfallSetListCmd = &cobra.Command{
 			// If the most recent set it not yet out, no reason to download new set data
 			log.Println("Set data is up to date - no need to download")
 			return nil
-		} else {
-			log.Println("Set data is out of date - downloading new set data")
 		}
+
+		log.Println("Set data is out of date - downloading new set data")
 
 		dl_bytes, err := mtgogetter.DownloadBodyToBytes(ScryfallSetListUrl)
 		if err != nil {

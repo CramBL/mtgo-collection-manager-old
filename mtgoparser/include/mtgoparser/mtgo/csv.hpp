@@ -107,7 +107,6 @@ using tup_quant_and_prices_t = std::tuple<opt_uint_t, opt_float_t, opt_float_t>;
  */
 [[nodiscard]] inline auto parse_quant_and_prices(const std::string &str) -> tup_quant_and_prices_t
 {
-
   opt_uint_t quantity;
   std::size_t start = 0;
 

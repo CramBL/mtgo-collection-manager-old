@@ -325,7 +325,6 @@ private:
   // Parse the command-line arguments
   [[nodiscard]] auto parse_args(const std::vector<std::string_view> &args) noexcept -> size_t
   {
-
     size_t errors = 0;
 
     for (auto it = args.cbegin(), end = args.cend(); it != end; ++it) {
