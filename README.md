@@ -59,7 +59,7 @@ If you're serious about starting a collaboration, send me a mail at `mbkj@tutama
 Build the image
 ```shell
 docker build -t "mcm-dev:Dockerfile" .devcontainer
-docker docker run --rm -it mcm-dev:Dockerfile
+docker run --rm -it mcm-dev:Dockerfile
 ```
 Now continuing from the container's shell
 ```shell
