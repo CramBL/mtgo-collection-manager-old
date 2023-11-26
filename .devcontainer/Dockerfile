@@ -15,7 +15,9 @@ RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Rust using the official Rust installer script
-RUN apt-get update && wget --progress=dot:giga -O - https://sh.rustup.rs | sh -s -- -y && apt-get install build-essential -y
+RUN apt-get update && wget --progress=dot:giga -O - https://sh.rustup.rs | sh -s -- -y && apt-get install build-essential -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Add the Rust binaries to the system PATH
 ENV PATH=$PATH:/root/.cargo/bin
@@ -112,7 +114,9 @@ RUN ln -s $(readlink -f /usr/lib/clang/${LLVM_VER}/include) \
     $(include-what-you-use -print-resource-dir 2>/dev/null)/include
 
 # Install mold for much faster linking
-RUN apt-get update && apt-get install mold -y
+RUN apt-get update && apt-get install mold -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 ENV PATH=$PATH:/usr/bin/mold
 
 ## Cleanup cached apt data we don't need anymore
@@ -120,7 +124,7 @@ RUN apt-get autoremove -y && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Download and install Go
-RUN wget https://golang.org/dl/go1.21.4.linux-amd64.tar.gz && \
+RUN wget --progress=dot:giga https://golang.org/dl/go1.21.4.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go1.21.4.linux-amd64.tar.gz && \
     rm go1.21.4.linux-amd64.tar.gz
 
@@ -128,7 +132,9 @@ RUN wget https://golang.org/dl/go1.21.4.linux-amd64.tar.gz && \
 ENV PATH=$PATH:/usr/local/go/bin
 
 # Add FLTK development headers
-RUN apt-get update && apt-get -y install --no-install-recommends libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev
+RUN apt-get update && apt-get -y install --no-install-recommends libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 
 # Allow the user to set compiler defaults
