@@ -14,7 +14,7 @@
 namespace mtg {
 
 // Denote the rarity of an MTG item.
-enum class [[nodiscard]] Rarity : uint8_t { Common, Uncommon, Rare, Mythic, Booster };
+enum class [[nodiscard]] Rarity : uint8_t{ Common, Uncommon, Rare, Mythic, Booster };
 
 namespace util {
 
@@ -82,33 +82,15 @@ namespace util {
     switch (rarity) {
     case Rarity::Common:
       [[likely]] if constexpr (shortFormat::value) { return "C"; }
-      else if constexpr (fullFormat::value)
-      {
-        return "Common";
-      }
-      else if constexpr (fullLowerFormat::value)
-      {
-        return "common";
-      }
-      else if constexpr (fullUpperFormat::value)
-      {
-        return "COMMON";
-      }
+      else if constexpr (fullFormat::value) { return "Common"; }
+      else if constexpr (fullLowerFormat::value) { return "common"; }
+      else if constexpr (fullUpperFormat::value) { return "COMMON"; }
 
     case Rarity::Uncommon:
       [[likely]] if constexpr (shortFormat::value) { return "U"; }
-      else if constexpr (fullFormat::value)
-      {
-        return "Uncommon";
-      }
-      else if constexpr (fullLowerFormat::value)
-      {
-        return "uncommon";
-      }
-      else if constexpr (fullUpperFormat::value)
-      {
-        return "UNCOMMON";
-      }
+      else if constexpr (fullFormat::value) { return "Uncommon"; }
+      else if constexpr (fullLowerFormat::value) { return "uncommon"; }
+      else if constexpr (fullUpperFormat::value) { return "UNCOMMON"; }
     case Rarity::Rare:
       if constexpr (shortFormat::value) {
         return "R";
@@ -121,32 +103,14 @@ namespace util {
       }
     case Rarity::Mythic:
       [[unlikely]] if constexpr (shortFormat::value) { return "M"; }
-      else if constexpr (fullFormat::value)
-      {
-        return "Mythic";
-      }
-      else if constexpr (fullLowerFormat::value)
-      {
-        return "mythic";
-      }
-      else if constexpr (fullUpperFormat::value)
-      {
-        return "MYTHIC";
-      }
+      else if constexpr (fullFormat::value) { return "Mythic"; }
+      else if constexpr (fullLowerFormat::value) { return "mythic"; }
+      else if constexpr (fullUpperFormat::value) { return "MYTHIC"; }
     case Rarity::Booster:
       [[unlikely]] if constexpr (shortFormat::value) { return "B"; }
-      else if constexpr (fullFormat::value)
-      {
-        return "Booster";
-      }
-      else if constexpr (fullLowerFormat::value)
-      {
-        return "booster";
-      }
-      else if constexpr (fullUpperFormat::value)
-      {
-        return "BOOSTER";
-      }
+      else if constexpr (fullFormat::value) { return "Booster"; }
+      else if constexpr (fullLowerFormat::value) { return "booster"; }
+      else if constexpr (fullUpperFormat::value) { return "BOOSTER"; }
     }
 
 
