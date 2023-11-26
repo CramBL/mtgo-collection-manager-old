@@ -6,16 +6,16 @@ FROM ubuntu:${VARIANT}
 ARG VARIANT
 
 # Install necessary packages available from standard repos
-RUN apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt install -y --no-install-recommends \
+RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y --no-install-recommends \
     software-properties-common wget apt-utils file zip \
     openssh-client gpg-agent socat rsync \
     make ninja-build git \
-    python3 python3-pip && apt clean \
+    python3 python3-pip && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Rust using the official Rust installer script
-RUN apt update && apt install -y curl && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && apt install build-essential -y
+RUN apt-get update && apt-get install -y curl && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && apt-get install build-essential -y
 
 # Add the Rust binaries to the system PATH
 ENV PATH=$PATH:/root/.cargo/bin
@@ -40,9 +40,9 @@ ENV CONAN_SYSREQUIRES_MODE enabled
 ARG GCC_VER="13"
 # Add gcc-${GCC_VER}
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
-    apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt install -y --no-install-recommends \
-    gcc-${GCC_VER} g++-${GCC_VER} gdb && apt clean \
+    apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y --no-install-recommends \
+    gcc-${GCC_VER} g++-${GCC_VER} gdb && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Set gcc-${GCC_VER} as default gcc
@@ -55,10 +55,10 @@ ARG LLVM_URL="http://apt.llvm.org/${VARIANT}/"
 ARG LLVM_PKG="llvm-toolchain-${VARIANT}-${LLVM_VER}"
 RUN wget --progress=dot:giga -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - 2>/dev/null && \
     add-apt-repository -y "deb ${LLVM_URL} ${LLVM_PKG} main" && \
-    apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt install -y --no-install-recommends  \
+    apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y --no-install-recommends  \
     clang-${LLVM_VER} lldb-${LLVM_VER} lld-${LLVM_VER} clangd-${LLVM_VER} \
-    llvm-${LLVM_VER}-dev libclang-${LLVM_VER}-dev clang-tidy-${LLVM_VER} && apt clean \
+    llvm-${LLVM_VER}-dev libclang-${LLVM_VER}-dev clang-tidy-${LLVM_VER} && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the default clang-tidy, so CMake can find it
@@ -74,19 +74,19 @@ ARG CMAKE_PKG=${VARIANT}
 RUN wget --progress=dot:giga -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
     | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null && \
     apt-add-repository -y "deb ${CMAKE_URL} ${CMAKE_PKG} main" && \
-    apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt install -y --no-install-recommends cmake cmake-curses-gui && apt clean \
+    apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y --no-install-recommends cmake cmake-curses-gui && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install editors
-RUN apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt install -y --no-install-recommends \
+RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y --no-install-recommends \
     neovim emacs nano
 
 # Install optional dependecies
-RUN apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt install -y --no-install-recommends \
-    doxygen graphviz ccache cppcheck && apt clean \
+RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y --no-install-recommends \
+    doxygen graphviz ccache cppcheck && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install include-what-you-use
@@ -112,11 +112,11 @@ RUN ln -s $(readlink -f /usr/lib/clang/${LLVM_VER}/include) \
     $(include-what-you-use -print-resource-dir 2>/dev/null)/include
 
 # Install mold for much faster linking
-RUN apt update && apt install mold -y
+RUN apt-get update && apt-get install mold -y
 ENV PATH=$PATH:/usr/bin/mold
 
 ## Cleanup cached apt data we don't need anymore
-RUN apt autoremove -y && apt clean && \
+RUN apt-get autoremove -y && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Download and install Go
@@ -128,7 +128,7 @@ RUN wget https://golang.org/dl/go1.21.4.linux-amd64.tar.gz && \
 ENV PATH=$PATH:/usr/local/go/bin
 
 # Add FLTK development headers
-RUN apt update && apt -y install --no-install-recommends libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev
+RUN apt-get update && apt-get -y install --no-install-recommends libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev
 
 
 # Allow the user to set compiler defaults
