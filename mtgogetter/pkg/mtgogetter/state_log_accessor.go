@@ -129,11 +129,11 @@ func writeStateLogToFile(stateLog *StateLog, logPath string) error {
 func stateLogExists(path_to_log string) bool {
 	if _, err := os.Stat(path_to_log); err == nil {
 		return true
-	} else if errors.Is(err, os.ErrNotExist) {
-		// Doesn't exist should be created
-		return false
-	} else {
+	} else if !errors.Is(err, os.ErrNotExist) {
+		// If the state_log doesn't exist `ErrNotExist` is expected
+		//  if another error is encountered, then something went wrong.
 		log.Println(err)
-		return false
 	}
+
+	return false
 }
