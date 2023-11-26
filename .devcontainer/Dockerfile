@@ -130,9 +130,8 @@ RUN wget --progress=dot:giga https://golang.org/dl/go1.21.4.linux-amd64.tar.gz &
 
 # Add Go binaries to the system PATH
 ENV PATH=$PATH:/usr/local/go/bin
-
-# Add FLTK development headers
-RUN apt-get update && apt-get -y install --no-install-recommends libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev \
+# Add FLTK development headers, also install curl as it is needed to to download the bundled libraries during compilation
+RUN apt-get update && apt-get -y install --no-install-recommends curl libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
