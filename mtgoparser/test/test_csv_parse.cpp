@@ -116,7 +116,6 @@ TEST_CASE("mtgo::csv::str_to_floats")
 
 TEST_CASE("mtgo::csv::into_substr_vec & mtgo::csv::str_to_floats")
 {
-
   std::vector<std::string> rows = mtgo::csv::into_lines_vec(global_test_csv_data);
   REQUIRE(rows.size() == 4);
 

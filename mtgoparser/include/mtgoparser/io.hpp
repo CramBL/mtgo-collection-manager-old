@@ -167,7 +167,6 @@ using ErrorStr = std::string;
 
     // Return the file name
     return outcome::success(fpath_with_time);
-
   } catch (const std::exception &e) {
     return outcome::failure(fmt::format("Failed to save file from path: {}, err: {}", fpath.string(), e.what()));
   }

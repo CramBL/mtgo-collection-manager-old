@@ -62,9 +62,9 @@ var UpdateAllCmd = &cobra.Command{
 			}
 			if any_errs_str != "" {
 				return fmt.Errorf("error(s) encountered during card definition updates: %s", any_errs_str)
-			} else {
-				return nil
 			}
+
+			return nil
 		}
 		work_group.Add(1)
 		go do_work(dl_gb_card_definitions, &work_group, error_channel)

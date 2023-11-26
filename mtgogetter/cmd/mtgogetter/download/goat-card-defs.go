@@ -49,9 +49,9 @@ Card definitions includes a unique card ID with associated name, cardset, rarity
 		if mtgogetter.IsCardDefinitionsUpdated(state_log) {
 			log.Println("Card definitions is up to date - no need to download")
 			return nil
-		} else {
-			log.Println("Card definitions are not up to date - downloading new card definitions")
 		}
+
+		log.Println("Card definitions are not up to date - downloading new card definitions")
 
 		// Update the timestamp in the state log after downloading the price history
 		// Only runs if the download is successful (i.e. no call to log.Fatalln()/os.Exit())

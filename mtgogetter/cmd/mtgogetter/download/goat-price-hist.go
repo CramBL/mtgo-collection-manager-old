@@ -52,9 +52,9 @@ The price history appears as a JSON map of unique card IDs and associated tix pr
 		if state_log.Goatbots.IsPriceUpdated() {
 			log.Println("Price history is up to date - no need to download")
 			return nil
-		} else {
-			log.Println("Price history is out of date - downloading")
 		}
+
+		log.Println("Price history is out of date - downloading")
 
 		// Update the timestamp in the state log after downloading the price history
 		// Only runs if the download is successful (no call to log.Fatalln()/os.Exit())
