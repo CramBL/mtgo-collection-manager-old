@@ -15,7 +15,7 @@ RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Rust using the official Rust installer script
-RUN apt-get update && apt-get install -y curl && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && apt-get install build-essential -y
+RUN apt-get update && wget --progress=dot:giga -O - https://sh.rustup.rs | sh -s -- -y && apt-get install build-essential -y
 
 # Add the Rust binaries to the system PATH
 ENV PATH=$PATH:/root/.cargo/bin
