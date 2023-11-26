@@ -14,6 +14,12 @@ RUN apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
     python3 python3-pip && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Download and install Rust using the official Rust installer script
+RUN apt update && apt install -y curl && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && apt install build-essential -y
+
+# Add the Rust binaries to the system PATH
+ENV PATH=$PATH:/root/.cargo/bin
+
 # Install conan
 RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools && \
     python3 -m pip install --no-cache-dir conan && \
@@ -120,12 +126,6 @@ RUN wget https://golang.org/dl/go1.21.4.linux-amd64.tar.gz && \
 
 # Add Go binaries to the system PATH
 ENV PATH=$PATH:/usr/local/go/bin
-
-# Download and install Rust using the official Rust installer script
-RUN apt update && apt install curl && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && apt install build-essential -y
-
-# Add the Rust binaries to the system PATH
-ENV PATH=$PATH:/root/.cargo/bin
 
 # Add FLTK development headers
 RUN apt update && apt -y install --no-install-recommends libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev
