@@ -1,21 +1,22 @@
-# [Choice] bionic (18.04), focal (20.04)
-ARG VARIANT="focal"
+# [Choice] bionic (18.04), focal (20.04), jammy (22.04)
+ARG VARIANT="jammy"
 FROM ubuntu:${VARIANT}
 
 # Restate the variant to use it later on in the llvm and cmake installations
 ARG VARIANT
 
 # Install necessary packages available from standard repos
-RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y --no-install-recommends \
-        software-properties-common wget apt-utils file zip \
-        openssh-client gpg-agent socat rsync \
-        make ninja-build git \
-        python3 python3-pip
+RUN apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt install -y --no-install-recommends \
+    software-properties-common wget apt-utils file zip \
+    openssh-client gpg-agent socat rsync \
+    make ninja-build git \
+    python3 python3-pip && apt clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install conan
-RUN python3 -m pip install --upgrade pip setuptools && \
-    python3 -m pip install conan && \
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools && \
+    python3 -m pip install --no-cache-dir conan && \
     conan --version
 
 # By default, anything you run in Docker is done as superuser.
@@ -28,29 +29,31 @@ ENV CONAN_SYSREQUIRES_SUDO 0
 ENV CONAN_SYSREQUIRES_MODE enabled
 
 # User-settable versions:
-# This Dockerfile should support gcc-[7, 8, 9, 10, 11] and clang-[10, 11, 12, 13]
+# This Dockerfile should support gcc-[7, 8, 9, 10, 11, 12, 13] and clang-[10, 11, 12, 13, 14, 15, 16, 17]
 # Earlier versions of clang will require significant modifications to the IWYU section
-ARG GCC_VER="11"
+ARG GCC_VER="13"
 # Add gcc-${GCC_VER}
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
-    apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y --no-install-recommends \
-        gcc-${GCC_VER} g++-${GCC_VER} gdb
+    apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt install -y --no-install-recommends \
+    gcc-${GCC_VER} g++-${GCC_VER} gdb && apt clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set gcc-${GCC_VER} as default gcc
 RUN update-alternatives --install /usr/bin/gcc gcc $(which gcc-${GCC_VER}) 100
 RUN update-alternatives --install /usr/bin/g++ g++ $(which g++-${GCC_VER}) 100
 
-ARG LLVM_VER="13"
+ARG LLVM_VER="17"
 # Add clang-${LLVM_VER}
 ARG LLVM_URL="http://apt.llvm.org/${VARIANT}/"
 ARG LLVM_PKG="llvm-toolchain-${VARIANT}-${LLVM_VER}"
-RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - 2>/dev/null && \
+RUN wget --progress=dot:giga -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - 2>/dev/null && \
     add-apt-repository -y "deb ${LLVM_URL} ${LLVM_PKG} main" && \
-    apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y --no-install-recommends \
-        clang-${LLVM_VER} lldb-${LLVM_VER} lld-${LLVM_VER} clangd-${LLVM_VER} \
-        llvm-${LLVM_VER}-dev libclang-${LLVM_VER}-dev clang-tidy-${LLVM_VER}
+    apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt install -y --no-install-recommends  \
+    clang-${LLVM_VER} lldb-${LLVM_VER} lld-${LLVM_VER} clangd-${LLVM_VER} \
+    llvm-${LLVM_VER}-dev libclang-${LLVM_VER}-dev clang-tidy-${LLVM_VER} && apt clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the default clang-tidy, so CMake can find it
 RUN update-alternatives --install /usr/bin/clang-tidy clang-tidy $(which clang-tidy-${LLVM_VER}) 1
@@ -62,21 +65,23 @@ RUN update-alternatives --install /usr/bin/clang++ clang++ $(which clang++-${LLV
 # Add current cmake/ccmake, from Kitware
 ARG CMAKE_URL="https://apt.kitware.com/ubuntu/"
 ARG CMAKE_PKG=${VARIANT}
-RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
-        | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null && \
+RUN wget --progress=dot:giga -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
+    | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null && \
     apt-add-repository -y "deb ${CMAKE_URL} ${CMAKE_PKG} main" && \
-    apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y --no-install-recommends cmake cmake-curses-gui
+    apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt install -y --no-install-recommends cmake cmake-curses-gui && apt clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install editors
-RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y --no-install-recommends \
-        neovim emacs nano
+RUN apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt install -y --no-install-recommends \
+    neovim emacs nano
 
 # Install optional dependecies
-RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y --no-install-recommends \
-        doxygen graphviz ccache cppcheck
+RUN apt update -qq && export DEBIAN_FRONTEND=noninteractive && \
+    apt install -y --no-install-recommends \
+    doxygen graphviz ccache cppcheck && apt clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install include-what-you-use
 ENV IWYU /home/iwyu
@@ -84,11 +89,11 @@ ENV IWYU_BUILD ${IWYU}/build
 ENV IWYU_SRC ${IWYU}/include-what-you-use
 RUN mkdir -p ${IWYU_BUILD} && \
     git clone --branch clang_${LLVM_VER} \
-        https://github.com/include-what-you-use/include-what-you-use.git \
-        ${IWYU_SRC}
+    https://github.com/include-what-you-use/include-what-you-use.git \
+    ${IWYU_SRC}
 RUN CC=clang-${LLVM_VER} CXX=clang++-${LLVM_VER} cmake -S ${IWYU_SRC} \
-        -B ${IWYU_BUILD} \
-        -G "Unix Makefiles" -DCMAKE_PREFIX_PATH=/usr/lib/llvm-${LLVM_VER} && \
+    -B ${IWYU_BUILD} \
+    -G "Unix Makefiles" -DCMAKE_PREFIX_PATH=/usr/lib/llvm-${LLVM_VER} && \
     cmake --build ${IWYU_BUILD} -j && \
     cmake --install ${IWYU_BUILD}
 
@@ -100,9 +105,31 @@ RUN mkdir -p $(include-what-you-use -print-resource-dir 2>/dev/null)
 RUN ln -s $(readlink -f /usr/lib/clang/${LLVM_VER}/include) \
     $(include-what-you-use -print-resource-dir 2>/dev/null)/include
 
+# Install mold for much faster linking
+RUN apt update && apt install mold -y
+ENV PATH=$PATH:/usr/bin/mold
+
 ## Cleanup cached apt data we don't need anymore
-RUN apt-get autoremove -y && apt-get clean && \
+RUN apt autoremove -y && apt clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Download and install Go
+RUN wget https://golang.org/dl/go1.21.4.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.21.4.linux-amd64.tar.gz && \
+    rm go1.21.4.linux-amd64.tar.gz
+
+# Add Go binaries to the system PATH
+ENV PATH=$PATH:/usr/local/go/bin
+
+# Download and install Rust using the official Rust installer script
+RUN apt update && apt install curl && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && apt install build-essential -y
+
+# Add the Rust binaries to the system PATH
+ENV PATH=$PATH:/root/.cargo/bin
+
+# Add FLTK development headers
+RUN apt update && apt -y install --no-install-recommends libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev
+
 
 # Allow the user to set compiler defaults
 ARG USE_CLANG
@@ -114,7 +141,7 @@ ENV CC=${CC:-"gcc"}
 ENV CXX=${CXX:-"g++"}
 
 # Include project
-#ADD . /workspaces/cpp_starter_project
-#WORKDIR /workspaces/cpp_starter_project
+#ADD . /workspaces/mtgo-collection-manager
+#WORKDIR /workspaces/mtgo-collection-manager
 
 CMD ["/bin/bash"]
