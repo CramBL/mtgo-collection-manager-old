@@ -9,6 +9,7 @@ pub mod mtgo_card;
 pub mod mtgo_preprocessor_api;
 pub mod mtgogetter_api;
 mod util;
+mod zip;
 
 pub use mtgogetter_api::download_custom_url as get_custom_url;
 pub use mtgogetter_api::download_goatbots_card_definitions as get_goatbots_card_definitions;
