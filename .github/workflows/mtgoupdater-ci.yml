@@ -70,11 +70,15 @@ jobs:
 
       - uses: moonrepo/setup-rust@v1
         with:
-          components: clippy
+          components: clippy, rustfmt
+          bins: cargo-audit
       - name: 🍄 Check & Lint MTGO Updater 🩺
         working-directory: ./mtgoupdater
         run: |
           cargo check --verbose
+          cargo fmt -- --check
+          cargo audit
+          cargo doc
           cargo clean
           cargo clippy -- -D warnings --no-deps
 
