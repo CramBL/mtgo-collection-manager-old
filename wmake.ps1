@@ -226,7 +226,7 @@ function Test-Mtgoupdater {
     Test-RustInstallation
     Write-Output "==> Testing MTGO Updater..."
     Set-Location mtgoupdater
-	cargo test -- --nocapture
+	cargo test -- --nocapture --test-threads=1
     Set-Location ..
     Write-Output "=== Done testing MTGO Updater ==="
 }
