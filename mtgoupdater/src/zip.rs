@@ -17,12 +17,6 @@ struct Archive<State = UnArchived> {
     _state: PhantomData<State>,
 }
 
-impl Archive {
-    const COMPRESSION_METHOD: zip::CompressionMethod = zip::CompressionMethod::BZIP2;
-    // Bzip2: 0 - 9. Default is 6
-    const COMPRESSION_LEVEL: i32 = 6;
-}
-
 impl Archive<UnArchived> {
     /// Instantiates a new `Archive`, the archive is not created until `archive` is called, which stores the archive in the location specified by `location`
     pub fn new(location: impl AsRef<Path>) -> Self {
@@ -148,6 +142,22 @@ impl Archive<Archived> {
 
         Ok(())
     }
+
+    /// Moves the given files to the archive and deletes the original files
+    pub fn move_to_archive<'f, F>(&mut self, files: F) -> Result<(), std::io::Error>
+    where
+        F: IntoIterator<Item = &'f Path> + Clone,
+    {
+        // 1. Add the files to the archive
+        self.add_to_archive(files.clone())?;
+
+        // 2. Delete the files
+        for file in files {
+            fs::remove_file(file)?;
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -156,6 +166,27 @@ mod tests {
     use pretty_assertions::assert_eq;
     use std::io::Read;
     use temp_dir::TempDir;
+
+    /// Helper function to make a file with some contents at a given path
+    fn create_file(path: &Path, contents: &str) {
+        fs::write(path, contents).expect("Failed to write to file");
+    }
+
+    /// Helper function to check that the name and contents of a file in a zip archive are as expected
+    fn check_zipfile_name_and_contents(
+        expected_name: &str,
+        expected_contents: &str,
+        file: &mut zip::read::ZipFile,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut zipped_file_contents = String::new();
+        file.read_to_string(&mut zipped_file_contents)?;
+        assert_eq!(
+            expected_name,
+            file.enclosed_name().unwrap().to_str().unwrap()
+        );
+        assert_eq!(expected_contents, zipped_file_contents);
+        Ok(())
+    }
 
     /// Compress a file and check that the archive contains the file
     /// Also check that the size of the archive is as expected
@@ -263,5 +294,74 @@ mod tests {
                 zipped_file_contents
             );
         }
+    }
+
+    /// Tests the `move_to_archive` method by:
+    /// 1. Create a file f1 in dir_a and archive it.
+    /// 2. Create 2 files f2 & f3 in dir_b.
+    /// 3. Move f2 & f3 from dir_b to the archive in dir_a.
+    /// 4. Check that the archive contains f1, f2, and f3 with correct name and content.
+    /// 5. Check that f2 & f3 in dir_b are no longer there.
+    #[test]
+    fn test_move_to_archive() {
+        let dir_a = TempDir::new().expect("Failed to create temporary directory");
+        let dir_b = TempDir::new().expect("Failed to create temporary directory");
+
+        // 1. Create a file in dir_a and archive it
+        let (f1_name, f1_contents) = ("f1.txt", "f1 contents");
+        let f1 = dir_a.child(f1_name);
+        create_file(&f1, f1_contents);
+
+        // Create an archive in dir_b and add f1 to it
+        let mut archive = Archive::new(dir_a.child("archive.zip"));
+        archive.add_file(f1.clone());
+        let mut archived = archive.archive().expect("Failed to archive file");
+
+        // 2. Create 2 files in dir_b
+        let (f2_name, f2_contents) = ("f2.txt", "f2 contents");
+        let f2 = dir_b.child(f2_name);
+        create_file(&f2, f2_contents);
+
+        let (f3_name, f3_contents) = ("f3.txt", "f3 contents");
+        let f3 = dir_b.child(f3_name);
+        create_file(&f3, f3_contents);
+
+        // 3. Move f2 & f3 from dir_b to the archive in dir_a
+        archived
+            .move_to_archive([f2.as_path(), f3.as_path()])
+            .expect("Failed to move files to archive");
+
+        // 4. Check that the archive contains f1, f2, and f3 with correct name and content
+        // Open the archive
+        let mut zip = zip::ZipArchive::new(
+            fs::File::open(archived.get_location()).expect("Failed to open archive file"),
+        )
+        .expect("Failed to create ZipArchive");
+
+        // Get the files from the archive and check file names and contents
+        check_zipfile_name_and_contents(
+            f1_name,
+            f1_contents,
+            &mut zip.by_index(0).expect("Failed to get file from archive"),
+        )
+        .expect("Failed check file name and contents");
+
+        check_zipfile_name_and_contents(
+            f2_name,
+            f2_contents,
+            &mut zip.by_index(1).expect("Failed to get file from archive"),
+        )
+        .expect("Failed check file name and contents");
+
+        check_zipfile_name_and_contents(
+            f3_name,
+            f3_contents,
+            &mut zip.by_index(2).expect("Failed to get file from archive"),
+        )
+        .expect("Failed check file name and contents");
+
+        // 5. Check that f2 & f3 in dir_b are no longer there
+        assert!(!f2.exists());
+        assert!(!f3.exists());
     }
 }
