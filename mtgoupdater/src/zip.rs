@@ -72,28 +72,31 @@ impl Archive<UnArchived> {
 }
 
 impl Archive<Archived> {
-    pub fn get_files(&self) -> &[PathBuf] {
+    /// Returns the paths to the files in the archive
+    pub fn files(&self) -> &[PathBuf] {
         &self.files
     }
 
-    pub fn get_location(&self) -> &Path {
+    /// Returns the Path to the archive
+    pub fn location(&self) -> &Path {
         &self.location
     }
 
-    /// Adds the given files to the archive
+    /// Adds the given files to the archive following the steps:
+    /// 1. Add a new temporary archive at the same location as the existing archive
+    /// 2. Copy the already compressed files from the existing archive to the temporary archive
+    /// 3. Add the new files to the temporary archive
+    /// 4. Delete the existing archive
+    /// 5. Rename the temporary archive to the the name of the original archive
     pub fn add_to_archive<'f, F>(&mut self, files: F) -> Result<(), std::io::Error>
     where
         F: IntoIterator<Item = &'f Path>,
     {
-        // 1. Add a new temporary archive
-        // 2. Copy the already compressed files from the existing archive to the temporary archive
-        // 3. Add the new files to the temporary archive
-        // 4. Delete the existing archive
-        // 5. Rename the temporary archive to the existing archive
+        // 1. Add a new temporary archive at the same location as the existing archive
+        let temp_archive_path = &self.location.with_file_name("temp.zip");
+        let temp_archive = fs::File::create(temp_archive_path)?;
 
-        // 1. Add a new temporary archive
-        let temp_archive = fs::File::create("temp.zip")?;
-        let mut zip = zip::ZipWriter::new(temp_archive);
+        let mut new_archive = zip::ZipWriter::new(temp_archive);
 
         let options = zip::write::FileOptions::default()
             .compression_method(COMPRESSION_METHOD)
@@ -105,8 +108,8 @@ impl Archive<Archived> {
         for i in 0..existing_archive.len() {
             let mut file = existing_archive.by_index(i)?;
             let filename = file.name().to_owned();
-            zip.start_file(filename, options)?;
-            std::io::copy(&mut file, &mut zip)?;
+            new_archive.start_file(filename, options)?;
+            std::io::copy(&mut file, &mut new_archive)?;
         }
 
         // 3. Add the new files to the temporary archive
@@ -127,18 +130,18 @@ impl Archive<Archived> {
                     )
                 })
                 .to_owned();
-            zip.start_file(filename, options)?;
+            new_archive.start_file(filename, options)?;
             let mut f = fs::File::open(file)?;
-            std::io::copy(&mut f, &mut zip)?;
+            std::io::copy(&mut f, &mut new_archive)?;
         }
 
-        zip.finish()?;
+        new_archive.finish()?;
 
         // 4. Delete the existing archive
         fs::remove_file(&self.location)?;
 
         // 5. Rename the temporary archive to the existing archive
-        fs::rename("temp.zip", &self.location)?;
+        fs::rename(temp_archive_path, &self.location)?;
 
         Ok(())
     }
@@ -219,7 +222,7 @@ mod tests {
         let archived = archive.archive().expect("Failed to archive file");
 
         // Open the archive
-        let file = fs::File::open(archived.get_location()).expect("Failed to open archive");
+        let file = fs::File::open(archived.location()).expect("Failed to open archive");
 
         let mut zip = zip::ZipArchive::new(file).expect("Failed to create ZipArchive");
 
@@ -235,7 +238,7 @@ mod tests {
         assert_eq!(file_contents, zipped_file_contents);
 
         // Size of zip
-        let metadata = fs::metadata(archived.get_location()).expect("Failed to get metadata");
+        let metadata = fs::metadata(archived.location()).expect("Failed to get metadata");
         assert_eq!(metadata.len(), EXPECT_ARCHIVE_SIZE as u64);
         eprintln!("Size of zip: {}", metadata.len());
         assert_eq!(zipped_file_contents.len(), expect_unzipped_size);
@@ -335,7 +338,7 @@ mod tests {
         // 4. Check that the archive contains f1, f2, and f3 with correct name and content
         // Open the archive
         let mut zip = zip::ZipArchive::new(
-            fs::File::open(archived.get_location()).expect("Failed to open archive file"),
+            fs::File::open(archived.location()).expect("Failed to open archive file"),
         )
         .expect("Failed to create ZipArchive");
 
