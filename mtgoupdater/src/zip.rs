@@ -106,10 +106,8 @@ impl Archive<Archived> {
         let mut existing_archive = zip::ZipArchive::new(fs::File::open(&self.location)?)?;
 
         for i in 0..existing_archive.len() {
-            let mut file = existing_archive.by_index(i)?;
-            let filename = file.name().to_owned();
-            new_archive.start_file(filename, options)?;
-            std::io::copy(&mut file, &mut new_archive)?;
+            let file = existing_archive.by_index(i)?;
+            new_archive.raw_copy_file(file)?; // raw_copy_file preserves the compression method and level of the original file
         }
 
         // 3. Add the new files to the temporary archive
