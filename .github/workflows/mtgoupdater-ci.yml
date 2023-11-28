@@ -126,4 +126,4 @@ jobs:
       - name: Test 📝 MTGO Updater
         working-directory: ./mtgoupdater
         run: |
-          cargo test --verbose -- --nocapture
+          cargo test --verbose -- --nocapture --test-threads=1

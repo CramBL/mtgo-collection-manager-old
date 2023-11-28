@@ -192,12 +192,12 @@ mod tests {
     /// Also check that the size of the archive is as expected
     #[test]
     fn test_archive_compression() {
+        // Create a temporary directory
+        let temp_dir = TempDir::new().expect("Failed to create temporary directory");
+
         let file_contents: String = "1234567891011121314".repeat(10);
         let expect_unzipped_size: usize = file_contents.len();
         const EXPECT_ARCHIVE_SIZE: usize = 175;
-
-        // Create a temporary directory
-        let temp_dir = TempDir::new().expect("Failed to create temporary directory");
 
         // Create a file in the temporary directory
         let temp_file = temp_dir.child("test.txt");
@@ -209,7 +209,8 @@ mod tests {
         );
 
         // Create an archive
-        let mut archive = Archive::new(temp_dir.child("test.zip"));
+        let child_path = temp_dir.child("test.zip");
+        let mut archive = Archive::new(child_path);
 
         // Add the file to the archive
         archive.add_file(temp_file);
