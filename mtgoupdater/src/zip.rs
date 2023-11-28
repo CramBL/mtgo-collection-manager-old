@@ -4,6 +4,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
+const COMPRESSION_METHOD: zip::CompressionMethod = zip::CompressionMethod::BZIP2;
+// Bzip2: 0 - 9. Default is 6
+const COMPRESSION_LEVEL: i32 = 6;
+
 /// Markers for the state of an archive
 struct UnArchived;
 struct Archived;
@@ -11,6 +15,12 @@ struct Archive<State = UnArchived> {
     location: PathBuf,
     files: Vec<PathBuf>,
     _state: PhantomData<State>,
+}
+
+impl Archive {
+    const COMPRESSION_METHOD: zip::CompressionMethod = zip::CompressionMethod::BZIP2;
+    // Bzip2: 0 - 9. Default is 6
+    const COMPRESSION_LEVEL: i32 = 6;
 }
 
 impl Archive<UnArchived> {
@@ -31,8 +41,9 @@ impl Archive<UnArchived> {
         let file = fs::File::create(&self.location)?;
         let mut zip = zip::ZipWriter::new(file);
 
-        let options =
-            zip::write::FileOptions::default().compression_method(zip::CompressionMethod::BZIP2);
+        let options = zip::write::FileOptions::default()
+            .compression_method(COMPRESSION_METHOD)
+            .compression_level(Some(COMPRESSION_LEVEL));
 
         for file in &self.files {
             let filename: String = file
@@ -74,18 +85,82 @@ impl Archive<Archived> {
     pub fn get_location(&self) -> &Path {
         &self.location
     }
+
+    /// Adds the given files to the archive
+    pub fn add_to_archive<'f, F>(&mut self, files: F) -> Result<(), std::io::Error>
+    where
+        F: IntoIterator<Item = &'f Path>,
+    {
+        // 1. Add a new temporary archive
+        // 2. Copy the already compressed files from the existing archive to the temporary archive
+        // 3. Add the new files to the temporary archive
+        // 4. Delete the existing archive
+        // 5. Rename the temporary archive to the existing archive
+
+        // 1. Add a new temporary archive
+        let temp_archive = fs::File::create("temp.zip")?;
+        let mut zip = zip::ZipWriter::new(temp_archive);
+
+        let options = zip::write::FileOptions::default()
+            .compression_method(COMPRESSION_METHOD)
+            .compression_level(Some(COMPRESSION_LEVEL));
+
+        // 2. Copy the already compressed files from the existing archive to the temporary archive
+        let mut existing_archive = zip::ZipArchive::new(fs::File::open(&self.location)?)?;
+
+        for i in 0..existing_archive.len() {
+            let mut file = existing_archive.by_index(i)?;
+            let filename = file.name().to_owned();
+            zip.start_file(filename, options)?;
+            std::io::copy(&mut file, &mut zip)?;
+        }
+
+        // 3. Add the new files to the temporary archive
+        for file in files {
+            let filename: String = file
+                .file_name()
+                .unwrap_or_else(|| {
+                    panic!(
+                        "Failed to get filename from path: {}",
+                        file.to_string_lossy()
+                    )
+                })
+                .to_str()
+                .unwrap_or_else(|| {
+                    panic!(
+                        "Failed to convert filename to string: {}",
+                        file.to_string_lossy()
+                    )
+                })
+                .to_owned();
+            zip.start_file(filename, options)?;
+            let mut f = fs::File::open(file)?;
+            std::io::copy(&mut f, &mut zip)?;
+        }
+
+        zip.finish()?;
+
+        // 4. Delete the existing archive
+        fs::remove_file(&self.location)?;
+
+        // 5. Rename the temporary archive to the existing archive
+        fs::rename("temp.zip", &self.location)?;
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::io::Read;
-
     use super::*;
     use pretty_assertions::assert_eq;
+    use std::io::Read;
     use temp_dir::TempDir;
 
+    /// Compress a file and check that the archive contains the file
+    /// Also check that the size of the archive is as expected
     #[test]
-    fn test_archive() {
+    fn test_archive_compression() {
         let file_contents: String = "1234567891011121314".repeat(10);
         let expect_unzipped_size: usize = file_contents.len();
         const EXPECT_ARCHIVE_SIZE: usize = 175;
@@ -133,5 +208,60 @@ mod tests {
         eprintln!("Size of zip: {}", metadata.len());
         assert_eq!(zipped_file_contents.len(), expect_unzipped_size);
         eprintln!("unzipped size: {}", zipped_file_contents.len());
+    }
+
+    /// Compress the first two files, then add the third file to the archive and check that the archive contains all three files
+    /// This test is to check that the `add_to_archive` method works
+    #[test]
+    fn tests_archive_add_to_archive() {
+        // Files to compress
+        let compress_files = [
+            Path::new("Cargo.toml"),
+            Path::new("Cargo.lock"),
+            Path::new("README.md"),
+        ];
+
+        // Create a temporary directory
+        let temp_dir = TempDir::new().expect("Failed to create temporary directory");
+        // Create child directory
+        let child_dir = temp_dir.child("my_zip");
+
+        // Zip cargo.toml and cargo.lock
+        let mut archive = Archive::new(&child_dir);
+        archive.add_file(compress_files[0].to_path_buf());
+        archive.add_file(compress_files[1].to_path_buf());
+
+        let mut archived = archive.archive().expect("Failed to archive file");
+
+        // Then add the README.md to the existing archive
+        archived
+            .add_to_archive([compress_files[2]])
+            .expect("Failed to add file to archive");
+
+        // Check that the archive contains the files
+        // Open the archive
+        let mut zip =
+            zip::ZipArchive::new(fs::File::open(child_dir).expect("failed to open archive file"))
+                .expect("Failed to create ZipArchive");
+
+        // Get the files from the archive and check file names and contents
+        for (idx, compressed_file) in compress_files.iter().enumerate() {
+            let mut zipped_file = zip.by_index(idx).expect("Failed to get file from archive");
+
+            let mut zipped_file_contents = String::new();
+
+            zipped_file
+                .read_to_string(&mut zipped_file_contents)
+                .expect("Failed to read file from archive");
+
+            assert_eq!(
+                zipped_file.enclosed_name().unwrap().to_str().unwrap(),
+                compressed_file.to_str().unwrap()
+            );
+            assert_eq!(
+                fs::read_to_string(compressed_file).expect("Failed to read file"),
+                zipped_file_contents
+            );
+        }
     }
 }
