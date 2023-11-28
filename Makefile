@@ -312,7 +312,7 @@ define fn_build_mtgoupdater
 endef
 
 define fn_test_mtgoupdater
-	cd mtgoupdater && cargo test -- --nocapture --test-threads=1
+	cd mtgoupdater && cargo test -- --nocapture
 endef
 
 
