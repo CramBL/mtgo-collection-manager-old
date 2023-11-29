@@ -9,11 +9,19 @@ const COMPRESSION_METHOD: zip::CompressionMethod = zip::CompressionMethod::BZIP2
 const COMPRESSION_LEVEL: i32 = 6;
 
 /// Markers for the state of an archive
-struct UnArchived;
-struct Archived;
-struct Archive<State = UnArchived> {
+pub struct UnArchived;
+pub struct Archived;
+
+/// Marker for whether to delete a file or not
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+enum ShouldDelete {
+    Yes,
+    #[default]
+    No,
+}
+pub struct Archive<State = UnArchived> {
     location: PathBuf,
-    files: Vec<PathBuf>,
+    files: Vec<(PathBuf, ShouldDelete)>,
     _state: PhantomData<State>,
 }
 
@@ -27,10 +35,27 @@ impl Archive<UnArchived> {
         }
     }
 
+    /// Adds the given file to the archive while preserving the original file.
     pub fn add_file(&mut self, file: PathBuf) {
-        self.files.push(file);
+        self.files.push((file, ShouldDelete::No));
     }
 
+    /// Moves the given file to the archive and deletes the original file.
+    pub fn move_file(&mut self, file: PathBuf) {
+        self.files.push((file, ShouldDelete::Yes));
+    }
+
+    /// Archives the files added to the `Archive` instance.
+    ///
+    /// # Returns
+    /// An `Archive` instance with the state `Archived`.
+    ///
+    /// # Errors
+    /// Returns an error if an error occurs while creating the archive.
+    ///
+    /// # Note
+    /// Files that were added with `move_file` will be deleted after they have been moved to the archive.
+    /// Files that were added with `add_file` will not be deleted.
     pub fn archive(self) -> Result<Archive<Archived>, std::io::Error> {
         let file = fs::File::create(&self.location)?;
         let mut zip = zip::ZipWriter::new(file);
@@ -39,7 +64,7 @@ impl Archive<UnArchived> {
             .compression_method(COMPRESSION_METHOD)
             .compression_level(Some(COMPRESSION_LEVEL));
 
-        for file in &self.files {
+        for (file, _) in &self.files {
             let filename: String = file
                 .file_name()
                 .unwrap_or_else(|| {
@@ -61,6 +86,13 @@ impl Archive<UnArchived> {
             std::io::copy(&mut f, &mut zip)?;
         }
 
+        // Delete files that were moved to the archive
+        for (file, should_delete) in &self.files {
+            if *should_delete == ShouldDelete::Yes {
+                fs::remove_file(file)?;
+            }
+        }
+
         zip.finish()?;
 
         Ok(Archive {
@@ -72,9 +104,20 @@ impl Archive<UnArchived> {
 }
 
 impl Archive<Archived> {
-    /// Returns the paths to the files in the archive
-    pub fn files(&self) -> &[PathBuf] {
-        &self.files
+    /// Instantiates a new `Archive` from an existing archive.
+    ///
+    /// In this case, the `Archive` instance is not used to create a new archive, but to add files to the existing archive.
+    /// There's no knowledge of the files in the existing archive, querying the files in the archive will return an empty vector.
+    ///
+    /// # Arguments
+    ///
+    /// * `location` - The path to the existing archive
+    pub fn init(location: impl AsRef<Path>) -> Self {
+        Self {
+            location: location.as_ref().to_path_buf(),
+            files: Vec::with_capacity(0),
+            _state: PhantomData,
+        }
     }
 
     /// Returns the Path to the archive
@@ -88,7 +131,7 @@ impl Archive<Archived> {
     /// 3. Add the new files to the temporary archive
     /// 4. Delete the existing archive
     /// 5. Rename the temporary archive to the the name of the original archive
-    pub fn add_to_archive<'f, F>(&mut self, files: F) -> Result<(), std::io::Error>
+    pub fn add_to_archive<'f, F>(&mut self, new_files: F) -> Result<(), std::io::Error>
     where
         F: IntoIterator<Item = &'f Path>,
     {
@@ -111,7 +154,7 @@ impl Archive<Archived> {
         }
 
         // 3. Add the new files to the temporary archive
-        for file in files {
+        for file in new_files {
             let filename: String = file
                 .file_name()
                 .unwrap_or_else(|| {
