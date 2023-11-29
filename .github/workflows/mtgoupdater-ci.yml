@@ -13,7 +13,6 @@ on:
 
 env:
   VERBOSE: 1
-  EXCLUDE_BOOST_LIBS: "serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
 
 jobs:
     # JOB to run change detection
@@ -62,13 +61,24 @@ jobs:
     name: ⚒️ Build & Test 📝
     steps:
       - uses: actions/checkout@v3
+
+      - name: 🗻 Set EXCLUDE_BOOST_LIBS environment variable 🏝️
+        run: |
+          $env:EXCLUDE_BOOST_LIBS = Get-Content -Raw -Path "build-util/boost-exclude-libs.txt"
+          Write-Output "EXCLUDE_BOOST_LIBS=$env:EXCLUDE_BOOST_LIBS" >> $env:GITHUB_ENV
+        shell: pwsh
+
       - uses: moonrepo/setup-rust@v1
         with:
-          components: clippy
+          components: clippy, rustfmt
+          bins: cargo-audit
       - name: 🍄 Check & Lint MTGO Updater 🩺
         working-directory: ./mtgoupdater
         run: |
           cargo check --verbose
+          cargo fmt -- --check
+          cargo audit
+          cargo doc
           cargo clean
           cargo clippy -- -D warnings --no-deps
 

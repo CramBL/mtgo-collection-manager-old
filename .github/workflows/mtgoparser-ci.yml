@@ -14,7 +14,6 @@ on:
 env:
   CLANG_VERSION_MACOS: "15.0.3"
   VERBOSE: 1
-  EXCLUDE_BOOST_LIBS: "serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;"
 
 jobs:
   # JOB to run change detection
@@ -70,7 +69,7 @@ jobs:
         include:
           # Add appropriate variables for gcov version required. This will intentionally break
           # if you try to use a compiler that does not have gcov set
-          - os: macos-12
+          - os: macos-13
             build_type: Debug
             compiler: gcc-13
             gcov_executable: gcov
@@ -79,7 +78,7 @@ jobs:
             packaging_maintainer_mode: Off
             build_shared: Off
 
-          - os: macos-12
+          - os: macos-13
             build_type: Debug
             compiler: llvm-15.0.3
             enable_ipo: Off
@@ -162,6 +161,12 @@ jobs:
         uses: cardinalby/export-env-action@v2
         with:
           envFile: '.github/constants.env'
+
+      - name: 🗻 Set EXCLUDE_BOOST_LIBS environment variable 🏝️
+        run: |
+          $env:EXCLUDE_BOOST_LIBS = Get-Content -Raw -Path "build-util/boost-exclude-libs.txt"
+          Write-Output "EXCLUDE_BOOST_LIBS=$env:EXCLUDE_BOOST_LIBS" >> $env:GITHUB_ENV
+        shell: pwsh
 
       - name: ⚙️ Setup C++ Tools - MacOS 🍎
         if: runner.os == 'macOS'
