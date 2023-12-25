@@ -1,0 +1,373 @@
+version: '3'
+
+dotenv: ['build.env']
+
+set: [pipefail]
+
+vars:
+   RUST_VERSION_CMD:
+      sh: rustc --version 2>/dev/null || echo "not found"
+   RUST_VERSION:
+      sh: echo {{ regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" .RUST_VERSION_CMD | default `not found` }}
+
+   GO_VERSION_CMD:
+      sh: go version 2>/dev/null || echo "not found"
+   GO_VERSION:
+      sh: echo {{ regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" .GO_VERSION_CMD | default `not found` }}
+
+   CMAKE_VERSION_CMD:
+      sh: cmake --version 2>/dev/null || echo "not found"
+   CMAKE_VERSION:
+      sh: echo {{ regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" .CMAKE_VERSION_CMD | default `not found` }}
+
+   CLANG_VERSION_CMD:
+      sh: clang --version 2>/dev/null || echo "not found"
+   CLANG_VERSION:
+      sh: echo {{ regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" .CLANG_VERSION_CMD | default `not found` }}
+
+   GCC_VERSION_CMD:
+      sh: gcc --version 2>/dev/null || echo "not found"
+   GCC_VERSION:
+      sh: echo {{ regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" .GCC_VERSION_CMD | default `not found` }}
+
+   MTGOPARSER_IPO: # Set to On for linux and windows but off for macos
+      sh: if [ "{{OS}}" = "linux" ] || [ "{{OS}}" = "windows" ]; then echo "On"; else echo "Off"; fi
+   MTGOPARSER_USER_LINKER: # Enable user linker for linux only
+      sh: if [ "{{OS}}" = "linux" ]; then echo "On"; else echo "Off"; fi
+   MTGOPARSER_EXCLUDE_BOOST_LIBS: serialization;asio;json;graph;log;property_tree;wave;contract;coroutine;date_time;fiber;locale;thread;type_erasure;test;url;python;compute;crc;dll;endian;lamda;fusion;geometry;gil;regex;iostreams;filesystem;program_options;random;math;multiprecision;mysql;stacktrace;
+
+
+
+tasks:
+   default:
+   # Just lists the tasks
+      desc: List tasks
+      cmds: [task --list-all]
+
+   print-tool-versions:
+      aliases: [tver]
+      desc: Print tool versions
+      summary: |
+         This task prints the versions of the tools used to build the project.
+
+         Such as Rust, Go, CMake, Clang, GCC, etc.
+      silent: true
+      cmds:
+         - echo "OS/Arch:" "{{OS}}/{{ARCH}}"
+         - echo "  Rust :" "{{ .RUST_VERSION }} (min. ${RUST_MIN_VERSION})"
+         - echo "  Go   :" "{{ .GO_VERSION }} (min. ${GO_MIN_VERSION})"
+         - echo "C++"
+         - echo "  - CLANG:" "{{ .CLANG_VERSION }} (min. ${LLVM_MIN_VERSION})"
+         - echo "  - GCC  :" "{{ .GCC_VERSION }} (min. ${GCC_MIN_VERSION})"
+         - echo "CMake:" "{{ .CMAKE_VERSION }} (min. ${CMAKE_MIN_VERSION})"
+         - echo "CMake generator:" "${MTGOPARSER_GENERATOR}"
+      requires:
+         vars: [RUST_VERSION, RUST_MIN_VERSION,
+               GO_VERSION, GO_MIN_VERSION,
+               CMAKE_VERSION, CMAKE_MIN_VERSION,
+               CLANG_VERSION, LLVM_MIN_VERSION,
+               GCC_VERSION, GCC_MIN_VERSION,
+               MTGOPARSER_GENERATOR]
+
+   print-build-vars:
+      aliases: [bvars, print-bvars]
+      desc: Print build configuration variables
+      silent: true
+      cmds:
+         - echo "BUILD_MODE=${BUILD_MODE}"
+         - echo "MTGOPARSER_GENERATOR=${MTGOPARSER_GENERATOR}"
+         - echo "MTGOPARSER_IPO={{.MTGOPARSER_IPO}}"
+         - echo "MTGOPARSER_BUILD_MODE=${MTGOPARSER_BUILD_MODE}"
+         - echo "MTGOPARSER_ENABLE_COV=${MTGOPARSER_ENABLE_COV}"
+         - echo "MTGOPARSER_EXCLUDE_BOOST_LIBS={{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
+         - echo "MTGOPARSER_LINKER=${MTGOPARSER_LINKER}"
+         - echo "MTGOPARSER_USER_LINKER={{.MTGOPARSER_USER_LINKER}}"
+
+      requires:
+         vars: [BUILD_MODE,
+               MTGOPARSER_GENERATOR,
+               MTGOPARSER_IPO,
+               MTGOPARSER_BUILD_MODE,
+               MTGOPARSER_ENABLE_COV,
+               MTGOPARSER_EXCLUDE_BOOST_LIBS,
+               MTGOPARSER_LINKER,
+               MTGOPARSER_USER_LINKER]
+
+
+
+   build-mtgogetter:
+      cmds:
+         - echo "==> Building MTGO Getter..."
+         - go build -C mtgogetter -v
+         - echo "=== Done building MTGO Getter ==="
+
+   test-mtgogetter:
+      desc: Runs unit/module tests for MTGO Getter
+      silent: true
+      cmds:
+         - echo "==> Testing MTGO Getter..."
+         - go test -C mtgogetter -v ./...
+         - echo "=== Done testing MTGO Getter ==="
+
+   build-mtgoparser:
+      desc: Build MTGO Parser
+      summary: |
+         This task builds MTGO Parser with the default build configuration, including warnings as errors and static analysis.
+      deps: [print-tool-versions]
+      dir: mtgoparser
+      cmds:
+         - task: generate-mtgoparser-buildsystem
+         - task: compile-mtgoparser
+
+   build-mtgoparser-for-integration:
+      aliases: [build-mtgoparser-integration, build-mtgoparser-int]
+      desc: Build MTGO Parser for integration with the rest of the MTGO Collection Manager app
+      summary: |
+         This task builds MTGO Parser for integration with the rest of the MTGO Collection Manager app.
+
+         The task is a convenience for building faster.
+
+         It turns off warnings as errors and some static analysis in the interest of building faster. When using this
+         build configuration, it is assumed that more thorough testing has been done on MTGO Parser in a more rigirous build.
+      dir: mtgoparser
+      cmds:
+         - task: generate-mtgoparser-buildsystem-for-integration
+         - task: compile-mtgoparser
+
+   generate-mtgoparser-buildsystem:
+      desc: Generate MTGO Parser build system
+      internal: true
+      dir: mtgoparser
+      cmds:
+         - task: print-build-vars
+         - echo "==> Generating MTGO Parser buildsystem..."
+         - cmake -S .
+                 -B build
+                 -G "${MTGOPARSER_GENERATOR}"
+                 -Dmtgoparser_ENABLE_IPO=${MTGOPARSER_IPO}
+                 -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE}
+                 -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV}
+                 -DBOOST_EXCLUDE_LIBRARIES="{{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
+                 -DUSER_LINKER_OPTION=${MTGOPARSER_LINKER}
+                 -Dmtgoparser_ENABLE_USER_LINKER:BOOL={{.MTGOPARSER_USER_LINKER}}
+         - echo "=== Done generating MTGO Parser build system ==="
+      requires:
+         vars: [MTGOPARSER_GENERATOR,
+               MTGOPARSER_IPO,
+               MTGOPARSER_BUILD_MODE,
+               MTGOPARSER_ENABLE_COV,
+               MTGOPARSER_EXCLUDE_BOOST_LIBS,
+               MTGOPARSER_LINKER,
+               MTGOPARSER_USER_LINKER]
+
+   generate-mtgoparser-buildsystem-for-integration:
+      aliases: [generate-mtgoparser-buildsystem-integration, gen-mtgoparser-build-integration]
+      desc: Generate MTGO Parser build system
+      internal: true
+      dir: mtgoparser
+      cmds:
+         - task: print-build-vars
+         - echo "==> Generating MTGO Parser buildsystem for integration..."
+         - cmake -S .
+                 -B build
+                 -G "${MTGOPARSER_GENERATOR}"
+                 -Dmtgoparser_DEPLOYING_BINARY=On
+                 -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
+                 -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF
+                 -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
+                 -Dmtgoparser_ENABLE_IPO=${MTGOPARSER_IPO}
+                 -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE}
+                 -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV}
+                 -DBOOST_EXCLUDE_LIBRARIES="{{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
+                 -DUSER_LINKER_OPTION=${MTGOPARSER_LINKER}
+                 -Dmtgoparser_ENABLE_USER_LINKER:BOOL={{.MTGOPARSER_USER_LINKER}}
+         - echo "=== Done generating MTGO Parser build system for integration ==="
+      requires:
+         vars: [MTGOPARSER_GENERATOR,
+               MTGOPARSER_IPO,
+               MTGOPARSER_BUILD_MODE,
+               MTGOPARSER_ENABLE_COV,
+               MTGOPARSER_EXCLUDE_BOOST_LIBS,
+               MTGOPARSER_LINKER,
+               MTGOPARSER_USER_LINKER]
+
+   compile-mtgoparser:
+      desc: Compile MTGO Parser
+      internal: true
+      dir: mtgoparser
+      cmds:
+         - echo "==> Compiling MTGO Parser..."
+         - cmake --build build --config ${MTGOPARSER_BUILD_MODE}
+         - echo "=== Done compiling MTGO Parser ==="
+      requires:
+         vars: [MTGOPARSER_BUILD_MODE]
+
+   test-mtgoparser:
+      desc: Runs unit/module tests for MTGO Parser
+      silent: true
+      dir: mtgoparser/build
+      cmds:
+         - echo "==> Testing MTGO Parser..."
+         - ctest --output-on-failure
+         - echo "=== Done testing MTGO Parser ==="
+
+   benchmark-mtgoparser-xml-parse:
+      desc: Run MTGO Parser benchmark suite for XML parsing
+      silent: true
+      dir: mtgoparser/build/test
+      cmds:
+         - echo "==> Benchmarking MTGO Parser XML parsing..."
+         - ./${MTGOPARSER_BUILD_MODE}/benchmark_xml_parse [.]
+         - echo "=== Done benchmarking MTGO Parser XML parsing ==="
+
+   build-mtgoupdater:
+      desc: Build MTGO Updater
+      silent: true
+      dir: mtgoupdater
+      cmds:
+         - echo "==> Building MTGO Updater..."
+         - echo "building in ${BUILD_MODE} mode"
+         - cmd: |
+            if [ "${BUILD_MODE}" = "Debug" ]; then
+               cargo build
+            else
+               cargo build --release
+            fi
+      requires:
+         vars: [BUILD_MODE]
+
+   test-mtgoupdater:
+      desc: Runs unit/module/integration tests for MTGO Updater
+      silent: true
+      dir: mtgoupdater
+      deps: [print-tool-versions]
+      cmds:
+         - echo "==> Testing MTGO Updater..."
+         - cargo test -- --nocapture
+         - echo "=== Done testing MTGO Updater ==="
+
+   build-mtgogui:
+      desc: Build MTGO GUI
+      silent: true
+      dir: mtgogui
+      cmds:
+         - echo "==> Building MTGO GUI..."
+         - echo "building in ${BUILD_MODE} mode"
+         - cmd: |
+            if [ "${BUILD_MODE}" = "Debug" ]; then
+               cargo build
+            else
+               cargo build --release
+            fi
+      requires:
+         vars: [BUILD_MODE]
+
+   test-mtgogui:
+      desc: Runs unit/module tests for MTGO GUI
+      silent: true
+      dir: mtgogui
+      cmds:
+         - echo "==> Testing MTGO GUI..."
+         - cmd: cargo test -- --nocapture
+           platforms: [linux, windows]
+         - cmd: echo "WARNING `cargo test` for FLTK is currently not working on MACOS - skipping tests"
+           platforms: [darwin]
+         - echo "=== Done testing MTGO GUI ==="
+
+   clean:
+      prompt: Are you sure you want to clean all build artifacts?
+      desc: Clean build artifacts in all subprojects
+      silent: true
+      cmds:
+         - echo "==> Cleaning build artifacts..."
+         - task: clean-mtgogetter
+         - task: clean-mtgoupdater
+         - task: clean-mtgogui
+         - task: clean-mtgoparser
+
+
+   clean-mtgogetter:
+      desc: Clean MTGO Getter build artifacts
+      dir: mtgogetter
+      cmds:
+         - echo "==> Cleaning MTGO Getter build artifacts..."
+         - go clean
+         - echo "=== Done cleaning MTGO Getter build artifacts ==="
+
+   clean-mtgoupdater:
+      desc: Clean MTGO Updater build artifacts
+      dir: mtgoupdater
+      cmds:
+         - echo "==> Cleaning MTGO Updater build artifacts..."
+         - cargo clean
+         - echo "=== Done cleaning MTGO Updater build artifacts ==="
+
+   clean-mtgogui:
+      desc: Clean MTGO GUI build artifacts
+      dir: mtgogui
+      cmds:
+         - echo "==> Cleaning MTGO GUI build artifacts..."
+         - cargo clean
+         - echo "=== Done cleaning MTGO GUI build artifacts ==="
+
+   clean-mtgoparser:
+      desc: Clean MTGO Parser build artifacts
+      dir: mtgoparser
+      cmds:
+         - echo "==> Cleaning MTGO Parser build artifacts..."
+         - cmd: rm -rf build
+           platforms: [linux, darwin]
+         - cmd: pwsh -Command "Remove-Item build -Recurse -Force"
+           platforms: [windows]
+         - echo "=== Done cleaning MTGO Parser build artifacts ==="
+
+   archive-mtgo-collection-manager:
+      aliases: [archive-bin]
+      desc: Make an archive containing the MTGO Collection Manager binary.
+      summary: |
+         This task makes an archive containing the MTGO Collection Manager binary.
+
+         The name of the archive is set by the PACKAGE_NAME environment variable.
+      silent: true
+      cmds:
+         - task: archive-mtgo-collection-manager-windows
+         - task: archive-mtgo-collection-manager-unix
+
+   archive-mtgo-collection-manager-windows:
+      internal: true
+      desc: Make an archive with the MTGO Collection Manager binary on Windows
+      summary: |
+         This task makes an archive with the MTGO Collection Manager binary using Windows PowerShell functions.
+
+         The name of the archive is set by the PACKAGE_NAME environment variable.
+      platforms: [windows]
+      cmds:
+         - echo "==> Compressing MTGO Collection Manager..."
+         # Create a temporary directory to hold the GUI binary
+         - pwsh -Command "New-Item -Path .\mtgo-collection-manager -ItemType Directory"
+         # Copy and rename the GUI binary
+         - pwsh -Command "Copy-Item -Path .\mtgogui\target\release\mtgogui.exe -Destination .\mtgo-collection-manager"
+         - pwsh -Command "Rename-Item -Path .\mtgo-collection-manager\mtgogui.exe -NewName mtgo-collection-manager.exe"
+         # Make final archive
+         - pwsh -Command "Compress-Archive -Path .\mtgo-collection-manager -DestinationPath .\'${PACKAGE_NAME}'.zip"
+         # Cleanup the temporary folder
+         - pwsh -Command "Remove-Item -Path .\mtgo-collection-manager -Recurse"
+         - echo "=== Done compressing MTGO Collection Manager ==="
+         - echo "=== Archive is located at ./${PACKAGE_NAME}.zip ==="
+      requires:
+         vars: [PACKAGE_NAME]
+
+   archive-mtgo-collection-manager-unix:
+      internal: true
+      desc: Make an archive with the MTGO Collection Manager binary on MacOS/Linux.
+      summary: |
+         This task makes an archive with the MTGO Collection Manager binary using the zip command.
+
+         The name of the archive is set by the PACKAGE_NAME environment variable.
+      platforms: [darwin, linux]
+      cmds:
+         - mkdir -p mtgo-collection-manager
+         - cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
+         - zip -r ${PACKAGE_NAME}.zip mtgo-collection-manager
+      requires:
+         vars: [PACKAGE_NAME]
