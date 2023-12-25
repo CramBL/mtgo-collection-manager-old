@@ -13,6 +13,7 @@ on:
 
 env:
   VERBOSE: 1
+  BUILD_MODE: Release
 
 jobs:
   Test:
@@ -76,14 +77,14 @@ jobs:
       - name: 📝 Build & Run tests - MacOS🍎
         if: runner.os == 'macOS'
         run: |
-          BUILD_MODE=Release; task build-integration
+          task build-integration
           task test
 
       - name: 📦 Pack - MacOS 🍎
         if: runner.os == 'macOS'
-        run: |
-          PACKAGE_NAME=ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
-          task archive-mtgo-collection-manager
+        run: task archive-mtgo-collection-manager
+        env:
+          PACKAGE_NAME: ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
 
       - name: 📩 Upload - MacOS 🍎
         if: runner.os == 'macOS'
@@ -101,14 +102,14 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           source build-util/dev-ubuntu/install-ubuntu-fltk-dev-headers.sh
-          BUILD_MODE=Release; task build-integration
+          task build-integration
           task test
 
       - name: 📦 Pack - Linux 🐧
         if: runner.os == 'Linux'
-        run: |
-          PACKAGE_NAME=ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
-          task archive-mtgo-collection-manager
+        run: task archive-mtgo-collection-manager
+        env:
+          PACKAGE_NAME: ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
 
       - name: 📩 Upload - Linux 🐧
         if: runner.os == 'Linux'
@@ -125,14 +126,15 @@ jobs:
       - name: 📝 Build & Run tests - Windows 💻
         if: runner.os == 'Windows'
         run: |
-          BUILD_MODE=Release; task build-integration
+          task build-integration
           task test
 
       - name: 📦 Pack - Windows 💻
         if: runner.os == 'Windows'
-        run: |
-          PACKAGE_NAME=windows-2022-${{ matrix.compiler }}-mtgo-cm
-          task archive-mtgo-collection-manager
+        run: task archive-mtgo-collection-manager
+        env:
+          PACKAGE_NAME: windows-2022-${{ matrix.compiler }}-mtgo-cm
+
 
       - name: 📩 Upload - Windows 💻
         if: runner.os == 'Windows'
