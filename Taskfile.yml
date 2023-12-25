@@ -52,7 +52,7 @@ tasks:
 
    build:
       desc: Build all subprojects with the default build configuration, including warnings as errors and static analysis.
-      deps: [mtgogetter:build, mtgoparser:build, build-mtgoupdater]
+      deps: [mtgogetter:build, mtgoparser:build, mtgoupdater:build]
       cmds:
          - task: build-mtgogui
          - task: print-tool-versions
@@ -61,7 +61,7 @@ tasks:
 
    build-integration:
       desc: Build all subprojects for integration with the rest of the MTGO Collection Manager app.
-      deps: [mtgogetter:build, mtgoparser:build-for-integration, build-mtgoupdater]
+      deps: [mtgogetter:build, mtgoparser:build-for-integration, mtgoupdater:build]
       cmds:
          - task: build-mtgogui
          - task: print-tool-versions
@@ -70,7 +70,7 @@ tasks:
 
    test:
       desc: Run all tests
-      deps: [mtgogetter:test, mtgoparser:test, test-mtgoupdater, test-mtgogui]
+      deps: [mtgogetter:test, mtgoparser:test, mtgoupdater:test, test-mtgogui]
       cmds:
          - echo "=== Done running all tests ==="
 
@@ -100,31 +100,9 @@ tasks:
                MTGOPARSER_GENERATOR]
 
 
-   build-mtgoupdater:
-      desc: Build MTGO Updater
-      silent: true
-      dir: mtgoupdater
-      cmds:
-         - echo "==> Building MTGO Updater..."
-         - echo "building in ${BUILD_MODE} mode"
-         - cmd: |
-            if [ "${BUILD_MODE}" = "Debug" ]; then
-               cargo build
-            else
-               cargo build --release
-            fi
-      requires:
-         vars: [BUILD_MODE]
 
-   test-mtgoupdater:
-      desc: Runs unit/module/integration tests for MTGO Updater
-      silent: true
-      dir: mtgoupdater
-      deps: [print-tool-versions]
-      cmds:
-         - echo "==> Testing MTGO Updater..."
-         - cargo test -- --nocapture
-         - echo "=== Done testing MTGO Updater ==="
+
+
 
    build-mtgogui:
       desc: Build MTGO GUI
@@ -161,19 +139,13 @@ tasks:
       cmds:
          - echo "==> Cleaning build artifacts..."
          - task: mtgogetter:clean
-         - task: clean-mtgoupdater
+         - task: mtgoupdater:clean
          - task: clean-mtgogui
          - task: mtgoparser:clean
 
 
 
-   clean-mtgoupdater:
-      desc: Clean MTGO Updater build artifacts
-      dir: mtgoupdater
-      cmds:
-         - echo "==> Cleaning MTGO Updater build artifacts..."
-         - cargo clean
-         - echo "=== Done cleaning MTGO Updater build artifacts ==="
+
 
    clean-mtgogui:
       desc: Clean MTGO GUI build artifacts
