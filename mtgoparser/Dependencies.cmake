@@ -9,7 +9,7 @@ function(mtgoparser_setup_dependencies)
   # already been provided to us by a parent project
 
   if(NOT TARGET glaze::glaze)
-    cpmaddpackage("gh:stephenberry/glaze@1.7.0")
+    cpmaddpackage("gh:stephenberry/glaze@1.9.8.1")
   endif()
 
   if(NOT TARGET fmtlib::fmtlib)
@@ -29,7 +29,7 @@ function(mtgoparser_setup_dependencies)
   endif()
 
   if(NOT TARGET Catch2::Catch2WithMain)
-    cpmaddpackage("gh:catchorg/Catch2@3.4.0")
+    cpmaddpackage("gh:catchorg/Catch2@3.5.0")
   endif()
 
   if(NOT TARGET rapidxml::rapidxml)
@@ -41,7 +41,7 @@ function(mtgoparser_setup_dependencies)
       NAME Boost
       VERSION 1.83.0
       GITHUB_REPOSITORY "boostorg/boost"
-      GIT_TAG "boost-1.83.0"
+      GIT_TAG "boost-1.84.0"
       OPTIONS
         "header_only TRUE"
         "COMPONENTS core;outcome;headers;conversion;detail;unordered"
