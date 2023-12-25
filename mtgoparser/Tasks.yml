@@ -1,0 +1,141 @@
+version: '3'
+
+tasks:
+  # These tasks should be run from the root of the project
+  # E.g. `task mtgoparser:build`
+
+  print-build-vars:
+      aliases: [bvars, print-bvars]
+      desc: Print build configuration variables
+      silent: true
+      cmds:
+         - echo "BUILD_MODE=${BUILD_MODE}"
+         - echo "MTGOPARSER_GENERATOR=${MTGOPARSER_GENERATOR}"
+         - echo "MTGOPARSER_IPO={{.MTGOPARSER_IPO}}"
+         - echo "MTGOPARSER_BUILD_MODE=${MTGOPARSER_BUILD_MODE}"
+         - echo "MTGOPARSER_ENABLE_COV=${MTGOPARSER_ENABLE_COV}"
+         - echo "MTGOPARSER_EXCLUDE_BOOST_LIBS={{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
+         - echo "MTGOPARSER_LINKER=${MTGOPARSER_LINKER}"
+         - echo "MTGOPARSER_USER_LINKER={{.MTGOPARSER_USER_LINKER}}"
+      requires:
+         vars: [BUILD_MODE,
+               MTGOPARSER_GENERATOR,
+               MTGOPARSER_IPO,
+               MTGOPARSER_BUILD_MODE,
+               MTGOPARSER_ENABLE_COV,
+               MTGOPARSER_EXCLUDE_BOOST_LIBS,
+               MTGOPARSER_LINKER,
+               MTGOPARSER_USER_LINKER]
+
+  build:
+      desc: Build MTGO Parser
+      summary: |
+         This task builds MTGO Parser with the default build configuration, including warnings as errors and static analysis.
+      dir: mtgoparser
+      deps: [print-build-vars]
+      cmds:
+         - task: generate-buildsystem
+         - task: compile
+
+  build-for-integration:
+      aliases: [build-mtgoparser-integration, build-mtgoparser-int]
+      desc: Build MTGO Parser for integration with the rest of the MTGO Collection Manager app
+      summary: |
+         This task builds MTGO Parser for integration with the rest of the MTGO Collection Manager app.
+
+         The task is a convenience for building faster.
+
+         It turns off warnings as errors and some static analysis in the interest of building faster. When using this
+         build configuration, it is assumed that more thorough testing has been done on MTGO Parser in a more rigirous build.
+      dir: mtgoparser
+      deps: [print-build-vars]
+      cmds:
+         - task: generate-buildsystem-for-integration
+         - task: compile
+
+  generate-buildsystem:
+      desc: Generate MTGO Parser build system
+      internal: true
+      dir: mtgoparser
+      cmds:
+         - echo "==> Generating MTGO Parser buildsystem..."
+         - cmake -S .
+                 -B build
+                 -G "${MTGOPARSER_GENERATOR}"
+                 -Dmtgoparser_ENABLE_IPO=${MTGOPARSER_IPO}
+                 -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE}
+                 -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV}
+                 -DBOOST_EXCLUDE_LIBRARIES="{{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
+                 -DUSER_LINKER_OPTION=${MTGOPARSER_LINKER}
+                 -Dmtgoparser_ENABLE_USER_LINKER:BOOL={{.MTGOPARSER_USER_LINKER}}
+         - echo "=== Done generating MTGO Parser build system ==="
+
+  generate-buildsystem-for-integration:
+      aliases: [generate-mtgoparser-buildsystem-integration, gen-mtgoparser-build-integration]
+      desc: Generate MTGO Parser build system
+      internal: true
+      dir: mtgoparser
+      cmds:
+         - echo "==> Generating MTGO Parser buildsystem for integration..."
+         - cmake -S .
+                 -B build
+                 -G "${MTGOPARSER_GENERATOR}"
+                 -Dmtgoparser_DEPLOYING_BINARY=On
+                 -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
+                 -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF
+                 -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
+                 -Dmtgoparser_ENABLE_IPO=${MTGOPARSER_IPO}
+                 -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE}
+                 -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV}
+                 -DBOOST_EXCLUDE_LIBRARIES="{{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
+                 -DUSER_LINKER_OPTION=${MTGOPARSER_LINKER}
+                 -Dmtgoparser_ENABLE_USER_LINKER:BOOL={{.MTGOPARSER_USER_LINKER}}
+         - echo "=== Done generating MTGO Parser build system for integration ==="
+      requires:
+         vars: [MTGOPARSER_GENERATOR,
+               MTGOPARSER_IPO,
+               MTGOPARSER_BUILD_MODE,
+               MTGOPARSER_ENABLE_COV,
+               MTGOPARSER_EXCLUDE_BOOST_LIBS,
+               MTGOPARSER_LINKER,
+               MTGOPARSER_USER_LINKER]
+
+  compile:
+      desc: Compile MTGO Parser
+      internal: true
+      dir: mtgoparser
+      cmds:
+         - echo "==> Compiling MTGO Parser..."
+         - cmake --build build --config ${MTGOPARSER_BUILD_MODE}
+         - echo "=== Done compiling MTGO Parser ==="
+      requires:
+         vars: [MTGOPARSER_BUILD_MODE]
+
+  test:
+      desc: Runs unit/module tests for MTGO Parser
+      silent: true
+      dir: mtgoparser/build
+      cmds:
+         - echo "==> Testing MTGO Parser..."
+         - ctest --output-on-failure
+         - echo "=== Done testing MTGO Parser ==="
+
+  benchmark-xml-parse:
+      desc: Run MTGO Parser benchmark suite for XML parsing
+      silent: true
+      dir: mtgoparser/build/test
+      cmds:
+         - echo "==> Benchmarking MTGO Parser XML parsing..."
+         - ./${MTGOPARSER_BUILD_MODE}/benchmark_xml_parse [.]
+         - echo "=== Done benchmarking MTGO Parser XML parsing ==="
+
+  clean:
+      desc: Clean MTGO Parser build artifacts
+      dir: mtgoparser
+      cmds:
+         - echo "==> Cleaning MTGO Parser build artifacts..."
+         - cmd: rm -rf build
+           platforms: [linux, darwin]
+         - cmd: pwsh -Command "Remove-Item build -Recurse -Force"
+           platforms: [windows]
+         - echo "=== Done cleaning MTGO Parser build artifacts ==="

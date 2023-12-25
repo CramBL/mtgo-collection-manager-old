@@ -1,7 +1,5 @@
 version: '3'
 
-# This
-
 tasks:
   # These tasks should be run from the root of the project
   # E.g. `task mtgogetter:build`
