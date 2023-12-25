@@ -1,5 +1,8 @@
 version: '3'
 
+includes:
+   mtgogetter: mtgogetter/Tasks.yml
+
 dotenv: ['build.env']
 
 set: [pipefail]
@@ -48,7 +51,7 @@ tasks:
 
    build:
       desc: Build all subprojects with the default build configuration, including warnings as errors and static analysis.
-      deps: [build-mtgogetter, build-mtgoparser, build-mtgoupdater]
+      deps: [mtgogetter:build, build-mtgoparser, build-mtgoupdater]
       cmds:
          - task: build-mtgogui
          - task: print-tool-versions
@@ -57,7 +60,7 @@ tasks:
 
    build-integration:
       desc: Build all subprojects for integration with the rest of the MTGO Collection Manager app.
-      deps: [build-mtgogetter, build-mtgoparser-for-integration, build-mtgoupdater]
+      deps: [mtgogetter:build, build-mtgoparser-for-integration, build-mtgoupdater]
       cmds:
          - task: build-mtgogui
          - task: print-tool-versions
@@ -66,7 +69,7 @@ tasks:
 
    test:
       desc: Run all tests
-      deps: [test-mtgogetter, test-mtgoparser, test-mtgoupdater, test-mtgogui]
+      deps: [mtgogetter:test, test-mtgoparser, test-mtgoupdater, test-mtgogui]
       cmds:
          - echo "=== Done running all tests ==="
 
@@ -118,22 +121,6 @@ tasks:
                MTGOPARSER_EXCLUDE_BOOST_LIBS,
                MTGOPARSER_LINKER,
                MTGOPARSER_USER_LINKER]
-
-
-
-   build-mtgogetter:
-      cmds:
-         - echo "==> Building MTGO Getter..."
-         - go build -C mtgogetter -v
-         - echo "=== Done building MTGO Getter ==="
-
-   test-mtgogetter:
-      desc: Runs unit/module tests for MTGO Getter
-      silent: true
-      cmds:
-         - echo "==> Testing MTGO Getter..."
-         - go test -C mtgogetter -v ./...
-         - echo "=== Done testing MTGO Getter ==="
 
    build-mtgoparser:
       desc: Build MTGO Parser
@@ -306,19 +293,12 @@ tasks:
       silent: true
       cmds:
          - echo "==> Cleaning build artifacts..."
-         - task: clean-mtgogetter
+         - task: mtgogetter:clean
          - task: clean-mtgoupdater
          - task: clean-mtgogui
          - task: clean-mtgoparser
 
 
-   clean-mtgogetter:
-      desc: Clean MTGO Getter build artifacts
-      dir: mtgogetter
-      cmds:
-         - echo "==> Cleaning MTGO Getter build artifacts..."
-         - go clean
-         - echo "=== Done cleaning MTGO Getter build artifacts ==="
 
    clean-mtgoupdater:
       desc: Clean MTGO Updater build artifacts
