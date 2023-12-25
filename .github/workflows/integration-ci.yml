@@ -64,21 +64,26 @@ jobs:
         if: runner.os == 'Linux'
         uses: rui314/setup-mold@v1
 
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
 ####                                              ####
 #🍎 MacOS 🍎 build -> test -> pack -> upload   🍎🍎#
 ####                                              ####
       - name: 📝 Build & Run tests - MacOS🍎
         if: runner.os == 'macOS'
         run: |
-          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} BUILD_MODE=Release
-          make test
+          BUILD_MODE=Release; task build-integration
+          task test
 
       - name: 📦 Pack - MacOS 🍎
         if: runner.os == 'macOS'
         run: |
-          mkdir -p mtgo-collection-manager
-          cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
-          zip -r macos-13-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
+          PACKAGE_NAME=ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
+          task archive-mtgo-collection-manager
 
       - name: 📩 Upload - MacOS 🍎
         if: runner.os == 'macOS'
@@ -96,16 +101,14 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           source build-util/dev-ubuntu/install-ubuntu-fltk-dev-headers.sh
-          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} BUILD_MODE=Release
-          make test
+          BUILD_MODE=Release; task build-integration
+          task test
 
       - name: 📦 Pack - Linux 🐧
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get -y install zip
-          mkdir -p mtgo-collection-manager
-          cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
-          zip -r ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
+          PACKAGE_NAME=ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
+          task archive-mtgo-collection-manager
 
       - name: 📩 Upload - Linux 🐧
         if: runner.os == 'Linux'
@@ -122,13 +125,14 @@ jobs:
       - name: 📝 Build & Run tests - Windows 💻
         if: runner.os == 'Windows'
         run: |
-          .\wmake.ps1 build-integration -MTGOPARSER_IPO ${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR "Ninja Multi-Config" -BUILD_MODE Release
-          .\wmake.ps1 test
+          BUILD_MODE=Release; task build-integration
+          task test
 
       - name: 📦 Pack - Windows 💻
         if: runner.os == 'Windows'
         run: |
-          .\wmake.ps1 pack -PACKAGE_NAME windows-2022-${{ matrix.compiler }}-mtgo-cm
+          PACKAGE_NAME=windows-2022-${{ matrix.compiler }}-mtgo-cm
+          task archive-mtgo-collection-manager
 
       - name: 📩 Upload - Windows 💻
         if: runner.os == 'Windows'
