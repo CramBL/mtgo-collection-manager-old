@@ -4,6 +4,8 @@ dotenv: ['build.env']
 
 set: [pipefail]
 
+output: prefixed
+
 vars:
    RUST_VERSION_CMD:
       sh: rustc --version 2>/dev/null || echo "not found"
@@ -43,6 +45,30 @@ tasks:
    # Just lists the tasks
       desc: List tasks
       cmds: [task --list-all]
+
+   build:
+      desc: Build all subprojects with the default build configuration, including warnings as errors and static analysis.
+      deps: [build-mtgogetter, build-mtgoparser, build-mtgoupdater]
+      cmds:
+         - task: build-mtgogui
+         - task: print-tool-versions
+         - task: print-build-vars
+         - echo "=== Done building all subprojects ==="
+
+   build-integration:
+      desc: Build all subprojects for integration with the rest of the MTGO Collection Manager app.
+      deps: [build-mtgogetter, build-mtgoparser-for-integration, build-mtgoupdater]
+      cmds:
+         - task: build-mtgogui
+         - task: print-tool-versions
+         - task: print-build-vars
+         - echo "=== Done building all subprojects for integration ==="
+
+   test:
+      desc: Run all tests
+      deps: [test-mtgogetter, test-mtgoparser, test-mtgoupdater, test-mtgogui]
+      cmds:
+         - echo "=== Done running all tests ==="
 
    print-tool-versions:
       aliases: [tver]
