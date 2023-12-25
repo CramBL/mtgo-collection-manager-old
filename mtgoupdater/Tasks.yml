@@ -5,6 +5,7 @@ tasks:
   # E.g. `task mtgoupdater:build`
 
   build:
+      aliases: [b]
       desc: Build MTGO Updater
       silent: true
       dir: mtgoupdater
@@ -21,6 +22,7 @@ tasks:
          vars: [BUILD_MODE]
 
   test:
+      aliases: [t]
       desc: Runs unit/module/integration tests for MTGO Updater
       silent: true
       dir: mtgoupdater
@@ -31,6 +33,7 @@ tasks:
          - echo "=== Done testing MTGO Updater ==="
 
   clean:
+      aliases: [c]
       desc: Clean MTGO Updater build artifacts
       dir: mtgoupdater
       cmds:

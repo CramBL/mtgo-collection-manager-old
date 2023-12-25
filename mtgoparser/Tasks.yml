@@ -28,6 +28,7 @@ tasks:
                MTGOPARSER_USER_LINKER]
 
   build:
+      aliases: [b]
       desc: Build MTGO Parser
       summary: |
          This task builds MTGO Parser with the default build configuration, including warnings as errors and static analysis.
@@ -38,7 +39,7 @@ tasks:
          - task: compile
 
   build-for-integration:
-      aliases: [build-mtgoparser-integration, build-mtgoparser-int]
+      aliases: [b-integration, b-int]
       desc: Build MTGO Parser for integration with the rest of the MTGO Collection Manager app
       summary: |
          This task builds MTGO Parser for integration with the rest of the MTGO Collection Manager app.
@@ -71,7 +72,6 @@ tasks:
          - echo "=== Done generating MTGO Parser build system ==="
 
   generate-buildsystem-for-integration:
-      aliases: [generate-mtgoparser-buildsystem-integration, gen-mtgoparser-build-integration]
       desc: Generate MTGO Parser build system
       internal: true
       dir: mtgoparser
@@ -112,6 +112,7 @@ tasks:
          vars: [MTGOPARSER_BUILD_MODE]
 
   test:
+      aliases: [t]
       desc: Runs unit/module tests for MTGO Parser
       silent: true
       dir: mtgoparser/build
@@ -130,6 +131,7 @@ tasks:
          - echo "=== Done benchmarking MTGO Parser XML parsing ==="
 
   clean:
+      aliases: [c]
       desc: Clean MTGO Parser build artifacts
       dir: mtgoparser
       cmds:

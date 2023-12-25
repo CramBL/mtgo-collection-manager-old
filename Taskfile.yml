@@ -3,6 +3,8 @@ version: '3'
 includes:
    mtgogetter: mtgogetter/Tasks.yml
    mtgoparser: mtgoparser/Tasks.yml
+   mtgoupdater: mtgoupdater/Tasks.yml
+   mtgogui: mtgogui/Tasks.yml
 
 dotenv: ['build.env']
 
@@ -51,26 +53,29 @@ tasks:
       cmds: [task --list-all]
 
    build:
+      aliases: [b]
       desc: Build all subprojects with the default build configuration, including warnings as errors and static analysis.
       deps: [mtgogetter:build, mtgoparser:build, mtgoupdater:build]
       cmds:
-         - task: build-mtgogui
+         - task: mtgogui:build
          - task: print-tool-versions
          - task: mtgoparser:print-build-vars
          - echo "=== Done building all subprojects ==="
 
    build-integration:
+      aliases: [b-integration]
       desc: Build all subprojects for integration with the rest of the MTGO Collection Manager app.
       deps: [mtgogetter:build, mtgoparser:build-for-integration, mtgoupdater:build]
       cmds:
-         - task: build-mtgogui
+         - task: mtgogui:build
          - task: print-tool-versions
          - task: mtgoparser:print-build-vars
          - echo "=== Done building all subprojects for integration ==="
 
    test:
+      aliases: [t]
       desc: Run all tests
-      deps: [mtgogetter:test, mtgoparser:test, mtgoupdater:test, test-mtgogui]
+      deps: [mtgogetter:test, mtgoparser:test, mtgoupdater:test, mtgogui:test]
       cmds:
          - echo "=== Done running all tests ==="
 
@@ -99,40 +104,8 @@ tasks:
                GCC_VERSION, GCC_MIN_VERSION,
                MTGOPARSER_GENERATOR]
 
-
-
-
-
-
-   build-mtgogui:
-      desc: Build MTGO GUI
-      silent: true
-      dir: mtgogui
-      cmds:
-         - echo "==> Building MTGO GUI..."
-         - echo "building in ${BUILD_MODE} mode"
-         - cmd: |
-            if [ "${BUILD_MODE}" = "Debug" ]; then
-               cargo build
-            else
-               cargo build --release
-            fi
-      requires:
-         vars: [BUILD_MODE]
-
-   test-mtgogui:
-      desc: Runs unit/module tests for MTGO GUI
-      silent: true
-      dir: mtgogui
-      cmds:
-         - echo "==> Testing MTGO GUI..."
-         - cmd: cargo test -- --nocapture
-           platforms: [linux, windows]
-         - cmd: echo "WARNING `cargo test` for FLTK is currently not working on MACOS - skipping tests"
-           platforms: [darwin]
-         - echo "=== Done testing MTGO GUI ==="
-
    clean:
+      aliases: [c]
       prompt: Are you sure you want to clean all build artifacts?
       desc: Clean build artifacts in all subprojects
       silent: true
@@ -140,20 +113,8 @@ tasks:
          - echo "==> Cleaning build artifacts..."
          - task: mtgogetter:clean
          - task: mtgoupdater:clean
-         - task: clean-mtgogui
+         - task: mtgogui:clean
          - task: mtgoparser:clean
-
-
-
-
-
-   clean-mtgogui:
-      desc: Clean MTGO GUI build artifacts
-      dir: mtgogui
-      cmds:
-         - echo "==> Cleaning MTGO GUI build artifacts..."
-         - cargo clean
-         - echo "=== Done cleaning MTGO GUI build artifacts ==="
 
    archive-mtgo-collection-manager:
       aliases: [archive-bin]
