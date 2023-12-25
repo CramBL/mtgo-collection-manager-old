@@ -48,7 +48,7 @@ fn test_call_mtgogetter_download_card_definitions() {
 fn test_mtgogetter_custom_url_download_scryfall_card_json() {
     internal_only::dev_try_init_mtgogetter_bin();
     // From the repository
-    let scryfall_card_json_url = "https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/test/test-data/mtgogetter-out/scryfall-card.json";
+    let scryfall_card_json_url = "https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/main/test/test-data/mtgogetter-out/scryfall-card.json";
     let cmd_out = mtgoupdater::get_custom_url(
         scryfall_card_json_url,
         false,

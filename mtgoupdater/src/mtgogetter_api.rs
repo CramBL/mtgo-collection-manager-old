@@ -76,7 +76,7 @@ pub fn download_goatbots_card_definitions() -> Result<process::Output, io::Error
 /// # use std::path::Path;
 /// # use mtgoupdater::mtgogetter_api::download_custom_url;
 ///
-/// match download_custom_url("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/LICENSE", false, None) {
+/// match download_custom_url("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/main/LICENSE", false, None) {
 ///  Ok(out) => {
 ///   eprintln!("stderr:\n{stderr}", stderr = String::from_utf8_lossy(&out.stderr),);
 ///   eprintln!("stdout:\n{stdout}", stdout = String::from_utf8_lossy(&out.stdout),);
