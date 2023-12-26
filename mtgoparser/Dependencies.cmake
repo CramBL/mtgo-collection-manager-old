@@ -9,7 +9,7 @@ function(mtgoparser_setup_dependencies)
   # already been provided to us by a parent project
 
   if(NOT TARGET glaze::glaze)
-    cpmaddpackage("gh:stephenberry/glaze@1.9.8.1")
+    cpmaddpackage("gh:stephenberry/glaze@1.7.0")
   endif()
 
   if(NOT TARGET fmtlib::fmtlib)
@@ -39,7 +39,7 @@ function(mtgoparser_setup_dependencies)
   if(NOT TARGET Boost)
     cpmaddpackage(
       NAME Boost
-      VERSION 1.83.0
+      VERSION 1.84.0
       GITHUB_REPOSITORY "boostorg/boost"
       GIT_TAG "boost-1.84.0"
       OPTIONS
