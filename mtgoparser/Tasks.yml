@@ -11,6 +11,7 @@ tasks:
       cmds:
          - echo "BUILD_MODE=${BUILD_MODE}"
          - echo "MTGOPARSER_BUILD_MODE=${MTGOPARSER_BUILD_MODE}"
+         - echo "MTGOPARSER_BUILD_TESTS=${MTGOPARSER_BUILD_TESTS}"
          - echo "MTGOPARSER_GENERATOR=${MTGOPARSER_GENERATOR}"
          - echo "MTGOPARSER_IPO={{.MTGOPARSER_IPO}}"
          - echo "MTGOPARSER_BUILD_MODE=${MTGOPARSER_BUILD_MODE}"
@@ -67,7 +68,7 @@ tasks:
                   BUILD_MODE: Release,
                   IPO: "{{.MTGOPARSER_IPO}}",
                   PACKAGING_MAINTAINER_MODE: "${MTGOPARSER_PACKAGING_MAINTAINER_MODE}",
-                  BUILD_TESTING: ON,
+                  BUILD_TESTS: "${MTGOPARSER_BUILD_TESTS}",
                   ENABLE_COV: "${MTGOPARSER_ENABLE_COV}",
                   WARNINGS_AS_ERRORS: ON,
                   ENABLE_CLANG_TIDY: ON,
@@ -89,7 +90,7 @@ tasks:
                   BUILD_MODE: Release,
                   IPO: "{{.MTGOPARSER_IPO}}",
                   PACKAGING_MAINTAINER_MODE: OFF,
-                  BUILD_TESTING: "${MTGOPARSER_BUILD_TESTING}",
+                  BUILD_TESTS: "${MTGOPARSER_BUILD_TESTS}",
                   ENABLE_COV: OFF,
                   WARNINGS_AS_ERRORS: OFF,
                   ENABLE_CLANG_TIDY: OFF,
@@ -116,7 +117,7 @@ tasks:
          BUILD_MODE:         '{{default "Release" .BUILD_MODE}}'
          IPO:                '{{default "ON" .IPO}}'
          PACKAGING_MAINTAINER_MODE: '{{default "OFF" .PACKAGING_MAINTAINER_MODE}}'
-         BUILD_TESTING:      '{{default "OFF" .BUILD_TESTING}}'
+         BUILD_TESTS:        '{{default "OFF" .BUILD_TESTS}}'
          ENABLE_COV:         '{{default "OFF" .ENABLE_COV}}'
          WARNINGS_AS_ERRORS: '{{default "ON" .WARNINGS_AS_ERRORS}}'
          ENABLE_CLANG_TIDY:  '{{default "ON" .ENABLE_CLANG_TIDY}}'
@@ -131,7 +132,7 @@ tasks:
                  -DCMAKE_BUILD_TYPE:STRING={{.BUILD_MODE}}
                  -Dmtgoparser_ENABLE_IPO={{.IPO}}
                  -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL={{.PACKAGING_MAINTAINER_MODE}}
-                 -DBUILD_TESTING={{.BUILD_TESTING}}
+                 -DBUILD_TESTING={{.BUILD_TESTS}}
                  -Dmtgoparser_ENABLE_COVERAGE:BOOL={{.ENABLE_COV}}
                  -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL={{.WARNINGS_AS_ERRORS}}
                  -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL={{.ENABLE_CLANG_TIDY}}
@@ -144,7 +145,7 @@ tasks:
                BUILD_MODE,
                IPO,
                PACKAGING_MAINTAINER_MODE,
-               BUILD_TESTING,
+               BUILD_TESTS,
                ENABLE_COV,
                WARNINGS_AS_ERRORS,
                ENABLE_CLANG_TIDY,
