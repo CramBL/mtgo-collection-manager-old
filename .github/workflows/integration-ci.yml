@@ -84,7 +84,7 @@ jobs:
         if: runner.os == 'macOS'
         run: task archive-mtgo-collection-manager
         env:
-          PACKAGE_NAME: ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm
+          PACKAGE_NAME: macos-13-${{ matrix.compiler }}-mtgo-cm
 
       - name: 📩 Upload - MacOS 🍎
         if: runner.os == 'macOS'
