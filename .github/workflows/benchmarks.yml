@@ -43,6 +43,12 @@ jobs:
           cmake: true
           ninja: true
 
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: 📝 Build & Run benchmarks - 🐧🍎💻
         run: |
           task mtgoparser:build-for-integration
