@@ -4,7 +4,7 @@ tasks:
   # These tasks should be run from the root of the project
   # E.g. `task mtgoparser:build`
 
-  print-build-vars:
+   print-build-vars:
       aliases: [bvars, print-bvars]
       desc: Print build configuration variables
       silent: true
@@ -28,7 +28,7 @@ tasks:
                MTGOPARSER_LINKER,
                MTGOPARSER_USER_LINKER]
 
-  build:
+   build:
       aliases: [b]
       desc: Build MTGO Parser
       summary: |
@@ -39,7 +39,7 @@ tasks:
          - task: generate-buildsystem
          - task: compile
 
-  build-for-integration:
+   build-for-integration:
       aliases: [b-integration, b-int]
       desc: Build MTGO Parser for integration with the rest of the MTGO Collection Manager app
       summary: |
@@ -55,43 +55,48 @@ tasks:
          - task: generate-buildsystem-for-integration
          - task: compile
 
-  generate-buildsystem:
+   generate-buildsystem:
       desc: Generate MTGO Parser build system
       internal: true
       dir: mtgoparser
       cmds:
          - echo "==> Generating MTGO Parser buildsystem..."
-         - cmake -S .
-                 -B build
-                 -G "${MTGOPARSER_GENERATOR}"
-                 -Dmtgoparser_ENABLE_IPO=${MTGOPARSER_IPO}
-                 -Dmtgoparser_ENABLE_COVERAGE:BOOL=${MTGOPARSER_ENABLE_COV}
-                 -DBOOST_EXCLUDE_LIBRARIES="{{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
-                 -DUSER_LINKER_OPTION=${MTGOPARSER_LINKER}
-                 -Dmtgoparser_ENABLE_USER_LINKER:BOOL={{.MTGOPARSER_USER_LINKER}}
+         - task: generate-buildsystem-template
+           vars: {
+                  GENERATOR: "${MTGOPARSER_GENERATOR}",
+                  BUILD_MODE: Release,
+                  IPO: "{{.MTGOPARSER_IPO}}",
+                  PACKAGING_MAINTAINER_MODE: "${MTGOPARSER_PACKAGING_MAINTAINER_MODE}",
+                  BUILD_TESTING: ON,
+                  ENABLE_COV: "${MTGOPARSER_ENABLE_COV}",
+                  WARNINGS_AS_ERRORS: ON,
+                  ENABLE_CLANG_TIDY: ON,
+                  ENABLE_CPPCHECK: ON,
+                  LINKER: "${MTGOPARSER_LINKER}",
+                  USER_LINKER: "${MTGOPARSER_USER_LINKER}"
+               }
          - echo "=== Done generating MTGO Parser build system ==="
 
-  generate-buildsystem-for-integration:
+   generate-buildsystem-for-integration:
       desc: Generate MTGO Parser build system
       internal: true
       dir: mtgoparser
       cmds:
          - echo "==> Generating MTGO Parser buildsystem for integration..."
-         - cmake -S .
-                 -B build
-                 -G "${MTGOPARSER_GENERATOR}"
-                 -DCMAKE_BUILD_TYPE:STRING=${MTGOPARSER_BUILD_MODE}
-                 -Dmtgoparser_ENABLE_IPO=${MTGOPARSER_IPO}
-                 -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
-                 -DBUILD_TESTING=OFF
-                 -Dmtgoparser_ENABLE_COVERAGE:BOOL=OFF
-                 -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
-                 -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
-                 -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF
-                 -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
-                 -DBOOST_EXCLUDE_LIBRARIES="{{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
-                 -DUSER_LINKER_OPTION=${MTGOPARSER_LINKER}
-                 -Dmtgoparser_ENABLE_USER_LINKER:BOOL={{.MTGOPARSER_USER_LINKER}}
+         - task: generate-buildsystem-template
+           vars: {
+                  GENERATOR: Ninja Multi-Config,
+                  BUILD_MODE: Release,
+                  IPO: "{{.MTGOPARSER_IPO}}",
+                  PACKAGING_MAINTAINER_MODE: OFF,
+                  BUILD_TESTING: "${MTGOPARSER_BUILD_TESTING}",
+                  ENABLE_COV: OFF,
+                  WARNINGS_AS_ERRORS: OFF,
+                  ENABLE_CLANG_TIDY: OFF,
+                  ENABLE_CPPCHECK: OFF,
+                  LINKER: "${MTGOPARSER_LINKER}",
+                  USER_LINKER: "${MTGOPARSER_USER_LINKER}"
+               }
          - echo "=== Done generating MTGO Parser build system for integration ==="
       requires:
          vars: [MTGOPARSER_GENERATOR,
@@ -102,7 +107,53 @@ tasks:
                MTGOPARSER_LINKER,
                MTGOPARSER_USER_LINKER]
 
-  compile:
+   generate-buildsystem-template:
+      desc: Template for setting parameters for generating the MTGO Parser build system
+      internal: true
+      dir: mtgoparser
+      vars:
+         GENERATOR:          '{{default "Ninja Multi-Config" .GENERATOR}}'
+         BUILD_MODE:         '{{default "Release" .BUILD_MODE}}'
+         IPO:                '{{default "ON" .IPO}}'
+         PACKAGING_MAINTAINER_MODE: '{{default "OFF" .PACKAGING_MAINTAINER_MODE}}'
+         BUILD_TESTING:      '{{default "OFF" .BUILD_TESTING}}'
+         ENABLE_COV:         '{{default "OFF" .ENABLE_COV}}'
+         WARNINGS_AS_ERRORS: '{{default "ON" .WARNINGS_AS_ERRORS}}'
+         ENABLE_CLANG_TIDY:  '{{default "ON" .ENABLE_CLANG_TIDY}}'
+         ENABLE_CPPCHECK:    '{{default "ON" .ENABLE_CPPCHECK}}'
+         LINKER:             '{{default "mold" .LINKER}}'
+         USER_LINKER:        '{{default "OFF" .USER_LINKER}}'
+
+      cmds:
+         - cmake -S .
+                 -B build
+                 -G "{{.GENERATOR}}"
+                 -DCMAKE_BUILD_TYPE:STRING={{.BUILD_MODE}}
+                 -Dmtgoparser_ENABLE_IPO={{.IPO}}
+                 -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL={{.PACKAGING_MAINTAINER_MODE}}
+                 -DBUILD_TESTING={{.BUILD_TESTING}}
+                 -Dmtgoparser_ENABLE_COVERAGE:BOOL={{.ENABLE_COV}}
+                 -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL={{.WARNINGS_AS_ERRORS}}
+                 -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL={{.ENABLE_CLANG_TIDY}}
+                 -Dmtgoparser_ENABLE_CPPCHECK:BOOL={{.ENABLE_CPPCHECK}}
+                 -DBOOST_EXCLUDE_LIBRARIES="{{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
+                 -DUSER_LINKER_OPTION={{.LINKER}}
+                 -Dmtgoparser_ENABLE_USER_LINKER:BOOL={{.USER_LINKER}}
+      requires:
+         vars: [GENERATOR,
+               BUILD_MODE,
+               IPO,
+               PACKAGING_MAINTAINER_MODE,
+               BUILD_TESTING,
+               ENABLE_COV,
+               WARNINGS_AS_ERRORS,
+               ENABLE_CLANG_TIDY,
+               ENABLE_CPPCHECK,
+               LINKER,
+               USER_LINKER]
+
+
+   compile:
       desc: Compile MTGO Parser
       internal: true
       dir: mtgoparser
@@ -113,7 +164,7 @@ tasks:
       requires:
          vars: [MTGOPARSER_BUILD_MODE]
 
-  test:
+   test:
       aliases: [t]
       desc: Runs unit/module tests for MTGO Parser
       silent: true
@@ -124,7 +175,7 @@ tasks:
          - echo "=== Done testing MTGO Parser ==="
 
 
-  benchmark:
+   benchmark:
       aliases: [bench]
       desc: Run MTGO Parser benchmark suite
       silent: true
@@ -134,7 +185,7 @@ tasks:
          - task: benchmark-xml-parse
          - echo "=== Done benchmarking MTGO Parser ==="
 
-  benchmark-xml-parse:
+   benchmark-xml-parse:
       desc: Run MTGO Parser benchmark suite for XML parsing
       silent: true
       dir: mtgoparser/build/test
@@ -143,7 +194,7 @@ tasks:
          - ./${MTGOPARSER_BUILD_MODE}/benchmark_xml_parse [.]
          - echo "=== Done benchmarking MTGO Parser XML parsing ==="
 
-  clean:
+   clean:
       aliases: [c]
       desc: Clean MTGO Parser build artifacts
       dir: mtgoparser
