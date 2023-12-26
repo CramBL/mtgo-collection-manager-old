@@ -131,11 +131,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 ENV PATH=$PATH:/usr/bin/mold
 
-## Cleanup cached apt data we don't need anymore
-RUN apt-get autoremove -y \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
 # Download and install Go
 RUN wget --progress=dot:giga https://golang.org/dl/go1.21.4.linux-amd64.tar.gz \
     && tar -C /usr/local -xzf go1.21.4.linux-amd64.tar.gz \
