@@ -121,6 +121,17 @@ tasks:
          - ctest --output-on-failure
          - echo "=== Done testing MTGO Parser ==="
 
+
+  benchmark:
+      aliases: [bench]
+      desc: Run MTGO Parser benchmark suite
+      silent: true
+      dir: mtgoparser/build/test
+      cmds:
+         - echo "==> Benchmarking MTGO Parser..."
+         - task: benchmark-xml-parse
+         - echo "=== Done benchmarking MTGO Parser ==="
+
   benchmark-xml-parse:
       desc: Run MTGO Parser benchmark suite for XML parsing
       silent: true
