@@ -62,18 +62,18 @@ const SHELL: &str = if cfg!(target_os = "windows") {
 
 /// Name of the build script executable
 ///
-/// On windows: `powershell` with the `wmake.ps1` script
+/// On windows: `powershell` with the `task` (Go Task) task runner
 /// On unix: `sh` with the `-c` flag
 const BUILD_SCRIPT_EXE: &str = if cfg!(target_os = "windows") {
-    ".\\wmake.ps1"
+    "task"
 } else {
     "-C"
 };
 
 /// Command to build the MTGO Getter binary
 const BUILD_MTGOGETTER_CMD: &str = if cfg!(target_os = "windows") {
-    // Arguments for the `wmake.ps1` script
-    "build-mtgogetter"
+    // Arguments for `task`
+    "mtgogetter:build"
 } else {
     // The `sh`-script to run
     "./build-util/integration/build-mtgogetter.sh"
@@ -81,7 +81,7 @@ const BUILD_MTGOGETTER_CMD: &str = if cfg!(target_os = "windows") {
 
 /// Command to build the MTGO Preprocessor binary
 const BUILD_MTGOPARSER_CMD: &str = if cfg!(target_os = "windows") {
-    "build-mtgoparser-integration -BUILD_MODE Release"
+    "mtgoparser:build-for-integration"
 } else {
     "./build-util/integration/build-mtgo-preprocessor.sh"
 };
