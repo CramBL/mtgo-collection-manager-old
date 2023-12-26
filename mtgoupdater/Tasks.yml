@@ -26,7 +26,6 @@ tasks:
       desc: Runs unit/module/integration tests for MTGO Updater
       silent: true
       dir: mtgoupdater
-      deps: [print-tool-versions]
       cmds:
          - echo "==> Testing MTGO Updater..."
          - cargo test -- --nocapture
