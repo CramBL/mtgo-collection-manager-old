@@ -92,8 +92,35 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 🗻 Set EXCLUDE_BOOST_LIBS environment variable 🏝️
+        run: |
+          $env:EXCLUDE_BOOST_LIBS = Get-Content -Raw -Path "build-util/boost-exclude-libs.txt"
+          Write-Output "EXCLUDE_BOOST_LIBS=$env:EXCLUDE_BOOST_LIBS" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: 🔧 Configure CMake
+        working-directory: ./mtgoparser
+        run: >
+          cmake -S .
+          -B ./build
+          -G "${{matrix.generator}}"
+          -Dmtgoparser_ENABLE_IPO=${{matrix.enable_ipo }}
+          -DCMAKE_BUILD_TYPE:STRING=Release
+          -DGIT_SHA:STRING=${{ github.sha }}
+          -DBUILD_TESTING=OFF
+          -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
+          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
+          -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
+          -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF
+          -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
+          -DBOOST_EXCLUDE_LIBRARIES="${{ env.EXCLUDE_BOOST_LIBS }}"
+        #run: task mtgoparser:build-for-integration
+
       - name: Build ⚒️ MTGO Parser 🤓
-        run: task mtgoparser:build-for-integration
+        working-directory: ./mtgoparser
+        run: >
+          cmake --build ./build
+          --config Release
 
       ## Build the MTGO Getter binary
       - name: Setup Go 🛠️ Toolchain
