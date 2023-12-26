@@ -74,7 +74,8 @@ tasks:
                   ENABLE_CLANG_TIDY: ON,
                   ENABLE_CPPCHECK: ON,
                   LINKER: "${MTGOPARSER_LINKER}",
-                  USER_LINKER: "${MTGOPARSER_USER_LINKER}"
+                  USER_LINKER: "${MTGOPARSER_USER_LINKER}",
+                  DEPLOYING_BINARY: "${MTGOPARSER_DEPLOYING_BINARY}"
                }
          - echo "=== Done generating MTGO Parser build system ==="
 
@@ -96,7 +97,8 @@ tasks:
                   ENABLE_CLANG_TIDY: OFF,
                   ENABLE_CPPCHECK: OFF,
                   LINKER: "${MTGOPARSER_LINKER}",
-                  USER_LINKER: "${MTGOPARSER_USER_LINKER}"
+                  USER_LINKER: "${MTGOPARSER_USER_LINKER}",
+                  DEPLOYING_BINARY: "${MTGOPARSER_DEPLOYING_BINARY}"
                }
          - echo "=== Done generating MTGO Parser build system for integration ==="
       requires:
@@ -124,6 +126,7 @@ tasks:
          ENABLE_CPPCHECK:    '{{default "ON" .ENABLE_CPPCHECK}}'
          LINKER:             '{{default "mold" .LINKER}}'
          USER_LINKER:        '{{default "OFF" .USER_LINKER}}'
+         DEPLOYING_BINARY:   '{{default "OFF" .DEPLOYING_BINARY}}'
 
       cmds:
          - cmake -S .
@@ -140,6 +143,7 @@ tasks:
                  -DBOOST_EXCLUDE_LIBRARIES="{{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
                  -DUSER_LINKER_OPTION={{.LINKER}}
                  -Dmtgoparser_ENABLE_USER_LINKER:BOOL={{.USER_LINKER}}
+                 -Dmtgoparser_DEPLOYING_BINARY={{.DEPLOYING_BINARY}}
       requires:
          vars: [GENERATOR,
                BUILD_MODE,
