@@ -46,7 +46,7 @@ jobs:
         go-version: '1.21'
 
     - name: Build ⚒️ MTGO Getter 🐹
-      run: go build -C mtgogetter -v
+      run: task mtgogetter:build
 
     - name: Test 📝 MTGO Getter 🐹
-      run: go test -C mtgogetter -v ./...
+      run: task mtgogetter:test

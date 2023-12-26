@@ -3,7 +3,6 @@ name: benchmarks
 on:
   workflow_dispatch:
 
-
 env:
   VERBOSE: 1
 
@@ -44,18 +43,10 @@ jobs:
           cmake: true
           ninja: true
 
-      - name: 📝 Build & Run benchmarks - Unix 🐧🍎
-        if: runner.os != 'Windows'
+      - name: 📝 Build & Run benchmarks - 🐧🍎💻
         run: |
-          make build-mtgoparser-integration MTGOPARSER_IPO=${{matrix.enable_ipo }}
-          make bench-mtgoparser
-
-      - name: 📝 Build & Run benchmarks - Windows 💻
-        if: runner.os == 'Windows'
-        run: |
-          .\wmake.ps1 build-mtgoparser-integration -MTGOPARSER_IPO=${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR="${{matrix.generator}}"
-          .\wmake.ps1 bench-mtgoparser
-
+          task mtgoparser:build-for-integration
+          task mtgoparser:benchmark
 
   Benchmark-mtgogetter:
     runs-on: ${{ matrix.os }}
@@ -72,17 +63,12 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - name: 📝 Build & Run benchmarks - Unix 🐧🍎
+      - name: 📝 Build & Run benchmarks - 🐧🍎💻
         if: runner.os != 'Windows'
         run: |
           echo placeholder
-        #  make bench-mtgogetter
+        #  task mtgogetter:bench
 
-      - name: 📝 Build & Run benchmarks - Windows 💻
-        if: runner.os == 'Windows'
-        run: |
-          echo placeholder
-        # .\wmake.ps1 bench-mtgogetter
 
   # Benchmark-mtgoupdater:
   #   runs-on: ${{ matrix.os }}
@@ -98,14 +84,7 @@ jobs:
   #     - uses: actions/checkout@v3
   #     - uses: moonrepo/setup-rust@v1
 
-  #     - name: 📝 Build & Run benchmarks - Unix 🐧🍎
-  #       if: runner.os != 'Windows'
+  #     - name: 📝 Build & Run benchmarks - 🐧🍎💻
   #       run: |
   #         echo placeholder
-  #       #  make bench-mtgoupdater
-
-  #     - name: 📝 Build & Run benchmarks - Windows 💻
-  #       if: runner.os == 'Windows'
-  #       run: |
-  #         echo placeholder
-  #       # .\wmake.ps1 bench-mtgoupdater
+  #       #  task mtgoupdater:benchmark
