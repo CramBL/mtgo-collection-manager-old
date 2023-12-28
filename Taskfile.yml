@@ -52,6 +52,29 @@ tasks:
       desc: List tasks
       cmds: [task --list-all]
 
+   build-devcontainer:
+      aliases: [b-devcontainer]
+      desc: Build the devcontainer image
+      summary: |
+         This task builds the devcontainer image used for development.
+
+         The image is built from the .devcontainer/Dockerfile file.
+
+         The image is tagged as mcm-devcontainer.
+         Using the -f to point to the Dockerfile is required because the Dockerfile is not
+         in the root directory. This way the project directory is correctly copied into the image.
+      cmds:
+         - echo "==> Building devcontainer image..."
+         - docker build -t mcm-devcontainer -f .devcontainer/Dockerfile .
+         - echo "=== Done building devcontainer image ==="
+
+   run-devcontainer:
+      silent: true
+      desc: Print description of how to run the devcontainer image
+      cmds:
+         - echo "==> Don't run the devcontainer through a Go task. Run it manually with:"
+         - echo "docker run --rm -it mcm-devcontainer"
+
    build:
       aliases: [b]
       desc: Build all subprojects with the default build configuration, including warnings as errors and static analysis.
