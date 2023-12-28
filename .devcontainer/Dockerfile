@@ -9,10 +9,20 @@ ARG VARIANT
 RUN apt-get update -qq \
     && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    software-properties-common wget apt-utils file zip \
-    openssh-client gpg-agent socat rsync \
-    make ninja-build git \
-    python3 python3-pip \
+    software-properties-common \
+    wget \
+    apt-utils \
+    file \
+    zip \
+    openssh-client \
+    gpg-agent \
+    socat \
+    rsync \
+    make \
+    ninja-build \
+    git \
+    python3 \
+    python3-pip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -25,6 +35,7 @@ RUN apt-get update \
 
 # Add the Rust binaries to the system PATH
 ENV PATH=$PATH:/root/.cargo/bin
+RUN rustc --version
 
 # Install conan
 RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools \
@@ -48,7 +59,9 @@ ARG GCC_VER="13"
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test \
     && apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    gcc-${GCC_VER} g++-${GCC_VER} gdb \
+    gcc-${GCC_VER} \
+    g++-${GCC_VER} \
+    gdb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -62,10 +75,16 @@ ARG LLVM_URL="http://apt.llvm.org/${VARIANT}/"
 ARG LLVM_PKG="llvm-toolchain-${VARIANT}-${LLVM_VER}"
 RUN wget --progress=dot:giga -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - 2>/dev/null \
     && add-apt-repository -y "deb ${LLVM_URL} ${LLVM_PKG} main" \
-    && apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update -qq \
+    && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    clang-${LLVM_VER} lldb-${LLVM_VER} lld-${LLVM_VER} clangd-${LLVM_VER} \
-    llvm-${LLVM_VER}-dev libclang-${LLVM_VER}-dev clang-tidy-${LLVM_VER} \
+    clang-${LLVM_VER} \
+    lldb-${LLVM_VER} \
+    lld-${LLVM_VER} \
+    clangd-${LLVM_VER} \
+    llvm-${LLVM_VER}-dev \
+    libclang-${LLVM_VER}-dev \
+    clang-tidy-${LLVM_VER} \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -83,7 +102,9 @@ RUN wget --progress=dot:giga -O - https://apt.kitware.com/keys/kitware-archive-l
     | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null \
     && apt-add-repository -y "deb ${CMAKE_URL} ${CMAKE_PKG} main" \
     && apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get install -y --no-install-recommends cmake cmake-curses-gui \
+    && apt-get install -y --no-install-recommends \
+    cmake \
+    cmake-curses-gui \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -91,14 +112,19 @@ RUN wget --progress=dot:giga -O - https://apt.kitware.com/keys/kitware-archive-l
 RUN apt-get update -qq \
     && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    neovim emacs nano \
+    neovim \
+    emacs \
+    nano \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install optional dependecies
 RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    doxygen graphviz ccache cppcheck \
+    doxygen \
+    graphviz \
+    ccache \
+    cppcheck \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -110,9 +136,12 @@ RUN mkdir -p ${IWYU_BUILD} \
     && git clone --branch clang_${LLVM_VER} \
     https://github.com/include-what-you-use/include-what-you-use.git \
     ${IWYU_SRC}
-RUN CC=clang-${LLVM_VER} CXX=clang++-${LLVM_VER} cmake -S ${IWYU_SRC} \
+RUN CC=clang-${LLVM_VER} \
+    CXX=clang++-${LLVM_VER} \
+    cmake -S ${IWYU_SRC} \
     -B ${IWYU_BUILD} \
-    -G "Unix Makefiles" -DCMAKE_PREFIX_PATH=/usr/lib/llvm-${LLVM_VER} \
+    -G "Unix Makefiles" \
+    -DCMAKE_PREFIX_PATH=/usr/lib/llvm-${LLVM_VER} \
     && cmake --build ${IWYU_BUILD} -j \
     && cmake --install ${IWYU_BUILD}
 
@@ -130,6 +159,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 ENV PATH=$PATH:/usr/bin/mold
+RUN mold --version
 
 # Download and install Go
 RUN wget --progress=dot:giga https://golang.org/dl/go1.21.4.linux-amd64.tar.gz \
@@ -138,9 +168,20 @@ RUN wget --progress=dot:giga https://golang.org/dl/go1.21.4.linux-amd64.tar.gz \
 
 # Add Go binaries to the system PATH
 ENV PATH=$PATH:/usr/local/go/bin
+RUN go version
+
+# Install Go Task
+RUN sh -c "$(wget --progress=dot:giga -O - https://taskfile.dev/install.sh)" -- -d -b /usr/bin && task --version
+
 # Add FLTK development headers, also install curl as it is needed to to download the bundled libraries during compilation
 RUN apt-get update \
-    && apt-get -y install --no-install-recommends curl libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev \
+    && apt-get -y install --no-install-recommends \
+    curl \
+    libxinerama-dev \
+    libxcursor-dev \
+    libxfixes-dev \
+    libxft-dev \
+    libpango1.0-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -155,7 +196,7 @@ ENV CC=${CC:-"gcc"}
 ENV CXX=${CXX:-"g++"}
 
 # Include project
-#ADD . /workspaces/mtgo-collection-manager
-#WORKDIR /workspaces/mtgo-collection-manager
+ADD . /workspaces/mtgo-collection-manager
+WORKDIR /workspaces/mtgo-collection-manager
 
 CMD ["/bin/bash"]
