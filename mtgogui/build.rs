@@ -65,26 +65,16 @@ const SHELL: &str = if cfg!(target_os = "windows") {
 /// On windows: `powershell` with the `task` (Go Task) task runner
 /// On unix: `sh` with the `-c` flag
 const BUILD_SCRIPT_EXE: &str = if cfg!(target_os = "windows") {
-    "task"
+    ""
 } else {
-    "-C"
+    "-c"
 };
 
-/// Command to build the MTGO Getter binary
-const BUILD_MTGOGETTER_CMD: &str = if cfg!(target_os = "windows") {
-    // Arguments for `task`
-    "mtgogetter:build"
-} else {
-    // The `sh`-script to run
-    "./build-util/integration/build-mtgogetter.sh"
-};
+/// Go Task command to build the MTGO Getter binary
+const BUILD_MTGOGETTER_CMD: &str = "'task mtgogetter:build'"; // Arguments for `task`
 
-/// Command to build the MTGO Preprocessor binary
-const BUILD_MTGOPARSER_CMD: &str = if cfg!(target_os = "windows") {
-    "mtgoparser:build-for-integration"
-} else {
-    "./build-util/integration/build-mtgo-preprocessor.sh"
-};
+/// Go Task command to build the MTGO Preprocessor binary
+const BUILD_MTGOPARSER_CMD: &str = "'task mtgoparser:build-for-integration'";
 /// Name of the file that contains the byte arrays for the binaries
 const INCLUDE_BINARIES_FILE: &str = "include_binaries.rs";
 
