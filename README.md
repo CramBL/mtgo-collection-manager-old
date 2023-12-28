@@ -31,7 +31,7 @@ To automate some tasks regarding effective management of [MTGO](https://www.mtgo
     - [Most recent demo](#most-recent-demo)
 - [Contributing](#contributing)
   - [Quickstart](#quickstart)
-    - [Docker (with .devcontainer/Dockerfile)](#docker-with-devcontainerdockerfile)
+    - [Development in a Docker container (with .devcontainer/Dockerfile)](#development-in-a-docker-container-with-devcontainerdockerfile)
     - [Build with Go Task](#build-with-go-task)
     - [Trouble shooting](#trouble-shooting)
       - [Compiling FLTK-rs on Linux](#compiling-fltk-rs-on-linux)
@@ -54,11 +54,12 @@ You're welcome to submit PRs or make issues.
 If you're serious about starting a collaboration, send me a mail at `mbkj@tutamail.com`.
 
 ## Quickstart
-### Docker (with [.devcontainer/Dockerfile](.devcontainer/Dockerfile))
-From the project root build the image
+### Development in a Docker container (with [.devcontainer/Dockerfile](.devcontainer/Dockerfile))
+From the project root build the image.
+> if you have Go task installed run `task build-devcontainer`
 ```shell
-docker build -t "mcm-dev:Dockerfile" .devcontainer
-docker run --rm -it mcm-dev:Dockerfile
+docker build -t mcm-devcontainer -f .devcontainer/Dockerfile .
+docker run --rm -it mcm-devcontainer
 ```
 Now continuing from the container's shell
 ```shell
