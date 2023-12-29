@@ -67,6 +67,8 @@ tasks:
          - echo "==> Building devcontainer image..."
          - docker build -t mcm-devcontainer -f .devcontainer/Dockerfile .
          - echo "=== Done building devcontainer image ==="
+         - echo "=== Run the devcontainer with:"" ==="
+         - echo "docker run --rm -it mcm-devcontainer"
 
    run-devcontainer:
       silent: true
