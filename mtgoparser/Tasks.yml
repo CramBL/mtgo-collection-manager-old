@@ -285,22 +285,8 @@ tasks:
          - ./${MTGOPARSER_BUILD_MODE}/benchmark_xml_parse [.]
          - echo "=== Done benchmarking MTGO Parser XML parsing ==="
 
-
    clean:
       aliases: [c]
-      desc: Clean MTGO Parser build artifacts (not downloaded dependencies)
-      dir: mtgoparser
-      cmds:
-         - echo "==> Cleaning MTGO Parser build artifacts... (not downloaded dependencies))"
-         - cmd: find build -mindepth 1 -maxdepth 1 ! -name '_deps' -exec rm -rf {} +
-           platforms: [linux, darwin]
-         - cmd: pwsh -Command "& { Get-ChildItem build | Where-Object -Property Name -NE '_deps' | Remove-Item -Recurse -Force }"
-           platforms: [windows]
-         - echo "=== Done cleaning MTGO Parser build artifacts ==="
-
-   clean-all:
-      aliases: [c-all]
-      prompt: Are you sure you want to clean all build artifacts AND delete downloaded dependencies (maybe you mtgoparser:clean is what you want)?
       desc: Clean MTGO Parser build artifacts AND downloaded dependencies
       dir: mtgoparser
       cmds:
