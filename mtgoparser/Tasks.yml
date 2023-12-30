@@ -294,7 +294,7 @@ tasks:
          - echo "==> Cleaning MTGO Parser build artifacts... (not downloaded dependencies))"
          - cmd: find build -mindepth 1 -maxdepth 1 ! -name '_deps' -exec rm -rf {} +
            platforms: [linux, darwin]
-         - cmd: pwsh -Command "& { Get-ChildItem build -Directory | Where-Object { $_.Name -ne '_deps' } | Remove-Item -Recurse -Force }"
+         - cmd: pwsh -Command "& { Get-ChildItem build | Where-Object -Property Name -NE '_deps' | Remove-Item -Recurse -Force }"
            platforms: [windows]
          - echo "=== Done cleaning MTGO Parser build artifacts ==="
 
