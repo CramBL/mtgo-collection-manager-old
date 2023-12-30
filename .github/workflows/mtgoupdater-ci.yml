@@ -15,7 +15,7 @@ env:
   VERBOSE: 1
   # For mtgoparser
   BUILD_MODE: Release
-  MTGOPARSER_BUILD_TESTS: OFF
+  MTGOPARSER_BUILD_TESTS: ON
 
 jobs:
     # JOB to run change detection
