@@ -14,7 +14,7 @@ on:
 env:
   VERBOSE: 1
   BUILD_MODE: Release
-  MTGOPARSER_BUILD_TESTS: OFF
+  MTGOPARSER_BUILD_TESTS: ON
   MTGOPARSER_DEPLOYING_BINARY: ON
 
 jobs:
@@ -83,15 +83,14 @@ jobs:
       - name: 📝 Test - 🍎🐧💻
         run: task test
 
-####                                              ####
-#     🍎 MacOS 🍎 pack -> upload   🍎🍎            #
-####                                              ####
-      - name: 📦 Pack - MacOS 🍎
-        if: runner.os == 'macOS'
+      - name: 📦 Pack/Archive - 🍎🐧💻
         run: task archive-mtgo-collection-manager
         env:
-          PACKAGE_NAME: macos-13-${{ matrix.compiler }}-mtgo-cm
+          PACKAGE_NAME: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm
 
+####                                   ####
+#     🍎 MacOS upload   🍎🍎            #
+####                                   ####
       - name: 📩 Upload - MacOS 🍎
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v3
@@ -100,15 +99,9 @@ jobs:
           path: macos-13-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
-####                                              ####
-#     🐧 Linux 🐧 pack -> upload   🐧🐧            #
-####                                              ####
-      - name: 📦 Pack - Linux 🐧
-        if: runner.os == 'Linux'
-        run: task archive-mtgo-collection-manager
-        env:
-          PACKAGE_NAME: ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm
-
+####                                      ####
+#     🐧 Linux 🐧 upload   🐧🐧            #
+####                                      ####
       - name: 📩 Upload - Linux 🐧
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v3
@@ -117,16 +110,9 @@ jobs:
           path: ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
-####                                              ####
-#     💻 Windows 💻  pack -> upload   💻💻         #
-####                                              ####
-      - name: 📦 Pack - Windows 💻
-        if: runner.os == 'Windows'
-        run: task archive-mtgo-collection-manager
-        env:
-          PACKAGE_NAME: windows-2022-${{ matrix.compiler }}-mtgo-cm
-
-
+####                                      ####
+#     💻 Windows 💻  upload   💻💻         #
+####                                      ####
       - name: 📩 Upload - Windows 💻
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v3
