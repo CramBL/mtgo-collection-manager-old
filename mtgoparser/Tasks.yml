@@ -14,7 +14,6 @@ tasks:
          - echo "MTGOPARSER_BUILD_TESTS=${MTGOPARSER_BUILD_TESTS}"
          - echo "MTGOPARSER_GENERATOR=${MTGOPARSER_GENERATOR}"
          - echo "MTGOPARSER_IPO={{.MTGOPARSER_IPO}}"
-         - echo "MTGOPARSER_BUILD_MODE=${MTGOPARSER_BUILD_MODE}"
          - echo "MTGOPARSER_ENABLE_COV=${MTGOPARSER_ENABLE_COV}"
          - echo "MTGOPARSER_EXCLUDE_BOOST_LIBS={{.MTGOPARSER_EXCLUDE_BOOST_LIBS}}"
          - echo "MTGOPARSER_LINKER=${MTGOPARSER_LINKER}"
@@ -172,12 +171,99 @@ tasks:
    test:
       aliases: [t]
       desc: Runs unit/module tests for MTGO Parser
+      summary: |
+         This task runs unit/module tests for MTGO Parser.
+
+         It runs the following tasks:
+         - test-util
+         - test-json-parse
+         - test-xml-parse
+         - test-csv-parse
+         - test-full-collection-parse
+
+         All tasks are run regardless of whether or not a previous task failed. If any task fails, the task will fail.
       silent: true
       dir: mtgoparser/build
       cmds:
          - echo "==> Testing MTGO Parser..."
-         - ctest --output-on-failure
-         - echo "=== Done testing MTGO Parser ==="
+         - |
+            FAILED_COUNT=0; PASSED_COUNT=0
+            FAILED_TASKS_LIST=""; PASSED_TASKS_LIST=""
+
+            run_test_task() {
+                  if task "mtgoparser:$1"
+                  then
+                     ((++PASSED_COUNT))
+                     PASSED_TASKS_LIST="${PASSED_TASKS_LIST}\n\t✔️ $1"
+                  else
+                     ((++FAILED_COUNT))
+                     FAILED_TASKS_LIST="${FAILED_TASKS_LIST}\n\t❌ $1"
+                  fi
+            }
+
+            run_test_task test-util
+            run_test_task test-json-parse
+            run_test_task test-xml-parse
+            run_test_task test-csv-parse
+            run_test_task test-full-collection-parse
+
+            if [ ${FAILED_COUNT} -eq 0 ]
+            then
+                  echo "✅✅✅ All ${PASSED_COUNT} tasks completed successfully in MTGO Parser ✅✅✅"
+                  echo -e "=== ${PASSED_COUNT} PASSED TESTS: ${PASSED_TASKS_LIST}"
+            else
+                  echo "=== ${PASSED_COUNT} task(s) passed in MTGO Parser ==="
+                  echo -e "=== PASSED TASKS: ${PASSED_TASKS_LIST}"
+                  echo "❗❗❗ ${FAILED_COUNT} task(s) failed in MTGO Parser ❗❗❗"
+                  echo -e "=== FAILED TASKS: ${FAILED_TASKS_LIST}"
+                  exit 1
+            fi
+
+
+   test-util:
+      desc: Runs unit/module tests for MTGO Parser utility/general purpose functions
+      silent: true
+      dir: mtgoparser/build/test
+      cmds:
+         - echo "==> Testing MTGO Parser utility/general purpose functions by running /"${MTGOPARSER_BUILD_MODE}"/tests"
+         - ./"${MTGOPARSER_BUILD_MODE}"/tests
+         - echo "=== Done testing MTGO Parser utility/general purpose functions ==="
+
+   test-json-parse:
+      desc: Runs unit/module tests for MTGO Parser JSON parsing
+      silent: true
+      dir: mtgoparser/build/test
+      cmds:
+         - echo "==> Testing MTGO Parser JSON parsing by running /"${MTGOPARSER_BUILD_MODE}"/test_json_parse"
+         - ./"${MTGOPARSER_BUILD_MODE}"/test_json_parse
+         - echo "=== Done testing MTGO Parser JSON parsing ==="
+
+   test-xml-parse:
+      desc: Runs unit/module tests for MTGO Parser XML parsing
+      silent: true
+      dir: mtgoparser/build/test
+      cmds:
+         - echo "==> Testing MTGO Parser XML parsing by running /"${MTGOPARSER_BUILD_MODE}"/test_xml_parse"
+         - ./"${MTGOPARSER_BUILD_MODE}"/test_xml_parse
+         - echo "=== Done testing MTGO Parser XML parsing ==="
+
+   test-csv-parse:
+      desc: Runs unit/module tests for MTGO Parser CSV parsing
+      silent: true
+      dir: mtgoparser/build/test
+      cmds:
+         - echo "==> Testing MTGO Parser CSV parsing by running /"${MTGOPARSER_BUILD_MODE}"/test_csv_parse"
+         - ./"${MTGOPARSER_BUILD_MODE}"/test_csv_parse
+         - echo "=== Done testing MTGO Parser CSV parsing ==="
+
+   test-full-collection-parse:
+      desc: End-to-end test for MTGO Parser parsing a full collection
+      silent: true
+      dir: mtgoparser/build/test
+      cmds:
+         - echo "==> Testing MTGO Parser parsing a full collection by running /"${MTGOPARSER_BUILD_MODE}"/test_full_collection_parse"
+         - ./"${MTGOPARSER_BUILD_MODE}"/test_full_collection_parse
+         - echo "=== Done testing MTGO Parser parsing a full collection ==="
 
 
    benchmark:
