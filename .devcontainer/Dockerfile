@@ -1,6 +1,8 @@
 # [Choice] bionic (18.04), focal (20.04), jammy (22.04)
 ARG VARIANT="jammy"
-FROM ubuntu:${VARIANT}
+
+# First stage: build base image, just enough to build MTGO Collection Manager and run tests
+FROM ubuntu:${VARIANT} as build-base
 
 # Restate the variant to use it later on in the llvm and cmake installations
 ARG VARIANT
@@ -9,6 +11,7 @@ ARG VARIANT
 RUN apt-get update -qq \
     && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
+    # software-properties-common contains add-apt-repository
     software-properties-common \
     wget \
     apt-utils \
@@ -29,27 +32,14 @@ RUN apt-get update -qq \
 # Download and install Rust using the official Rust installer script
 RUN apt-get update \
     && wget --progress=dot:giga -O - https://sh.rustup.rs | sh -s -- -y \
-    && apt-get install build-essential -y \
+    && apt-get install -y \
+    build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Add the Rust binaries to the system PATH
 ENV PATH=$PATH:/root/.cargo/bin
 RUN rustc --version
-
-# Install conan
-RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools \
-    && python3 -m pip install --no-cache-dir conan \
-    && conan --version
-
-# By default, anything you run in Docker is done as superuser.
-# Conan runs some install commands as superuser, and will prepend `sudo` to
-# these commands, unless `CONAN_SYSREQUIRES_SUDO=0` is in your env variables.
-ENV CONAN_SYSREQUIRES_SUDO 0
-# Some packages request that Conan use the system package manager to install
-# a few dependencies. This flag allows Conan to proceed with these installations;
-# leaving this flag undefined can cause some installation failures.
-ENV CONAN_SYSREQUIRES_MODE enabled
 
 # User-settable versions:
 # This Dockerfile should support gcc-[7, 8, 9, 10, 11, 12, 13] and clang-[10, 11, 12, 13, 14, 15, 16, 17]
@@ -62,7 +52,6 @@ RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test \
     && apt-get install -y --no-install-recommends \
     gcc-${GCC_VER} \
     g++-${GCC_VER} \
-    gdb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -92,7 +81,6 @@ RUN wget --progress=dot:giga -O - https://apt.llvm.org/llvm-snapshot.gpg.key | a
     libclang-common-${LLVM_VER}-dev \
     libclang-${LLVM_VER}-dev \
     libclang1-${LLVM_VER} \
-    clang-format-${LLVM_VER} \
     clangd-${LLVM_VER} \
     clang-tidy-${LLVM_VER} \
     # Other tools
@@ -122,25 +110,12 @@ RUN wget --progress=dot:giga -O - https://apt.kitware.com/keys/kitware-archive-l
     && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
     cmake \
-    cmake-curses-gui \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install editors
-RUN apt-get update -qq \
-    && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get install -y --no-install-recommends \
-    neovim \
-    emacs \
-    nano \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install optional dependecies
 RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    doxygen \
-    graphviz \
     ccache \
     cppcheck \
     && apt-get clean \
@@ -214,8 +189,48 @@ ENV CXX=${USE_CLANG:+"clang++"}
 ENV CC=${CC:-"gcc"}
 ENV CXX=${CXX:-"g++"}
 
+# Install editors
+RUN apt-get update -qq \
+    && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get install -y --no-install-recommends \
+    neovim \
+    emacs \
+    nano \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Include project
 ADD . /workspaces/mtgo-collection-manager
 WORKDIR /workspaces/mtgo-collection-manager
+
+FROM build-base as extras
+
+
+
+# Install optional dependecies
+RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get install -y --no-install-recommends \
+    doxygen \
+    graphviz \
+    clang-format-${LLVM_VER} \
+    gdb \
+    cmake-curses-gui \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install conan
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools \
+    && python3 -m pip install --no-cache-dir conan \
+    && conan --version
+
+# By default, anything you run in Docker is done as superuser.
+# Conan runs some install commands as superuser, and will prepend `sudo` to
+# these commands, unless `CONAN_SYSREQUIRES_SUDO=0` is in your env variables.
+ENV CONAN_SYSREQUIRES_SUDO 0
+# Some packages request that Conan use the system package manager to install
+# a few dependencies. This flag allows Conan to proceed with these installations;
+# leaving this flag undefined can cause some installation failures.
+ENV CONAN_SYSREQUIRES_MODE enabled
+
 
 CMD ["/bin/bash"]
