@@ -1,5 +1,5 @@
 find_package(fmt)
-find_package(Boost 1.83 REQUIRED COMPONENTS
+find_package(Boost 1.84 REQUIRED COMPONENTS
              outcome core conversion detail headers)
 
 add_executable(mtgo_preprocessor main.cpp setup.cpp run.cpp)
