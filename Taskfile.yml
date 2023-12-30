@@ -63,9 +63,16 @@ tasks:
          The image is tagged as mcm-devcontainer.
          Using the -f to point to the Dockerfile is required because the Dockerfile is not
          in the root directory. This way the project directory is correctly copied into the image.
+      vars:
+         USE_CLANG: '{{default 1 .USE_CLANG}}'
+         UBUNTU_VARIANT: '{{default "jammy" .UBUNTU_VARIANT}}'
       cmds:
          - echo "==> Building devcontainer image..."
-         - docker build -t mcm-devcontainer -f .devcontainer/Dockerfile .
+         - docker build
+            -t mcm-devcontainer
+            --build-arg USE_CLANG={{.USE_CLANG}}
+            --build-arg VARIANT={{.UBUNTU_VARIANT}}
+            -f .devcontainer/Dockerfile .
          - echo "=== Done building devcontainer image ==="
          - echo "=== Run the devcontainer with:"" ==="
          - echo "docker run --rm -it mcm-devcontainer"
@@ -137,6 +144,15 @@ tasks:
       deps: [mtgogetter:clean, mtgoparser:clean, mtgoupdater:clean, mtgogui:clean]
       cmds:
          - echo "==> Done cleaning build artifacts..."
+
+   clean-all:
+      aliases: [c]
+      prompt: Are you sure you want to clean all build artifacts AND downloaded dependencies? (you might just want `task clean`?)
+      desc: Clean build artifacts in all subprojects
+      silent: true
+      deps: [mtgogetter:clean, mtgoparser:clean-all, mtgoupdater:clean, mtgogui:clean]
+      cmds:
+         - echo "==> Done cleaning build artifacts including downloaded dependencies..."
 
    archive-mtgo-collection-manager:
       aliases: [archive-bin]
