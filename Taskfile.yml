@@ -134,12 +134,9 @@ tasks:
       prompt: Are you sure you want to clean all build artifacts?
       desc: Clean build artifacts in all subprojects
       silent: true
+      deps: [mtgogetter:clean, mtgoparser:clean, mtgoupdater:clean, mtgogui:clean]
       cmds:
-         - echo "==> Cleaning build artifacts..."
-         - task: mtgogetter:clean
-         - task: mtgoupdater:clean
-         - task: mtgogui:clean
-         - task: mtgoparser:clean
+         - echo "==> Done cleaning build artifacts..."
 
    archive-mtgo-collection-manager:
       aliases: [archive-bin]

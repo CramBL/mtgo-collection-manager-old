@@ -73,15 +73,19 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-####                                              ####
-#🍎 MacOS 🍎 build -> test -> pack -> upload   🍎🍎#
-####                                              ####
-      - name: 📝 Build & Run tests - MacOS🍎
-        if: runner.os == 'macOS'
-        run: |
-          task build-integration
-          task test
+      - name: ⚙️ Install development headers - Linux 🐧
+        if: runner.os == 'Linux'
+        run: source build-util/dev-ubuntu/install-ubuntu-fltk-dev-headers.sh
 
+      - name: ⚒️ Build - 🍎🐧💻
+        run: task build-integration
+
+      - name: 📝 Test - 🍎🐧💻
+        run: task test
+
+####                                              ####
+#     🍎 MacOS 🍎 pack -> upload   🍎🍎            #
+####                                              ####
       - name: 📦 Pack - MacOS 🍎
         if: runner.os == 'macOS'
         run: task archive-mtgo-collection-manager
@@ -97,16 +101,8 @@ jobs:
           retention-days: 14
 
 ####                                              ####
-#🐧 Linux 🐧 build -> test -> pack -> upload   🐧🐧#
+#     🐧 Linux 🐧 pack -> upload   🐧🐧            #
 ####                                              ####
-
-      - name: 📝 Build & Run tests - Linux 🐧
-        if: runner.os == 'Linux'
-        run: |
-          source build-util/dev-ubuntu/install-ubuntu-fltk-dev-headers.sh
-          task build-integration
-          task test
-
       - name: 📦 Pack - Linux 🐧
         if: runner.os == 'Linux'
         run: task archive-mtgo-collection-manager
@@ -122,15 +118,8 @@ jobs:
           retention-days: 14
 
 ####                                              ####
-#💻 Windows 💻  build -> test -> pack -> upload 💻💻
+#     💻 Windows 💻  pack -> upload   💻💻         #
 ####                                              ####
-
-      - name: 📝 Build & Run tests - Windows 💻
-        if: runner.os == 'Windows'
-        run: |
-          task build-integration
-          task test
-
       - name: 📦 Pack - Windows 💻
         if: runner.os == 'Windows'
         run: task archive-mtgo-collection-manager
