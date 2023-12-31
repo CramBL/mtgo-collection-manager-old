@@ -35,7 +35,7 @@ jobs:
 
     name: MTGO-Parser-benchmark
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: aminya/setup-cpp@v1
         with:
           vcvarsall: ${{ contains(matrix.os, 'windows' )}}
@@ -69,7 +69,7 @@ jobs:
           - os: windows-2022
     name: MTGO-Getter-benchmark
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
@@ -91,7 +91,7 @@ jobs:
   #         - os: windows-2022
   #   name: MTGO-Updater-benchmark
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - uses: moonrepo/setup-rust@v1
 
   #     - name: 📝 Build & Run benchmarks - 🐧🍎💻

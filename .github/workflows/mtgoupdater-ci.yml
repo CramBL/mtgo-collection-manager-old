@@ -27,7 +27,7 @@ jobs:
       mtgoupdater: ${{ steps.filter.outputs.mtgoupdater }}
     steps:
     # For pull requests it's not necessary to checkout the code
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dorny/paths-filter@v2
       id: filter
       with:
@@ -63,7 +63,7 @@ jobs:
 
     name: ⚒️ Build & Test 📝
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: moonrepo/setup-rust@v1
         with:
           components: clippy, rustfmt

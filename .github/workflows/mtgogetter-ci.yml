@@ -24,7 +24,7 @@ jobs:
       mtgogetter: ${{ steps.filter.outputs.mtgogetter }}
     steps:
     # For pull requests it's not necessary to checkout the code
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dorny/paths-filter@v2
       id: filter
       with:
@@ -40,7 +40,7 @@ jobs:
     if: ${{ needs.changes.outputs.mtgogetter == 'true' }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup Go 🛠️ Toolchain
       uses: actions/setup-go@v4
