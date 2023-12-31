@@ -31,9 +31,8 @@ To automate some tasks regarding effective management of [MTGO](https://www.mtgo
     - [Most recent demo](#most-recent-demo)
 - [Contributing](#contributing)
   - [Quickstart](#quickstart)
-    - [Docker (with .devcontainer/Dockerfile)](#docker-with-devcontainerdockerfile)
-    - [Unix-like (with Make)](#unix-like-with-make)
-    - [Windows (with PowerShell)](#windows-with-powershell)
+    - [Development in a Docker container (with .devcontainer/Dockerfile)](#development-in-a-docker-container-with-devcontainerdockerfile)
+    - [Build with Go Task](#build-with-go-task)
     - [Trouble shooting](#trouble-shooting)
       - [Compiling FLTK-rs on Linux](#compiling-fltk-rs-on-linux)
       - [Ubuntu](#ubuntu)
@@ -55,61 +54,37 @@ You're welcome to submit PRs or make issues.
 If you're serious about starting a collaboration, send me a mail at `mbkj@tutamail.com`.
 
 ## Quickstart
-### Docker (with [.devcontainer/Dockerfile](.devcontainer/Dockerfile))
-Build the image
+### Development in a Docker container (with [.devcontainer/Dockerfile](.devcontainer/Dockerfile))
+From the project root build the image.
+> if you have Go task installed run `task build-devcontainer`
 ```shell
-docker build -t "mcm-dev:Dockerfile" .devcontainer
-docker run --rm -it mcm-dev:Dockerfile
+docker build -t mcm-devcontainer -f .devcontainer/Dockerfile .
+docker run --rm -it mcm-devcontainer
 ```
 Now continuing from the container's shell
 ```shell
-cd home
-git clone https://github.com/CramBL/mtgo-collection-manager.git
-cd mtgo-collection-manager
-make all && make test
+task build && task test
 ```
 The very first build will take a while...
-### Unix-like (with Make)
-A Makefile lets you build and test any or all of the subprojects.
+### Build with Go Task
+Install [Go Task](https://taskfile.dev/installation/) then build and run tests through the `task` command.
 
 Check versions of Rust/Go/C++ (also display minimum required versions) and more
-```shell
-make show-versions
+```
+task print-tool-versions
 ```
 
-Build all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater -> MTGO GUI`
-```shell
-make
+Build all projects (in parallel)
 ```
-Test all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater -> MTGO GUI`
-```shell
-make test
+task build
 ```
-Build/test a single subproject with the `-{projectname}`-suffix e.g.
-```shell
-make test-mtgogetter
+Test all projects (in parallel)
 ```
-
-### Windows (with PowerShell)
-
-A PowerShell script lets you build and test any or all of the subprojects in a manner similar to a Makefile.
-
-Check versions of Rust/Go/C++ (also display minimum required versions) and more
-```shell
-.\wmake.ps1 show-versions
+task test
 ```
-
-Build all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater -> MTGO GUI`
-```shell
-.\wmake.ps1
+Build/test a single subproject with the `{projectname}:`-prefix e.g.
 ```
-Test all projects `order: MTGO Getter -> MTGO Parser -> MTGO Updater -> MTGO GUI`
-```shell
-.\wmake.ps1 test
-```
-Build/test a single subproject with the `-{projectname}`-suffix e.g.
-```shell
-.\wmake.ps1 test-mtgogetter
+task mtgogetter:test
 ```
 
 ### Trouble shooting

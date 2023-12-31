@@ -9,7 +9,7 @@ import (
 
 // TODO: Mock HTTP requests: https://www.thegreatcodeadventure.com/mocking-http-requests-in-golang/
 func TestDownloadBodyToBytes(t *testing.T) {
-	got_body_bytes, err := DownloadBodyToBytes("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/LICENSE")
+	got_body_bytes, err := DownloadBodyToBytes("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/main/LICENSE")
 	if err != nil {
 		t.Errorf("Error downloading body: %s", err)
 	}
@@ -30,7 +30,7 @@ func TestRetryingDownload(t *testing.T) {
 	attempts := 3
 	delay_ms := 1
 	function_download := func() ([]byte, error) {
-		return DownloadBodyToBytes("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/master/LICENSE")
+		return DownloadBodyToBytes("https://raw.githubusercontent.com/CramBL/mtgo-collection-manager/main/LICENSE")
 	}
 	resp_body, err := Retry(attempts, delay_ms, function_download)
 	if err != nil {

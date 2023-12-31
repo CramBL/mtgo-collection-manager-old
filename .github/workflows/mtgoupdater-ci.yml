@@ -13,6 +13,9 @@ on:
 
 env:
   VERBOSE: 1
+  # For mtgoparser
+  BUILD_MODE: Release
+  MTGOPARSER_BUILD_TESTS: OFF
 
 jobs:
     # JOB to run change detection
@@ -24,7 +27,7 @@ jobs:
       mtgoupdater: ${{ steps.filter.outputs.mtgoupdater }}
     steps:
     # For pull requests it's not necessary to checkout the code
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dorny/paths-filter@v2
       id: filter
       with:
@@ -60,14 +63,7 @@ jobs:
 
     name: ⚒️ Build & Test 📝
     steps:
-      - uses: actions/checkout@v3
-
-      - name: 🗻 Set EXCLUDE_BOOST_LIBS environment variable 🏝️
-        run: |
-          $env:EXCLUDE_BOOST_LIBS = Get-Content -Raw -Path "build-util/boost-exclude-libs.txt"
-          Write-Output "EXCLUDE_BOOST_LIBS=$env:EXCLUDE_BOOST_LIBS" >> $env:GITHUB_ENV
-        shell: pwsh
-
+      - uses: actions/checkout@v4
       - uses: moonrepo/setup-rust@v1
         with:
           components: clippy, rustfmt
@@ -92,27 +88,20 @@ jobs:
           compiler: ${{ matrix.compiler }}
           cmake: true
           ninja: true
-      - name: 🔧 Configure CMake
-        working-directory: ./mtgoparser
-        run: >
-          cmake -S .
-          -B ./build
-          -G "${{matrix.generator}}"
-          -Dmtgoparser_ENABLE_IPO=${{matrix.enable_ipo }}
-          -DCMAKE_BUILD_TYPE:STRING=Release
-          -DGIT_SHA:STRING=${{ github.sha }}
-          -DBUILD_TESTING=OFF
-          -Dmtgoparser_ENABLE_COVERAGE:BOOL=false
-          -Dmtgoparser_PACKAGING_MAINTAINER_MODE:BOOL=OFF
-          -Dmtgoparser_WARNINGS_AS_ERRORS:BOOL=OFF
-          -Dmtgoparser_ENABLE_CLANG_TIDY:BOOL=OFF
-          -Dmtgoparser_ENABLE_CPPCHECK:BOOL=OFF
-          -DBOOST_EXCLUDE_LIBRARIES="${{ env.EXCLUDE_BOOST_LIBS }}"
+
+      - name: Setup Mold linker for Linux 🐧 builds
+        if: runner.os == 'Linux'
+        uses: rui314/setup-mold@v1
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build ⚒️ MTGO Parser 🤓
         working-directory: ./mtgoparser
-        run: >
-          cmake --build ./build
-          --config Release
+        run: task mtgoparser:build-for-integration
 
       ## Build the MTGO Getter binary
       - name: Setup Go 🛠️ Toolchain
@@ -120,10 +109,9 @@ jobs:
         with:
           go-version: '1.21'
       - name: Build ⚒️ MTGO Getter 🐹
-        run: go build -C mtgogetter -v
+        run: task mtgogetter:build
 
       ## Run the integration tests
       - name: Test 📝 MTGO Updater
         working-directory: ./mtgoupdater
-        run: |
-          cargo test --verbose -- --nocapture
+        run: task mtgoupdater:test

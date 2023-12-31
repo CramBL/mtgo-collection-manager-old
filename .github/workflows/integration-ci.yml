@@ -13,6 +13,9 @@ on:
 
 env:
   VERBOSE: 1
+  BUILD_MODE: Release
+  MTGOPARSER_BUILD_TESTS: ON
+  MTGOPARSER_DEPLOYING_BINARY: ON
 
 jobs:
   Test:
@@ -44,7 +47,7 @@ jobs:
 
     name: Test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: 🗻 Export constants as environment variables 🏝️
         uses: cardinalby/export-env-action@v2
         with:
@@ -64,22 +67,30 @@ jobs:
         if: runner.os == 'Linux'
         uses: rui314/setup-mold@v1
 
-####                                              ####
-#🍎 MacOS 🍎 build -> test -> pack -> upload   🍎🍎#
-####                                              ####
-      - name: 📝 Build & Run tests - MacOS🍎
-        if: runner.os == 'macOS'
-        run: |
-          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} BUILD_MODE=Release
-          make test
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📦 Pack - MacOS 🍎
-        if: runner.os == 'macOS'
-        run: |
-          mkdir -p mtgo-collection-manager
-          cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
-          zip -r macos-13-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
+      - name: ⚙️ Install development headers - Linux 🐧
+        if: runner.os == 'Linux'
+        run: source build-util/dev-ubuntu/install-ubuntu-fltk-dev-headers.sh
 
+      - name: ⚒️ Build - 🍎🐧💻
+        run: task build-integration
+
+      - name: 📝 Test - 🍎🐧💻
+        run: task test
+
+      - name: 📦 Pack/Archive - 🍎🐧💻
+        run: task archive-mtgo-collection-manager
+        env:
+          PACKAGE_NAME: ${{ matrix.os }}-${{ matrix.compiler }}-mtgo-cm
+
+####                                   ####
+#     🍎 MacOS upload   🍎🍎            #
+####                                   ####
       - name: 📩 Upload - MacOS 🍎
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v3
@@ -88,25 +99,9 @@ jobs:
           path: macos-13-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
-####                                              ####
-#🐧 Linux 🐧 build -> test -> pack -> upload   🐧🐧#
-####                                              ####
-
-      - name: 📝 Build & Run tests - Linux 🐧
-        if: runner.os == 'Linux'
-        run: |
-          source build-util/dev-ubuntu/install-ubuntu-fltk-dev-headers.sh
-          make build-integration MTGOPARSER_IPO=${{matrix.enable_ipo }} BUILD_MODE=Release
-          make test
-
-      - name: 📦 Pack - Linux 🐧
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get -y install zip
-          mkdir -p mtgo-collection-manager
-          cp mtgogui/target/release/mtgogui mtgo-collection-manager/mtgo-collection-manager
-          zip -r ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip mtgo-collection-manager
-
+####                                      ####
+#     🐧 Linux 🐧 upload   🐧🐧            #
+####                                      ####
       - name: 📩 Upload - Linux 🐧
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v3
@@ -115,21 +110,9 @@ jobs:
           path: ubuntu-22.04-${{ matrix.compiler }}-mtgo-cm.zip
           retention-days: 14
 
-####                                              ####
-#💻 Windows 💻  build -> test -> pack -> upload 💻💻
-####                                              ####
-
-      - name: 📝 Build & Run tests - Windows 💻
-        if: runner.os == 'Windows'
-        run: |
-          .\wmake.ps1 build-integration -MTGOPARSER_IPO ${{matrix.enable_ipo }} -MTGOPARSER_GENERATOR "Ninja Multi-Config" -BUILD_MODE Release
-          .\wmake.ps1 test
-
-      - name: 📦 Pack - Windows 💻
-        if: runner.os == 'Windows'
-        run: |
-          .\wmake.ps1 pack -PACKAGE_NAME windows-2022-${{ matrix.compiler }}-mtgo-cm
-
+####                                      ####
+#     💻 Windows 💻  upload   💻💻         #
+####                                      ####
       - name: 📩 Upload - Windows 💻
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v3

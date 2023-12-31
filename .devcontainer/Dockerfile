@@ -1,6 +1,8 @@
 # [Choice] bionic (18.04), focal (20.04), jammy (22.04)
 ARG VARIANT="jammy"
-FROM ubuntu:${VARIANT}
+
+# First stage: build base image, just enough to build MTGO Collection Manager and run tests
+FROM ubuntu:${VARIANT} as build-base
 
 # Restate the variant to use it later on in the llvm and cmake installations
 ARG VARIANT
@@ -9,36 +11,35 @@ ARG VARIANT
 RUN apt-get update -qq \
     && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    software-properties-common wget apt-utils file zip \
-    openssh-client gpg-agent socat rsync \
-    make ninja-build git \
-    python3 python3-pip \
+    # software-properties-common contains add-apt-repository
+    software-properties-common \
+    wget \
+    apt-utils \
+    file \
+    zip \
+    openssh-client \
+    gpg-agent \
+    socat \
+    rsync \
+    make \
+    ninja-build \
+    git \
+    python3 \
+    python3-pip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install Rust using the official Rust installer script
 RUN apt-get update \
     && wget --progress=dot:giga -O - https://sh.rustup.rs | sh -s -- -y \
-    && apt-get install build-essential -y \
+    && apt-get install -y \
+    build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Add the Rust binaries to the system PATH
 ENV PATH=$PATH:/root/.cargo/bin
-
-# Install conan
-RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools \
-    && python3 -m pip install --no-cache-dir conan \
-    && conan --version
-
-# By default, anything you run in Docker is done as superuser.
-# Conan runs some install commands as superuser, and will prepend `sudo` to
-# these commands, unless `CONAN_SYSREQUIRES_SUDO=0` is in your env variables.
-ENV CONAN_SYSREQUIRES_SUDO 0
-# Some packages request that Conan use the system package manager to install
-# a few dependencies. This flag allows Conan to proceed with these installations;
-# leaving this flag undefined can cause some installation failures.
-ENV CONAN_SYSREQUIRES_MODE enabled
+RUN rustc --version
 
 # User-settable versions:
 # This Dockerfile should support gcc-[7, 8, 9, 10, 11, 12, 13] and clang-[10, 11, 12, 13, 14, 15, 16, 17]
@@ -46,9 +47,11 @@ ENV CONAN_SYSREQUIRES_MODE enabled
 ARG GCC_VER="13"
 # Add gcc-${GCC_VER}
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test \
-    && apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update -qq \
+    && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    gcc-${GCC_VER} g++-${GCC_VER} gdb \
+    gcc-${GCC_VER} \
+    g++-${GCC_VER} \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -56,16 +59,37 @@ RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test \
 RUN update-alternatives --install /usr/bin/gcc gcc $(which gcc-${GCC_VER}) 100
 RUN update-alternatives --install /usr/bin/g++ g++ $(which g++-${GCC_VER}) 100
 
+
+# Installation instructions on LLVM: https://apt.llvm.org/
 ARG LLVM_VER="17"
 # Add clang-${LLVM_VER}
 ARG LLVM_URL="http://apt.llvm.org/${VARIANT}/"
 ARG LLVM_PKG="llvm-toolchain-${VARIANT}-${LLVM_VER}"
+
 RUN wget --progress=dot:giga -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - 2>/dev/null \
     && add-apt-repository -y "deb ${LLVM_URL} ${LLVM_PKG} main" \
-    && apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update -qq \
+    && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    clang-${LLVM_VER} lldb-${LLVM_VER} lld-${LLVM_VER} clangd-${LLVM_VER} \
-    llvm-${LLVM_VER}-dev libclang-${LLVM_VER}-dev clang-tidy-${LLVM_VER} \
+    # LLVM
+    libllvm${LLVM_VER} \
+    llvm-${LLVM_VER} \
+    llvm-${LLVM_VER}-dev \
+    # Clang
+    clang-${LLVM_VER} \
+    clang-tools-${LLVM_VER} \
+    libclang-common-${LLVM_VER}-dev \
+    libclang-${LLVM_VER}-dev \
+    libclang1-${LLVM_VER} \
+    clangd-${LLVM_VER} \
+    clang-tidy-${LLVM_VER} \
+    # Other tools
+    lldb-${LLVM_VER} \
+    lld-${LLVM_VER} \
+    # Compiler runtime contains the sanitizers
+    libclang-rt-${LLVM_VER}-dev \
+    # libc++
+    libc++-${LLVM_VER}-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -82,59 +106,29 @@ ARG CMAKE_PKG=${VARIANT}
 RUN wget --progress=dot:giga -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null \
     | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null \
     && apt-add-repository -y "deb ${CMAKE_URL} ${CMAKE_PKG} main" \
-    && apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get install -y --no-install-recommends cmake cmake-curses-gui \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install editors
-RUN apt-get update -qq \
+    && apt-get update -qq \
     && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    neovim emacs nano \
+    cmake \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install optional dependecies
 RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y --no-install-recommends \
-    doxygen graphviz ccache cppcheck \
+    ccache \
+    cppcheck \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-# Install include-what-you-use
-ENV IWYU /home/iwyu
-ENV IWYU_BUILD ${IWYU}/build
-ENV IWYU_SRC ${IWYU}/include-what-you-use
-RUN mkdir -p ${IWYU_BUILD} \
-    && git clone --branch clang_${LLVM_VER} \
-    https://github.com/include-what-you-use/include-what-you-use.git \
-    ${IWYU_SRC}
-RUN CC=clang-${LLVM_VER} CXX=clang++-${LLVM_VER} cmake -S ${IWYU_SRC} \
-    -B ${IWYU_BUILD} \
-    -G "Unix Makefiles" -DCMAKE_PREFIX_PATH=/usr/lib/llvm-${LLVM_VER} \
-    && cmake --build ${IWYU_BUILD} -j \
-    && cmake --install ${IWYU_BUILD}
-
-# Per https://github.com/include-what-you-use/include-what-you-use#how-to-install:
-# `You need to copy the Clang include directory to the expected location before
-#  running (similarly, use include-what-you-use -print-resource-dir to learn
-#  exactly where IWYU wants the headers).`
-RUN mkdir -p $(include-what-you-use -print-resource-dir 2>/dev/null)
-RUN ln -s $(readlink -f /usr/lib/clang/${LLVM_VER}/include) \
-    $(include-what-you-use -print-resource-dir 2>/dev/null)/include
 
 # Install mold for much faster linking
 RUN apt-get update \
-    && apt-get install -y mold \
+    && apt-get install -y \
+    mold \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 ENV PATH=$PATH:/usr/bin/mold
-
-## Cleanup cached apt data we don't need anymore
-RUN apt-get autoremove -y \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN mold --version
 
 # Download and install Go
 RUN wget --progress=dot:giga https://golang.org/dl/go1.21.4.linux-amd64.tar.gz \
@@ -143,9 +137,20 @@ RUN wget --progress=dot:giga https://golang.org/dl/go1.21.4.linux-amd64.tar.gz \
 
 # Add Go binaries to the system PATH
 ENV PATH=$PATH:/usr/local/go/bin
+RUN go version
+
+# Install Go Task
+RUN sh -c "$(wget --progress=dot:giga -O - https://taskfile.dev/install.sh)" -- -d -b /usr/bin && task --version
+
 # Add FLTK development headers, also install curl as it is needed to to download the bundled libraries during compilation
 RUN apt-get update \
-    && apt-get -y install --no-install-recommends curl libxinerama-dev libxcursor-dev libxfixes-dev libxft-dev libpango1.0-dev \
+    && apt-get -y install --no-install-recommends \
+    curl \
+    libxinerama-dev \
+    libxcursor-dev \
+    libxfixes-dev \
+    libxft-dev \
+    libpango1.0-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -159,8 +164,73 @@ ENV CXX=${USE_CLANG:+"clang++"}
 ENV CC=${CC:-"gcc"}
 ENV CXX=${CXX:-"g++"}
 
+# Install editors
+RUN apt-get update -qq \
+    && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get install -y --no-install-recommends \
+    neovim \
+    emacs \
+    nano \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Include project
-#ADD . /workspaces/mtgo-collection-manager
-#WORKDIR /workspaces/mtgo-collection-manager
+ADD . /workspaces/mtgo-collection-manager
+WORKDIR /workspaces/mtgo-collection-manager
+
+FROM build-base as extras
+
+
+# Install include-what-you-use
+ENV IWYU /home/iwyu
+ENV IWYU_BUILD ${IWYU}/build
+ENV IWYU_SRC ${IWYU}/include-what-you-use
+RUN mkdir -p ${IWYU_BUILD} \
+    && git clone --branch clang_${LLVM_VER} \
+    https://github.com/include-what-you-use/include-what-you-use.git \
+    ${IWYU_SRC}
+RUN CC=clang-${LLVM_VER} \
+    CXX=clang++-${LLVM_VER} \
+    cmake -S ${IWYU_SRC} \
+    -B ${IWYU_BUILD} \
+    -G "Unix Makefiles" \
+    -DCMAKE_PREFIX_PATH=/usr/lib/llvm-${LLVM_VER} \
+    && cmake --build ${IWYU_BUILD} -j \
+    && cmake --install ${IWYU_BUILD}
+
+# Per https://github.com/include-what-you-use/include-what-you-use#how-to-install:
+# `You need to copy the Clang include directory to the expected location before
+#  running (similarly, use include-what-you-use -print-resource-dir to learn
+#  exactly where IWYU wants the headers).`
+RUN mkdir -p $(include-what-you-use -print-resource-dir 2>/dev/null)
+RUN ln -s $(readlink -f /usr/lib/clang/${LLVM_VER}/include) \
+    $(include-what-you-use -print-resource-dir 2>/dev/null)/include
+
+
+# Install optional dependecies
+RUN apt-get update -qq && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get install -y --no-install-recommends \
+    doxygen \
+    graphviz \
+    clang-format-${LLVM_VER} \
+    gdb \
+    cmake-curses-gui \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install conan
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools \
+    && python3 -m pip install --no-cache-dir conan \
+    && conan --version
+
+# By default, anything you run in Docker is done as superuser.
+# Conan runs some install commands as superuser, and will prepend `sudo` to
+# these commands, unless `CONAN_SYSREQUIRES_SUDO=0` is in your env variables.
+ENV CONAN_SYSREQUIRES_SUDO 0
+# Some packages request that Conan use the system package manager to install
+# a few dependencies. This flag allows Conan to proceed with these installations;
+# leaving this flag undefined can cause some installation failures.
+ENV CONAN_SYSREQUIRES_MODE enabled
+
 
 CMD ["/bin/bash"]

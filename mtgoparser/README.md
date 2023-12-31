@@ -5,10 +5,11 @@
 Parse the various data formats produced by MTGO and the third party sources that provide price data etc.
 
 ## Get started
+> Prefer using `task` from the project root to build and test MTGO Parser. e.g. `task mtgoparser:build`
 
 ### Prerequisites
 
- - **Compiler** any of: 
+ - **Compiler** any of:
     - Clang 15+
     - GCC 12+
     - MSVC with C++20 support
@@ -30,5 +31,5 @@ Parse the various data formats produced by MTGO and the third party sources that
  ```
  Run tests
  ```shell
-cd build && ctest 
+cd build && ctest
  ```

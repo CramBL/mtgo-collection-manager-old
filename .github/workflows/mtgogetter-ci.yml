@@ -24,7 +24,7 @@ jobs:
       mtgogetter: ${{ steps.filter.outputs.mtgogetter }}
     steps:
     # For pull requests it's not necessary to checkout the code
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dorny/paths-filter@v2
       id: filter
       with:
@@ -32,21 +32,29 @@ jobs:
           mtgogetter:
             - 'mtgogetter/**'
 
+
+
   build-Go:
     # Only run if there's changes to the Go code (in /mtgogetter)
     needs: changes
     if: ${{ needs.changes.outputs.mtgogetter == 'true' }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup Go 🛠️ Toolchain
       uses: actions/setup-go@v4
       with:
         go-version: '1.21'
 
+    - name: Install Task
+      uses: arduino/setup-task@v1
+      with:
+        version: 3.x
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build ⚒️ MTGO Getter 🐹
-      run: go build -C mtgogetter -v
+      run: task mtgogetter:build
 
     - name: Test 📝 MTGO Getter 🐹
-      run: go test -C mtgogetter -v ./...
+      run: task mtgogetter:test
