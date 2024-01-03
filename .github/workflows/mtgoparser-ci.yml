@@ -73,7 +73,7 @@ jobs:
             build_type: Debug
             compiler: gcc-13
             gcov_executable: gcov
-            enable_ipo: On
+            enable_ipo: Off # IPO is not supported in GCC on MacOS
             generator: "Ninja Multi-Config"
             packaging_maintainer_mode: Off
             build_shared: Off
@@ -81,7 +81,7 @@ jobs:
           - os: macos-13
             build_type: Debug
             compiler: llvm-15.0.3
-            enable_ipo: On
+            enable_ipo: Off
             generator: "Ninja Multi-Config"
             packaging_maintainer_mode: Off
             build_shared: Off
@@ -138,7 +138,7 @@ jobs:
             build_type: Release
             packaging_maintainer_mode: Off
             package_generator: ZIP
-            enable_ipo: Off
+            enable_ipo: On
 
           - os: windows-2022
             compiler: msvc
