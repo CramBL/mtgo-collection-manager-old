@@ -73,7 +73,7 @@ jobs:
             build_type: Debug
             compiler: gcc-13
             gcov_executable: gcov
-            enable_ipo: Off
+            enable_ipo: On
             generator: "Ninja Multi-Config"
             packaging_maintainer_mode: Off
             build_shared: Off
@@ -81,10 +81,11 @@ jobs:
           - os: macos-13
             build_type: Debug
             compiler: llvm-15.0.3
-            enable_ipo: Off
+            enable_ipo: On
             generator: "Ninja Multi-Config"
             packaging_maintainer_mode: Off
             build_shared: Off
+
 
           - os: ubuntu-22.04
             compiler: gcc-13
@@ -92,8 +93,8 @@ jobs:
             enable_ipo: On
 
           - compiler: llvm-17.0.2
-            enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
+            enable_ipo: On
 
           # Set up preferred package generators, for given build configurations
           - build_type: Release
@@ -107,7 +108,7 @@ jobs:
             build_type: Debug
             gcov_executable: "llvm-cov gcov" # simply putting "gcov" errors on Ubuntu with a segfault (exit -11 = SIGSEGV) as it's the wrong gcov version
             packaging_maintainer_mode: On
-            enable_ipo: Off
+            enable_ipo: On
 
           # Windows msvc builds
           - os: windows-2022
@@ -129,6 +130,7 @@ jobs:
             generator: "Visual Studio 17 2022"
             build_type: Debug
             packaging_maintainer_mode: Off
+            enable_ipo: On
 
           - os: windows-2022
             compiler: msvc
@@ -136,6 +138,7 @@ jobs:
             build_type: Release
             packaging_maintainer_mode: Off
             package_generator: ZIP
+            enable_ipo: Off
 
           - os: windows-2022
             compiler: msvc
