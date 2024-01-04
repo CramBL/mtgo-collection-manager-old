@@ -77,12 +77,13 @@ tasks:
          - echo "=== Run the devcontainer with:"" ==="
          - echo "docker run --rm -it mcm-devcontainer"
 
-   run-devcontainer:
+   test-devcontainer:
       silent: true
-      desc: Print description of how to run the devcontainer image
+      desc: Builds and tests the project in a devcontainer (To run the devcontainer manually use `docker run --rm -it mcm-devcontainer`)
       cmds:
-         - echo "==> Don't run the devcontainer through a Go task. Run it manually with:"
-         - echo "docker run --rm -it mcm-devcontainer"
+         - echo "==> Building and testing all subprojects in devcontainer..."
+         - docker run --rm -it mcm-devcontainer bash -c "task build && task test"
+         - echo "=== Done building and testing all subprojects in devcontainer ==="
 
    build:
       aliases: [b]

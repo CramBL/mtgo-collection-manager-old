@@ -13,7 +13,7 @@ function(mtgoparser_setup_dependencies)
   endif()
 
   if(NOT TARGET fmtlib::fmtlib)
-    cpmaddpackage("gh:fmtlib/fmt#10.1.1")
+    cpmaddpackage("gh:fmtlib/fmt#10.2.0")
   endif()
 
   if(NOT TARGET spdlog::spdlog)
@@ -29,7 +29,7 @@ function(mtgoparser_setup_dependencies)
   endif()
 
   if(NOT TARGET Catch2::Catch2WithMain)
-    cpmaddpackage("gh:catchorg/Catch2@3.5.0")
+    cpmaddpackage("gh:catchorg/Catch2@3.5.1")
   endif()
 
   if(NOT TARGET rapidxml::rapidxml)

@@ -66,6 +66,8 @@ Now continuing from the container's shell
 task build && task test
 ```
 The very first build will take a while...
+
+If you don't want to develop in the container but still want to confirm that it builds and tests passes, you can run simply run `task build-devcontainer && task test-devcontainer`.
 ### Build with Go Task
 Install [Go Task](https://taskfile.dev/installation/) then build and run tests through the `task` command.
 
