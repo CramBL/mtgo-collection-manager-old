@@ -142,7 +142,7 @@ TEST_CASE("MTGO card - Initialize and use of")
     CHECK(mtgo_card.set_ == "set");
     CHECK(mtgo_card.rarity_ == mtg::Rarity::Common);
     CHECK(mtgo_card.foil_ == false);
-    CHECK(mtgo_card.goatbots_price_ == 0);
+    CHECK(mtgo_card.goatbots_price_ == 0.0f);
     REQUIRE(mtgo_card.scryfall_price_.has_value() == false);
     REQUIRE(mtgo_card.scryfall_price_ == std::nullopt);
 
